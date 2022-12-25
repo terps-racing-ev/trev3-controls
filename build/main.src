@@ -1,0 +1,1264 @@
+	; TASKING VX-toolset for C166: C compiler v3.1r2 Build 719 SN 00005894
+	; Options: -f cc31796a -c99 -Mh -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2022 -DRTS_TTC_FLASH_DATE_MONTH=12 -DRTS_TTC_FLASH_DATE_DAY=25 -DRTS_TTC_FLASH_DATE_HOUR=18 -DRTS_TTC_FLASH_DATE_MINUTE=27 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\main.src
+	; Module start
+	.source	'src/main.c'
+code_main	.section	code, cluster 'main', new
+	.global	_main
+
+; src/main.c	     1  /**************************************************************************
+; src/main.c	     2   *  XC-2000 IO-LIB
+; src/main.c	     3   *
+; src/main.c	     4   *  Template
+; src/main.c	     5   **************************************************************************
+; src/main.c	     6   *
+; src/main.c	     7   *  Quickstart Template for HY-TTC60
+; src/main.c	     8   *
+; src/main.c	     9   **************************************************************************/
+; src/main.c	    10  
+; src/main.c	    11  
+; src/main.c	    12  #include "IO_Driver.h"
+; src/main.c	    13  #include "IO_RTC.h"
+; src/main.c	    14  #include "IO_ADC.h"
+; src/main.c	    15  #include "IO_DIO.h"
+; src/main.c	    16  #include "APDB.h"
+; src/main.c	    17  
+; src/main.c	    18  /* APPS 1 -> pin 152 (aka adc 5V 0)*/
+; src/main.c	    19  #define IO_PIN_APPS_1 IO_ADC_5V_00
+; src/main.c	    20  
+; src/main.c	    21  /* APPS 2 -> pin 140 (aka adc 5V 1)*/
+; src/main.c	    22  #define IO_PIN_APPS_2 IO_ADC_5V_01
+; src/main.c	    23  
+; src/main.c	    24  /* BSE -> pin 151 (aka adc 5V 2)*/
+; src/main.c	    25  #define IO_PIN_BSE IO_ADC_5V_02
+; src/main.c	    26  
+; src/main.c	    27  /* RTD -> pin 263 (aka digital in 0) */
+; src/main.c	    28  #define IO_PIN_RTD IO_DI_00
+; src/main.c	    29  
+; src/main.c	    30  /* Application Database,
+; src/main.c	    31   * needed for TTC-Downloader
+; src/main.c	    32   */
+; src/main.c	    33  APDB appl_db =
+; src/main.c	    34            { 0                      /* ubyte4 versionAPDB        */
+; src/main.c	    35            , {0}                    /* BL_T_DATE flashDate       */
+; src/main.c	    36                                     /* BL_T_DATE buildDate                   */
+; src/main.c	    37            , { (ubyte4) (((((ubyte4) RTS_TTC_FLASH_DATE_YEAR) & 0x0FFF) << 0) |
+; src/main.c	    38                          ((((ubyte4) RTS_TTC_FLASH_DATE_MONTH) & 0x0F) << 12) |
+; src/main.c	    39                          ((((ubyte4) RTS_TTC_FLASH_DATE_DAY) & 0x1F) << 16) |
+; src/main.c	    40                          ((((ubyte4) RTS_TTC_FLASH_DATE_HOUR) & 0x1F) << 21) |
+; src/main.c	    41                          ((((ubyte4) RTS_TTC_FLASH_DATE_MINUTE) & 0x3F) << 26)) }
+; src/main.c	    42            , 0                      /* ubyte4 nodeType           */
+; src/main.c	    43            , 0                      /* ubyte4 startAddress       */
+; src/main.c	    44            , 0                      /* ubyte4 codeSize           */
+; src/main.c	    45            , 0                      /* ubyte4 legacyAppCRC       */
+; src/main.c	    46            , 0                      /* ubyte4 appCRC             */
+; src/main.c	    47            , 1                      /* ubyte1 nodeNr             */
+; src/main.c	    48            , 0                      /* ubyte4 CRCInit            */
+; src/main.c	    49            , 0                      /* ubyte4 flags              */
+; src/main.c	    50            , 0                      /* ubyte4 hook1              */
+; src/main.c	    51            , 0                      /* ubyte4 hook2              */
+; src/main.c	    52            , 0                      /* ubyte4 hook3              */
+; src/main.c	    53            , APPL_START             /* ubyte4 mainAddress        */
+; src/main.c	    54            , {0, 1}                 /* BL_T_CAN_ID canDownloadID */
+; src/main.c	    55            , {0, 2}                 /* BL_T_CAN_ID canUploadID   */
+; src/main.c	    56            , 0                      /* ubyte4 legacyHeaderCRC    */
+; src/main.c	    57            , 0                      /* ubyte4 version            */
+; src/main.c	    58            , 500                    /* ubyte2 canBaudrate        */
+; src/main.c	    59            , 0                      /* ubyte1 canChannel         */
+; src/main.c	    60            , {0}                    /* ubyte1 reserved[8*4]      */
+; src/main.c	    61            , 0                      /* ubyte4 headerCRC          */
+; src/main.c	    62            };
+; src/main.c	    63  
+; src/main.c	    64  void main (void)
+; Function _main
+_5:
+_main	.proc	far
+	subw	r15,#0x16
+_43:
+
+; src/main.c	    65  {
+; src/main.c	    66      ubyte4 timestamp;
+; src/main.c	    67  
+; src/main.c	    68      /*******************************************/
+; src/main.c	    69      /*             INITIALIZATION              */
+; src/main.c	    70      /*******************************************/
+; src/main.c	    71  
+; src/main.c	    72      /* Initialize the IO driver (without safety functions) */
+; src/main.c	    73      IO_Driver_Init(NULL);
+	movw	r2,#0x0
+	movw	r3,r2
+	call	_IO_Driver_Init
+_72:
+
+; src/main.c	    74  
+; src/main.c	    75          /* Add your initialization code here            */
+; src/main.c	    76          /*  - Use the IO driver functions to initialize */
+; src/main.c	    77          /*    all required IOs and interfaces           */
+; src/main.c	    78  
+; src/main.c	    79      /* NOTE: turns 5v sensor supply 1 on */
+; src/main.c	    80      IO_POWER_Set (IO_ADC_SENSOR_SUPPLY_0, IO_POWER_ON);
+	movb	rl2,#0x24
+_73:
+	movb	rh2,#0x1
+	call	_IO_POWER_Set
+_29:
+
+; src/main.c	    81  
+; src/main.c	    82      /* APPS 1 */
+; src/main.c	    83      bool adc_fresh_apps_1;
+; src/main.c	    84      ubyte2 adc_val_apps_1;
+; src/main.c	    85      IO_ADC_ChannelInit( IO_PIN_APPS_1
+	movb	rl2,#0x8
+_74:
+
+; src/main.c	    86                        , IO_ADC_ABSOLUTE
+	movb	rh2,#0x2
+_75:
+
+; src/main.c	    87                        , 0
+	movb	rl3,#0x0
+_76:
+
+; src/main.c	    88                        , 0
+	movb	rh3,rl3
+_77:
+
+; src/main.c	    89                        , 0
+	movb	rl4,rl3
+_78:
+
+; src/main.c	    90                        , NULL );
+	movw	r11,#0x0
+	movw	r12,r11
+	call	_IO_ADC_ChannelInit
+_34:
+
+; src/main.c	    91  
+; src/main.c	    92      /* APPS 2 */
+; src/main.c	    93      bool adc_fresh_apps_2;
+; src/main.c	    94      ubyte2 adc_val_apps_2;
+; src/main.c	    95      IO_ADC_ChannelInit( IO_PIN_APPS_2
+	movb	rl2,#0x9
+_79:
+
+; src/main.c	    96                        , IO_ADC_ABSOLUTE
+	movb	rh2,#0x2
+_80:
+
+; src/main.c	    97                        , 0
+	movb	rl3,#0x0
+_81:
+
+; src/main.c	    98                        , 0
+	movb	rh3,rl3
+_82:
+
+; src/main.c	    99                        , 0
+	movb	rl4,rl3
+_83:
+
+; src/main.c	   100                        , NULL );
+	movw	r11,#0x0
+	movw	r12,r11
+	call	_IO_ADC_ChannelInit
+_37:
+
+; src/main.c	   101  
+; src/main.c	   102  
+; src/main.c	   103      /* BSE */
+; src/main.c	   104      bool adc_fresh_bse;
+; src/main.c	   105      ubyte2 adc_val_bse;
+; src/main.c	   106      IO_ADC_ChannelInit( IO_PIN_BSE
+	movb	rl2,#0xa
+_84:
+
+; src/main.c	   107                        , IO_ADC_ABSOLUTE
+	movb	rh2,#0x2
+_85:
+
+; src/main.c	   108                        , 0
+	movb	rl3,#0x0
+_86:
+
+; src/main.c	   109                        , 0
+	movb	rh3,rl3
+_87:
+
+; src/main.c	   110                        , 0
+	movb	rl4,rl3
+_88:
+
+; src/main.c	   111                        , NULL );
+	movw	r11,#0x0
+	movw	r12,r11
+	call	_IO_ADC_ChannelInit
+_40:
+
+; src/main.c	   112  
+; src/main.c	   113      /* RTD */
+; src/main.c	   114      bool di_val_rtd;
+; src/main.c	   115      IO_DI_Init( IO_PIN_RTD
+	movb	rl2,#0x26
+_89:
+
+; src/main.c	   116      		  , IO_DI_PU_10K );
+	movb	rh2,#0x1
+	call	_IO_DI_Init
+_90:
+
+; src/main.c	   117      /*******************************************/
+; src/main.c	   118      /*       PERIODIC APPLICATION CODE         */
+; src/main.c	   119      /*******************************************/
+; src/main.c	   120  
+; src/main.c	   121      /* main loop, executed periodically with a
+; src/main.c	   122       * defined cycle time (here: 10 ms)
+; src/main.c	   123       */
+; src/main.c	   124      while (1)
+; src/main.c	   125      {
+; src/main.c	   126          /* get a timestamp to implement the cycle time */
+; src/main.c	   127          IO_RTC_StartTime(&timestamp);
+	movw	r11,r15
+	andw	r11,#0x3fff
+	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
+	movw	[r15+#0x14],r11
+	movw	r0,#@seg(__lc_ub_user_stack+0xffff)
+_91:
+
+; src/main.c	   128          /* Task begin function for IO Driver
+; src/main.c	   129           * This function needs to be called at
+; src/main.c	   130           * the beginning of every SW cycle
+; src/main.c	   131           */
+; src/main.c	   132          IO_Driver_TaskBegin();
+; src/main.c	   133  
+; src/main.c	   134          /*
+; src/main.c	   135           *  Application Code
+; src/main.c	   136           */
+; src/main.c	   137  
+; src/main.c	   138              /* Add your application code here               */
+; src/main.c	   139              /*  - IO driver task functions can be used,     */
+; src/main.c	   140              /*    to read/write from/to interfaces and IOs  */
+; src/main.c	   141  
+; src/main.c	   142          IO_ADC_Get(IO_PIN_APPS_1, &adc_val_apps_1, &adc_fresh_apps_1);
+	movw	r11,#0x4
+	addw	r11,r15
+	andw	r11,#0x3fff
+	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
+	movw	[r15+#0x12],r11
+_92:
+	movw	r1,#0x6
+	addw	r1,r15
+	andw	r1,#0x3fff
+	orw	r1,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
+_93:
+
+; src/main.c	   143  
+; src/main.c	   144          IO_ADC_Get(IO_PIN_APPS_2, &adc_val_apps_2, &adc_fresh_apps_2);
+	movw	r7,#0x8
+	addw	r7,r15
+	andw	r7,#0x3fff
+	orw	r7,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
+_94:
+	movw	r6,#0xa
+	addw	r6,r15
+	andw	r6,#0x3fff
+	orw	r6,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
+_95:
+
+; src/main.c	   145  
+; src/main.c	   146          IO_ADC_Get(IO_PIN_BSE, &adc_val_bse, &adc_fresh_bse);
+	movw	r10,#0xc
+	addw	r10,r15
+	andw	r10,#0x3fff
+	orw	r10,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
+_96:
+	movw	r9,#0xe
+	addw	r9,r15
+	andw	r9,#0x3fff
+	orw	r9,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
+_97:
+
+; src/main.c	   147  
+; src/main.c	   148          IO_DI_Get(IO_PIN_RTD, &di_val_rtd);
+	movw	r8,r15
+	addw	r8,#0x10
+	andw	r8,#0x3fff
+	orw	r8,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
+_2:
+	movw	r2,[r15+#0x14]
+	movw	r3,r0
+	call	_IO_RTC_StartTime
+_98:
+	call	_IO_Driver_TaskBegin
+_99:
+	movb	rl2,#0x8
+_100:
+	movw	r4,r1
+	movw	r5,r0
+	movw	r11,[r15+#0x12]
+	movw	r12,r0
+	call	_IO_ADC_Get
+_101:
+	movb	rl2,#0x9
+_102:
+	movw	r4,r6
+	movw	r5,r0
+	movw	r11,r7
+	movw	r12,r0
+	call	_IO_ADC_Get
+_103:
+	movb	rl2,#0xa
+_104:
+	movw	r4,r9
+	movw	r5,r0
+	movw	r11,r10
+	movw	r12,r0
+	call	_IO_ADC_Get
+_105:
+	movb	rl2,#0x26
+_106:
+	movw	r4,r8
+	movw	r5,r0
+	call	_IO_DI_Get
+_107:
+
+; src/main.c	   149  
+; src/main.c	   150  
+; src/main.c	   151          /* Task end function for IO Driver
+; src/main.c	   152           * This function needs to be called at
+; src/main.c	   153           * the end of every SW cycle
+; src/main.c	   154           */
+; src/main.c	   155          IO_Driver_TaskEnd();
+	call	_IO_Driver_TaskEnd
+
+; src/main.c	   156          /* wait until the cycle time is over */
+; src/main.c	   157  
+; src/main.c	   158          /* NOTE:
+; src/main.c	   159           * If the code between the TaskBegin and TaskEnd doesn't take
+; src/main.c	   160           * 10000 (milliseconds?), this code delays the end of the cycle so it lasts
+; src/main.c	   161           * 10000
+; src/main.c	   162           */
+; src/main.c	   163          while (IO_RTC_GetTimeUS(timestamp) < 10000);
+_3:
+	movw	r3,[r15+#0x2]
+	movw	r2,[r15+#0x0]
+	call	_IO_RTC_GetTimeUS
+_108:
+	cmpw	r2,#0x2710
+	subcw	r3,#0x0
+	jmp+	cc_ult,_3
+_109:
+	jmp	_2
+_24:
+	; End of function
+	; End of section
+
+huge_appl_db	.section	huge, romdata, at 0xc10000, cluster 'appl_db', new
+	.global	_appl_db
+_appl_db	.label	word
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.dl	0x6e59c7e6
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.dl	0x1
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.dl	__cstart
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.dl	0x1
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.dl	0x2
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.dl	0x1f4
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	; End of section
+
+	.calls	'__INDIRECT__','__cstart'
+	.calls	'_main','_IO_Driver_Init'
+	.calls	'_main','_IO_POWER_Set'
+	.calls	'_main','_IO_ADC_ChannelInit'
+	.calls	'_main','_IO_DI_Init'
+	.calls	'_main','_IO_RTC_StartTime'
+	.calls	'_main','_IO_Driver_TaskBegin'
+	.calls	'_main','_IO_ADC_Get'
+	.calls	'_main','_IO_DI_Get'
+	.calls	'_main','_IO_Driver_TaskEnd'
+	.calls	'_main','_IO_RTC_GetTimeUS'
+	.calls	'_main','',4,22
+	.extern	_IO_POWER_Set : far
+	.extern	_IO_Driver_Init : far
+	.extern	_IO_Driver_TaskBegin : far
+	.extern	_IO_Driver_TaskEnd : far
+	.extern	_IO_RTC_StartTime : far
+	.extern	_IO_RTC_GetTimeUS : far
+	.extern	_IO_ADC_ChannelInit : far
+	.extern	_IO_ADC_Get : far
+	.extern	_IO_DI_Init : far
+	.extern	_IO_DI_Get : far
+	.extern	__cstart : far
+	.extern	__lc_ub_user_stack : nearbyte
+	.extern	__INDIRECT__ : far
+	.debug		.debug_info
+_17:
+	.dl	2598
+	.dw	3
+	.dl	_18
+	.db	4
+_16:
+	.db	1
+	.db	'src/main.c',0
+	.db	'TASKING VX-toolset for C166: C compiler',0
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Sophomore Year\\Terps Racing (TREV 1)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev_apps\\',0
+	.db	12,1
+	.dl	_19
+_32:
+	.db	2
+	.db	'unsigned int',0,2,7,3
+	.db	'IO_POWER_Set',0,1,184,1,15,6
+	.dl	224
+	.db	1,1,1,1
+_30:
+	.db	2
+	.db	'unsigned char',0,1,8,4
+	.db	'pin',0,1,184,1,35
+	.dl	267
+	.db	4
+	.db	'mode',0,1,184,1,47
+	.dl	267
+	.db	0,3
+	.db	'IO_Driver_Init',0,2,155,4,15,6
+	.dl	224
+	.db	1,1,1,1,5
+	.db	'_io_driver_safety_conf',0,2,251,2,16,8,6
+	.db	'glitch_filter_time',0,1
+	.dl	267
+	.db	2,35,0,6
+	.db	'command_period',0,2
+	.dl	224
+	.db	2,35,2,6
+	.db	'timeout_count',0,1
+	.dl	267
+	.db	2,35,4,6
+	.db	'CPU_check_loopcount',0,2
+	.dl	224
+	.db	2,35,6,0,7
+	.dl	341
+	.db	8,5
+	.dl	475
+	.db	4
+	.db	'safety_conf',0,2,155,4,67
+	.dl	480
+	.db	0,9
+	.db	'IO_Driver_TaskBegin',0,2,167,4,15,6
+	.dl	224
+	.db	1,1,1,1,9
+	.db	'IO_Driver_TaskEnd',0,2,182,4,15,6
+	.dl	224
+	.db	1,1,1,1,3
+	.db	'IO_RTC_StartTime',0,3,118,15,6
+	.dl	224
+	.db	1,1,1,1
+_27:
+	.db	2
+	.db	'unsigned long int',0,4,7,8,5
+	.dl	604
+	.db	4
+	.db	'timestamp',0,3,118,49
+	.dl	625
+	.db	0,3
+	.db	'IO_RTC_GetTimeUS',0,3,143,1,9,6
+	.dl	604
+	.db	1,1,1,1,4
+	.db	'timestamp',0,3,143,1,35
+	.dl	604
+	.db	0,3
+	.db	'IO_ADC_ChannelInit',0,4,157,2,14,6
+	.dl	224
+	.db	1,1,1,1,4
+	.db	'adc_channel',0,4,157,2,41
+	.dl	267
+	.db	4
+	.db	'type',0,4,158,2,41
+	.dl	267
+	.db	4
+	.db	'range',0,4,159,2,41
+	.dl	267
+	.db	4
+	.db	'pupd',0,4,160,2,41
+	.dl	267
+	.db	4
+	.db	'sensor_supply',0,4,161,2,41
+	.dl	267
+	.db	5
+	.db	'_io_adc_safety_conf',0,4,159,1,16,4,6
+	.db	'adc_val_upper',0,1
+	.dl	267
+	.db	2,35,0,6
+	.db	'adc_val_lower',0,1
+	.dl	267
+	.db	2,35,1,6
+	.db	'redundant_channel',0,1
+	.dl	267
+	.db	2,35,2,0,7
+	.dl	821
+	.db	8,5
+	.dl	921
+	.db	4
+	.db	'safety_conf',0,4,162,2,67
+	.dl	926
+	.db	0,3
+	.db	'IO_ADC_Get',0,4,132,3,14,6
+	.dl	224
+	.db	1,1,1,1,4
+	.db	'adc_channel',0,4,132,3,33
+	.dl	267
+	.db	8,5
+	.dl	224
+	.db	4
+	.db	'adc_value',0,4,133,3,41
+	.dl	1000
+	.db	8,5
+	.dl	267
+	.db	4
+	.db	'fresh',0,4,134,3,39
+	.dl	1025
+	.db	0,3
+	.db	'IO_DI_Init',0,5,119,14,6
+	.dl	224
+	.db	1,1,1,1,4
+	.db	'di_channel',0,5,119,33
+	.dl	267
+	.db	4
+	.db	'mode',0,5,120,33
+	.dl	267
+	.db	0,3
+	.db	'IO_DI_Get',0,5,220,1,14,6
+	.dl	224
+	.db	1,1,1,1,4
+	.db	'di_channel',0,5,220,1,32
+	.dl	267
+	.db	4
+	.db	'di_value',0,5,221,1,38
+	.dl	1025
+	.db	0,10
+	.db	'_INDIRECT__',0,6,1,1,6,1,1,1,11
+	.db	'void',0,8,5
+	.dl	1187
+	.db	12
+	.db	'__prof_adm',0,6,1,1
+	.dl	1193
+	.db	12
+	.db	'__codeptr',0,6,1,1
+	.dl	604
+	.db	12
+	.db	'ubyte1',0,7,21,29
+	.dl	267
+	.db	12
+	.db	'ubyte2',0,7,22,29
+	.dl	224
+	.db	12
+	.db	'ubyte4',0,7,23,29
+	.dl	604
+	.db	12
+	.db	'bool',0,7,31,29
+	.dl	267
+	.db	12
+	.db	'IO_ErrorType',0,8,153,1,17
+	.dl	224
+	.db	12
+	.db	'IO_DRIVER_SAFETY_CONF',0,2,138,3,3
+	.dl	341
+	.db	13
+	.db	'_io_driver_reset_reason',0,2,162,3,14,1,14
+	.db	'IO_DRIVER_RESET_REASON_PORST',0,0,14
+	.db	'IO_DRIVER_RESET_REASON_WDT',0,1,14
+	.db	'IO_DRIVER_RESET_REASON_TRAP',0,2,14
+	.db	'IO_DRIVER_RESET_REASON_SW',0,3,14
+	.db	'IO_DRIVER_RESET_REASON_UNKNOWN',0,4,0,12
+	.db	'IO_DRIVER_RESET_REASON',0,2,169,3,3
+	.dl	1347
+	.db	5
+	.db	'_io_driver_trap_info',0,2,174,3,16,10,6
+	.db	'trap_id',0,2
+	.dl	224
+	.db	2,35,0,6
+	.db	'cpu_tfr',0,2
+	.dl	224
+	.db	2,35,2,6
+	.db	'cpu_trapstat',0,2
+	.dl	224
+	.db	2,35,4,6
+	.db	'fault_location',0,4
+	.dl	604
+	.db	2,35,6,0,12
+	.db	'IO_DRIVER_TRAP_INFO',0,2,197,3,3
+	.dl	1561
+	.db	12
+	.db	'IO_ADC_SAFETY_CONF',0,4,169,1,3
+	.dl	821
+	.db	5
+	.db	'bl_t_date_',0,9,122,16,4,6
+	.db	'date',0,4
+	.dl	604
+	.db	2,35,0,0,12
+	.db	'BL_T_DATE',0,9,131,1,3
+	.dl	1726
+	.db	5
+	.db	'bl_t_can_id_',0,9,138,1,16,8,6
+	.db	'extended',0,4
+	.dl	604
+	.db	2,35,0,6
+	.db	'ID',0,4
+	.dl	604
+	.db	2,35,4,0,12
+	.db	'BL_T_CAN_ID',0,9,146,1,3
+	.dl	1776
+	.db	5
+	.db	'bl_apdb_',0,9,155,1,16,128,1,6
+	.db	'APDBVersion',0,4
+	.dl	604
+	.db	2,35,0,6
+	.db	'FlashDate',0,4
+	.dl	1726
+	.db	2,35,4,6
+	.db	'BuildDate',0,4
+	.dl	1726
+	.db	2,35,8,6
+	.db	'NodeType',0,4
+	.dl	604
+	.db	2,35,12,6
+	.db	'CRCStartAddress',0,4
+	.dl	604
+	.db	2,35,16,6
+	.db	'CodeSize',0,4
+	.dl	604
+	.db	2,35,20,6
+	.db	'LegacyApplicationCRC',0,4
+	.dl	604
+	.db	2,35,24,6
+	.db	'ApplicationCRC',0,4
+	.dl	604
+	.db	2,35,28,6
+	.db	'NodeNumber',0,4
+	.dl	604
+	.db	2,35,32,6
+	.db	'CRCSeed',0,4
+	.dl	604
+	.db	2,35,36,6
+	.db	'Flags',0,4
+	.dl	604
+	.db	2,35,40,6
+	.db	'Hook1',0,4
+	.dl	604
+	.db	2,35,44,6
+	.db	'Hook2',0,4
+	.dl	604
+	.db	2,35,48,6
+	.db	'Hook3',0,4
+	.dl	604
+	.db	2,35,52,6
+	.db	'MainAddress',0,4
+	.dl	604
+	.db	2,35,56,6
+	.db	'CANDownloadID',0,8
+	.dl	1776
+	.db	2,35,60,6
+	.db	'CANUploadID',0,8
+	.dl	1776
+	.db	2,35,68,6
+	.db	'LegacyHeaderCRC',0,4
+	.dl	604
+	.db	2,35,76,6
+	.db	'ApplicationVersion',0,4
+	.dl	604
+	.db	2,35,80,6
+	.db	'CANBaudrate',0,4
+	.dl	604
+	.db	2,35,84,6
+	.db	'CANChannel',0,4
+	.dl	604
+	.db	2,35,88,6
+	.db	'Password',0,4
+	.dl	604
+	.db	2,35,92,6
+	.db	'MagicSeed',0,4
+	.dl	604
+	.db	2,35,96,15,4
+	.dl	267
+	.db	16,3,0,6
+	.db	'TargetIPAddress',0,4
+	.dl	2330
+	.db	2,35,100,6
+	.db	'SubnetMask',0,4
+	.dl	2330
+	.db	2,35,104,6
+	.db	'DLMulticastIPAddress',0,4
+	.dl	2330
+	.db	2,35,108,6
+	.db	'DebugKey',0,4
+	.dl	604
+	.db	2,35,112,6
+	.db	'ABRDTimeout',0,4
+	.dl	604
+	.db	2,35,116,6
+	.db	'ManufacturerID',0,1
+	.dl	267
+	.db	2,35,120,6
+	.db	'ApplicationID',0,1
+	.dl	267
+	.db	2,35,121,6
+	.db	'Reserved',0,2
+	.dl	224
+	.db	2,35,122,6
+	.db	'HeaderCRC',0,4
+	.dl	604
+	.db	2,35,124,0,12
+	.db	'BL_APDB',0,9,227,1,3
+	.dl	1847
+	.db	17
+	.dl	1847
+_42:
+	.db	7
+	.dl	2555
+	.db	18
+	.dl	267
+	.db	19,0,20
+	.db	'_lc_ub_user_stack',0,6,1,1,2
+	.dl	2565
+	.db	1,1,0
+	; End of section
+
+	.debug		.debug_abbrev
+_18:
+	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,16,6,0,0,2,36,0,3,8,11,15,62,15,0,0,3,46,1,3,8,58,15,59,15,57,15
+	.db	51,15,73,19,54,15,39,12,63,12,60,12,0,0,4,5,0,3,8,58,15,59,15,57,15,73,19,0,0,5,19,1,3,8,58,15,59,15,57
+	.db	15,11,15,0,0,6,13,0,3,8,11,15,73,19,56,9,0,0,7,38,0,73,19,0,0,8,15,0,51,15,73,19,0,0,9,46,0,3,8,58,15
+	.db	59,15,57,15,51,15,73,19,54,15,39,12,63,12,60,12,0,0,10,46,0,3,8,58,15,59,15,57,15,51,15,54,15,63,12,60
+	.db	12,0,0,11,59,0,3,8,0,0,12,22,0,3,8,58,15,59,15,57,15,73,19,0,0,13,4,1,3,8,58,15,59,15,57,15,11,15,0,0
+	.db	14,40,0,3,8,28,13,0,0,15,1,1,11,15,73,19,0,0,16,33,0,47,15,0,0,17,53,0,73,19,0,0,18,1,1,73,19,0,0,19,33
+	.db	0,0,0,20,52,0,3,8,58,15,59,15,57,15,51,15,73,19,63,12,60,12,0,0,0
+	; End of section
+
+	.debug		.debug_line
+_19:
+	.dl	_65-_64
+_64:
+	.dw	3
+	.dl	_67-_66
+_66:
+	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1
+	.db	'..\\..\\..\\Environment\\inc',0,0
+	.db	'IO_POWER.h',0,1,0,0
+	.db	'IO_Driver.h',0,1,0,0
+	.db	'IO_RTC.h',0,1,0,0
+	.db	'IO_ADC.h',0,1,0,0
+	.db	'IO_DIO.h',0,1,0,0
+	.db	'src/main.c',0,0,0,0
+	.db	'ptypes_xe167.h',0,1,0,0
+	.db	'IO_Constants.h',0,1,0,0
+	.db	'APDB.h',0,1,0,0,0
+_67:
+_65:
+	; End of section
+
+	.debug		.debug_pubnames
+	.dl	221
+	.dw	2
+	.dl	_17,2602,240
+	.db	'IO_POWER_Set',0
+	.dl	312
+	.db	'IO_Driver_Init',0
+	.dl	508
+	.db	'IO_Driver_TaskBegin',0
+	.dl	542
+	.db	'IO_Driver_TaskEnd',0
+	.dl	574
+	.db	'IO_RTC_StartTime',0
+	.dl	650
+	.db	'IO_RTC_GetTimeUS',0
+	.dl	701
+	.db	'IO_ADC_ChannelInit',0
+	.dl	954
+	.db	'IO_ADC_Get',0
+	.dl	1047
+	.db	'IO_DI_Init',0
+	.dl	1104
+	.db	'IO_DI_Get',0
+	.dl	1167
+	.db	'_INDIRECT__',0
+	.dl	0
+	; End of section
+
+	.debug		.debug_info, cluster 'main'
+_20:
+	.dl	534
+	.dw	3
+	.dl	_21
+	.db	4,1
+	.db	'src/main.c',0
+	.db	'TASKING VX-toolset for C166: C compiler',0
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Sophomore Year\\Terps Racing (TREV 1)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev_apps\\',0
+	.db	12,1
+	.dl	_23,_22
+	.db	2
+	.dl	_16
+	.db	3
+	.db	'main',0,1,64,6,6,1,1,1
+	.dl	_5,_24,_4
+	.db	12,19,146,176,2,0,64,36,146,161,2,0,33,4
+	.dl	_5,_24
+	.db	5
+	.db	'timestamp',0,1,66,12,2
+	.dl	_27,_28
+	.db	4
+	.dl	_29,_24
+	.db	5
+	.db	'adc_fresh_apps_1',0,1,83,10,2
+	.dl	_30,_31
+	.db	5
+	.db	'adc_val_apps_1',0,1,84,12,2
+	.dl	_32,_33
+	.db	4
+	.dl	_34,_24
+	.db	5
+	.db	'adc_fresh_apps_2',0,1,93,10,2
+	.dl	_30,_35
+	.db	5
+	.db	'adc_val_apps_2',0,1,94,12,2
+	.dl	_32,_36
+	.db	4
+	.dl	_37,_24
+	.db	5
+	.db	'adc_fresh_bse',0,1,104,10,2
+	.dl	_30,_38
+	.db	5
+	.db	'adc_val_bse',0,1,105,12,2
+	.dl	_32,_39
+	.db	4
+	.dl	_40,_24
+	.db	5
+	.db	'di_val_rtd',0,1,114,10,2
+	.dl	_30,_41
+	.db	0,0,0,0,0,0,0
+	; End of section
+
+	.debug		.debug_abbrev, cluster 'main'
+_21:
+	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,85,6,16,6,0,0,2,61,0,24,16,0,0,3,46,1,3,8,58,15,59,15,57,15,51,15
+	.db	54,15,39,12,63,12,17,1,18,1,64,6,42,9,0,0,4,11,1,17,1,18,1,0,0,5,52,0,3,8,58,15,59,15,57,15,51,15,73,16
+	.db	2,6,0,0,0
+	; End of section
+
+	.debug		.debug_line, cluster 'main'
+_22:
+	.dl	_69-_68
+_68:
+	.dw	3
+	.dl	_71-_70
+_70:
+	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
+	.db	'src/main.c',0,0,0,0,0
+_71:
+	.db	5,6,7,0,5,2
+	.dl	_5
+	.db	3,63,1,5,20,9
+	.dw	_43-_5
+	.db	3,9,1,5,19,9
+	.dw	_72-_43
+	.db	3,7,1,5,43,9
+	.dw	_73-_72
+	.db	1,5,25,9
+	.dw	_29-_73
+	.db	3,5,1,9
+	.dw	_74-_29
+	.db	3,1,1,9
+	.dw	_75-_74
+	.db	3,1,1,9
+	.dw	_76-_75
+	.db	3,1,1,9
+	.dw	_77-_76
+	.db	3,1,1,9
+	.dw	_78-_77
+	.db	3,1,1,9
+	.dw	_34-_78
+	.db	3,5,1,9
+	.dw	_79-_34
+	.db	3,1,1,9
+	.dw	_80-_79
+	.db	3,1,1,9
+	.dw	_81-_80
+	.db	3,1,1,9
+	.dw	_82-_81
+	.db	3,1,1,9
+	.dw	_83-_82
+	.db	3,1,1,9
+	.dw	_37-_83
+	.db	3,6,1,9
+	.dw	_84-_37
+	.db	3,1,1,9
+	.dw	_85-_84
+	.db	3,1,1,9
+	.dw	_86-_85
+	.db	3,1,1,9
+	.dw	_87-_86
+	.db	3,1,1,9
+	.dw	_88-_87
+	.db	3,1,1,5,17,9
+	.dw	_40-_88
+	.db	3,4,1,5,11,9
+	.dw	_89-_40
+	.db	3,1,1,5,27,9
+	.dw	_90-_89
+	.db	3,11,1,5,53,9
+	.dw	_91-_90
+	.db	3,15,1,5,36,9
+	.dw	_92-_91
+	.db	1,5,53,9
+	.dw	_93-_92
+	.db	3,2,1,5,36,9
+	.dw	_94-_93
+	.db	1,5,47,9
+	.dw	_95-_94
+	.db	3,2,1,5,33,9
+	.dw	_96-_95
+	.db	1,5,32,9
+	.dw	_97-_96
+	.db	3,2,1,5,27,9
+	.dw	_2-_97
+	.db	3,107,1,5,28,9
+	.dw	_98-_2
+	.db	3,5,1,5,20,9
+	.dw	_99-_98
+	.db	3,10,1,5,53,9
+	.dw	_100-_99
+	.db	1,5,20,9
+	.dw	_101-_100
+	.db	3,2,1,5,53,9
+	.dw	_102-_101
+	.db	1,5,20,9
+	.dw	_103-_102
+	.db	3,2,1,5,47,9
+	.dw	_104-_103
+	.db	1,5,19,9
+	.dw	_105-_104
+	.db	3,2,1,5,32,9
+	.dw	_106-_105
+	.db	1,5,26,9
+	.dw	_107-_106
+	.db	3,7,1,5,33,9
+	.dw	_3-_107
+	.db	3,8,1,5,51,9
+	.dw	_108-_3
+	.db	1,5,13,9
+	.dw	_109-_108
+	.db	3,89,1,5,1,9
+	.dw	_24-_109
+	.db	3,41,0,1,1
+_69:
+	; End of section
+
+	.debug		.debug_ranges, cluster 'main'
+_23:
+	.dl	-1,_5,0,_24-_5,0,0
+	; End of section
+
+	.debug		.debug_pubnames
+	.dl	23
+	.dw	2
+	.dl	_20,538,233
+	.db	'main',0
+	.dl	0
+	; End of section
+
+	.debug		.debug_info, cluster 'appl_db'
+_25:
+	.dl	246
+	.dw	3
+	.dl	_26
+	.db	4,1
+	.db	'src/main.c',0
+	.db	'TASKING VX-toolset for C166: C compiler',0
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Sophomore Year\\Terps Racing (TREV 1)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev_apps\\',0
+	.db	12,1,2
+	.dl	_16
+	.db	3
+	.db	'appl_db',0,6,33,6,5
+	.dl	_42
+	.db	1,5,3
+	.dl	_appl_db
+	.db	0
+	; End of section
+
+	.debug		.debug_abbrev, cluster 'appl_db'
+_26:
+	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,0,0,2,61,0,24,16,0,0,3,52,0,3,8,58,15,59,15,57,15,51,15,73,16,63
+	.db	12,2,9,0,0,0
+	; End of section
+
+	.debug		.debug_loc, cluster 'main'
+_31:
+	.dl	-1,_5,0,_24-_5
+	.dw	2
+	.db	145,110
+	.dl	0,0
+_35:
+	.dl	-1,_5,0,_24-_5
+	.dw	2
+	.db	145,114
+	.dl	0,0
+_38:
+	.dl	-1,_5,0,_24-_5
+	.dw	2
+	.db	145,118
+	.dl	0,0
+_33:
+	.dl	-1,_5,0,_24-_5
+	.dw	2
+	.db	145,112
+	.dl	0,0
+_36:
+	.dl	-1,_5,0,_24-_5
+	.dw	2
+	.db	145,116
+	.dl	0,0
+_39:
+	.dl	-1,_5,0,_24-_5
+	.dw	2
+	.db	145,120
+	.dl	0,0
+_41:
+	.dl	-1,_5,0,_24-_5
+	.dw	2
+	.db	145,122
+	.dl	0,0
+_4:
+	.dl	-1,_5,0,_43-_5
+	.dw	58
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_6-_10
+_10:
+	.db	146,177,2,0,47
+	.dw	_9-_11
+_11:
+_6:
+	.db	18,49,46,40
+	.dw	_7-_12
+_12:
+	.db	146,178,2,0,47
+	.dw	_9-_13
+_13:
+_7:
+	.db	18,50,46,40
+	.dw	_8-_14
+_14:
+	.db	146,179,2,0,47
+	.dw	_9-_15
+_15:
+_8:
+	.db	146,180,2,0
+_9:
+	.db	22,19,62,36,33
+	.dl	_43-_5,_24-_5
+	.dw	60
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_44-_48
+_48:
+	.db	146,177,2,0,47
+	.dw	_47-_49
+_49:
+_44:
+	.db	18,49,46,40
+	.dw	_45-_50
+_50:
+	.db	146,178,2,0,47
+	.dw	_47-_51
+_51:
+_45:
+	.db	18,50,46,40
+	.dw	_46-_52
+_52:
+	.db	146,179,2,0,47
+	.dw	_47-_53
+_53:
+_46:
+	.db	146,180,2,0
+_47:
+	.db	22,19,62,36,33,70,34
+	.dl	0,0
+_28:
+	.dl	-1,_5,0,_24-_5
+	.dw	2
+	.db	145,106
+	.dl	0,0
+	; End of section
+
+	.debug		.debug_frame
+_110:
+	.dl	148
+	.dl	-1
+	.db	3,0,2,2,173,2,15,60,127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_111-_115
+_115:
+	.db	146,177,2,0,47
+	.dw	_114-_116
+_116:
+_111:
+	.db	18,49,46,40
+	.dw	_112-_117
+_117:
+	.db	146,178,2,0,47
+	.dw	_114-_118
+_118:
+_112:
+	.db	18,50,46,40
+	.dw	_113-_119
+_119:
+	.db	146,179,2,0,47
+	.dw	_114-_120
+_120:
+_113:
+	.db	146,180,2,0
+_114:
+	.db	22,19,62,36,33,48,34,16,173,2,12,19,146,176,2,0,64,36,146,161,2,0,33,8,15,22,161,2,5,19,146,161,2,4,8
+	.db	177,2,8,178,2,8,179,2,8,180,2,16,174,2,12,19,146,176,2,0,64,36,146,161,2,0,33,16,175,2,12,19,146,176,2
+	.db	0,64,36,146,161,2,2,33,8,176,2,0,0
+	; End of section
+
+	.debug		.debug_frame, cluster 'main'
+	.dl	112
+	.dl	_110,_5,_24-_5
+	.db	8,162,2,8,166,2,8,167,2,8,168,2,8,169,2,8,170,2,8,171,2,8,172,2,4
+	.dl	(_43-_5)/2
+	.db	15,60,127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_54-_58
+_58:
+	.db	146,177,2,0,47
+	.dw	_57-_59
+_59:
+_54:
+	.db	18,49,46,40
+	.dw	_55-_60
+_60:
+	.db	146,178,2,0,47
+	.dw	_57-_61
+_61:
+_55:
+	.db	18,50,46,40
+	.dw	_56-_62
+_62:
+	.db	146,179,2,0,47
+	.dw	_57-_63
+_63:
+_56:
+	.db	146,180,2,0
+_57:
+	.db	22,19,62,36,33,70,34,22,15,3,19,127,22,0,0,0
+	; End of section
+
+
+; src/main.c	   164      }
+; src/main.c	   165  }
+
+	; Module end
+	.end
