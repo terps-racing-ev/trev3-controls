@@ -34,30 +34,22 @@
  */
 #define APPS_MIN_IMPLAUSIBLE_DEVIATION 10
 
-int voltage_to_pct_travel_apps_1 (ubyte2 val) {
-	/*
-	 * TODO: write voltage -> pct travel code
-	 */
-	return 0;
-}
+/* macro to convert a milliseconds time to microseconds (for rtc functions) */
+#define MsToUs(x) ((x)*(1000ul))
 
-int voltage_to_pct_travel_apps_2 (ubyte2 val) {
-	/*
-	 * TODO: write voltage -> pct travel code
-	 */
-	return 0;
-}
+#define IMPLAUSIBILITY_PERSISTENCE_PERIOD_US MsToUs(100ul)
 
-/* absolute value function (so we don't have to import all of stdlib.h
- * for one function
+/* TODO: voltage->pct travel code*/ 
+#define VoltageToPctTravelApps1(val) (0)
+#define VoltageToPctTravelApps2(val) (0)
+
+/* absolute value macro (so we don't have to import all of stdlib.h
+ * for one macro)
  */
-int abs (int k) {
-	if (k < 0) {
-		return -1 * k;
-	}
+#define Abs(k) (((k) < 0) ? ((-1) * (k)) : (k))
 
-	return k;
-}
+/* TODO: Put in Torque Curve */
+#define VoltageToTorque(v) (0)
 
 /* Application Database,
  * needed for TTC-Downloader
@@ -96,6 +88,7 @@ APDB appl_db =
 void main (void)
 {
     ubyte4 timestamp;
+    ubyte4 implausibility_timestamp;
 
     /*******************************************/
     /*             INITIALIZATION              */
@@ -148,9 +141,16 @@ void main (void)
     		  , IO_DI_PU_10K );
 
     bool ready_to_drive = FALSE;
-
+    
+    bool implausible_deviation = FALSE;
+    
+    int diff = 0;
+    
     int pct_travel_apps_1 = 0;
     int pct_travel_apps_2 = 0;
+    int avg_pct_travel = 0;
+    
+    int torque_to_send = 0;
 
     /*******************************************/
     /*       PERIODIC APPLICATION CODE         */
@@ -181,9 +181,13 @@ void main (void)
         	/* retrieve values for RTD switch and BSE */
         	IO_DI_Get(IO_PIN_RTD, &di_val_rtd);
         	IO_ADC_Get(IO_PIN_BSE, &adc_val_bse, &adc_fresh_bse);
-
+        	
+        	/* if brakes are pressed and RTD is activated, activate
+        	 * ready-to-drive
+        	 */
         	if (di_val_rtd == TRUE && adc_val_bse >= BSE_THRESHOLD_RTD) {
         		ready_to_drive = TRUE;
+        		
         		/*
         		 * TODO: RTD BUZZER CODE
         		 */
@@ -197,22 +201,54 @@ void main (void)
         		/* get the raw values for both APPS sensors */
                 IO_ADC_Get(IO_PIN_APPS_1, &adc_val_apps_1, &adc_fresh_apps_1);
                 IO_ADC_Get(IO_PIN_APPS_2, &adc_val_apps_2, &adc_fresh_apps_2);
-
-                pct_travel_apps_1 = voltage_to_pct_travel_apps_1(adc_val_apps_1);
-                pct_travel_apps_2 = voltage_to_pct_travel_apps_2(adc_val_apps_2);
-
-                int diff = pct_travel_apps_2 - pct_travel_apps_1;
-                diff = abs(diff);
-
-                if (diff >= APPS_MIN_IMPLAUSIBLE_DEVIATION) {
-                	/*
-                	 * TODO: Implausiblity code
-                	 */
-                } else {
-                	/*
-                	 * TODO: send Torque over CAN
-                	 */
+                
+                /* calculate pct travel */
+                if (adc_fresh_apps_1 && adc_fresh_apps_2) {
+                	pct_travel_apps_1 = VoltageToPctTravelApps1(adc_val_apps_1);
+                	pct_travel_apps_2 = VoltageToPctTravelApps2(adc_val_apps_2);
                 }
+                
+                /* get the difference between the two */
+                diff = pct_travel_apps_2 - pct_travel_apps_1;
+                diff = Abs(diff);
+                
+                /* if the difference is above the implausibility requirement */
+                if (diff >= APPS_MIN_IMPLAUSIBLE_DEVIATION) {
+                	IO_RTC_StartTime(&implausibility_timestamp);
+                	
+                	implausible_deviation = TRUE;
+                	
+                	/* check if the implausiblity persists for 100 msec */
+                	while (IO_RTC_GetTimeUS(implausibility_timestamp) 
+                			< IMPLAUSIBILITY_PERSISTENCE_PERIOD_US
+                			&& implausible_deviation) {
+                		
+                        IO_ADC_Get(IO_PIN_APPS_1, &adc_val_apps_1, &adc_fresh_apps_1);
+                        IO_ADC_Get(IO_PIN_APPS_2, &adc_val_apps_2, &adc_fresh_apps_2);
+                        
+                        if (adc_fresh_apps_1 && adc_fresh_apps_2) {
+                        	pct_travel_apps_1 = VoltageToPctTravelApps1(adc_val_apps_1);
+                        	pct_travel_apps_2 = VoltageToPctTravelApps2(adc_val_apps_2);
+                        }
+                        
+                        diff = pct_travel_apps_2 - pct_travel_apps_1;
+                        diff = Abs(diff);
+                        
+                        if (diff < APPS_MIN_IMPLAUSIBLE_DEVIATION) {
+                        	implausible_deviation = FALSE;
+                        }
+                	}
+                	
+                	if (implausible_deviation) {
+                		torque_to_send = 0;
+                	} else {
+                		avg_pct_travel = ((pct_travel_apps_2 + pct_travel_apps_1) / 2);
+                		torque_to_send = VoltageToTorque(avg_pct_travel);
+                	}
+                }
+                  /*
+                   * TODO: send Torque over CAN
+                   */
 
         	} else {
         		/* If the RTD switch has been turned off, the RTD procedure
@@ -232,9 +268,9 @@ void main (void)
 
         /* NOTE:
          * If the code between the TaskBegin and TaskEnd doesn't take
-         * 10000 (milliseconds?), this code delays the end of the cycle so it lasts
-         * 10000
+         * 10 milliseconds, this code delays the end of the cycle so it lasts
+         * 10 milliseconds
          */
-        while (IO_RTC_GetTimeUS(timestamp) < 10000);
+        while (IO_RTC_GetTimeUS(timestamp) < MsToUs(10));
     }
 }
