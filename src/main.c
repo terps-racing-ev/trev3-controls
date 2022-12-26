@@ -8,7 +8,6 @@
  *
  **************************************************************************/
 
-
 #include "IO_Driver.h"
 #include "IO_RTC.h"
 #include "IO_ADC.h"
@@ -26,6 +25,39 @@
 
 /* RTD -> pin 263 (aka digital in 0) */
 #define IO_PIN_RTD IO_DI_00
+
+/* BSE treshold for triggering RTD */
+#define BSE_THRESHOLD_RTD 1
+
+/* smallest difference between the 2 APPS pct travels that will
+ * trigger the implausibility check
+ */
+#define APPS_MIN_IMPLAUSIBLE_DEVIATION 10
+
+int voltage_to_pct_travel_apps_1 (ubyte2 val) {
+	/*
+	 * TODO: write voltage -> pct travel code
+	 */
+	return 0;
+}
+
+int voltage_to_pct_travel_apps_2 (ubyte2 val) {
+	/*
+	 * TODO: write voltage -> pct travel code
+	 */
+	return 0;
+}
+
+/* absolute value function (so we don't have to import all of stdlib.h
+ * for one function
+ */
+int abs (int k) {
+	if (k < 0) {
+		return -1 * k;
+	}
+
+	return k;
+}
 
 /* Application Database,
  * needed for TTC-Downloader
@@ -115,7 +147,11 @@ void main (void)
     IO_DI_Init( IO_PIN_RTD
     		  , IO_DI_PU_10K );
 
-    bool ready_to_drive = false;
+    bool ready_to_drive = FALSE;
+
+    int pct_travel_apps_1 = 0;
+    int pct_travel_apps_2 = 0;
+
     /*******************************************/
     /*       PERIODIC APPLICATION CODE         */
     /*******************************************/
@@ -141,13 +177,50 @@ void main (void)
             /*  - IO driver task functions can be used,     */
             /*    to read/write from/to interfaces and IOs  */
 
-        IO_ADC_Get(IO_PIN_APPS_1, &adc_val_apps_1, &adc_fresh_apps_1);
+        if (!ready_to_drive) {
+        	/* retrieve values for RTD switch and BSE */
+        	IO_DI_Get(IO_PIN_RTD, &di_val_rtd);
+        	IO_ADC_Get(IO_PIN_BSE, &adc_val_bse, &adc_fresh_bse);
 
-        IO_ADC_Get(IO_PIN_APPS_2, &adc_val_apps_2, &adc_fresh_apps_2);
+        	if (di_val_rtd == TRUE && adc_val_bse >= BSE_THRESHOLD_RTD) {
+        		ready_to_drive = TRUE;
+        		/*
+        		 * TODO: RTD BUZZER CODE
+        		 */
+        	}
 
-        IO_ADC_Get(IO_PIN_BSE, &adc_val_bse, &adc_fresh_bse);
+        } else {
+        	/* check if the RTD switch is on */
+        	IO_DI_Get(IO_PIN_RTD, &di_val_rtd);
 
-        IO_DI_Get(IO_PIN_RTD, &di_val_rtd);
+        	if (di_val_rtd == TRUE) {
+        		/* get the raw values for both APPS sensors */
+                IO_ADC_Get(IO_PIN_APPS_1, &adc_val_apps_1, &adc_fresh_apps_1);
+                IO_ADC_Get(IO_PIN_APPS_2, &adc_val_apps_2, &adc_fresh_apps_2);
+
+                pct_travel_apps_1 = voltage_to_pct_travel_apps_1(adc_val_apps_1);
+                pct_travel_apps_2 = voltage_to_pct_travel_apps_2(adc_val_apps_2);
+
+                int diff = pct_travel_apps_2 - pct_travel_apps_1;
+                diff = abs(diff);
+
+                if (diff >= APPS_MIN_IMPLAUSIBLE_DEVIATION) {
+                	/*
+                	 * TODO: Implausiblity code
+                	 */
+                } else {
+                	/*
+                	 * TODO: send Torque over CAN
+                	 */
+                }
+
+        	} else {
+        		/* If the RTD switch has been turned off, the RTD procedure
+        		 * has to be repeated
+        		 */
+        		ready_to_drive = FALSE;
+        	}
+        }
 
 
         /* Task end function for IO Driver
