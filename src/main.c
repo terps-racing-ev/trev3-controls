@@ -9,10 +9,28 @@
  **************************************************************************/
 
 #include "IO_Driver.h"
+#include "IO_CAN.h"
 #include "IO_RTC.h"
 #include "IO_ADC.h"
 #include "IO_DIO.h"
 #include "APDB.h"
+
+/**************************************************************************
+ * Utility Macros
+ ***************************************************************************/
+
+/* absolute value macro (so we don't have to import all of stdlib.h
+ * for one macro)
+ */
+#define Abs(k) (((k) < 0) ? ((-1) * (k)) : (k))
+
+/* macro to convert a milliseconds time to microseconds (for rtc functions) */
+#define MsToUs(x) ((x)*(1000ul))
+
+
+/**************************************************************************
+ * Sensor Pins
+ ***************************************************************************/
 
 /* APPS 1 -> pin 152 (aka adc 5V 0)*/
 #define IO_PIN_APPS_1 IO_ADC_5V_00
@@ -29,27 +47,46 @@
 /* BSE treshold for triggering RTD */
 #define BSE_THRESHOLD_RTD 1
 
-/* smallest difference between the 2 APPS pct travels that will
- * trigger the implausibility check
- */
+
+/**************************************************************************
+ * Controls Settings
+ ***************************************************************************/
+
+/* min. difference between the APPS pct travels 
+ * that'll trigger the implausibility check */
 #define APPS_MIN_IMPLAUSIBLE_DEVIATION 10
 
-/* macro to convert a milliseconds time to microseconds (for rtc functions) */
-#define MsToUs(x) ((x)*(1000ul))
-
 #define IMPLAUSIBILITY_PERSISTENCE_PERIOD_US MsToUs(100ul)
+
+
+/**************************************************************************
+ * Controls Math Macros
+ ***************************************************************************/
 
 /* TODO: voltage->pct travel code*/ 
 #define VoltageToPctTravelApps1(val) (0)
 #define VoltageToPctTravelApps2(val) (0)
 
-/* absolute value macro (so we don't have to import all of stdlib.h
- * for one macro)
- */
-#define Abs(k) (((k) < 0) ? ((-1) * (k)) : (k))
-
 /* TODO: Put in Torque Curve */
 #define VoltageToTorque(v) (0)
+
+
+/**************************************************************************
+ * CAN Constants
+ ***************************************************************************/
+
+#define CAN_CHANNEL IO_CAN_CHANNEL_0
+
+#define BAUD_RATE 250
+
+/* The system sends CAN messages from a FIFO buffer, this constant defines
+ * its size. If a message is added to the full buffer, it is ignored.
+ */
+#define FIFO_BUFFER_SIZE 20
+
+#define VCU_CAN_ID 0
+
+
 
 /* Application Database,
  * needed for TTC-Downloader
@@ -124,7 +161,6 @@ void main (void)
                       , 0
                       , NULL );
 
-
     /* BSE */
     bool adc_fresh_bse;
     ubyte2 adc_val_bse;
@@ -142,15 +178,33 @@ void main (void)
 
     bool ready_to_drive = FALSE;
     
+    /* APPS variables */
     bool implausible_deviation = FALSE;
-    
     int diff = 0;
-    
     int pct_travel_apps_1 = 0;
     int pct_travel_apps_2 = 0;
     int avg_pct_travel = 0;
-    
     int torque_to_send = 0;
+    
+    /* CAN variables and initialization */
+    ubyte1 handle_fifo_w;
+    
+    IO_CAN_DATA_FRAME can_frame[1] = {{{0}}};
+    
+    IO_CAN_Init( CAN_CHANNEL
+               , BAUD_RATE
+               , 0
+               , 0
+               , 0);
+    
+    IO_CAN_ConfigFIFO( &handle_fifo_w
+    				 , CAN_CHANNEL
+    				 , FIFO_BUFFER_SIZE
+    				 , IO_CAN_MSG_WRITE 
+    				 , IO_CAN_STD_FRAME 
+    				 , VCU_CAN_ID 
+    				 , 0);
+    
 
     /*******************************************/
     /*       PERIODIC APPLICATION CODE         */
@@ -168,14 +222,6 @@ void main (void)
          * the beginning of every SW cycle
          */
         IO_Driver_TaskBegin();
-
-        /*
-         *  Application Code
-         */
-
-            /* Add your application code here               */
-            /*  - IO driver task functions can be used,     */
-            /*    to read/write from/to interfaces and IOs  */
 
         if (!ready_to_drive) {
         	/* retrieve values for RTD switch and BSE */
@@ -223,6 +269,7 @@ void main (void)
                 			< IMPLAUSIBILITY_PERSISTENCE_PERIOD_US
                 			&& implausible_deviation) {
                 		
+                		/* keep checking the difference between the 2 apps's */
                         IO_ADC_Get(IO_PIN_APPS_1, &adc_val_apps_1, &adc_fresh_apps_1);
                         IO_ADC_Get(IO_PIN_APPS_2, &adc_val_apps_2, &adc_fresh_apps_2);
                         
@@ -234,21 +281,35 @@ void main (void)
                         diff = pct_travel_apps_2 - pct_travel_apps_1;
                         diff = Abs(diff);
                         
+                        /* stop checking once the 2 values don't deviate anymore */
                         if (diff < APPS_MIN_IMPLAUSIBLE_DEVIATION) {
                         	implausible_deviation = FALSE;
                         }
                 	}
-                	
-                	if (implausible_deviation) {
-                		torque_to_send = 0;
-                	} else {
-                		avg_pct_travel = ((pct_travel_apps_2 + pct_travel_apps_1) / 2);
-                		torque_to_send = VoltageToTorque(avg_pct_travel);
-                	}
+
                 }
-                  /*
-                   * TODO: send Torque over CAN
-                   */
+            	
+                /* calculate the torque to be sent */
+            	if (implausible_deviation) {
+            		torque_to_send = 0;
+            	} else {
+            		avg_pct_travel = ((pct_travel_apps_2 + pct_travel_apps_1) / 2);
+            		torque_to_send = VoltageToTorque(avg_pct_travel);
+            	}
+            	
+            	can_frame[0].id = VCU_CAN_ID;
+            	can_frame[0].id_format = IO_CAN_STD_FRAME;
+            	can_frame[0].length = 8;
+            	can_frame[0].data[0] = (torque_to_send * 10) % 256;
+            	can_frame[0].data[1] = (torque_to_send * 10) / 256;
+            	can_frame[0].data[2] = 0;
+            	can_frame[0].data[3] = 0;
+            	can_frame[0].data[4] = 1;
+            	can_frame[0].data[5] = 0;
+            	can_frame[0].data[6] = 0;
+            	can_frame[0].data[7] = 0;
+            	
+            	IO_CAN_WriteFIFO(handle_fifo_w, can_frame, 1);
 
         	} else {
         		/* If the RTD switch has been turned off, the RTD procedure

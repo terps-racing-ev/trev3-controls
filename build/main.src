@@ -1,5 +1,5 @@
 	; TASKING VX-toolset for C166: C compiler v3.1r2 Build 719 SN 00005894
-	; Options: -f cc21656a -c99 -Mh -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2022 -DRTS_TTC_FLASH_DATE_MONTH=12 -DRTS_TTC_FLASH_DATE_DAY=26 -DRTS_TTC_FLASH_DATE_HOUR=16 -DRTS_TTC_FLASH_DATE_MINUTE=55 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\main.src
+	; Options: -f cc27100a -c99 -Mh -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2022 -DRTS_TTC_FLASH_DATE_MONTH=12 -DRTS_TTC_FLASH_DATE_DAY=26 -DRTS_TTC_FLASH_DATE_HOUR=19 -DRTS_TTC_FLASH_DATE_MINUTE=46 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\main.src
 	; Module start
 	.source	'src/main.c'
 code_main	.section	code, cluster 'main', new
@@ -16,491 +16,650 @@ code_main	.section	code, cluster 'main', new
 ; src/main.c	     9   **************************************************************************/
 ; src/main.c	    10  
 ; src/main.c	    11  #include "IO_Driver.h"
-; src/main.c	    12  #include "IO_RTC.h"
-; src/main.c	    13  #include "IO_ADC.h"
-; src/main.c	    14  #include "IO_DIO.h"
-; src/main.c	    15  #include "APDB.h"
-; src/main.c	    16  
-; src/main.c	    17  /* APPS 1 -> pin 152 (aka adc 5V 0)*/
-; src/main.c	    18  #define IO_PIN_APPS_1 IO_ADC_5V_00
-; src/main.c	    19  
-; src/main.c	    20  /* APPS 2 -> pin 140 (aka adc 5V 1)*/
-; src/main.c	    21  #define IO_PIN_APPS_2 IO_ADC_5V_01
-; src/main.c	    22  
-; src/main.c	    23  /* BSE -> pin 151 (aka adc 5V 2)*/
-; src/main.c	    24  #define IO_PIN_BSE IO_ADC_5V_02
-; src/main.c	    25  
-; src/main.c	    26  /* RTD -> pin 263 (aka digital in 0) */
-; src/main.c	    27  #define IO_PIN_RTD IO_DI_00
-; src/main.c	    28  
-; src/main.c	    29  /* BSE treshold for triggering RTD */
-; src/main.c	    30  #define BSE_THRESHOLD_RTD 1
-; src/main.c	    31  
-; src/main.c	    32  /* smallest difference between the 2 APPS pct travels that will
-; src/main.c	    33   * trigger the implausibility check
-; src/main.c	    34   */
-; src/main.c	    35  #define APPS_MIN_IMPLAUSIBLE_DEVIATION 10
-; src/main.c	    36  
-; src/main.c	    37  /* macro to convert a milliseconds time to microseconds (for rtc functions) */
-; src/main.c	    38  #define MsToUs(x) ((x)*(1000ul))
-; src/main.c	    39  
-; src/main.c	    40  #define IMPLAUSIBILITY_PERSISTENCE_PERIOD_US MsToUs(100ul)
-; src/main.c	    41  
-; src/main.c	    42  /* TODO: voltage->pct travel code*/ 
-; src/main.c	    43  #define VoltageToPctTravelApps1(val) (0)
-; src/main.c	    44  #define VoltageToPctTravelApps2(val) (0)
-; src/main.c	    45  
-; src/main.c	    46  /* absolute value macro (so we don't have to import all of stdlib.h
-; src/main.c	    47   * for one macro)
-; src/main.c	    48   */
-; src/main.c	    49  #define Abs(k) (((k) < 0) ? ((-1) * (k)) : (k))
+; src/main.c	    12  #include "IO_CAN.h"
+; src/main.c	    13  #include "IO_RTC.h"
+; src/main.c	    14  #include "IO_ADC.h"
+; src/main.c	    15  #include "IO_DIO.h"
+; src/main.c	    16  #include "APDB.h"
+; src/main.c	    17  
+; src/main.c	    18  /**************************************************************************
+; src/main.c	    19   * Utility Macros
+; src/main.c	    20   ***************************************************************************/
+; src/main.c	    21  
+; src/main.c	    22  /* absolute value macro (so we don't have to import all of stdlib.h
+; src/main.c	    23   * for one macro)
+; src/main.c	    24   */
+; src/main.c	    25  #define Abs(k) (((k) < 0) ? ((-1) * (k)) : (k))
+; src/main.c	    26  
+; src/main.c	    27  /* macro to convert a milliseconds time to microseconds (for rtc functions) */
+; src/main.c	    28  #define MsToUs(x) ((x)*(1000ul))
+; src/main.c	    29  
+; src/main.c	    30  
+; src/main.c	    31  /**************************************************************************
+; src/main.c	    32   * Sensor Pins
+; src/main.c	    33   ***************************************************************************/
+; src/main.c	    34  
+; src/main.c	    35  /* APPS 1 -> pin 152 (aka adc 5V 0)*/
+; src/main.c	    36  #define IO_PIN_APPS_1 IO_ADC_5V_00
+; src/main.c	    37  
+; src/main.c	    38  /* APPS 2 -> pin 140 (aka adc 5V 1)*/
+; src/main.c	    39  #define IO_PIN_APPS_2 IO_ADC_5V_01
+; src/main.c	    40  
+; src/main.c	    41  /* BSE -> pin 151 (aka adc 5V 2)*/
+; src/main.c	    42  #define IO_PIN_BSE IO_ADC_5V_02
+; src/main.c	    43  
+; src/main.c	    44  /* RTD -> pin 263 (aka digital in 0) */
+; src/main.c	    45  #define IO_PIN_RTD IO_DI_00
+; src/main.c	    46  
+; src/main.c	    47  /* BSE treshold for triggering RTD */
+; src/main.c	    48  #define BSE_THRESHOLD_RTD 1
+; src/main.c	    49  
 ; src/main.c	    50  
-; src/main.c	    51  /* TODO: Put in Torque Curve */
-; src/main.c	    52  #define VoltageToTorque(v) (0)
-; src/main.c	    53  
-; src/main.c	    54  /* Application Database,
-; src/main.c	    55   * needed for TTC-Downloader
-; src/main.c	    56   */
-; src/main.c	    57  APDB appl_db =
-; src/main.c	    58            { 0                      /* ubyte4 versionAPDB        */
-; src/main.c	    59            , {0}                    /* BL_T_DATE flashDate       */
-; src/main.c	    60                                     /* BL_T_DATE buildDate                   */
-; src/main.c	    61            , { (ubyte4) (((((ubyte4) RTS_TTC_FLASH_DATE_YEAR) & 0x0FFF) << 0) |
-; src/main.c	    62                          ((((ubyte4) RTS_TTC_FLASH_DATE_MONTH) & 0x0F) << 12) |
-; src/main.c	    63                          ((((ubyte4) RTS_TTC_FLASH_DATE_DAY) & 0x1F) << 16) |
-; src/main.c	    64                          ((((ubyte4) RTS_TTC_FLASH_DATE_HOUR) & 0x1F) << 21) |
-; src/main.c	    65                          ((((ubyte4) RTS_TTC_FLASH_DATE_MINUTE) & 0x3F) << 26)) }
-; src/main.c	    66            , 0                      /* ubyte4 nodeType           */
-; src/main.c	    67            , 0                      /* ubyte4 startAddress       */
-; src/main.c	    68            , 0                      /* ubyte4 codeSize           */
-; src/main.c	    69            , 0                      /* ubyte4 legacyAppCRC       */
-; src/main.c	    70            , 0                      /* ubyte4 appCRC             */
-; src/main.c	    71            , 1                      /* ubyte1 nodeNr             */
-; src/main.c	    72            , 0                      /* ubyte4 CRCInit            */
-; src/main.c	    73            , 0                      /* ubyte4 flags              */
-; src/main.c	    74            , 0                      /* ubyte4 hook1              */
-; src/main.c	    75            , 0                      /* ubyte4 hook2              */
-; src/main.c	    76            , 0                      /* ubyte4 hook3              */
-; src/main.c	    77            , APPL_START             /* ubyte4 mainAddress        */
-; src/main.c	    78            , {0, 1}                 /* BL_T_CAN_ID canDownloadID */
-; src/main.c	    79            , {0, 2}                 /* BL_T_CAN_ID canUploadID   */
-; src/main.c	    80            , 0                      /* ubyte4 legacyHeaderCRC    */
-; src/main.c	    81            , 0                      /* ubyte4 version            */
-; src/main.c	    82            , 500                    /* ubyte2 canBaudrate        */
-; src/main.c	    83            , 0                      /* ubyte1 canChannel         */
-; src/main.c	    84            , {0}                    /* ubyte1 reserved[8*4]      */
-; src/main.c	    85            , 0                      /* ubyte4 headerCRC          */
-; src/main.c	    86            };
-; src/main.c	    87  
-; src/main.c	    88  void main (void)
+; src/main.c	    51  /**************************************************************************
+; src/main.c	    52   * Controls Settings
+; src/main.c	    53   ***************************************************************************/
+; src/main.c	    54  
+; src/main.c	    55  /* min. difference between the APPS pct travels 
+; src/main.c	    56   * that'll trigger the implausibility check */
+; src/main.c	    57  #define APPS_MIN_IMPLAUSIBLE_DEVIATION 10
+; src/main.c	    58  
+; src/main.c	    59  #define IMPLAUSIBILITY_PERSISTENCE_PERIOD_US MsToUs(100ul)
+; src/main.c	    60  
+; src/main.c	    61  
+; src/main.c	    62  /**************************************************************************
+; src/main.c	    63   * Controls Math Macros
+; src/main.c	    64   ***************************************************************************/
+; src/main.c	    65  
+; src/main.c	    66  /* TODO: voltage->pct travel code*/ 
+; src/main.c	    67  #define VoltageToPctTravelApps1(val) (0)
+; src/main.c	    68  #define VoltageToPctTravelApps2(val) (0)
+; src/main.c	    69  
+; src/main.c	    70  /* TODO: Put in Torque Curve */
+; src/main.c	    71  #define VoltageToTorque(v) (0)
+; src/main.c	    72  
+; src/main.c	    73  
+; src/main.c	    74  /**************************************************************************
+; src/main.c	    75   * CAN Constants
+; src/main.c	    76   ***************************************************************************/
+; src/main.c	    77  
+; src/main.c	    78  #define CAN_CHANNEL IO_CAN_CHANNEL_0
+; src/main.c	    79  
+; src/main.c	    80  #define BAUD_RATE 250
+; src/main.c	    81  
+; src/main.c	    82  /* The system sends CAN messages from a FIFO buffer, this constant defines
+; src/main.c	    83   * its size. If a message is added to the full buffer, it is ignored.
+; src/main.c	    84   */
+; src/main.c	    85  #define FIFO_BUFFER_SIZE 20
+; src/main.c	    86  
+; src/main.c	    87  #define VCU_CAN_ID 0
+; src/main.c	    88  
+; src/main.c	    89  
+; src/main.c	    90  
+; src/main.c	    91  /* Application Database,
+; src/main.c	    92   * needed for TTC-Downloader
+; src/main.c	    93   */
+; src/main.c	    94  APDB appl_db =
+; src/main.c	    95            { 0                      /* ubyte4 versionAPDB        */
+; src/main.c	    96            , {0}                    /* BL_T_DATE flashDate       */
+; src/main.c	    97                                     /* BL_T_DATE buildDate                   */
+; src/main.c	    98            , { (ubyte4) (((((ubyte4) RTS_TTC_FLASH_DATE_YEAR) & 0x0FFF) << 0) |
+; src/main.c	    99                          ((((ubyte4) RTS_TTC_FLASH_DATE_MONTH) & 0x0F) << 12) |
+; src/main.c	   100                          ((((ubyte4) RTS_TTC_FLASH_DATE_DAY) & 0x1F) << 16) |
+; src/main.c	   101                          ((((ubyte4) RTS_TTC_FLASH_DATE_HOUR) & 0x1F) << 21) |
+; src/main.c	   102                          ((((ubyte4) RTS_TTC_FLASH_DATE_MINUTE) & 0x3F) << 26)) }
+; src/main.c	   103            , 0                      /* ubyte4 nodeType           */
+; src/main.c	   104            , 0                      /* ubyte4 startAddress       */
+; src/main.c	   105            , 0                      /* ubyte4 codeSize           */
+; src/main.c	   106            , 0                      /* ubyte4 legacyAppCRC       */
+; src/main.c	   107            , 0                      /* ubyte4 appCRC             */
+; src/main.c	   108            , 1                      /* ubyte1 nodeNr             */
+; src/main.c	   109            , 0                      /* ubyte4 CRCInit            */
+; src/main.c	   110            , 0                      /* ubyte4 flags              */
+; src/main.c	   111            , 0                      /* ubyte4 hook1              */
+; src/main.c	   112            , 0                      /* ubyte4 hook2              */
+; src/main.c	   113            , 0                      /* ubyte4 hook3              */
+; src/main.c	   114            , APPL_START             /* ubyte4 mainAddress        */
+; src/main.c	   115            , {0, 1}                 /* BL_T_CAN_ID canDownloadID */
+; src/main.c	   116            , {0, 2}                 /* BL_T_CAN_ID canUploadID   */
+; src/main.c	   117            , 0                      /* ubyte4 legacyHeaderCRC    */
+; src/main.c	   118            , 0                      /* ubyte4 version            */
+; src/main.c	   119            , 500                    /* ubyte2 canBaudrate        */
+; src/main.c	   120            , 0                      /* ubyte1 canChannel         */
+; src/main.c	   121            , {0}                    /* ubyte1 reserved[8*4]      */
+; src/main.c	   122            , 0                      /* ubyte4 headerCRC          */
+; src/main.c	   123            };
+; src/main.c	   124  
+; src/main.c	   125  void main (void)
 ; Function _main
 _11:
 _main	.proc	far
-	subw	r15,#0x16
-_51:
+	subw	r15,#0x28
+_54:
 
-; src/main.c	    89  {
-; src/main.c	    90      ubyte4 timestamp;
-; src/main.c	    91      ubyte4 implausibility_timestamp;
-; src/main.c	    92  
-; src/main.c	    93      /*******************************************/
-; src/main.c	    94      /*             INITIALIZATION              */
-; src/main.c	    95      /*******************************************/
-; src/main.c	    96  
-; src/main.c	    97      /* Initialize the IO driver (without safety functions) */
-; src/main.c	    98      IO_Driver_Init(NULL);
+; src/main.c	   126  {
+; src/main.c	   127      ubyte4 timestamp;
+; src/main.c	   128      ubyte4 implausibility_timestamp;
+; src/main.c	   129  
+; src/main.c	   130      /*******************************************/
+; src/main.c	   131      /*             INITIALIZATION              */
+; src/main.c	   132      /*******************************************/
+; src/main.c	   133  
+; src/main.c	   134      /* Initialize the IO driver (without safety functions) */
+; src/main.c	   135      IO_Driver_Init(NULL);
 	movw	r2,#0x0
 	movw	r3,r2
 	call	_IO_Driver_Init
-_86:
+_90:
 
-; src/main.c	    99  
-; src/main.c	   100          /* Add your initialization code here            */
-; src/main.c	   101          /*  - Use the IO driver functions to initialize */
-; src/main.c	   102          /*    all required IOs and interfaces           */
-; src/main.c	   103  
-; src/main.c	   104      /* NOTE: turns 5v sensor supply 1 on */
-; src/main.c	   105      IO_POWER_Set (IO_ADC_SENSOR_SUPPLY_0, IO_POWER_ON);
+; src/main.c	   136  
+; src/main.c	   137          /* Add your initialization code here            */
+; src/main.c	   138          /*  - Use the IO driver functions to initialize */
+; src/main.c	   139          /*    all required IOs and interfaces           */
+; src/main.c	   140  
+; src/main.c	   141      /* NOTE: turns 5v sensor supply 1 on */
+; src/main.c	   142      IO_POWER_Set (IO_ADC_SENSOR_SUPPLY_0, IO_POWER_ON);
 	movb	rl2,#0x24
-_87:
+_91:
 	movb	rh2,#0x1
 	call	_IO_POWER_Set
 _35:
 
-; src/main.c	   106  
-; src/main.c	   107      /* APPS 1 */
-; src/main.c	   108      bool adc_fresh_apps_1;
-; src/main.c	   109      ubyte2 adc_val_apps_1;
-; src/main.c	   110      IO_ADC_ChannelInit( IO_PIN_APPS_1
+; src/main.c	   143  
+; src/main.c	   144      /* APPS 1 */
+; src/main.c	   145      bool adc_fresh_apps_1;
+; src/main.c	   146      ubyte2 adc_val_apps_1;
+; src/main.c	   147      IO_ADC_ChannelInit( IO_PIN_APPS_1
 	movb	rl2,#0x8
-_88:
-
-; src/main.c	   111                        , IO_ADC_ABSOLUTE
-	movb	rh2,#0x2
-_89:
-
-; src/main.c	   112                        , 0
-	movb	rl3,#0x0
-_90:
-
-; src/main.c	   113                        , 0
-	movb	rh3,rl3
-_91:
-
-; src/main.c	   114                        , 0
-	movb	rl4,rl3
 _92:
 
-; src/main.c	   115                        , NULL );
+; src/main.c	   148                        , IO_ADC_ABSOLUTE
+	movb	rh2,#0x2
+_93:
+
+; src/main.c	   149                        , 0
+	movb	rl3,#0x0
+_94:
+
+; src/main.c	   150                        , 0
+	movb	rh3,rl3
+_95:
+
+; src/main.c	   151                        , 0
+	movb	rl4,rl3
+_96:
+
+; src/main.c	   152                        , NULL );
 	movw	r11,#0x0
 	movw	r12,r11
 	call	_IO_ADC_ChannelInit
 _40:
 
-; src/main.c	   116  
-; src/main.c	   117      /* APPS 2 */
-; src/main.c	   118      bool adc_fresh_apps_2;
-; src/main.c	   119      ubyte2 adc_val_apps_2;
-; src/main.c	   120      IO_ADC_ChannelInit( IO_PIN_APPS_2
+; src/main.c	   153  
+; src/main.c	   154      /* APPS 2 */
+; src/main.c	   155      bool adc_fresh_apps_2;
+; src/main.c	   156      ubyte2 adc_val_apps_2;
+; src/main.c	   157      IO_ADC_ChannelInit( IO_PIN_APPS_2
 	movb	rl2,#0x9
-_93:
-
-; src/main.c	   121                        , IO_ADC_ABSOLUTE
-	movb	rh2,#0x2
-_94:
-
-; src/main.c	   122                        , 0
-	movb	rl3,#0x0
-_95:
-
-; src/main.c	   123                        , 0
-	movb	rh3,rl3
-_96:
-
-; src/main.c	   124                        , 0
-	movb	rl4,rl3
 _97:
 
-; src/main.c	   125                        , NULL );
+; src/main.c	   158                        , IO_ADC_ABSOLUTE
+	movb	rh2,#0x2
+_98:
+
+; src/main.c	   159                        , 0
+	movb	rl3,#0x0
+_99:
+
+; src/main.c	   160                        , 0
+	movb	rh3,rl3
+_100:
+
+; src/main.c	   161                        , 0
+	movb	rl4,rl3
+_101:
+
+; src/main.c	   162                        , NULL );
 	movw	r11,#0x0
 	movw	r12,r11
 	call	_IO_ADC_ChannelInit
 _43:
 
-; src/main.c	   126  
-; src/main.c	   127  
-; src/main.c	   128      /* BSE */
-; src/main.c	   129      bool adc_fresh_bse;
-; src/main.c	   130      ubyte2 adc_val_bse;
-; src/main.c	   131      IO_ADC_ChannelInit( IO_PIN_BSE
+; src/main.c	   163  
+; src/main.c	   164      /* BSE */
+; src/main.c	   165      bool adc_fresh_bse;
+; src/main.c	   166      ubyte2 adc_val_bse;
+; src/main.c	   167      IO_ADC_ChannelInit( IO_PIN_BSE
 	movb	rl2,#0xa
-_98:
-
-; src/main.c	   132                        , IO_ADC_ABSOLUTE
-	movb	rh2,#0x2
-_99:
-
-; src/main.c	   133                        , 0
-	movb	rl3,#0x0
-_100:
-
-; src/main.c	   134                        , 0
-	movb	rh3,rl3
-_101:
-
-; src/main.c	   135                        , 0
-	movb	rl4,rl3
 _102:
 
-; src/main.c	   136                        , NULL );
+; src/main.c	   168                        , IO_ADC_ABSOLUTE
+	movb	rh2,#0x2
+_103:
+
+; src/main.c	   169                        , 0
+	movb	rl3,#0x0
+_104:
+
+; src/main.c	   170                        , 0
+	movb	rh3,rl3
+_105:
+
+; src/main.c	   171                        , 0
+	movb	rl4,rl3
+_106:
+
+; src/main.c	   172                        , NULL );
 	movw	r11,#0x0
 	movw	r12,r11
 	call	_IO_ADC_ChannelInit
 _46:
 
-; src/main.c	   137  
-; src/main.c	   138      /* RTD */
-; src/main.c	   139      bool di_val_rtd;
-; src/main.c	   140      IO_DI_Init( IO_PIN_RTD
+; src/main.c	   173  
+; src/main.c	   174      /* RTD */
+; src/main.c	   175      bool di_val_rtd;
+; src/main.c	   176      IO_DI_Init( IO_PIN_RTD
 	movb	rl2,#0x26
-_103:
+_107:
 
-; src/main.c	   141      		  , IO_DI_PU_10K );
+; src/main.c	   177      		  , IO_DI_PU_10K );
 	movb	rh2,#0x1
 	call	_IO_DI_Init
 _48:
 
-; src/main.c	   142  
-; src/main.c	   143      bool ready_to_drive = FALSE;
+; src/main.c	   178  
+; src/main.c	   179      bool ready_to_drive = FALSE;
 	movb	rh4,#0x0
-_72:
-	movb	[r15+#0x14],rh4
-_73:
+_75:
+	movb	[r15+#0x26],rh4
+_77:
 
-; src/main.c	   144      
-; src/main.c	   145      bool implausible_deviation = FALSE;
-; src/main.c	   146      
-; src/main.c	   147      int diff = 0;
-; src/main.c	   148      
-; src/main.c	   149      int pct_travel_apps_1 = 0;
-; src/main.c	   150      int pct_travel_apps_2 = 0;
-; src/main.c	   151      int avg_pct_travel = 0;
-; src/main.c	   152      
-; src/main.c	   153      int torque_to_send = 0;
-; src/main.c	   154  
-; src/main.c	   155      /*******************************************/
-; src/main.c	   156      /*       PERIODIC APPLICATION CODE         */
-; src/main.c	   157      /*******************************************/
-; src/main.c	   158  
-; src/main.c	   159      /* main loop, executed periodically with a
-; src/main.c	   160       * defined cycle time (here: 10 ms)
-; src/main.c	   161       */
-; src/main.c	   162      while (1)
-; src/main.c	   163      {
-; src/main.c	   164          /* get a timestamp to implement the cycle time */
-; src/main.c	   165          IO_RTC_StartTime(&timestamp);
+; src/main.c	   180      
+; src/main.c	   181      /* APPS variables */
+; src/main.c	   182      bool implausible_deviation = FALSE;
+; src/main.c	   183      int diff = 0;
+; src/main.c	   184      int pct_travel_apps_1 = 0;
+; src/main.c	   185      int pct_travel_apps_2 = 0;
+; src/main.c	   186      int avg_pct_travel = 0;
+; src/main.c	   187      int torque_to_send = 0;
+; src/main.c	   188      
+; src/main.c	   189      /* CAN variables and initialization */
+; src/main.c	   190      ubyte1 handle_fifo_w;
+; src/main.c	   191      
+; src/main.c	   192      IO_CAN_DATA_FRAME can_frame[1] = {{{0}}};
+	movw	r2,#0x10
+	addw	r2,r15
+_108:
+	movw	r4,#@sof(_$1$ini)
+_76:
+	movw	r5,#@seg(_$1$ini)
+_109:
+	movw	r3,#0x7
+	call	__cphnw
+_110:
+
+; src/main.c	   193      
+; src/main.c	   194      IO_CAN_Init( CAN_CHANNEL
+	movb	rl2,#0x3a
+_111:
+
+; src/main.c	   195                 , BAUD_RATE
+	movw	r3,#0xfa
+_112:
+
+; src/main.c	   196                 , 0
+	movb	rh2,#0x0
+_113:
+
+; src/main.c	   197                 , 0
+	movb	rl4,rh2
+_114:
+
+; src/main.c	   198                 , 0);
+	movb	rh4,rh2
+	call	_IO_CAN_Init
+_115:
+
+; src/main.c	   199      
+; src/main.c	   200      IO_CAN_ConfigFIFO( &handle_fifo_w
+	movw	r2,r15
+	addw	r2,#0x1e
+	andw	r2,#0x3fff
+	orw	r2,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
+_116:
+
+; src/main.c	   201      				 , CAN_CHANNEL
+	movb	rl4,#0x3a
+_117:
+
+; src/main.c	   202      				 , FIFO_BUFFER_SIZE
+	movb	rh4,#0x14
+_118:
+
+; src/main.c	   203      				 , IO_CAN_MSG_WRITE 
+	movb	rl5,#0x1
+_119:
+
+; src/main.c	   204      				 , IO_CAN_STD_FRAME 
+	movb	rh5,#0x0
+_120:
+
+; src/main.c	   205      				 , VCU_CAN_ID 
+	movw	r11,#0x0
+_121:
+
+; src/main.c	   206      				 , 0);
+	movw	r3,#@seg(__lc_ub_user_stack+0xffff)
+	movw	r12,r11
+	movw	r13,r11
+	movw	r14,r11
+	call	_IO_CAN_ConfigFIFO
+_122:
+
+; src/main.c	   207      
+; src/main.c	   208  
+; src/main.c	   209      /*******************************************/
+; src/main.c	   210      /*       PERIODIC APPLICATION CODE         */
+; src/main.c	   211      /*******************************************/
+; src/main.c	   212  
+; src/main.c	   213      /* main loop, executed periodically with a
+; src/main.c	   214       * defined cycle time (here: 10 ms)
+; src/main.c	   215       */
+; src/main.c	   216      while (1)
+; src/main.c	   217      {
+; src/main.c	   218          /* get a timestamp to implement the cycle time */
+; src/main.c	   219          IO_RTC_StartTime(&timestamp);
 	movw	r11,r15
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0x12],r11
+	movw	[r15+#0x24],r11
 	movw	r8,#@seg(__lc_ub_user_stack+0xffff)
-_104:
+_123:
 
-; src/main.c	   166          /* Task begin function for IO Driver
-; src/main.c	   167           * This function needs to be called at
-; src/main.c	   168           * the beginning of every SW cycle
-; src/main.c	   169           */
-; src/main.c	   170          IO_Driver_TaskBegin();
-; src/main.c	   171  
-; src/main.c	   172          /*
-; src/main.c	   173           *  Application Code
-; src/main.c	   174           */
-; src/main.c	   175  
-; src/main.c	   176              /* Add your application code here               */
-; src/main.c	   177              /*  - IO driver task functions can be used,     */
-; src/main.c	   178              /*    to read/write from/to interfaces and IOs  */
-; src/main.c	   179  
-; src/main.c	   180          if (!ready_to_drive) {
-; src/main.c	   181          	/* retrieve values for RTD switch and BSE */
-; src/main.c	   182          	IO_DI_Get(IO_PIN_RTD, &di_val_rtd);
+; src/main.c	   220          /* Task begin function for IO Driver
+; src/main.c	   221           * This function needs to be called at
+; src/main.c	   222           * the beginning of every SW cycle
+; src/main.c	   223           */
+; src/main.c	   224          IO_Driver_TaskBegin();
+; src/main.c	   225  
+; src/main.c	   226          if (!ready_to_drive) {
+; src/main.c	   227          	/* retrieve values for RTD switch and BSE */
+; src/main.c	   228          	IO_DI_Get(IO_PIN_RTD, &di_val_rtd);
 	movw	r9,#0xf
 	addw	r9,r15
 	andw	r9,#0x3fff
 	orw	r9,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-_105:
+_124:
 
-; src/main.c	   183          	IO_ADC_Get(IO_PIN_BSE, &adc_val_bse, &adc_fresh_bse);
+; src/main.c	   229          	IO_ADC_Get(IO_PIN_BSE, &adc_val_bse, &adc_fresh_bse);
 	movw	r11,#0xe
 	addw	r11,r15
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0x10],r11
-_106:
-	movw	r1,#0xc
+	movw	[r15+#0x22],r11
+_125:
+	movw	r11,#0xc
+	addw	r11,r15
+	andw	r11,#0x3fff
+	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
+	movw	[r15+#0x20],r11
+_126:
+
+; src/main.c	   230          	
+; src/main.c	   231          	/* if brakes are pressed and RTD is activated, activate
+; src/main.c	   232          	 * ready-to-drive
+; src/main.c	   233          	 */
+; src/main.c	   234          	if (di_val_rtd == TRUE && adc_val_bse >= BSE_THRESHOLD_RTD) {
+; src/main.c	   235          		ready_to_drive = TRUE;
+; src/main.c	   236          		
+; src/main.c	   237          		/*
+; src/main.c	   238          		 * TODO: RTD BUZZER CODE
+; src/main.c	   239          		 */
+; src/main.c	   240          	}
+; src/main.c	   241  
+; src/main.c	   242          } else {
+; src/main.c	   243          	/* check if the RTD switch is on */
+; src/main.c	   244          	IO_DI_Get(IO_PIN_RTD, &di_val_rtd);
+; src/main.c	   245  
+; src/main.c	   246          	if (di_val_rtd == TRUE) {
+; src/main.c	   247          		/* get the raw values for both APPS sensors */
+; src/main.c	   248                  IO_ADC_Get(IO_PIN_APPS_1, &adc_val_apps_1, &adc_fresh_apps_1);
+	movw	r1,#0x4
 	addw	r1,r15
 	andw	r1,#0x3fff
 	orw	r1,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-_107:
-
-; src/main.c	   184          	
-; src/main.c	   185          	/* if brakes are pressed and RTD is activated, activate
-; src/main.c	   186          	 * ready-to-drive
-; src/main.c	   187          	 */
-; src/main.c	   188          	if (di_val_rtd == TRUE && adc_val_bse >= BSE_THRESHOLD_RTD) {
-; src/main.c	   189          		ready_to_drive = TRUE;
-; src/main.c	   190          		
-; src/main.c	   191          		/*
-; src/main.c	   192          		 * TODO: RTD BUZZER CODE
-; src/main.c	   193          		 */
-; src/main.c	   194          	}
-; src/main.c	   195  
-; src/main.c	   196          } else {
-; src/main.c	   197          	/* check if the RTD switch is on */
-; src/main.c	   198          	IO_DI_Get(IO_PIN_RTD, &di_val_rtd);
-; src/main.c	   199  
-; src/main.c	   200          	if (di_val_rtd == TRUE) {
-; src/main.c	   201          		/* get the raw values for both APPS sensors */
-; src/main.c	   202                  IO_ADC_Get(IO_PIN_APPS_1, &adc_val_apps_1, &adc_fresh_apps_1);
-	movw	r10,#0x4
-	addw	r10,r15
-	andw	r10,#0x3fff
-	orw	r10,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-_108:
-	movw	r6,#0x6
-	addw	r6,r15
-	andw	r6,#0x3fff
-	orw	r6,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-_109:
-
-; src/main.c	   203                  IO_ADC_Get(IO_PIN_APPS_2, &adc_val_apps_2, &adc_fresh_apps_2);
-	movw	r7,#0x8
-	addw	r7,r15
-	andw	r7,#0x3fff
-	orw	r7,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-_110:
-	movw	r0,#0xa
+_127:
+	movw	r0,#0x6
 	addw	r0,r15
 	andw	r0,#0x3fff
 	orw	r0,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
+_128:
+
+; src/main.c	   249                  IO_ADC_Get(IO_PIN_APPS_2, &adc_val_apps_2, &adc_fresh_apps_2);
+	movw	r10,#0x8
+	addw	r10,r15
+	andw	r10,#0x3fff
+	orw	r10,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
+_129:
+	movw	r6,#0xa
+	addw	r6,r15
+	andw	r6,#0x3fff
+	orw	r6,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
+_130:
+
+; src/main.c	   250                  
+; src/main.c	   251                  /* calculate pct travel */
+; src/main.c	   252                  if (adc_fresh_apps_1 && adc_fresh_apps_2) {
+; src/main.c	   253                  	pct_travel_apps_1 = VoltageToPctTravelApps1(adc_val_apps_1);
+; src/main.c	   254                  	pct_travel_apps_2 = VoltageToPctTravelApps2(adc_val_apps_2);
+; src/main.c	   255                  }
+; src/main.c	   256                  
+; src/main.c	   257                  /* get the difference between the two */
+; src/main.c	   258                  diff = pct_travel_apps_2 - pct_travel_apps_1;
+; src/main.c	   259                  diff = Abs(diff);
+; src/main.c	   260                  
+; src/main.c	   261                  /* if the difference is above the implausibility requirement */
+; src/main.c	   262                  if (diff >= APPS_MIN_IMPLAUSIBLE_DEVIATION) {
+; src/main.c	   263                  	IO_RTC_StartTime(&implausibility_timestamp);
+; src/main.c	   264                  	
+; src/main.c	   265                  	implausible_deviation = TRUE;
+; src/main.c	   266                  	
+; src/main.c	   267                  	/* check if the implausiblity persists for 100 msec */
+; src/main.c	   268                  	while (IO_RTC_GetTimeUS(implausibility_timestamp) 
+; src/main.c	   269                  			< IMPLAUSIBILITY_PERSISTENCE_PERIOD_US
+; src/main.c	   270                  			&& implausible_deviation) {
+; src/main.c	   271                  		
+; src/main.c	   272                  		/* keep checking the difference between the 2 apps's */
+; src/main.c	   273                          IO_ADC_Get(IO_PIN_APPS_1, &adc_val_apps_1, &adc_fresh_apps_1);
+; src/main.c	   274                          IO_ADC_Get(IO_PIN_APPS_2, &adc_val_apps_2, &adc_fresh_apps_2);
+; src/main.c	   275                          
+; src/main.c	   276                          if (adc_fresh_apps_1 && adc_fresh_apps_2) {
+; src/main.c	   277                          	pct_travel_apps_1 = VoltageToPctTravelApps1(adc_val_apps_1);
+; src/main.c	   278                          	pct_travel_apps_2 = VoltageToPctTravelApps2(adc_val_apps_2);
+; src/main.c	   279                          }
+; src/main.c	   280                          
+; src/main.c	   281                          diff = pct_travel_apps_2 - pct_travel_apps_1;
+; src/main.c	   282                          diff = Abs(diff);
+; src/main.c	   283                          
+; src/main.c	   284                          /* stop checking once the 2 values don't deviate anymore */
+; src/main.c	   285                          if (diff < APPS_MIN_IMPLAUSIBLE_DEVIATION) {
+; src/main.c	   286                          	implausible_deviation = FALSE;
+; src/main.c	   287                          }
+; src/main.c	   288                  	}
+; src/main.c	   289  
+; src/main.c	   290                  }
+; src/main.c	   291              	
+; src/main.c	   292                  /* calculate the torque to be sent */
+; src/main.c	   293              	if (implausible_deviation) {
+; src/main.c	   294              		torque_to_send = 0;
+; src/main.c	   295              	} else {
+; src/main.c	   296              		avg_pct_travel = ((pct_travel_apps_2 + pct_travel_apps_1) / 2);
+; src/main.c	   297              		torque_to_send = VoltageToTorque(avg_pct_travel);
+; src/main.c	   298              	}
+; src/main.c	   299              	
+; src/main.c	   300              	can_frame[0].id = VCU_CAN_ID;
+; src/main.c	   301              	can_frame[0].id_format = IO_CAN_STD_FRAME;
+; src/main.c	   302              	can_frame[0].length = 8;
+; src/main.c	   303              	can_frame[0].data[0] = (torque_to_send * 10) % 256;
+; src/main.c	   304              	can_frame[0].data[1] = (torque_to_send * 10) / 256;
+; src/main.c	   305              	can_frame[0].data[2] = 0;
+; src/main.c	   306              	can_frame[0].data[3] = 0;
+; src/main.c	   307              	can_frame[0].data[4] = 1;
+; src/main.c	   308              	can_frame[0].data[5] = 0;
+; src/main.c	   309              	can_frame[0].data[6] = 0;
+; src/main.c	   310              	can_frame[0].data[7] = 0;
+; src/main.c	   311              	
+; src/main.c	   312              	IO_CAN_WriteFIFO(handle_fifo_w, can_frame, 1);
+	movw	r7,r15
+	addw	r7,#0x10
+	andw	r7,#0x3fff
+	orw	r7,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 _2:
-	movw	r2,[r15+#0x12]
+	movw	r2,[r15+#0x24]
 	movw	r3,r8
 	call	_IO_RTC_StartTime
-_111:
+_131:
 	call	_IO_Driver_TaskBegin
-_112:
-	movb	rh4,[r15+#0x14]
-_74:
+_132:
+	movb	rh4,[r15+#0x26]
+_78:
 	jmp	cc_ne,_3
-_113:
+_133:
 	movb	rl2,#0x26
-_114:
+_134:
 	movw	r4,r9
-_75:
+_79:
 	movw	r5,r8
 	call	_IO_DI_Get
-_115:
+_135:
 	movb	rl2,#0xa
-_116:
-	movw	r4,r1
+_136:
+	movw	r4,[r15+#0x20]
 	movw	r5,r8
-	movw	r11,[r15+#0x10]
+	movw	r11,[r15+#0x22]
 	movw	r12,r8
 	call	_IO_ADC_Get
-_117:
+_137:
 	movb	rh4,[r15+#0xf]
 	cmpb	rh4,#0x1
 	jmp	cc_ne,_4
-_118:
+_138:
 	movw	r11,[r15+#0xc]
-_119:
+_139:
 	jmp	cc_eq,_5
-_120:
+_140:
 	movb	rh4,#0x1
-_76:
+_80:
 	jmp	_6
 _3:
 	movb	rl2,#0x26
-_121:
+_141:
 	movw	r4,r9
-_77:
+_81:
 	movw	r5,r8
 	call	_IO_DI_Get
-_122:
+_142:
 	movb	rh4,[r15+#0xf]
-_123:
+_143:
 	cmpb	rh4,#0x1
 	jmp	cc_ne,_7
-_124:
+_144:
 	movb	rl2,#0x8
-_125:
+_145:
+	movw	r4,r0
+	movw	r5,r8
+	movw	r11,r1
+	movw	r12,r8
+	call	_IO_ADC_Get
+_146:
+	movb	rl2,#0x9
+_147:
 	movw	r4,r6
 	movw	r5,r8
 	movw	r11,r10
 	movw	r12,r8
 	call	_IO_ADC_Get
-_126:
-	movb	rl2,#0x9
-_127:
-	movw	r4,r0
+_148:
+	movw	r11,#0x0
+_149:
+	movw	[r15+#0x1a],r11
+	movw	[r15+#0x1c],r11
+_150:
+	movb	rl4,#0x0
+_151:
+	movb	[r15+#0x19],rl4
+_152:
+	movb	rh4,#0x8
+_153:
+	movb	[r15+#0x18],rh4
+_154:
+	movb	[r15+#0x10],rl4
+_155:
+	movb	[r15+#0x11],rl4
+_156:
+	movb	[r15+#0x12],rl4
+_157:
+	movb	[r15+#0x13],rl4
+_158:
+	movb	rh2,#0x1
+_159:
+	movb	[r15+#0x14],rh2
+_160:
+	movb	[r15+#0x15],rl4
+_161:
+	movb	[r15+#0x16],rl4
+_162:
+	movb	[r15+#0x17],rl4
+_163:
+	movb	rl2,[r15+#0x1e]
+_164:
+	movw	r4,r7
 	movw	r5,r8
-	movw	r11,r7
-	movw	r12,r8
-	call	_IO_ADC_Get
-_128:
-
-; src/main.c	   204                  
-; src/main.c	   205                  /* calculate pct travel */
-; src/main.c	   206                  if (adc_fresh_apps_1 && adc_fresh_apps_2) {
-; src/main.c	   207                  	pct_travel_apps_1 = VoltageToPctTravelApps1(adc_val_apps_1);
-; src/main.c	   208                  	pct_travel_apps_2 = VoltageToPctTravelApps2(adc_val_apps_2);
-; src/main.c	   209                  }
-; src/main.c	   210                  
-; src/main.c	   211                  /* get the difference between the two */
-; src/main.c	   212                  diff = pct_travel_apps_2 - pct_travel_apps_1;
-; src/main.c	   213                  diff = Abs(diff);
-; src/main.c	   214                  
-; src/main.c	   215                  /* if the difference is above the implausibility requirement */
-; src/main.c	   216                  if (diff >= APPS_MIN_IMPLAUSIBLE_DEVIATION) {
+	call	_IO_CAN_WriteFIFO
+_165:
 	jmp	_8
 _7:
 
-; src/main.c	   217                  	IO_RTC_StartTime(&implausibility_timestamp);
-; src/main.c	   218                  	
-; src/main.c	   219                  	implausible_deviation = TRUE;
-; src/main.c	   220                  	
-; src/main.c	   221                  	/* check if the implausiblity persists for 100 msec */
-; src/main.c	   222                  	while (IO_RTC_GetTimeUS(implausibility_timestamp) 
-; src/main.c	   223                  			< IMPLAUSIBILITY_PERSISTENCE_PERIOD_US
-; src/main.c	   224                  			&& implausible_deviation) {
-; src/main.c	   225                  		
-; src/main.c	   226                          IO_ADC_Get(IO_PIN_APPS_1, &adc_val_apps_1, &adc_fresh_apps_1);
-; src/main.c	   227                          IO_ADC_Get(IO_PIN_APPS_2, &adc_val_apps_2, &adc_fresh_apps_2);
-; src/main.c	   228                          
-; src/main.c	   229                          if (adc_fresh_apps_1 && adc_fresh_apps_2) {
-; src/main.c	   230                          	pct_travel_apps_1 = VoltageToPctTravelApps1(adc_val_apps_1);
-; src/main.c	   231                          	pct_travel_apps_2 = VoltageToPctTravelApps2(adc_val_apps_2);
-; src/main.c	   232                          }
-; src/main.c	   233                          
-; src/main.c	   234                          diff = pct_travel_apps_2 - pct_travel_apps_1;
-; src/main.c	   235                          diff = Abs(diff);
-; src/main.c	   236                          
-; src/main.c	   237                          if (diff < APPS_MIN_IMPLAUSIBLE_DEVIATION) {
-; src/main.c	   238                          	implausible_deviation = FALSE;
-; src/main.c	   239                          }
-; src/main.c	   240                  	}
-; src/main.c	   241                  	
-; src/main.c	   242                  	if (implausible_deviation) {
-; src/main.c	   243                  		torque_to_send = 0;
-; src/main.c	   244                  	} else {
-; src/main.c	   245                  		avg_pct_travel = ((pct_travel_apps_2 + pct_travel_apps_1) / 2);
-; src/main.c	   246                  		torque_to_send = VoltageToTorque(avg_pct_travel);
-; src/main.c	   247                  	}
-; src/main.c	   248                  }
-; src/main.c	   249                    /*
-; src/main.c	   250                     * TODO: send Torque over CAN
-; src/main.c	   251                     */
-; src/main.c	   252  
-; src/main.c	   253          	} else {
-; src/main.c	   254          		/* If the RTD switch has been turned off, the RTD procedure
-; src/main.c	   255          		 * has to be repeated
-; src/main.c	   256          		 */
-; src/main.c	   257          		ready_to_drive = FALSE;
+; src/main.c	   313  
+; src/main.c	   314          	} else {
+; src/main.c	   315          		/* If the RTD switch has been turned off, the RTD procedure
+; src/main.c	   316          		 * has to be repeated
+; src/main.c	   317          		 */
+; src/main.c	   318          		ready_to_drive = FALSE;
 	movb	rh4,#0x0
 _6:
-	movb	[r15+#0x14],rh4
-_8:
+	movb	[r15+#0x26],rh4
 _5:
 _4:
+_8:
 
-; src/main.c	   258          	}
-; src/main.c	   259          }
-; src/main.c	   260  
-; src/main.c	   261  
-; src/main.c	   262          /* Task end function for IO Driver
-; src/main.c	   263           * This function needs to be called at
-; src/main.c	   264           * the end of every SW cycle
-; src/main.c	   265           */
-; src/main.c	   266          IO_Driver_TaskEnd();
+; src/main.c	   319          	}
+; src/main.c	   320          }
+; src/main.c	   321  
+; src/main.c	   322  
+; src/main.c	   323          /* Task end function for IO Driver
+; src/main.c	   324           * This function needs to be called at
+; src/main.c	   325           * the end of every SW cycle
+; src/main.c	   326           */
+; src/main.c	   327          IO_Driver_TaskEnd();
 	call	_IO_Driver_TaskEnd
 
-; src/main.c	   267          /* wait until the cycle time is over */
-; src/main.c	   268  
-; src/main.c	   269          /* NOTE:
-; src/main.c	   270           * If the code between the TaskBegin and TaskEnd doesn't take
-; src/main.c	   271           * 10 milliseconds, this code delays the end of the cycle so it lasts
-; src/main.c	   272           * 10 milliseconds
-; src/main.c	   273           */
-; src/main.c	   274          while (IO_RTC_GetTimeUS(timestamp) < MsToUs(10));
+; src/main.c	   328          /* wait until the cycle time is over */
+; src/main.c	   329  
+; src/main.c	   330          /* NOTE:
+; src/main.c	   331           * If the code between the TaskBegin and TaskEnd doesn't take
+; src/main.c	   332           * 10 milliseconds, this code delays the end of the cycle so it lasts
+; src/main.c	   333           * 10 milliseconds
+; src/main.c	   334           */
+; src/main.c	   335          while (IO_RTC_GetTimeUS(timestamp) < MsToUs(10));
 _9:
 	movw	r3,[r15+#0x2]
 	movw	r2,[r15+#0x0]
 	call	_IO_RTC_GetTimeUS
-_129:
+_166:
 	cmpw	r2,#0x2710
 	subcw	r3,#0x0
 	jmp+	cc_ult,_9
-_130:
+_167:
 	jmp	_2
 _30:
 	; End of function
@@ -517,7 +676,7 @@ _appl_db	.label	word
 	.db	0x0
 	.db	0x0
 	.db	0x0
-	.dl	0xde1ac7e6
+	.dl	0xba7ac7e6
 	.db	0x0
 	.db	0x0
 	.db	0x0
@@ -621,22 +780,47 @@ _appl_db	.label	word
 	.db	0x0
 	; End of section
 
+huge__1_ini	.section	huge, romdata, new
+_$1$ini	.label	word
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	.db	0x0
+	; End of section
+
+	.calls	'_main','__cphnw'
 	.calls	'__INDIRECT__','__cstart'
 	.calls	'_main','_IO_Driver_Init'
 	.calls	'_main','_IO_POWER_Set'
 	.calls	'_main','_IO_ADC_ChannelInit'
 	.calls	'_main','_IO_DI_Init'
+	.calls	'_main','_IO_CAN_Init'
+	.calls	'_main','_IO_CAN_ConfigFIFO'
 	.calls	'_main','_IO_RTC_StartTime'
 	.calls	'_main','_IO_Driver_TaskBegin'
 	.calls	'_main','_IO_DI_Get'
 	.calls	'_main','_IO_ADC_Get'
+	.calls	'_main','_IO_CAN_WriteFIFO'
 	.calls	'_main','_IO_Driver_TaskEnd'
 	.calls	'_main','_IO_RTC_GetTimeUS'
-	.calls	'_main','',4,22
+	.calls	'_main','',4,40
 	.extern	_IO_POWER_Set : far
 	.extern	_IO_Driver_Init : far
 	.extern	_IO_Driver_TaskBegin : far
 	.extern	_IO_Driver_TaskEnd : far
+	.extern	_IO_CAN_Init : far
+	.extern	_IO_CAN_ConfigFIFO : far
+	.extern	_IO_CAN_WriteFIFO : far
 	.extern	_IO_RTC_StartTime : far
 	.extern	_IO_RTC_GetTimeUS : far
 	.extern	_IO_ADC_ChannelInit : far
@@ -645,10 +829,11 @@ _appl_db	.label	word
 	.extern	_IO_DI_Get : far
 	.extern	__cstart : far
 	.extern	__lc_ub_user_stack : nearbyte
+	.extern	__cphnw : far
 	.extern	__INDIRECT__ : far
 	.debug		.debug_info
 _23:
-	.dl	2598
+	.dl	3075
 	.dw	3
 	.dl	_24
 	.db	4
@@ -703,42 +888,116 @@ _36:
 	.db	'IO_Driver_TaskEnd',0,2,182,4,15,6
 	.dl	224
 	.db	1,1,1,1,3
-	.db	'IO_RTC_StartTime',0,3,118,15,6
+	.db	'IO_CAN_Init',0,3,183,3,15,6
 	.dl	224
-	.db	1,1,1,1
+	.db	1,1,1,1,4
+	.db	'channel',0,3,183,3,35
+	.dl	267
+	.db	4
+	.db	'baudrate',0,3,184,3,35
+	.dl	224
+	.db	4
+	.db	'tseg1',0,3,185,3,35
+	.dl	267
+	.db	4
+	.db	'tseg2',0,3,186,3,35
+	.dl	267
+	.db	4
+	.db	'sjw',0,3,187,3,35
+	.dl	267
+	.db	0,3
+	.db	'IO_CAN_ConfigFIFO',0,3,137,5,15,6
+	.dl	224
+	.db	1,1,1,1,8,5
+	.dl	267
+	.db	4
+	.db	'handle',0,3,137,5,49
+	.dl	711
+	.db	4
+	.db	'channel',0,3,138,5,41
+	.dl	267
+	.db	4
+	.db	'size',0,3,139,5,41
+	.dl	267
+	.db	4
+	.db	'mode',0,3,140,5,41
+	.dl	267
+	.db	4
+	.db	'id_format',0,3,141,5,41
+	.dl	267
 _33:
 	.db	2
-	.db	'unsigned long int',0,4,7,8,5
-	.dl	604
+	.db	'unsigned long int',0,4,7,4
+	.db	'id',0,3,142,5,41
+	.dl	797
 	.db	4
-	.db	'timestamp',0,3,118,49
-	.dl	625
+	.db	'ac_mask',0,3,143,5,41
+	.dl	797
 	.db	0,3
-	.db	'IO_RTC_GetTimeUS',0,3,143,1,9,6
-	.dl	604
-	.db	1,1,1,1,4
-	.db	'timestamp',0,3,143,1,35
-	.dl	604
-	.db	0,3
-	.db	'IO_ADC_ChannelInit',0,4,157,2,14,6
+	.db	'IO_CAN_WriteFIFO',0,3,208,5,15,6
 	.dl	224
 	.db	1,1,1,1,4
-	.db	'adc_channel',0,4,157,2,41
-	.dl	267
-	.db	4
-	.db	'type',0,4,158,2,41
-	.dl	267
-	.db	4
-	.db	'range',0,4,159,2,41
-	.dl	267
-	.db	4
-	.db	'pupd',0,4,160,2,41
-	.dl	267
-	.db	4
-	.db	'sensor_supply',0,4,161,2,41
+	.db	'handle',0,3,208,5,40
 	.dl	267
 	.db	5
-	.db	'_io_adc_safety_conf',0,4,159,1,16,4,6
+	.db	'_io_can_data_frame',0,3,250,2,16,14,10,8
+	.dl	267
+	.db	11,7,0,6
+	.db	'data',0,8
+	.dl	920
+	.db	2,35,0,6
+	.db	'length',0,1
+	.dl	267
+	.db	2,35,8,6
+	.db	'id_format',0,1
+	.dl	267
+	.db	2,35,9,6
+	.db	'id',0,4
+	.dl	797
+	.db	2,35,10,0,7
+	.dl	895
+	.db	8,5
+	.dl	991
+	.db	4
+	.db	'data',0,3,209,5,65
+	.dl	996
+	.db	4
+	.db	'tx_length',0,3,210,5,40
+	.dl	267
+	.db	0,3
+	.db	'IO_RTC_StartTime',0,4,118,15,6
+	.dl	224
+	.db	1,1,1,1,8,5
+	.dl	797
+	.db	4
+	.db	'timestamp',0,4,118,49
+	.dl	1066
+	.db	0,3
+	.db	'IO_RTC_GetTimeUS',0,4,143,1,9,6
+	.dl	797
+	.db	1,1,1,1,4
+	.db	'timestamp',0,4,143,1,35
+	.dl	797
+	.db	0,3
+	.db	'IO_ADC_ChannelInit',0,5,157,2,14,6
+	.dl	224
+	.db	1,1,1,1,4
+	.db	'adc_channel',0,5,157,2,41
+	.dl	267
+	.db	4
+	.db	'type',0,5,158,2,41
+	.dl	267
+	.db	4
+	.db	'range',0,5,159,2,41
+	.dl	267
+	.db	4
+	.db	'pupd',0,5,160,2,41
+	.dl	267
+	.db	4
+	.db	'sensor_supply',0,5,161,2,41
+	.dl	267
+	.db	5
+	.db	'_io_adc_safety_conf',0,5,159,1,16,4,6
 	.db	'adc_val_upper',0,1
 	.dl	267
 	.db	2,35,0,6
@@ -748,83 +1007,87 @@ _33:
 	.db	'redundant_channel',0,1
 	.dl	267
 	.db	2,35,2,0,7
-	.dl	821
+	.dl	1262
 	.db	8,5
-	.dl	921
+	.dl	1362
 	.db	4
-	.db	'safety_conf',0,4,162,2,67
-	.dl	926
+	.db	'safety_conf',0,5,162,2,67
+	.dl	1367
 	.db	0,3
-	.db	'IO_ADC_Get',0,4,132,3,14,6
+	.db	'IO_ADC_Get',0,5,132,3,14,6
 	.dl	224
 	.db	1,1,1,1,4
-	.db	'adc_channel',0,4,132,3,33
+	.db	'adc_channel',0,5,132,3,33
 	.dl	267
 	.db	8,5
 	.dl	224
 	.db	4
-	.db	'adc_value',0,4,133,3,41
-	.dl	1000
+	.db	'adc_value',0,5,133,3,41
+	.dl	1441
 	.db	8,5
 	.dl	267
 	.db	4
-	.db	'fresh',0,4,134,3,39
-	.dl	1025
+	.db	'fresh',0,5,134,3,39
+	.dl	1466
 	.db	0,3
-	.db	'IO_DI_Init',0,5,119,14,6
+	.db	'IO_DI_Init',0,6,119,14,6
 	.dl	224
 	.db	1,1,1,1,4
-	.db	'di_channel',0,5,119,33
+	.db	'di_channel',0,6,119,33
 	.dl	267
 	.db	4
-	.db	'mode',0,5,120,33
+	.db	'mode',0,6,120,33
 	.dl	267
 	.db	0,3
-	.db	'IO_DI_Get',0,5,220,1,14,6
+	.db	'IO_DI_Get',0,6,220,1,14,6
 	.dl	224
 	.db	1,1,1,1,4
-	.db	'di_channel',0,5,220,1,32
+	.db	'di_channel',0,6,220,1,32
 	.dl	267
 	.db	4
-	.db	'di_value',0,5,221,1,38
-	.dl	1025
-	.db	0,10
-	.db	'_INDIRECT__',0,6,1,1,6,1,1,1,11
+	.db	'di_value',0,6,221,1,38
+	.dl	1466
+	.db	0
+_51:
+	.db	10,14
+	.dl	895
+	.db	11,0,0,12
+	.db	'_INDIRECT__',0,7,1,1,6,1,1,1,13
 	.db	'void',0,8,5
-	.dl	1187
-	.db	12
-	.db	'__prof_adm',0,6,1,1
-	.dl	1193
-	.db	12
-	.db	'__codeptr',0,6,1,1
-	.dl	604
-	.db	12
-	.db	'ubyte1',0,7,21,29
+	.dl	1637
+	.db	14
+	.db	'__prof_adm',0,7,1,1
+	.dl	1643
+	.db	14
+	.db	'__codeptr',0,7,1,1
+	.dl	797
+	.db	14
+	.db	'ubyte1',0,8,21,29
 	.dl	267
-	.db	12
-	.db	'ubyte2',0,7,22,29
+	.db	14
+	.db	'ubyte2',0,8,22,29
 	.dl	224
-	.db	12
-	.db	'ubyte4',0,7,23,29
-	.dl	604
-	.db	12
-	.db	'bool',0,7,31,29
+	.db	14
+	.db	'ubyte4',0,8,23,29
+	.dl	797
+	.db	14
+	.db	'bool',0,8,31,29
 	.dl	267
-	.db	12
-	.db	'IO_ErrorType',0,8,153,1,17
+	.db	14
+	.db	'IO_ErrorType',0,9,153,1,17
 	.dl	224
-	.db	12
+	.db	14
 	.db	'IO_DRIVER_SAFETY_CONF',0,2,138,3,3
 	.dl	341
-	.db	13
-	.db	'_io_driver_reset_reason',0,2,162,3,14,1,14
-	.db	'IO_DRIVER_RESET_REASON_PORST',0,0,14
-	.db	'IO_DRIVER_RESET_REASON_WDT',0,1,14
-	.db	'IO_DRIVER_RESET_REASON_TRAP',0,2,14
-	.db	'IO_DRIVER_RESET_REASON_SW',0,3,14
-	.db	'IO_DRIVER_RESET_REASON_UNKNOWN',0,4,0,12
+	.db	15
+	.db	'_io_driver_reset_reason',0,2,162,3,14,1,16
+	.db	'IO_DRIVER_RESET_REASON_PORST',0,0,16
+	.db	'IO_DRIVER_RESET_REASON_WDT',0,1,16
+	.db	'IO_DRIVER_RESET_REASON_TRAP',0,2,16
+	.db	'IO_DRIVER_RESET_REASON_SW',0,3,16
+	.db	'IO_DRIVER_RESET_REASON_UNKNOWN',0,4,0,14
 	.db	'IO_DRIVER_RESET_REASON',0,2,169,3,3
-	.dl	1347
+	.dl	1797
 	.db	5
 	.db	'_io_driver_trap_info',0,2,174,3,16,10,6
 	.db	'trap_id',0,2
@@ -837,117 +1100,120 @@ _33:
 	.dl	224
 	.db	2,35,4,6
 	.db	'fault_location',0,4
-	.dl	604
-	.db	2,35,6,0,12
+	.dl	797
+	.db	2,35,6,0,14
 	.db	'IO_DRIVER_TRAP_INFO',0,2,197,3,3
-	.dl	1561
-	.db	12
-	.db	'IO_ADC_SAFETY_CONF',0,4,169,1,3
-	.dl	821
+	.dl	2011
+	.db	14
+	.db	'IO_CAN_DATA_FRAME',0,3,128,3,3
+	.dl	895
+	.db	14
+	.db	'IO_ADC_SAFETY_CONF',0,5,169,1,3
+	.dl	1262
 	.db	5
-	.db	'bl_t_date_',0,9,122,16,4,6
+	.db	'bl_t_date_',0,10,122,16,4,6
 	.db	'date',0,4
-	.dl	604
-	.db	2,35,0,0,12
-	.db	'BL_T_DATE',0,9,131,1,3
-	.dl	1726
+	.dl	797
+	.db	2,35,0,0,14
+	.db	'BL_T_DATE',0,10,131,1,3
+	.dl	2203
 	.db	5
-	.db	'bl_t_can_id_',0,9,138,1,16,8,6
+	.db	'bl_t_can_id_',0,10,138,1,16,8,6
 	.db	'extended',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,0,6
 	.db	'ID',0,4
-	.dl	604
-	.db	2,35,4,0,12
-	.db	'BL_T_CAN_ID',0,9,146,1,3
-	.dl	1776
+	.dl	797
+	.db	2,35,4,0,14
+	.db	'BL_T_CAN_ID',0,10,146,1,3
+	.dl	2253
 	.db	5
-	.db	'bl_apdb_',0,9,155,1,16,128,1,6
+	.db	'bl_apdb_',0,10,155,1,16,128,1,6
 	.db	'APDBVersion',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,0,6
 	.db	'FlashDate',0,4
-	.dl	1726
+	.dl	2203
 	.db	2,35,4,6
 	.db	'BuildDate',0,4
-	.dl	1726
+	.dl	2203
 	.db	2,35,8,6
 	.db	'NodeType',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,12,6
 	.db	'CRCStartAddress',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,16,6
 	.db	'CodeSize',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,20,6
 	.db	'LegacyApplicationCRC',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,24,6
 	.db	'ApplicationCRC',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,28,6
 	.db	'NodeNumber',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,32,6
 	.db	'CRCSeed',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,36,6
 	.db	'Flags',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,40,6
 	.db	'Hook1',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,44,6
 	.db	'Hook2',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,48,6
 	.db	'Hook3',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,52,6
 	.db	'MainAddress',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,56,6
 	.db	'CANDownloadID',0,8
-	.dl	1776
+	.dl	2253
 	.db	2,35,60,6
 	.db	'CANUploadID',0,8
-	.dl	1776
+	.dl	2253
 	.db	2,35,68,6
 	.db	'LegacyHeaderCRC',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,76,6
 	.db	'ApplicationVersion',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,80,6
 	.db	'CANBaudrate',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,84,6
 	.db	'CANChannel',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,88,6
 	.db	'Password',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,92,6
 	.db	'MagicSeed',0,4
-	.dl	604
-	.db	2,35,96,15,4
+	.dl	797
+	.db	2,35,96,10,4
 	.dl	267
-	.db	16,3,0,6
+	.db	11,3,0,6
 	.db	'TargetIPAddress',0,4
-	.dl	2330
+	.dl	2807
 	.db	2,35,100,6
 	.db	'SubnetMask',0,4
-	.dl	2330
+	.dl	2807
 	.db	2,35,104,6
 	.db	'DLMulticastIPAddress',0,4
-	.dl	2330
+	.dl	2807
 	.db	2,35,108,6
 	.db	'DebugKey',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,112,6
 	.db	'ABRDTimeout',0,4
-	.dl	604
+	.dl	797
 	.db	2,35,116,6
 	.db	'ManufacturerID',0,1
 	.dl	267
@@ -959,20 +1225,20 @@ _33:
 	.dl	224
 	.db	2,35,122,6
 	.db	'HeaderCRC',0,4
-	.dl	604
-	.db	2,35,124,0,12
-	.db	'BL_APDB',0,9,227,1,3
-	.dl	1847
+	.dl	797
+	.db	2,35,124,0,14
+	.db	'BL_APDB',0,10,227,1,3
+	.dl	2324
 	.db	17
-	.dl	1847
-_50:
+	.dl	2324
+_53:
 	.db	7
-	.dl	2555
+	.dl	3032
 	.db	18
 	.dl	267
 	.db	19,0,20
-	.db	'_lc_ub_user_stack',0,6,1,1,2
-	.dl	2565
+	.db	'_lc_ub_user_stack',0,7,1,1,2
+	.dl	3042
 	.db	1,1,0
 	; End of section
 
@@ -981,23 +1247,24 @@ _24:
 	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,16,6,0,0,2,36,0,3,8,11,15,62,15,0,0,3,46,1,3,8,58,15,59,15,57,15
 	.db	51,15,73,19,54,15,39,12,63,12,60,12,0,0,4,5,0,3,8,58,15,59,15,57,15,73,19,0,0,5,19,1,3,8,58,15,59,15,57
 	.db	15,11,15,0,0,6,13,0,3,8,11,15,73,19,56,9,0,0,7,38,0,73,19,0,0,8,15,0,51,15,73,19,0,0,9,46,0,3,8,58,15
-	.db	59,15,57,15,51,15,73,19,54,15,39,12,63,12,60,12,0,0,10,46,0,3,8,58,15,59,15,57,15,51,15,54,15,63,12,60
-	.db	12,0,0,11,59,0,3,8,0,0,12,22,0,3,8,58,15,59,15,57,15,73,19,0,0,13,4,1,3,8,58,15,59,15,57,15,11,15,0,0
-	.db	14,40,0,3,8,28,13,0,0,15,1,1,11,15,73,19,0,0,16,33,0,47,15,0,0,17,53,0,73,19,0,0,18,1,1,73,19,0,0,19,33
+	.db	59,15,57,15,51,15,73,19,54,15,39,12,63,12,60,12,0,0,10,1,1,11,15,73,19,0,0,11,33,0,47,15,0,0,12,46,0,3
+	.db	8,58,15,59,15,57,15,51,15,54,15,63,12,60,12,0,0,13,59,0,3,8,0,0,14,22,0,3,8,58,15,59,15,57,15,73,19,0
+	.db	0,15,4,1,3,8,58,15,59,15,57,15,11,15,0,0,16,40,0,3,8,28,13,0,0,17,53,0,73,19,0,0,18,1,1,73,19,0,0,19,33
 	.db	0,0,0,20,52,0,3,8,58,15,59,15,57,15,51,15,73,19,63,12,60,12,0,0,0
 	; End of section
 
 	.debug		.debug_line
 _25:
-	.dl	_79-_78
-_78:
+	.dl	_83-_82
+_82:
 	.dw	3
-	.dl	_81-_80
-_80:
+	.dl	_85-_84
+_84:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1
 	.db	'..\\..\\..\\Environment\\inc',0,0
 	.db	'IO_POWER.h',0,1,0,0
 	.db	'IO_Driver.h',0,1,0,0
+	.db	'IO_CAN.h',0,1,0,0
 	.db	'IO_RTC.h',0,1,0,0
 	.db	'IO_ADC.h',0,1,0,0
 	.db	'IO_DIO.h',0,1,0,0
@@ -1005,14 +1272,14 @@ _80:
 	.db	'ptypes_xe167.h',0,1,0,0
 	.db	'IO_Constants.h',0,1,0,0
 	.db	'APDB.h',0,1,0,0,0
-_81:
-_79:
+_85:
+_83:
 	; End of section
 
 	.debug		.debug_pubnames
-	.dl	221
+	.dl	280
 	.dw	2
-	.dl	_23,2602,240
+	.dl	_23,3079,240
 	.db	'IO_POWER_Set',0
 	.dl	312
 	.db	'IO_Driver_Init',0
@@ -1021,25 +1288,31 @@ _79:
 	.dl	542
 	.db	'IO_Driver_TaskEnd',0
 	.dl	574
+	.db	'IO_CAN_Init',0
+	.dl	679
+	.db	'IO_CAN_ConfigFIFO',0
+	.dl	848
+	.db	'IO_CAN_WriteFIFO',0
+	.dl	1036
 	.db	'IO_RTC_StartTime',0
-	.dl	650
+	.dl	1091
 	.db	'IO_RTC_GetTimeUS',0
-	.dl	701
+	.dl	1142
 	.db	'IO_ADC_ChannelInit',0
-	.dl	954
+	.dl	1395
 	.db	'IO_ADC_Get',0
-	.dl	1047
+	.dl	1488
 	.db	'IO_DI_Init',0
-	.dl	1104
+	.dl	1545
 	.db	'IO_DI_Get',0
-	.dl	1167
+	.dl	1617
 	.db	'_INDIRECT__',0
 	.dl	0
 	; End of section
 
 	.debug		.debug_info, cluster 'main'
 _26:
-	.dl	576
+	.dl	632
 	.dw	3
 	.dl	_27
 	.db	4,1
@@ -1051,47 +1324,53 @@ _26:
 	.db	2
 	.dl	_22
 	.db	3
-	.db	'main',0,1,88,6,6,1,1,1
+	.db	'main',0,1,125,6,6,1,1,1
 	.dl	_11,_30,_10
 	.db	12,19,146,176,2,0,64,36,146,161,2,0,33,4
 	.dl	_11,_30
 	.db	5
-	.db	'timestamp',0,1,90,12,2
+	.db	'timestamp',0,1,127,12,2
 	.dl	_33,_34
 	.db	4
 	.dl	_35,_30
 	.db	5
-	.db	'adc_fresh_apps_1',0,1,108,10,2
+	.db	'adc_fresh_apps_1',0,1,145,1,10,2
 	.dl	_36,_37
 	.db	5
-	.db	'adc_val_apps_1',0,1,109,12,2
+	.db	'adc_val_apps_1',0,1,146,1,12,2
 	.dl	_38,_39
 	.db	4
 	.dl	_40,_30
 	.db	5
-	.db	'adc_fresh_apps_2',0,1,118,10,2
+	.db	'adc_fresh_apps_2',0,1,155,1,10,2
 	.dl	_36,_41
 	.db	5
-	.db	'adc_val_apps_2',0,1,119,12,2
+	.db	'adc_val_apps_2',0,1,156,1,12,2
 	.dl	_38,_42
 	.db	4
 	.dl	_43,_30
 	.db	5
-	.db	'adc_fresh_bse',0,1,129,1,10,2
+	.db	'adc_fresh_bse',0,1,165,1,10,2
 	.dl	_36,_44
 	.db	5
-	.db	'adc_val_bse',0,1,130,1,12,2
+	.db	'adc_val_bse',0,1,166,1,12,2
 	.dl	_38,_45
 	.db	4
 	.dl	_46,_30
 	.db	5
-	.db	'di_val_rtd',0,1,139,1,10,2
+	.db	'di_val_rtd',0,1,175,1,10,2
 	.dl	_36,_47
 	.db	4
 	.dl	_48,_30
 	.db	5
-	.db	'ready_to_drive',0,1,143,1,10,2
+	.db	'ready_to_drive',0,1,179,1,10,2
 	.dl	_36,_49
+	.db	5
+	.db	'handle_fifo_w',0,1,190,1,12,2
+	.dl	_36,_50
+	.db	5
+	.db	'can_frame',0,1,192,1,23,2
+	.dl	_51,_52
 	.db	0,0,0,0,0,0,0,0
 	; End of section
 
@@ -1104,38 +1383,28 @@ _27:
 
 	.debug		.debug_line, cluster 'main'
 _28:
-	.dl	_83-_82
-_82:
+	.dl	_87-_86
+_86:
 	.dw	3
-	.dl	_85-_84
-_84:
+	.dl	_89-_88
+_88:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
 	.db	'src/main.c',0,0,0,0,0
-_85:
+_89:
 	.db	5,6,7,0,5,2
 	.dl	_11
-	.db	3,215,0,1,5,20,9
-	.dw	_51-_11
+	.db	3,252,0,1,5,20,9
+	.dw	_54-_11
 	.db	3,10,1,5,19,9
-	.dw	_86-_51
+	.dw	_90-_54
 	.db	3,7,1,5,43,9
-	.dw	_87-_86
-	.db	1,5,25,9
-	.dw	_35-_87
-	.db	3,5,1,9
-	.dw	_88-_35
-	.db	3,1,1,9
-	.dw	_89-_88
-	.db	3,1,1,9
-	.dw	_90-_89
-	.db	3,1,1,9
 	.dw	_91-_90
-	.db	3,1,1,9
-	.dw	_92-_91
-	.db	3,1,1,9
-	.dw	_40-_92
+	.db	1,5,25,9
+	.dw	_35-_91
 	.db	3,5,1,9
-	.dw	_93-_40
+	.dw	_92-_35
+	.db	3,1,1,9
+	.dw	_93-_92
 	.db	3,1,1,9
 	.dw	_94-_93
 	.db	3,1,1,9
@@ -1143,11 +1412,11 @@ _85:
 	.db	3,1,1,9
 	.dw	_96-_95
 	.db	3,1,1,9
-	.dw	_97-_96
+	.dw	_40-_96
+	.db	3,5,1,9
+	.dw	_97-_40
 	.db	3,1,1,9
-	.dw	_43-_97
-	.db	3,6,1,9
-	.dw	_98-_43
+	.dw	_98-_97
 	.db	3,1,1,9
 	.dw	_99-_98
 	.db	3,1,1,9
@@ -1155,85 +1424,161 @@ _85:
 	.db	3,1,1,9
 	.dw	_101-_100
 	.db	3,1,1,9
-	.dw	_102-_101
-	.db	3,1,1,5,17,9
-	.dw	_46-_102
-	.db	3,4,1,5,11,9
-	.dw	_103-_46
-	.db	3,1,1,5,25,9
-	.dw	_48-_103
-	.db	3,2,1,5,27,9
-	.dw	_73-_48
-	.db	3,22,1,5,33,9
-	.dw	_104-_73
-	.db	3,17,1,5,48,9
+	.dw	_43-_101
+	.db	3,5,1,9
+	.dw	_102-_43
+	.db	3,1,1,9
+	.dw	_103-_102
+	.db	3,1,1,9
+	.dw	_104-_103
+	.db	3,1,1,9
 	.dw	_105-_104
-	.db	3,1,1,5,34,9
+	.db	3,1,1,9
 	.dw	_106-_105
-	.db	1,5,61,9
-	.dw	_107-_106
-	.db	3,19,1,5,44,9
-	.dw	_108-_107
-	.db	1,5,61,9
+	.db	3,1,1,5,17,9
+	.dw	_46-_106
+	.db	3,4,1,5,11,9
+	.dw	_107-_46
+	.db	3,1,1,5,25,9
+	.dw	_48-_107
+	.db	3,2,1,5,23,9
+	.dw	_77-_48
+	.db	3,13,1,5,38,9
+	.dw	_108-_77
+	.db	1,5,23,9
 	.dw	_109-_108
-	.db	3,1,1,5,44,9
+	.db	1,5,18,9
 	.dw	_110-_109
-	.db	1,5,27,9
-	.dw	_2-_110
-	.db	3,90,1,5,28,9
-	.dw	_111-_2
-	.db	3,5,1,5,14,9
+	.db	3,2,1,9
+	.dw	_111-_110
+	.db	3,1,1,9
 	.dw	_112-_111
-	.db	3,10,1,5,20,9
+	.db	3,1,1,9
 	.dw	_113-_112
-	.db	3,2,1,5,33,9
+	.db	3,1,1,9
 	.dw	_114-_113
-	.db	1,5,21,9
+	.db	3,1,1,5,25,9
 	.dw	_115-_114
-	.db	3,1,1,5,48,9
+	.db	3,2,1,5,12,9
 	.dw	_116-_115
-	.db	1,5,14,9
+	.db	3,1,1,9
 	.dw	_117-_116
-	.db	3,5,1,5,36,9
+	.db	3,1,1,9
 	.dw	_118-_117
-	.db	1,5,48,9
+	.db	3,1,1,9
 	.dw	_119-_118
-	.db	1,5,26,7,9
+	.db	3,1,1,9
 	.dw	_120-_119
-	.db	3,1,1,5,68,9
-	.dw	_76-_120
-	.db	3,127,1,5,20,9
-	.dw	_3-_76
-	.db	3,10,1,5,33,9
-	.dw	_121-_3
-	.db	1,5,14,9
+	.db	3,1,1,9
+	.dw	_121-_120
+	.db	3,1,1,5,27,9
 	.dw	_122-_121
-	.db	3,2,1,5,10,9
+	.db	3,13,1,5,33,9
 	.dw	_123-_122
-	.db	1,5,28,9
+	.db	3,9,1,5,48,9
 	.dw	_124-_123
-	.db	3,2,1,5,61,9
+	.db	3,1,1,5,34,9
 	.dw	_125-_124
-	.db	1,5,28,9
+	.db	1,5,61,9
 	.dw	_126-_125
-	.db	3,1,1,5,61,9
+	.db	3,19,1,5,44,9
 	.dw	_127-_126
-	.db	1,5,17,9
+	.db	1,5,61,9
 	.dw	_128-_127
-	.db	3,13,1,5,26,9
-	.dw	_7-_128
-	.db	3,41,1,9
-	.dw	_4-_7
-	.db	3,9,1,5,33,9
-	.dw	_9-_4
-	.db	3,8,1,5,56,9
-	.dw	_129-_9
-	.db	1,5,13,9
+	.db	3,1,1,5,44,9
+	.dw	_129-_128
+	.db	1,5,46,9
 	.dw	_130-_129
-	.db	3,144,127,1,5,1,9
-	.dw	_30-_130
-	.db	3,242,0,0,1,1
-_83:
+	.db	3,63,1,5,27,9
+	.dw	_2-_130
+	.db	3,163,127,1,5,28,9
+	.dw	_131-_2
+	.db	3,5,1,5,14,9
+	.dw	_132-_131
+	.db	3,2,1,5,20,9
+	.dw	_133-_132
+	.db	3,2,1,5,33,9
+	.dw	_134-_133
+	.db	1,5,21,9
+	.dw	_135-_134
+	.db	3,1,1,5,48,9
+	.dw	_136-_135
+	.db	1,5,14,9
+	.dw	_137-_136
+	.db	3,5,1,5,36,9
+	.dw	_138-_137
+	.db	1,5,48,9
+	.dw	_139-_138
+	.db	1,5,26,7,9
+	.dw	_140-_139
+	.db	3,1,1,5,68,9
+	.dw	_80-_140
+	.db	3,127,1,5,20,9
+	.dw	_3-_80
+	.db	3,10,1,5,33,9
+	.dw	_141-_3
+	.db	1,5,14,9
+	.dw	_142-_141
+	.db	3,2,1,5,10,9
+	.dw	_143-_142
+	.db	1,5,28,9
+	.dw	_144-_143
+	.db	3,2,1,5,61,9
+	.dw	_145-_144
+	.db	1,5,28,9
+	.dw	_146-_145
+	.db	3,1,1,5,61,9
+	.dw	_147-_146
+	.db	1,5,32,9
+	.dw	_148-_147
+	.db	3,51,1,5,30,9
+	.dw	_149-_148
+	.db	1,5,39,9
+	.dw	_150-_149
+	.db	3,1,1,5,37,9
+	.dw	_151-_150
+	.db	1,5,36,9
+	.dw	_152-_151
+	.db	3,1,1,5,34,9
+	.dw	_153-_152
+	.db	1,5,35,9
+	.dw	_154-_153
+	.db	3,1,1,9
+	.dw	_155-_154
+	.db	3,1,1,9
+	.dw	_156-_155
+	.db	3,1,1,9
+	.dw	_157-_156
+	.db	3,1,1,5,37,9
+	.dw	_158-_157
+	.db	3,1,1,5,35,9
+	.dw	_159-_158
+	.db	1,9
+	.dw	_160-_159
+	.db	3,1,1,9
+	.dw	_161-_160
+	.db	3,1,1,9
+	.dw	_162-_161
+	.db	3,1,1,5,31,9
+	.dw	_163-_162
+	.db	3,2,1,5,57,9
+	.dw	_164-_163
+	.db	1,5,42,9
+	.dw	_165-_164
+	.db	3,116,1,5,26,9
+	.dw	_7-_165
+	.db	3,18,1,9
+	.dw	_8-_7
+	.db	3,9,1,5,33,9
+	.dw	_9-_8
+	.db	3,8,1,5,56,9
+	.dw	_166-_9
+	.db	1,5,13,9
+	.dw	_167-_166
+	.db	3,137,127,1,5,1,9
+	.dw	_30-_167
+	.db	3,249,0,0,1,1
+_87:
 	; End of section
 
 	.debug		.debug_ranges, cluster 'main'
@@ -1244,7 +1589,7 @@ _29:
 	.debug		.debug_pubnames
 	.dl	23
 	.dw	2
-	.dl	_26,580,233
+	.dl	_26,636,233
 	.db	'main',0
 	.dl	0
 	; End of section
@@ -1261,8 +1606,8 @@ _31:
 	.db	12,1,2
 	.dl	_22
 	.db	3
-	.db	'appl_db',0,6,57,6,5
-	.dl	_50
+	.db	'appl_db',0,7,94,6,5
+	.dl	_53
 	.db	1,5,3
 	.dl	_appl_db
 	.db	0
@@ -1278,40 +1623,50 @@ _32:
 _37:
 	.dl	-1,_11,0,_30-_11
 	.dw	2
-	.db	145,110
+	.db	145,92
 	.dl	0,0
 _41:
 	.dl	-1,_11,0,_30-_11
 	.dw	2
-	.db	145,114
+	.db	145,96
 	.dl	0,0
 _44:
 	.dl	-1,_11,0,_30-_11
 	.dw	2
-	.db	145,120
+	.db	145,102
 	.dl	0,0
 _39:
 	.dl	-1,_11,0,_30-_11
 	.dw	2
-	.db	145,112
+	.db	145,94
 	.dl	0,0
 _42:
 	.dl	-1,_11,0,_30-_11
 	.dw	2
-	.db	145,116
+	.db	145,98
 	.dl	0,0
 _45:
 	.dl	-1,_11,0,_30-_11
 	.dw	2
-	.db	145,118
+	.db	145,100
+	.dl	0,0
+_52:
+	.dl	-1,_11,0,_30-_11
+	.dw	2
+	.db	145,104
 	.dl	0,0
 _47:
 	.dl	-1,_11,0,_30-_11
 	.dw	2
-	.db	145,121
+	.db	145,103
+	.dl	0,0
+_50:
+	.dl	-1,_11,0,_30-_11
+	.dw	2
+	.db	145,118
 	.dl	0,0
 _10:
-	.dl	-1,_11,0,_51-_11
+	.dl	-1,_11,0,_54-_11
 	.dw	58
 	.db	127,0,18,10
 	.dw	16383
@@ -1339,88 +1694,88 @@ _14:
 	.db	146,180,2,0
 _15:
 	.db	22,19,62,36,33
-	.dl	_51-_11,_30-_11
-	.dw	60
+	.dl	_54-_11,_30-_11
+	.dw	61
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_52-_56
-_56:
-	.db	146,177,2,0,47
-	.dw	_55-_57
-_57:
-_52:
-	.db	18,49,46,40
-	.dw	_53-_58
-_58:
-	.db	146,178,2,0,47
 	.dw	_55-_59
 _59:
-_53:
-	.db	18,50,46,40
-	.dw	_54-_60
+	.db	146,177,2,0,47
+	.dw	_58-_60
 _60:
-	.db	146,179,2,0,47
-	.dw	_55-_61
-_61:
-_54:
-	.db	146,180,2,0
 _55:
-	.db	22,19,62,36,33,70,34
+	.db	18,49,46,40
+	.dw	_56-_61
+_61:
+	.db	146,178,2,0,47
+	.dw	_58-_62
+_62:
+_56:
+	.db	18,50,46,40
+	.dw	_57-_63
+_63:
+	.db	146,179,2,0,47
+	.dw	_58-_64
+_64:
+_57:
+	.db	146,180,2,0
+_58:
+	.db	22,19,62,36,33,9,40,34
 	.dl	0,0
 _49:
-	.dl	-1,_11,_72-_11,_2-_11
+	.dl	-1,_11,_75-_11,_76-_11
 	.dw	4
 	.db	84,157,8,8
-	.dl	_73-_11,_30-_11
+	.dl	_77-_11,_30-_11
 	.dw	2
 	.db	145,126
-	.dl	_74-_11,_75-_11
+	.dl	_78-_11,_79-_11
 	.dw	4
 	.db	84,157,8,8
-	.dl	_76-_11,_77-_11
+	.dl	_80-_11,_81-_11
 	.dw	4
 	.db	84,157,8,8
-	.dl	_6-_11,_4-_11
+	.dl	_6-_11,_8-_11
 	.dw	4
 	.db	84,157,8,8
 	.dl	0,0
 _34:
 	.dl	-1,_11,0,_30-_11
 	.dw	2
-	.db	145,106
+	.db	145,88
 	.dl	0,0
 	; End of section
 
 	.debug		.debug_frame
-_131:
+_168:
 	.dl	148
 	.dl	-1
 	.db	3,0,2,2,173,2,15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_132-_136
-_136:
+	.dw	_169-_173
+_173:
 	.db	146,177,2,0,47
-	.dw	_135-_137
-_137:
-_132:
+	.dw	_172-_174
+_174:
+_169:
 	.db	18,49,46,40
-	.dw	_133-_138
-_138:
+	.dw	_170-_175
+_175:
 	.db	146,178,2,0,47
-	.dw	_135-_139
-_139:
-_133:
+	.dw	_172-_176
+_176:
+_170:
 	.db	18,50,46,40
-	.dw	_134-_140
-_140:
+	.dw	_171-_177
+_177:
 	.db	146,179,2,0,47
-	.dw	_135-_141
-_141:
-_134:
+	.dw	_172-_178
+_178:
+_171:
 	.db	146,180,2,0
-_135:
+_172:
 	.db	22,19,62,36,33,48,34,16,173,2,12,19,146,176,2,0,64,36,146,161,2,0,33,8,15,22,161,2,5,19,146,161,2,4,8
 	.db	177,2,8,178,2,8,179,2,8,180,2,16,174,2,12,19,146,176,2,0,64,36,146,161,2,0,33,16,175,2,12,19,146,176,2
 	.db	0,64,36,146,161,2,2,33,8,176,2,0,0
@@ -1428,40 +1783,40 @@ _135:
 
 	.debug		.debug_frame, cluster 'main'
 	.dl	112
-	.dl	_131,_11,_30-_11
+	.dl	_168,_11,_30-_11
 	.db	8,162,2,8,166,2,8,167,2,8,168,2,8,169,2,8,170,2,8,171,2,8,172,2,4
-	.dl	(_51-_11)/2
-	.db	15,60,127,0,18,10
+	.dl	(_54-_11)/2
+	.db	15,61,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_62-_66
-_66:
-	.db	146,177,2,0,47
-	.dw	_65-_67
-_67:
-_62:
-	.db	18,49,46,40
-	.dw	_63-_68
-_68:
-	.db	146,178,2,0,47
 	.dw	_65-_69
 _69:
-_63:
-	.db	18,50,46,40
-	.dw	_64-_70
+	.db	146,177,2,0,47
+	.dw	_68-_70
 _70:
-	.db	146,179,2,0,47
-	.dw	_65-_71
-_71:
-_64:
-	.db	146,180,2,0
 _65:
-	.db	22,19,62,36,33,70,34,22,15,3,19,127,22,0,0,0
+	.db	18,49,46,40
+	.dw	_66-_71
+_71:
+	.db	146,178,2,0,47
+	.dw	_68-_72
+_72:
+_66:
+	.db	18,50,46,40
+	.dw	_67-_73
+_73:
+	.db	146,179,2,0,47
+	.dw	_68-_74
+_74:
+_67:
+	.db	146,180,2,0
+_68:
+	.db	22,19,62,36,33,9,40,34,22,15,3,19,127,40,0,0
 	; End of section
 
 
-; src/main.c	   275      }
-; src/main.c	   276  }
+; src/main.c	   336      }
+; src/main.c	   337  }
 
 	; Module end
 	.end
