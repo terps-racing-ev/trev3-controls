@@ -292,6 +292,11 @@ void main (void)
                 /* calculate the torque to be sent */
             	if (implausible_deviation) {
             		torque_to_send = 0;
+            		/* make it so that RTD has to be flicked off and on before 
+            		 * the car drives again
+            		 */
+            		ready_to_drive = FALSE;
+            		implausible_deviation = FALSE;
             	} else {
             		avg_pct_travel = ((pct_travel_apps_2 + pct_travel_apps_1) / 2);
             		torque_to_send = VoltageToTorque(avg_pct_travel);
