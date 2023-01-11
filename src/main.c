@@ -58,6 +58,10 @@
 
 #define IMPLAUSIBILITY_PERSISTENCE_PERIOD_US MsToUs(100ul)
 
+#define MAX_TRAVEL 100
+
+#define MIN_TRAVEL 0
+
 
 /**************************************************************************
  * Controls Math Macros
@@ -186,6 +190,8 @@ void main (void)
     int avg_pct_travel = 0;
     int torque_to_send = 0;
     
+    bool outside_max_or_min = FALSE;
+    
     /* CAN variables and initialization */
     ubyte1 handle_fifo_w;
     
@@ -289,14 +295,25 @@ void main (void)
 
                 }
             	
+                /* check if either APPS has a value outside the max or min
+                 * (short circuit)
+                 */
+                if (pct_travel_apps_2 > MAX_TRAVEL || pct_travel_apps_2 < MIN_TRAVEL
+                	|| pct_travel_apps_1 > MAX_TRAVEL || pct_travel_apps_1 < MIN_TRAVEL) {
+                	outside_max_or_min = TRUE;
+                }
+                
                 /* calculate the torque to be sent */
-            	if (implausible_deviation) {
+            	if (implausible_deviation || outside_max_or_min) {
             		torque_to_send = 0;
             		/* make it so that RTD has to be flicked off and on before 
             		 * the car drives again
             		 */
             		ready_to_drive = FALSE;
+            		
+            		/* reset the error checks */
             		implausible_deviation = FALSE;
+            		outside_max_or_min = FALSE;
             	} else {
             		avg_pct_travel = ((pct_travel_apps_2 + pct_travel_apps_1) / 2);
             		torque_to_send = VoltageToTorque(avg_pct_travel);
