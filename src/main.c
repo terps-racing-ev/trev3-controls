@@ -52,6 +52,7 @@
  ***************************************************************************/
 #define RTD_ON 0
 #define RTD_OFF 1
+
 // 1.5 s RTD sound time
 #define RTD_SOUND_DURATION MsToUs(1500ul)
 
@@ -95,7 +96,7 @@
  */
 #define FIFO_BUFFER_SIZE 20
 
-#define VCU_CONTROLS_CAN_ID 193
+#define VCU_CONTROLS_CAN_ID 0xC0
 #define VCU_DEBUG_CAN_ID 0xDB
 
 /**************************************************************************
@@ -166,7 +167,18 @@ void main (void)
     /* CAN variables and initialization */
     ubyte1 handle_fifo_w;
 
-    IO_CAN_DATA_FRAME can_frame[1] = {{{0}}};
+    IO_CAN_DATA_FRAME controls_can_frame;
+    controls_can_frame.id = VCU_CONTROLS_CAN_ID;
+    controls_can_frame.id_format = IO_CAN_STD_FRAME;
+    controls_can_frame.length = 8;
+
+    IO_CAN_DATA_FRAME debug_can_frame;
+    debug_can_frame.id = VCU_DEBUG_CAN_ID;
+    debug_can_frame.id_format = IO_CAN_STD_FRAME;
+    debug_can_frame.length = 8;
+    for (int i = 0; i < 8; i++) {
+        debug_can_frame.data[i] = 0;
+    }
 
     IO_CAN_Init( CAN_CHANNEL
                , BAUD_RATE
@@ -188,9 +200,9 @@ void main (void)
                 IO_DI_PU_10K );
 
 
-    /* rtd 1.5 second timer variable */
+    /* rtd variables */
     ubyte4 rtd_timestamp;
-
+    bool just_entered_sound_state = TRUE;
 
     /* VCU State */
     enum VCU_State current_state = NOT_READY;
@@ -221,6 +233,7 @@ void main (void)
         if (first_cycle) {
             first_cycle = FALSE;
         } else {
+
             if (current_state == NOT_READY) {
                 get_rtd(&rtd_val);
 
@@ -229,16 +242,35 @@ void main (void)
                 if (rtd_val == RTD_ON) {
                     // rtd on -> switch to playing rtd sound
                     current_state = PLAYING_RTD_SOUND;
+                } else {
+                    // if you don't transition away from this state, send a 0
+                    // torque message to the motor
+                    for (int i = 0; i < 8; i++) {
+                        controls_can_frame.data[i] = 0;
+                    }
+                    IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
                 }
 
             } else if (current_state == PLAYING_RTD_SOUND) {
-                IO_RTC_StartTime(&rtd_timestamp);
 
-                while (IO_RTC_GetTimeUS(rtd_timestamp) < RTD_SOUND_DURATION) {
-                    // TODO: Buzzer code
+                if (just_entered_sound_state) {
+                    // when this state has just been entered, turn on the buzzer and a timer
+                    IO_RTC_StartTime(&rtd_timestamp);
+                    just_entered_sound_state = FALSE;
+                    // TODO: turn on buzzer
+                } else if (!just_entered_sound_state && IO_RTC_GetTimeUS(rtd_timestamp) > RTD_SOUND_DURATION) {
+                    // once the timer runs out, enter the new state
+                    current_state = DRIVING;
+                    just_entered_sound_state = TRUE;
+                    // TODO: turn off buzzer
                 }
 
-                current_state = DRIVING;
+                // keep sending 0 torque messages to the inverter in this state
+                for (int i = 0; i < 8; i++) {
+                    controls_can_frame.data[i] = 0;
+                }
+                IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
+
             } else if (current_state == DRIVING) {
                 get_rtd(&rtd_val);
 
@@ -246,23 +278,20 @@ void main (void)
                 if (rtd_val == RTD_OFF) {
                     // rtd off -> switch to not ready state
                     current_state = NOT_READY;
+                } else {
+                    // no transition into another state -> send controls message
+                    for (int i = 0; i < 8; i++) {
+                        // set everything to 5 for now for debugging purposes
+                        controls_can_frame.data[i] = 5;
+                    }
+                    IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
                 }
             }
 
             // send out a debug frame with the current state
-            can_frame[0].id = VCU_DEBUG_CAN_ID;
-            can_frame[0].id_format = IO_CAN_STD_FRAME;
-            can_frame[0].length = 8;
-            can_frame[0].data[0] = current_state;
-            can_frame[0].data[1] = 0;
-            can_frame[0].data[2] = 0;
-            can_frame[0].data[3] = 0;
-            can_frame[0].data[4] = 0;
-            can_frame[0].data[5] = 0;
-            can_frame[0].data[6] = 0;
-            can_frame[0].data[7] = 0;
+            debug_can_frame.data[0] = current_state;
 
-            IO_CAN_WriteFIFO(handle_fifo_w, can_frame, 1);
+            IO_CAN_WriteFIFO(handle_fifo_w, &debug_can_frame, 1);
         }
 
         /* Task end function for IO Driver
