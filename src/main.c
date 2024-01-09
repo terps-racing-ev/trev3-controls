@@ -257,6 +257,7 @@ void main (void)
             can_frame[0].data[1] = 0;
             can_frame[0].data[2] = 0;
             can_frame[0].data[3] = 0;
+
             can_frame[0].data[4] = 0;
             can_frame[0].data[5] = 0;
             can_frame[0].data[6] = 0;
