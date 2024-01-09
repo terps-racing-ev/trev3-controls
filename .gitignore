@@ -1,5 +1,4 @@
-build/
-!build/main.elf
+*.hex
 
 # Prerequisites
 *.d
