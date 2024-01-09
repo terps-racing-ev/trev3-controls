@@ -47,6 +47,13 @@
 /* BSE treshold for triggering RTD */
 #define BSE_THRESHOLD_RTD 1
 
+/**************************************************************************
+ * RTD Settings
+ ***************************************************************************/
+#define RTD_ON 0
+#define RTD_OFF 1
+// 1.5 s RTD sound time
+#define RTD_SOUND_DURATION MsToUs(1500ul)
 
 /**************************************************************************
  * Controls Settings
@@ -88,12 +95,14 @@
  */
 #define FIFO_BUFFER_SIZE 20
 
-#define VCU_CAN_ID 193
+#define VCU_CONTROLS_CAN_ID 193
+#define VCU_DEBUG_CAN_ID 0xDB
 
 /**************************************************************************
  * Other
  ***************************************************************************/
- #define CYCLE_TIME_MS 5
+ // 5 ms cycle time
+ #define CYCLE_TIME MsToUs(5ul)
 
 /* Application Database,
  * needed for TTC-Downloader
@@ -129,12 +138,16 @@ APDB appl_db =
           , 0                      /* ubyte4 headerCRC          */
           };
 
+void get_rtd(bool *rtd_val) {
+    IO_DI_Get(IO_PIN_RTD, rtd_val);
+}
+
 void main (void)
 {
     ubyte4 timestamp;
     ubyte4 implausibility_timestamp;
 
-    enum VCU_State { NOT_READY, PLAYING_RTD_SOUND, DRIVING, ERRORED };
+    enum VCU_State { NOT_READY, PLAYING_RTD_SOUND, DRIVING, ERRORED, APPS_5PCT_WAIT };
 
     /*******************************************/
     /*             INITIALIZATION              */
@@ -143,9 +156,9 @@ void main (void)
     /* Initialize the IO driver (without safety functions) */
     IO_Driver_Init(NULL);
 
-        /* Add your initialization code here            */
-        /*  - Use the IO driver functions to initialize */
-        /*    all required IOs and interfaces           */
+    /* Add your initialization code here            */
+    /*  - Use the IO driver functions to initialize */
+    /*    all required IOs and interfaces           */
 
     /* NOTE: turns 5v sensor supply 1 on */
     IO_POWER_Set (IO_ADC_SENSOR_SUPPLY_0, IO_POWER_ON);
@@ -166,11 +179,24 @@ void main (void)
     				 , FIFO_BUFFER_SIZE
     				 , IO_CAN_MSG_WRITE
     				 , IO_CAN_STD_FRAME
-    				 , VCU_CAN_ID
+    				 , VCU_CONTROLS_CAN_ID
     				 , 0);
 
+    /* rtd with 10k pull-up resistor*/
+    bool rtd_val;
+    IO_DI_Init( IO_PIN_RTD,
+                IO_DI_PU_10K );
 
+
+    /* rtd 1.5 second timer variable */
+    ubyte4 rtd_timestamp;
+
+
+    /* VCU State */
     enum VCU_State current_state = NOT_READY;
+
+    // sensor input is invalid during the first cycle
+    bool first_cycle = TRUE;
 
 
     /*******************************************/
@@ -190,19 +216,54 @@ void main (void)
          */
         IO_Driver_TaskBegin();
 
-        can_frame[0].id = VCU_CAN_ID;
-        can_frame[0].id_format = IO_CAN_STD_FRAME;
-        can_frame[0].length = 8;
-        can_frame[0].data[0] = current_state;
-        can_frame[0].data[1] = 0;
-        can_frame[0].data[2] = 0;
-        can_frame[0].data[3] = 0;
-        can_frame[0].data[4] = 1;
-        can_frame[0].data[5] = 0;
-        can_frame[0].data[6] = 0;
-        can_frame[0].data[7] = 0;
 
-        IO_CAN_WriteFIFO(handle_fifo_w, can_frame, 1);
+        // during the first cycle, every sensor input is invalid, so skip it
+        if (first_cycle) {
+            first_cycle = FALSE;
+        } else {
+            if (current_state == NOT_READY) {
+                get_rtd(&rtd_val);
+
+                // transitions
+                // TODO: Add brake checking
+                if (rtd_val == RTD_ON) {
+                    // rtd on -> switch to playing rtd sound
+                    current_state = PLAYING_RTD_SOUND;
+                }
+
+            } else if (current_state == PLAYING_RTD_SOUND) {
+                IO_RTC_StartTime(&rtd_timestamp);
+
+                while (IO_RTC_GetTimeUS(rtd_timestamp) < RTD_SOUND_DURATION) {
+                    // TODO: Buzzer code
+                }
+
+                current_state = DRIVING;
+            } else if (current_state == DRIVING) {
+                get_rtd(&rtd_val);
+
+                // transitions
+                if (rtd_val == RTD_OFF) {
+                    // rtd off -> switch to not ready state
+                    current_state = NOT_READY;
+                }
+            }
+
+            // send out a debug frame with the current state
+            can_frame[0].id = VCU_DEBUG_CAN_ID;
+            can_frame[0].id_format = IO_CAN_STD_FRAME;
+            can_frame[0].length = 8;
+            can_frame[0].data[0] = current_state;
+            can_frame[0].data[1] = 0;
+            can_frame[0].data[2] = 0;
+            can_frame[0].data[3] = 0;
+            can_frame[0].data[4] = 0;
+            can_frame[0].data[5] = 0;
+            can_frame[0].data[6] = 0;
+            can_frame[0].data[7] = 0;
+
+            IO_CAN_WriteFIFO(handle_fifo_w, can_frame, 1);
+        }
 
         /* Task end function for IO Driver
          * This function needs to be called at
@@ -216,6 +277,6 @@ void main (void)
          * 10 milliseconds, this code delays the end of the cycle so it lasts
          * 10 milliseconds
          */
-        while (IO_RTC_GetTimeUS(timestamp) < MsToUs(CYCLE_TIME_MS));
+        while (IO_RTC_GetTimeUS(timestamp) < CYCLE_TIME);
     }
 }
