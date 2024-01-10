@@ -34,9 +34,11 @@
 
 /* APPS 1 -> pin 152 (aka adc 5V 0)*/
 #define IO_PIN_APPS_1 IO_ADC_5V_00
+#define IO_APPS_1_SUPPLY IO_ADC_SENSOR_SUPPLY_0
 
 /* APPS 2 -> pin 140 (aka adc 5V 1)*/
 #define IO_PIN_APPS_2 IO_ADC_5V_01
+#define IO_APPS_2_SUPPLY IO_ADC_SENSOR_SUPPLY_0
 
 /* BSE -> pin 151 (aka adc 5V 2)*/
 #define IO_PIN_BSE IO_ADC_5V_02
@@ -66,9 +68,13 @@
 
 #define IMPLAUSIBILITY_PERSISTENCE_PERIOD_US MsToUs(100ul)
 
-#define MAX_TRAVEL 100
+#define APPS_1_MAX_VOLTAGE 4500
 
-#define MIN_TRAVEL 0
+#define APPS_1_MIN_VOLTAGE 500
+
+#define APPS_2_MAX_VOLTAGE 4500
+
+#define APPS_2_MIN_VOLTAGE 500
 
 
 /**************************************************************************
@@ -76,8 +82,8 @@
  ***************************************************************************/
 
 /* TODO: voltage->pct travel code*/
-#define VoltageToPctTravelApps1(val) (0)
-#define VoltageToPctTravelApps2(val) (0)
+#define VoltageToPctTravelApps1(val) (val)
+#define VoltageToPctTravelApps2(val) (val)
 
 /* TODO: Put in Torque Curve */
 #define VoltageToTorque(v) (0)
@@ -143,6 +149,24 @@ void get_rtd(bool *rtd_val) {
     IO_DI_Get(IO_PIN_RTD, rtd_val);
 }
 
+void get_apps(ubyte2 *apps_pct_result, bool *error, ubyte2 *apps_1_val, bool *apps_1_fresh, ubyte2 *apps_2_val, bool *apps_2_fresh) {
+    // get voltage values
+    IO_ADC_Get(IO_PIN_APPS_1, apps_1_val, apps_1_fresh);
+    IO_ADC_Get(IO_PIN_APPS_2, apps_2_val, apps_2_fresh);
+
+    bool apps_1_within_threshhold = (*apps_1_val >= APPS_1_MIN_VOLTAGE) && (*apps_1_val <= APPS_1_MAX_VOLTAGE);
+    bool apps_2_within_threshhold = (*apps_2_val >= APPS_2_MIN_VOLTAGE) && (*apps_2_val <= APPS_2_MAX_VOLTAGE);
+
+    if (*apps_1_fresh && apps_1_within_threshhold &&
+        *apps_2_fresh && apps_2_within_threshhold) {
+        *apps_pct_result = ((VoltageToPctTravelApps1(*apps_1_val)) + (VoltageToPctTravelApps1(*apps_2_val))) / 2;
+        *error = FALSE;
+    } else {
+        *error = TRUE;
+        *apps_pct_result = 0;
+    }
+}
+
 void main (void)
 {
     ubyte4 timestamp;
@@ -203,6 +227,31 @@ void main (void)
     /* rtd variables */
     ubyte4 rtd_timestamp;
     bool just_entered_sound_state = TRUE;
+
+
+    /* APPS 1 */
+    ubyte2 apps_1_val;
+    bool apps_1_fresh;
+    IO_ADC_ChannelInit( IO_PIN_APPS_1,
+                        IO_ADC_RATIOMETRIC,
+                        0,
+                        0,
+                        IO_APPS_1_SUPPLY,
+                        NULL );
+
+    /* APPS 2 */
+    ubyte2 apps_2_val;
+    bool apps_2_fresh;
+    IO_ADC_ChannelInit( IO_PIN_APPS_2,
+                        IO_ADC_RATIOMETRIC,
+                        0,
+                        0,
+                        IO_APPS_2_SUPPLY,
+                        NULL );
+
+    /* APPS in general */
+    ubyte2 apps_pct_result;
+    bool apps_error;
 
     /* VCU State */
     enum VCU_State current_state = NOT_READY;
@@ -273,19 +322,38 @@ void main (void)
 
             } else if (current_state == DRIVING) {
                 get_rtd(&rtd_val);
+                get_apps(&apps_pct_result, &apps_error,
+                         &apps_1_val, &apps_1_fresh,
+                         &apps_2_val, &apps_2_fresh);
 
                 // transitions
                 if (rtd_val == RTD_OFF) {
                     // rtd off -> switch to not ready state
                     current_state = NOT_READY;
+                } else if (apps_error) {
+                    current_state = ERRORED;
                 } else {
                     // no transition into another state -> send controls message
                     for (int i = 0; i < 8; i++) {
                         // set everything to 5 for now for debugging purposes
                         controls_can_frame.data[i] = 5;
                     }
+                    controls_can_frame.data[0] = apps_pct_result >> 8;
+                    controls_can_frame.data[1] = apps_pct_result & 0xFF;
                     IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
                 }
+            } else if (current_state == ERRORED) {
+                get_rtd(&rtd_val);
+
+                if (rtd_val == RTD_OFF) {
+                    // rtd off -> switch to not ready state
+                    current_state = NOT_READY;
+                }
+
+                for (int i = 0; i < 8; i++) {
+                    controls_can_frame.data[i] = 0;
+                }
+                IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
             }
 
             // send out a debug frame with the current state
