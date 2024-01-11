@@ -42,12 +42,10 @@
 
 /* BSE -> pin 151 (aka adc 5V 2)*/
 #define IO_PIN_BSE IO_ADC_5V_02
+#define IO_BSE_SUPPLY IO_ADC_SENSOR_SUPPLY_1
 
 /* RTD -> pin 263 (aka digital in 0) */
 #define IO_PIN_RTD IO_DI_00
-
-/* BSE treshold for triggering RTD */
-#define BSE_THRESHOLD_RTD 1
 
 /**************************************************************************
  * RTD Settings
@@ -68,6 +66,10 @@
 
 #define IMPLAUSIBILITY_PERSISTENCE_PERIOD_US MsToUs(100ul)
 
+#define APPS_THRESHHOLD_BRAKE_PLAUSIBILITY 25
+
+#define APPS_THRESHHOLD_REESTABLISH_PLAUSIBILITY 5
+
 /* apps 1 */
 
 #define APPS_1_MAX_VOLTAGE 4500
@@ -83,6 +85,15 @@
 #define APPS_2_MIN_VOLTAGE 500
 
 #define APPS_2_VOLTAGE_RANGE (APPS_2_MAX_VOLTAGE - APPS_2_MIN_VOLTAGE)
+
+
+/* bse */
+#define BSE_MAX_VOLTAGE 4500
+
+#define BSE_MIN_VOLTAGE 500
+
+#define BRAKES_ENGAGED_BSE_THRESHOLD 1000
+
 
 
 /**************************************************************************
@@ -178,6 +189,7 @@ void get_apps(ubyte2 *apps_pct_result, bool *error) {
     ubyte2 apps_2_pct;
     sbyte2 difference;
 
+    // check that both apps are within the treshhold
     if (apps_1_fresh && apps_1_within_threshhold &&
         apps_2_fresh && apps_2_within_threshhold) {
 
@@ -187,6 +199,7 @@ void get_apps(ubyte2 *apps_pct_result, bool *error) {
         difference = apps_1_pct - apps_2_pct;
 
 
+        // check if there's an implausible deviation between the two
         if ((Abs(difference)) >= APPS_MIN_IMPLAUSIBLE_DEVIATION) {
             IO_RTC_StartTime(&implausibility_timestamp);
 
@@ -221,12 +234,34 @@ void get_apps(ubyte2 *apps_pct_result, bool *error) {
         }
 
 
+        // set the result to the average of the two
         *apps_pct_result = ((apps_1_pct) + (apps_2_pct)) / 2;
         *error = FALSE;
     } else {
         *error = TRUE;
         *apps_pct_result = 0;
     }
+}
+
+void get_bse(ubyte2 *bse_result, bool *error) {
+    ubyte2 bse_val;
+    bool bse_fresh;
+
+    // get voltage from pin
+    IO_ADC_Get(IO_PIN_BSE, &bse_val, &bse_fresh);
+
+    // check if its in the treshhold
+    bool bse_within_threshhold = (bse_val >= BSE_MIN_VOLTAGE) && (bse_val <= BSE_MAX_VOLTAGE);
+
+    // error out if it isn't
+    if (bse_fresh && bse_within_threshhold) {
+        *bse_result = bse_val;
+        *error = FALSE;
+    } else {
+        *bse_result = 0;
+        *error = TRUE;
+    }
+
 }
 
 void main (void)
@@ -252,11 +287,13 @@ void main (void)
     /* CAN variables and initialization */
     ubyte1 handle_fifo_w;
 
+    /* can frame used to send torque requests to the inverter */
     IO_CAN_DATA_FRAME controls_can_frame;
     controls_can_frame.id = VCU_CONTROLS_CAN_ID;
     controls_can_frame.id_format = IO_CAN_STD_FRAME;
     controls_can_frame.length = 8;
 
+    /* can frame used for debugging */
     IO_CAN_DATA_FRAME debug_can_frame;
     debug_can_frame.id = VCU_DEBUG_CAN_ID;
     debug_can_frame.id_format = IO_CAN_STD_FRAME;
@@ -265,6 +302,7 @@ void main (void)
         debug_can_frame.data[i] = 0;
     }
 
+    /* initialize can channel and fifo buffer */
     IO_CAN_Init( CAN_CHANNEL
                , BAUD_RATE
                , 0
@@ -291,8 +329,6 @@ void main (void)
 
 
     /* APPS 1 */
-    ubyte2 apps_1_val;
-    bool apps_1_fresh;
     IO_ADC_ChannelInit( IO_PIN_APPS_1,
                         IO_ADC_RATIOMETRIC,
                         0,
@@ -301,8 +337,6 @@ void main (void)
                         NULL );
 
     /* APPS 2 */
-    ubyte2 apps_2_val;
-    bool apps_2_fresh;
     IO_ADC_ChannelInit( IO_PIN_APPS_2,
                         IO_ADC_RATIOMETRIC,
                         0,
@@ -313,6 +347,16 @@ void main (void)
     /* APPS in general */
     ubyte2 apps_pct_result;
     bool apps_error;
+
+    /* BSE */
+    IO_ADC_ChannelInit( IO_PIN_BSE,
+                        IO_ADC_RATIOMETRIC,
+                        0,
+                        0,
+                        IO_BSE_SUPPLY,
+                        NULL );
+    ubyte2 bse_result;
+    bool bse_error;
 
     /* VCU State */
     enum VCU_State current_state = NOT_READY;
@@ -346,15 +390,16 @@ void main (void)
 
             if (current_state == NOT_READY) {
                 get_rtd(&rtd_val);
+                get_bse(&bse_result, &bse_error);
 
                 // transitions
-                // TODO: Add brake checking
-                if (rtd_val == RTD_ON) {
+                // rtd on and brakes engaged -> play rtd sound
+                if (rtd_val == RTD_ON && (!bse_error && bse_result > BRAKES_ENGAGED_BSE_THRESHOLD)) {
                     // rtd on -> switch to playing rtd sound
                     current_state = PLAYING_RTD_SOUND;
                 } else {
                     // if you don't transition away from this state, send a 0
-                    // torque message to the motor
+                    // torque message to the motor with 0 torque
                     for (int i = 0; i < 8; i++) {
                         controls_can_frame.data[i] = 0;
                     }
@@ -369,7 +414,7 @@ void main (void)
                     just_entered_sound_state = FALSE;
                     // TODO: turn on buzzer
                 } else if (!just_entered_sound_state && IO_RTC_GetTimeUS(rtd_timestamp) > RTD_SOUND_DURATION) {
-                    // once the timer runs out, enter the new state
+                    // once the timer runs out, enter the new state (driving) and turn off the buzzer
                     current_state = DRIVING;
                     just_entered_sound_state = TRUE;
                     // TODO: turn off buzzer
@@ -382,15 +427,19 @@ void main (void)
                 IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
 
             } else if (current_state == DRIVING) {
+                // get the rtd, apps, and bse
                 get_rtd(&rtd_val);
                 get_apps(&apps_pct_result, &apps_error);
+                get_bse(&bse_result, &bse_error);
 
                 // transitions
                 if (rtd_val == RTD_OFF) {
                     // rtd off -> switch to not ready state
                     current_state = NOT_READY;
-                } else if (apps_error) {
+                } else if (apps_error || bse_error) {
                     current_state = ERRORED;
+                } else if (bse_result > BRAKES_ENGAGED_BSE_THRESHOLD && apps_pct_result >= APPS_THRESHHOLD_BRAKE_PLAUSIBILITY) {
+                    current_state = APPS_5PCT_WAIT;
                 } else {
                     // no transition into another state -> send controls message
                     for (int i = 0; i < 8; i++) {
@@ -410,10 +459,33 @@ void main (void)
                     current_state = NOT_READY;
                 }
 
+                // continue sending 0 torque messages to the inverter in this state
                 for (int i = 0; i < 8; i++) {
                     controls_can_frame.data[i] = 0;
                 }
                 IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
+            } else if (current_state == APPS_5PCT_WAIT) {
+                // when brakes are engaged and apps > 25%, the car goes into this state
+                get_rtd(&rtd_val);
+                get_apps(&apps_pct_result, &apps_error);
+                get_bse(&bse_result, &bse_error);
+
+                if (rtd_val == RTD_OFF) {
+                    // rtd off -> switch to not ready state
+                    current_state = NOT_READY;
+                } else if (apps_error || bse_error) {
+                    current_state = ERRORED;
+                } else if (apps_pct_result <= APPS_THRESHHOLD_REESTABLISH_PLAUSIBILITY) {
+                    // go back to driving when apps <= 5%
+                    current_state = DRIVING;
+                } else {
+                    // no transition into another state -> send 0 torque message
+                    for (int i = 0; i < 8; i++) {
+                        controls_can_frame.data[i] = 0;
+                    }
+                    IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
+                }
+
             }
 
             // send out a debug frame with the current state
