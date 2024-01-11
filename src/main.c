@@ -68,13 +68,21 @@
 
 #define IMPLAUSIBILITY_PERSISTENCE_PERIOD_US MsToUs(100ul)
 
+/* apps 1 */
+
 #define APPS_1_MAX_VOLTAGE 4500
 
 #define APPS_1_MIN_VOLTAGE 500
 
+#define APPS_1_VOLTAGE_RANGE (APPS_1_MAX_VOLTAGE - APPS_1_MIN_VOLTAGE)
+
+/* apps 2 */
+
 #define APPS_2_MAX_VOLTAGE 4500
 
 #define APPS_2_MIN_VOLTAGE 500
+
+#define APPS_2_VOLTAGE_RANGE (APPS_2_MAX_VOLTAGE - APPS_2_MIN_VOLTAGE)
 
 
 /**************************************************************************
@@ -82,8 +90,9 @@
  ***************************************************************************/
 
 /* TODO: voltage->pct travel code*/
-#define VoltageToPctTravelApps1(val) (val)
-#define VoltageToPctTravelApps2(val) (val)
+// converts voltage into percent from 0 - 100
+#define VoltageToPctTravelApps1(val) (100 - (((val) - APPS_1_MIN_VOLTAGE) / (APPS_1_VOLTAGE_RANGE / 100)))
+#define VoltageToPctTravelApps2(val) (100 - (((val) - APPS_2_MIN_VOLTAGE) / (APPS_2_VOLTAGE_RANGE / 100)))
 
 /* TODO: Put in Torque Curve */
 #define VoltageToTorque(v) (0)
@@ -149,17 +158,70 @@ void get_rtd(bool *rtd_val) {
     IO_DI_Get(IO_PIN_RTD, rtd_val);
 }
 
-void get_apps(ubyte2 *apps_pct_result, bool *error, ubyte2 *apps_1_val, bool *apps_1_fresh, ubyte2 *apps_2_val, bool *apps_2_fresh) {
+// gets apps values, puts average pct travel into apps_pct_result
+// if an error is detected, turns error to TRUE
+void get_apps(ubyte2 *apps_pct_result, bool *error) {
+    ubyte2 apps_1_val;
+    bool apps_1_fresh;
+    ubyte2 apps_2_val;
+    bool apps_2_fresh;
+
     // get voltage values
-    IO_ADC_Get(IO_PIN_APPS_1, apps_1_val, apps_1_fresh);
-    IO_ADC_Get(IO_PIN_APPS_2, apps_2_val, apps_2_fresh);
+    IO_ADC_Get(IO_PIN_APPS_1, &apps_1_val, &apps_1_fresh);
+    IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
 
-    bool apps_1_within_threshhold = (*apps_1_val >= APPS_1_MIN_VOLTAGE) && (*apps_1_val <= APPS_1_MAX_VOLTAGE);
-    bool apps_2_within_threshhold = (*apps_2_val >= APPS_2_MIN_VOLTAGE) && (*apps_2_val <= APPS_2_MAX_VOLTAGE);
+    bool apps_1_within_threshhold = (apps_1_val >= APPS_1_MIN_VOLTAGE) && (apps_1_val <= APPS_1_MAX_VOLTAGE);
+    bool apps_2_within_threshhold = (apps_2_val >= APPS_2_MIN_VOLTAGE) && (apps_2_val <= APPS_2_MAX_VOLTAGE);
 
-    if (*apps_1_fresh && apps_1_within_threshhold &&
-        *apps_2_fresh && apps_2_within_threshhold) {
-        *apps_pct_result = ((VoltageToPctTravelApps1(*apps_1_val)) + (VoltageToPctTravelApps1(*apps_2_val))) / 2;
+    ubyte4 implausibility_timestamp;
+    ubyte2 apps_1_pct;
+    ubyte2 apps_2_pct;
+    sbyte2 difference;
+
+    if (apps_1_fresh && apps_1_within_threshhold &&
+        apps_2_fresh && apps_2_within_threshhold) {
+
+        apps_1_pct = VoltageToPctTravelApps1(apps_1_val);
+        apps_2_pct = VoltageToPctTravelApps2(apps_2_val);
+
+        difference = apps_1_pct - apps_2_pct;
+
+
+        if ((Abs(difference)) >= APPS_MIN_IMPLAUSIBLE_DEVIATION) {
+            IO_RTC_StartTime(&implausibility_timestamp);
+
+            // continuously check APPS for 100 ms to check if it stays implausible
+            while (IO_RTC_GetTimeUS(implausibility_timestamp) <= IMPLAUSIBILITY_PERSISTENCE_PERIOD_US) {
+                IO_ADC_Get(IO_PIN_APPS_1, &apps_1_val, &apps_1_fresh);
+                IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
+
+                apps_1_within_threshhold = (apps_1_val >= APPS_1_MIN_VOLTAGE) && (apps_1_val <= APPS_1_MAX_VOLTAGE);
+                apps_2_within_threshhold = (apps_2_val >= APPS_2_MIN_VOLTAGE) && (apps_2_val <= APPS_2_MAX_VOLTAGE);
+
+                // if the values are plausible
+                if (apps_1_within_threshhold && apps_2_within_threshhold) {
+                    apps_1_pct = VoltageToPctTravelApps1(apps_1_val);
+                    apps_2_pct = VoltageToPctTravelApps2(apps_2_val);
+
+                    difference = apps_1_pct - apps_2_pct;
+
+                    // then return
+                    if ((Abs(difference)) < APPS_MIN_IMPLAUSIBLE_DEVIATION) {
+                        *apps_pct_result = ((apps_1_pct) + (apps_2_pct)) / 2;
+                        *error = FALSE;
+                        return;
+                    }
+                }
+            }
+
+            // if the values never became plausible, then indicate an error
+            *apps_pct_result = 0;
+            *error = TRUE;
+            return;
+        }
+
+
+        *apps_pct_result = ((apps_1_pct) + (apps_2_pct)) / 2;
         *error = FALSE;
     } else {
         *error = TRUE;
@@ -170,7 +232,6 @@ void get_apps(ubyte2 *apps_pct_result, bool *error, ubyte2 *apps_1_val, bool *ap
 void main (void)
 {
     ubyte4 timestamp;
-    ubyte4 implausibility_timestamp;
 
     enum VCU_State { NOT_READY, PLAYING_RTD_SOUND, DRIVING, ERRORED, APPS_5PCT_WAIT };
 
@@ -322,9 +383,7 @@ void main (void)
 
             } else if (current_state == DRIVING) {
                 get_rtd(&rtd_val);
-                get_apps(&apps_pct_result, &apps_error,
-                         &apps_1_val, &apps_1_fresh,
-                         &apps_2_val, &apps_2_fresh);
+                get_apps(&apps_pct_result, &apps_error);
 
                 // transitions
                 if (rtd_val == RTD_OFF) {
@@ -338,6 +397,7 @@ void main (void)
                         // set everything to 5 for now for debugging purposes
                         controls_can_frame.data[i] = 5;
                     }
+                    // send apps_pct result for debugging purposes
                     controls_can_frame.data[0] = apps_pct_result >> 8;
                     controls_can_frame.data[1] = apps_pct_result & 0xFF;
                     IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
