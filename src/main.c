@@ -96,7 +96,8 @@
 
 #define BRAKES_ENGAGED_BSE_THRESHOLD 1000
 
-
+/* percent to torque algorithm */
+#define PCT_TRAVEL_TO_TORQUE(val) (val)
 /**************************************************************************
  * SDC Settings
  ***************************************************************************/
@@ -381,6 +382,10 @@ void main (void)
     // sensor input is invalid during the first cycle
     bool first_cycle = TRUE;
 
+    ubyte4 torque;
+    ubyte4 d0;
+    ubyte4 d1;
+
 
     /*******************************************/
     /*       PERIODIC APPLICATION CODE         */
@@ -461,13 +466,19 @@ void main (void)
                     current_state = APPS_5PCT_WAIT;
                 } else {
                     // no transition into another state -> send controls message
-                    for (int i = 0; i < 8; i++) {
-                        // set everything to 5 for now for debugging purposes
-                        controls_can_frame.data[i] = 5;
-                    }
-                    // send apps_pct result for debugging purposes
-                    controls_can_frame.data[0] = apps_pct_result >> 8;
-                    controls_can_frame.data[1] = apps_pct_result & 0xFF;
+                    torque = PCT_TRAVEL_TO_TORQUE(apps_pct_result);
+                    d0 = (torque * 10) % 256;
+                    d1 = (torque * 10) / 256;
+                    controls_can_frame.data[0] = d0;
+                    controls_can_frame.data[1] = d1;
+                    controls_can_frame.data[2] = 0;
+                    controls_can_frame.data[3] = 0;
+                    // forward direction
+                    controls_can_frame.data[4] = 1;
+                    // enable inverter
+                    controls_can_frame.data[5] = 1;
+                    controls_can_frame.data[6] = 0;
+                    controls_can_frame.data[7] = 0;
                     IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
                 }
             } else if (current_state == ERRORED) {
