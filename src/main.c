@@ -47,6 +47,8 @@
 /* RTD -> pin 263 (aka digital in 0) */
 #define IO_PIN_RTD IO_DI_00
 
+/* SDC -> pin 256 (aka digital in 1) */
+#define IO_PIN_SDC IO_DI_01
 /**************************************************************************
  * RTD Settings
  ***************************************************************************/
@@ -57,7 +59,7 @@
 #define RTD_SOUND_DURATION MsToUs(1500ul)
 
 /**************************************************************************
- * Controls Settings
+ * APPS, BSE Settings
  ***************************************************************************/
 
 /* min. difference between the APPS pct travels
@@ -95,6 +97,11 @@
 #define BRAKES_ENGAGED_BSE_THRESHOLD 1000
 
 
+/**************************************************************************
+ * SDC Settings
+ ***************************************************************************/
+#define SDC_ON 1
+#define SDC_OFF 0
 
 /**************************************************************************
  * Controls Math Macros
@@ -168,6 +175,11 @@ APDB appl_db =
 void get_rtd(bool *rtd_val) {
     IO_DI_Get(IO_PIN_RTD, rtd_val);
 }
+
+void get_sdc(bool *sdc_val) {
+    IO_DI_Get(IO_PIN_SDC, sdc_val);
+}
+
 
 // gets apps values, puts average pct travel into apps_pct_result
 // if an error is detected, turns error to TRUE
@@ -358,6 +370,11 @@ void main (void)
     ubyte2 bse_result;
     bool bse_error;
 
+    /* sdc with 10k pull-down resistor*/
+    bool sdc_val;
+    IO_DI_Init( IO_PIN_SDC,
+                IO_DI_PD_10K );
+
     /* VCU State */
     enum VCU_State current_state = NOT_READY;
 
@@ -429,14 +446,16 @@ void main (void)
             } else if (current_state == DRIVING) {
                 // get the rtd, apps, and bse
                 get_rtd(&rtd_val);
+                get_sdc(&sdc_val);
                 get_apps(&apps_pct_result, &apps_error);
                 get_bse(&bse_result, &bse_error);
+
 
                 // transitions
                 if (rtd_val == RTD_OFF) {
                     // rtd off -> switch to not ready state
                     current_state = NOT_READY;
-                } else if (apps_error || bse_error) {
+                } else if (apps_error || bse_error || (sdc_val == SDC_OFF)) {
                     current_state = ERRORED;
                 } else if (bse_result > BRAKES_ENGAGED_BSE_THRESHOLD && apps_pct_result >= APPS_THRESHHOLD_BRAKE_PLAUSIBILITY) {
                     current_state = APPS_5PCT_WAIT;
@@ -467,13 +486,14 @@ void main (void)
             } else if (current_state == APPS_5PCT_WAIT) {
                 // when brakes are engaged and apps > 25%, the car goes into this state
                 get_rtd(&rtd_val);
+                get_sdc(&sdc_val);
                 get_apps(&apps_pct_result, &apps_error);
                 get_bse(&bse_result, &bse_error);
 
                 if (rtd_val == RTD_OFF) {
                     // rtd off -> switch to not ready state
                     current_state = NOT_READY;
-                } else if (apps_error || bse_error) {
+                } else if (apps_error || bse_error || (sdc_val == SDC_OFF)) {
                     current_state = ERRORED;
                 } else if (apps_pct_result <= APPS_THRESHHOLD_REESTABLISH_PLAUSIBILITY) {
                     // go back to driving when apps <= 5%
