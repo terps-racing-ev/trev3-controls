@@ -121,7 +121,9 @@
  * CAN Constants
  ***************************************************************************/
 
-#define CAN_CHANNEL IO_CAN_CHANNEL_0
+#define CAN_CHANNEL IO_CAN_CHANNEL_1
+
+#define DEBUG_CAN_CHANNEL IO_CAN_CHANNEL_0
 
 #define BAUD_RATE 500
 
@@ -299,6 +301,7 @@ void main (void)
 
     /* CAN variables and initialization */
     ubyte1 handle_fifo_w;
+    ubyte1 handle_fifo_w_debug;
 
     /* can frame used to send torque requests to the inverter */
     IO_CAN_DATA_FRAME controls_can_frame;
@@ -322,8 +325,22 @@ void main (void)
                , 0
                , 0);
 
+    IO_CAN_Init( DEBUG_CAN_CHANNEL
+               , BAUD_RATE
+               , 0
+               , 0
+               , 0);
+
     IO_CAN_ConfigFIFO( &handle_fifo_w
     				 , CAN_CHANNEL
+    				 , FIFO_BUFFER_SIZE
+    				 , IO_CAN_MSG_WRITE
+    				 , IO_CAN_STD_FRAME
+    				 , VCU_CONTROLS_CAN_ID
+    				 , 0);
+
+    IO_CAN_ConfigFIFO( &handle_fifo_w_debug
+    				 , DEBUG_CAN_CHANNEL
     				 , FIFO_BUFFER_SIZE
     				 , IO_CAN_MSG_WRITE
     				 , IO_CAN_STD_FRAME
@@ -426,6 +443,7 @@ void main (void)
                         controls_can_frame.data[i] = 0;
                     }
                     IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
+                    IO_CAN_WriteFIFO(handle_fifo_w_debug, &controls_can_frame, 1);
                 }
 
             } else if (current_state == PLAYING_RTD_SOUND) {
@@ -447,6 +465,7 @@ void main (void)
                     controls_can_frame.data[i] = 0;
                 }
                 IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
+                IO_CAN_WriteFIFO(handle_fifo_w_debug, &controls_can_frame, 1);
 
             } else if (current_state == DRIVING) {
                 // get the rtd, apps, and bse
@@ -480,6 +499,7 @@ void main (void)
                     controls_can_frame.data[6] = 0;
                     controls_can_frame.data[7] = 0;
                     IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
+                    IO_CAN_WriteFIFO(handle_fifo_w_debug, &controls_can_frame, 1);
                 }
             } else if (current_state == ERRORED) {
                 get_rtd(&rtd_val);
@@ -494,6 +514,7 @@ void main (void)
                     controls_can_frame.data[i] = 0;
                 }
                 IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
+                IO_CAN_WriteFIFO(handle_fifo_w_debug, &controls_can_frame, 1);
             } else if (current_state == APPS_5PCT_WAIT) {
                 // when brakes are engaged and apps > 25%, the car goes into this state
                 get_rtd(&rtd_val);
@@ -515,6 +536,7 @@ void main (void)
                         controls_can_frame.data[i] = 0;
                     }
                     IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
+                    IO_CAN_WriteFIFO(handle_fifo_w_debug, &controls_can_frame, 1);
                 }
 
             }
@@ -523,6 +545,7 @@ void main (void)
             debug_can_frame.data[0] = current_state;
 
             IO_CAN_WriteFIFO(handle_fifo_w, &debug_can_frame, 1);
+            IO_CAN_WriteFIFO(handle_fifo_w_debug, &controls_can_frame, 1);
         }
 
         /* Task end function for IO Driver
