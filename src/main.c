@@ -44,11 +44,14 @@
 #define IO_PIN_BSE IO_ADC_5V_02
 #define IO_BSE_SUPPLY IO_ADC_SENSOR_SUPPLY_1
 
-/* RTD -> pin 263 (aka digital in 0) */
+/* RTD -> pin 263 (aka digital in 0) (switched to ground with pullup) */
 #define IO_PIN_RTD IO_DI_00
 
 /* SDC -> pin 256 (aka digital in 1) */
 #define IO_PIN_SDC IO_DI_01
+
+/* Buzzer */
+#define IO_PIN_BUZZER IO_DI_12
 /**************************************************************************
  * RTD Settings
  ***************************************************************************/
@@ -298,6 +301,7 @@ void main (void)
 
     /* NOTE: turns 5v sensor supply 1 on */
     IO_POWER_Set (IO_ADC_SENSOR_SUPPLY_0, IO_POWER_ON);
+    IO_POWER_Set (IO_ADC_SENSOR_SUPPLY_1, IO_POWER_ON);
 
     /* CAN variables and initialization */
     ubyte1 handle_fifo_w;
@@ -393,6 +397,9 @@ void main (void)
     IO_DI_Init( IO_PIN_SDC,
                 IO_DI_PD_10K );
 
+    /* buzzer */
+    IO_DO_INIT( IO_PIN_BUZZER );
+
     /* VCU State */
     enum VCU_State current_state = NOT_READY;
 
@@ -452,12 +459,13 @@ void main (void)
                     // when this state has just been entered, turn on the buzzer and a timer
                     IO_RTC_StartTime(&rtd_timestamp);
                     just_entered_sound_state = FALSE;
-                    // TODO: turn on buzzer
+
+                    IO_DO_SET(IO_PIN_BUZZER, TRUE);
                 } else if (!just_entered_sound_state && IO_RTC_GetTimeUS(rtd_timestamp) > RTD_SOUND_DURATION) {
                     // once the timer runs out, enter the new state (driving) and turn off the buzzer
                     current_state = DRIVING;
                     just_entered_sound_state = TRUE;
-                    // TODO: turn off buzzer
+                    IO_DO_SET(IO_PIN_BUZZER, TRUE);
                 }
 
                 // keep sending 0 torque messages to the inverter in this state
