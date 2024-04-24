@@ -51,7 +51,7 @@
 #define IO_PIN_SDC IO_DI_01
 
 /* Buzzer */
-#define IO_PIN_BUZZER IO_DI_12
+#define IO_PIN_BUZZER IO_DO_12
 /**************************************************************************
  * RTD Settings
  ***************************************************************************/
@@ -77,17 +77,17 @@
 
 /* apps 1 */
 
-#define APPS_1_MAX_VOLTAGE 4500
+#define APPS_1_MAX_VOLTAGE 3250
 
-#define APPS_1_MIN_VOLTAGE 500
+#define APPS_1_MIN_VOLTAGE 850
 
 #define APPS_1_VOLTAGE_RANGE (APPS_1_MAX_VOLTAGE - APPS_1_MIN_VOLTAGE)
 
 /* apps 2 */
 
-#define APPS_2_MAX_VOLTAGE 4500
+#define APPS_2_MAX_VOLTAGE 4450
 
-#define APPS_2_MIN_VOLTAGE 500
+#define APPS_2_MIN_VOLTAGE 930
 
 #define APPS_2_VOLTAGE_RANGE (APPS_2_MAX_VOLTAGE - APPS_2_MIN_VOLTAGE)
 
@@ -100,7 +100,7 @@
 #define BRAKES_ENGAGED_BSE_THRESHOLD 1000
 
 /* percent to torque algorithm */
-#define PCT_TRAVEL_TO_TORQUE(val) (val)
+#define PCT_TRAVEL_TO_TORQUE(val) ((val) * 2)
 /**************************************************************************
  * SDC Settings
  ***************************************************************************/
@@ -113,20 +113,17 @@
 
 /* TODO: voltage->pct travel code*/
 // converts voltage into percent from 0 - 100
-#define VoltageToPctTravelApps1(val) (100 - (((val) - APPS_1_MIN_VOLTAGE) / (APPS_1_VOLTAGE_RANGE / 100)))
-#define VoltageToPctTravelApps2(val) (100 - (((val) - APPS_2_MIN_VOLTAGE) / (APPS_2_VOLTAGE_RANGE / 100)))
-
-/* TODO: Put in Torque Curve */
-#define VoltageToTorque(v) (0)
+#define VoltageToPctTravelApps1(val) ((((val) - APPS_1_MIN_VOLTAGE) / (APPS_1_VOLTAGE_RANGE / 100)))
+#define VoltageToPctTravelApps2(val) ((((val) - APPS_2_MIN_VOLTAGE) / (APPS_2_VOLTAGE_RANGE / 100)))
 
 
 /**************************************************************************
  * CAN Constants
  ***************************************************************************/
 
-#define CAN_CHANNEL IO_CAN_CHANNEL_1
+#define CAN_CHANNEL IO_CAN_CHANNEL_0
 
-#define DEBUG_CAN_CHANNEL IO_CAN_CHANNEL_0
+#define DEBUG_CAN_CHANNEL IO_CAN_CHANNEL_1
 
 #define BAUD_RATE 500
 
@@ -136,6 +133,7 @@
 #define FIFO_BUFFER_SIZE 20
 
 #define VCU_CONTROLS_CAN_ID 0xC0
+#define VCU_INVERTER_SETTINGS_CAN_ID 0xC1
 #define VCU_DEBUG_CAN_ID 0xDB
 
 /**************************************************************************
@@ -279,7 +277,6 @@ void get_bse(ubyte2 *bse_result, bool *error) {
         *bse_result = 0;
         *error = TRUE;
     }
-
 }
 
 void main (void)
@@ -305,6 +302,8 @@ void main (void)
 
     /* CAN variables and initialization */
     ubyte1 handle_fifo_w;
+    ubyte1 handle_tms_r;
+    ubyte1 handle_inverter_voltage_r;
     ubyte1 handle_fifo_w_debug;
 
     /* can frame used to send torque requests to the inverter */
@@ -312,6 +311,18 @@ void main (void)
     controls_can_frame.id = VCU_CONTROLS_CAN_ID;
     controls_can_frame.id_format = IO_CAN_STD_FRAME;
     controls_can_frame.length = 8;
+
+    IO_CAN_DATA_FRAME inverter_settings_can_frame;
+    inverter_settings_can_frame.id = VCU_INVERTER_SETTINGS_CAN_ID;
+    inverter_settings_can_frame.id_format = IO_CAN_STD_FRAME;
+    inverter_settings_can_frame.length = 8;
+    for (int i = 0; i < 8; i++) {
+        inverter_settings_can_frame.data[i] = 0;
+    }
+
+    // CAN frames for reading from tms and inverter voltage respectively
+    IO_CAN_DATA_FRAME tms_read_can_frame;
+    IO_CAN_DATA_FRAME inverter_voltage_read_can_frame;
 
     /* can frame used for debugging */
     IO_CAN_DATA_FRAME debug_can_frame;
@@ -342,6 +353,20 @@ void main (void)
     				 , IO_CAN_STD_FRAME
     				 , VCU_CONTROLS_CAN_ID
     				 , 0);
+
+    IO_CAN_ConfigMsg( &handle_tms_r
+                     , CAN_CHANNEL
+                     , IO_CAN_MSG_READ
+                     , IO_CAN_STD_FRAME
+                     , 1
+                     , 0x1FFFFFFF);
+
+    IO_CAN_ConfigMsg( &handle_inverter_voltage_r
+                     , CAN_CHANNEL
+                     , IO_CAN_MSG_READ
+                     , IO_CAN_STD_FRAME
+                     , 0xA7
+                     , 0x1FFFFFFF);
 
     IO_CAN_ConfigFIFO( &handle_fifo_w_debug
     				 , DEBUG_CAN_CHANNEL
@@ -398,7 +423,7 @@ void main (void)
                 IO_DI_PD_10K );
 
     /* buzzer */
-    IO_DO_INIT( IO_PIN_BUZZER );
+    IO_DO_Init( IO_PIN_BUZZER );
 
     /* VCU State */
     enum VCU_State current_state = NOT_READY;
@@ -406,9 +431,20 @@ void main (void)
     // sensor input is invalid during the first cycle
     bool first_cycle = TRUE;
 
+
+    /* Voltage checking functionality */
+    bool tms_voltage_read = FALSE;
+    bool inverter_voltage_read = FALSE;
+    bool voltage_match = FALSE;
+    ubyte4 inverter_voltage = 0;
+    ubyte4 tms_voltage = 0;
+    IO_ErrorType x;
+    IO_ErrorType y;
+
     ubyte4 torque;
     ubyte4 d0;
     ubyte4 d1;
+
 
 
     /*******************************************/
@@ -437,10 +473,9 @@ void main (void)
             if (current_state == NOT_READY) {
                 get_rtd(&rtd_val);
                 get_bse(&bse_result, &bse_error);
-
                 // transitions
                 // rtd on and brakes engaged -> play rtd sound
-                if (rtd_val == RTD_ON && (!bse_error && bse_result > BRAKES_ENGAGED_BSE_THRESHOLD)) {
+                if (rtd_val == RTD_ON && voltage_match /*&& (!bse_error && bse_result > BRAKES_ENGAGED_BSE_THRESHOLD)*/) {
                     // rtd on -> switch to playing rtd sound
                     current_state = PLAYING_RTD_SOUND;
                 } else {
@@ -460,12 +495,25 @@ void main (void)
                     IO_RTC_StartTime(&rtd_timestamp);
                     just_entered_sound_state = FALSE;
 
-                    IO_DO_SET(IO_PIN_BUZZER, TRUE);
+                    IO_DO_Set(IO_PIN_BUZZER, TRUE);
+
+                    inverter_settings_can_frame.data[0] = 20;
+                    inverter_settings_can_frame.data[1] = 0;
+                    inverter_settings_can_frame.data[2] = 1;
+                    inverter_settings_can_frame.data[3] = 0;
+                    inverter_settings_can_frame.data[4] = 0;
+                    inverter_settings_can_frame.data[5] = 0;
+                    inverter_settings_can_frame.data[6] = 0;
+                    inverter_settings_can_frame.data[7] = 0;
+
+                    IO_CAN_WriteFIFO(handle_fifo_w, &inverter_settings_can_frame, 1);
+                    IO_CAN_WriteFIFO(handle_fifo_w_debug, &inverter_settings_can_frame, 1);
+
                 } else if (!just_entered_sound_state && IO_RTC_GetTimeUS(rtd_timestamp) > RTD_SOUND_DURATION) {
                     // once the timer runs out, enter the new state (driving) and turn off the buzzer
                     current_state = DRIVING;
                     just_entered_sound_state = TRUE;
-                    IO_DO_SET(IO_PIN_BUZZER, TRUE);
+                    IO_DO_Set(IO_PIN_BUZZER, TRUE);
                 }
 
                 // keep sending 0 torque messages to the inverter in this state
@@ -482,14 +530,18 @@ void main (void)
                 get_apps(&apps_pct_result, &apps_error);
                 get_bse(&bse_result, &bse_error);
 
+                //*************************************
+                bse_error = 0;
+                //*************************************
+
 
                 // transitions
                 if (rtd_val == RTD_OFF) {
                     // rtd off -> switch to not ready state
                     current_state = NOT_READY;
-                } else if (apps_error || bse_error || (sdc_val == SDC_OFF)) {
+                } else if (apps_error /*|| bse_error || (sdc_val == SDC_OFF)*/) {
                     current_state = ERRORED;
-                } else if (bse_result > BRAKES_ENGAGED_BSE_THRESHOLD && apps_pct_result >= APPS_THRESHHOLD_BRAKE_PLAUSIBILITY) {
+                } else if (0 /*bse_result > BRAKES_ENGAGED_BSE_THRESHOLD && apps_pct_result >= APPS_THRESHHOLD_BRAKE_PLAUSIBILITY*/) {
                     current_state = APPS_5PCT_WAIT;
                 } else {
                     // no transition into another state -> send controls message
@@ -530,10 +582,15 @@ void main (void)
                 get_apps(&apps_pct_result, &apps_error);
                 get_bse(&bse_result, &bse_error);
 
+                //*************************************
+                bse_error = 0;
+                //*************************************
+
                 if (rtd_val == RTD_OFF) {
                     // rtd off -> switch to not ready state
                     current_state = NOT_READY;
-                } else if (apps_error || bse_error || (sdc_val == SDC_OFF)) {
+
+                } else if (apps_error || bse_error /*|| (sdc_val == SDC_OFF)*/) {
                     current_state = ERRORED;
                 } else if (apps_pct_result <= APPS_THRESHHOLD_REESTABLISH_PLAUSIBILITY) {
                     // go back to driving when apps <= 5%
@@ -551,7 +608,72 @@ void main (void)
 
             // send out a debug frame with the current state
             debug_can_frame.data[0] = current_state;
+            // get_apps(&apps_pct_result, &apps_error);
+            // get_bse(&bse_result, &bse_error);
 
+            ubyte2 apps_1_val;
+            bool apps_1_fresh;
+            ubyte2 apps_2_val;
+            bool apps_2_fresh;
+
+            ubyte2 bse_val;
+            bool bse_fresh;
+
+            /*
+            if (IO_CAN_MsgStatus(handle_tms_r) == IO_E_OK) {
+                IO_CAN_ReadMsg(handle_tms_r, &tms_read_can_frame);
+                debug_can_frame.data[5] = tms_read_can_frame.data[0];
+            }
+
+            if (IO_CAN_MsgStatus(handle_inverter_voltage_r) == IO_E_OK) {
+                IO_CAN_ReadMsg(handle_inverter_voltage_r, &inverter_voltage_read_can_frame);
+                debug_can_frame.data[6] = inverter_voltage_read_can_frame.data[0];
+            }
+            */
+
+
+            IO_ADC_Get(IO_PIN_APPS_1, &apps_1_val, &apps_1_fresh);
+            IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
+
+            IO_ADC_Get(IO_PIN_BSE, &bse_val, &bse_fresh);
+
+            // debug_can_frame.data[1] = apps_1_val >> 8;
+            // debug_can_frame.data[2] = apps_1_val & 0xFF;
+
+            // debug_can_frame.data[3] = apps_2_val >> 8;
+            // debug_can_frame.data[4] = apps_2_val & 0xFF;
+
+            // debug_can_frame.data[5] = voltage_match;
+            // debug_can_frame.data[6] = tms_voltage_read;
+            // debug_can_frame.data[7] = inverter_voltage_read;
+
+
+            x = IO_CAN_MsgStatus(handle_tms_r);
+            if (x == IO_E_OK || x == IO_E_CAN_OLD_DATA) {
+                IO_CAN_ReadMsg(handle_tms_r, &tms_read_can_frame);
+                debug_can_frame.data[1] = tms_read_can_frame.data[0];
+                tms_voltage = (tms_read_can_frame.data[5] << 8) | (tms_read_can_frame.data[4]);
+                tms_voltage = tms_voltage / 10;
+            }
+
+            y = IO_CAN_MsgStatus(handle_inverter_voltage_r);
+            if (y == IO_E_OK || y == IO_E_CAN_OLD_DATA) {
+                IO_CAN_ReadMsg(handle_inverter_voltage_r, &inverter_voltage_read_can_frame);
+                debug_can_frame.data[2] = inverter_voltage_read_can_frame.data[0];
+                inverter_voltage = (inverter_voltage_read_can_frame.data[1] << 8) | (inverter_voltage_read_can_frame.data[0]);
+                inverter_voltage = inverter_voltage / 10;
+            }
+
+            if ((tms_voltage < inverter_voltage + 10) &&
+                (tms_voltage > inverter_voltage - 10) && inverter_voltage >= 290) {
+                    voltage_match = TRUE;
+            } else {
+                    voltage_match = FALSE;
+            }
+
+
+
+            IO_CAN_WriteFIFO(handle_fifo_w_debug, &debug_can_frame, 1);
             IO_CAN_WriteFIFO(handle_fifo_w, &debug_can_frame, 1);
             IO_CAN_WriteFIFO(handle_fifo_w_debug, &controls_can_frame, 1);
         }
