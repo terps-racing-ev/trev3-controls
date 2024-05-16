@@ -142,6 +142,9 @@
 #define TMS_PACK_VOLT_LO 2
 #define TMS_PACK_VOLT_HI 3
 
+#define NUM_MODULES 6
+#define NUM_MODULE_FRAMES (NUM_MODULES * 3)
+
 /**************************************************************************
  * Other
  ***************************************************************************/
@@ -300,6 +303,21 @@ void read_can_msg(ubyte1 handle_r, IO_CAN_DATA_FRAME* dst_data_frame, bool *msg_
 
 }
 
+void read_tms_messages(ubyte1 summary_handle_r, IO_CAN_DATA_FRAME* summary_dst_data_frame, bool* summary_msg_received,
+                       ubyte1* module_handles, IO_CAN_DATA_FRAME* module_data_frames, bool* module_msg_received) {
+    int i = 0;
+    read_can_msg(summary_handle_r, summary_dst_data_frame, summary_msg_received);
+
+    for (i = 0; i < NUM_MODULE_FRAMES; i++) {
+        read_can_msg(module_handles[i], &(module_data_frames[i]), &(module_msg_received[i]));
+    }
+}
+
+double voltage_to_torque_limit (ubyte2 pack_voltage) {
+    return ((double) (pack_voltage)) * -0.3255 + 231.25;
+}
+
+
 void main (void)
 {
     ubyte4 timestamp;
@@ -322,9 +340,13 @@ void main (void)
     IO_POWER_Set (IO_ADC_SENSOR_SUPPLY_1, IO_POWER_ON);
 
     /* CAN variables and initialization */
+    // transmitting
     ubyte1 handle_fifo_w;
-    ubyte1 handle_tms_r;
     ubyte1 handle_fifo_w_debug;
+
+    // receiving
+    ubyte1 handle_tms_summary_r;
+    ubyte1 handles_tms_module_info_r[NUM_MODULE_FRAMES];
 
     /* can frame used to send torque requests to the inverter */
     IO_CAN_DATA_FRAME controls_can_frame;
@@ -340,8 +362,9 @@ void main (void)
         inverter_settings_can_frame.data[i] = 0;
     }
 
-    // CAN frames for reading from tms and inverter voltage respectively
-    IO_CAN_DATA_FRAME tms_read_can_frame;
+    // CAN frames for reading from tms
+    IO_CAN_DATA_FRAME tms_summary_can_frame;
+    IO_CAN_DATA_FRAME tms_module_can_frames[NUM_MODULE_FRAMES];
 
     /* can frame used for debugging */
     IO_CAN_DATA_FRAME debug_can_frame;
@@ -373,12 +396,23 @@ void main (void)
     				 , VCU_CONTROLS_CAN_ID
     				 , 0);
 
-    IO_CAN_ConfigMsg( &handle_tms_r
+    IO_CAN_ConfigMsg( &handle_tms_summary_r
                      , CAN_CHANNEL
                      , IO_CAN_MSG_READ
                      , IO_CAN_STD_FRAME
                      , TMS_SUMMARY_CAN_ID
                      , 0x1FFFFFFF);
+
+    // configure the 18 handles for the module info (3 for each module)
+    for (int i = 0; i < NUM_MODULE_FRAMES; i++) {
+        IO_CAN_ConfigMsg( &handles_tms_module_info_r[i]
+                         , CAN_CHANNEL
+                         , IO_CAN_MSG_READ
+                         , IO_CAN_STD_FRAME
+                         , (i + 1)
+                         , 0x1FFFFFFF);
+    }
+
 
     IO_CAN_ConfigFIFO( &handle_fifo_w_debug
     				 , DEBUG_CAN_CHANNEL
@@ -445,12 +479,16 @@ void main (void)
 
 
     /* Voltage checking functionality */
-    bool tms_message_received = FALSE;
+    bool tms_summary_message_received = FALSE;
+    bool tms_module_message_received[NUM_MODULE_FRAMES] = {FALSE};
     ubyte2 pack_voltage = 0;
+    bool pack_voltage_updated_once = FALSE;
+    int i;
 
-    ubyte4 torque;
-    ubyte4 d0;
-    ubyte4 d1;
+    ubyte4 torque = 0;
+    ubyte4 limited_torque = 0;
+    ubyte4 d0 = 0;
+    ubyte4 d1 = 0;
 
 
 
@@ -472,10 +510,21 @@ void main (void)
         IO_Driver_TaskBegin();
 
         // read voltage from pack
-        read_can_msg(handle_tms_r, &tms_read_can_frame, &tms_message_received);
-        if (tms_message_received == TRUE) {
-            pack_voltage = (tms_read_can_frame.data[TMS_PACK_VOLT_HI] << 8) | tms_read_can_frame.data[TMS_PACK_VOLT_LO];
+        // read_can_msg(handle_tms_summary_r, &tms_summary_can_frame, &tms_summary_message_received);
+
+        read_tms_messages(handle_tms_summary_r, &tms_summary_can_frame, &tms_summary_message_received,
+                          handles_tms_module_info_r, tms_module_can_frames, tms_module_message_received);
+
+        if (tms_summary_message_received == TRUE) {
+            pack_voltage = (tms_summary_can_frame.data[TMS_PACK_VOLT_HI] << 8) | tms_summary_can_frame.data[TMS_PACK_VOLT_LO];
+            pack_voltage_updated_once = TRUE;
         }
+
+        d0 = 0;
+        d1 = 0;
+        torque = 0;
+        apps_pct_result = 0;
+        bse_result = 0;
 
         // during the first cycle, every sensor input is invalid, so skip it
         if (first_cycle) {
@@ -500,6 +549,7 @@ void main (void)
                         controls_can_frame.data[i] = 0;
                     }
                     IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
+                    pack_voltage_updated_once = FALSE;
                 }
 
             } else if (current_state == PLAYING_RTD_SOUND) {
@@ -555,6 +605,16 @@ void main (void)
                 } else {
                     // no transition into another state -> send controls message
                     torque = PCT_TRAVEL_TO_TORQUE(apps_pct_result);
+
+                    if (pack_voltage_updated_once) {
+                        limited_torque = (ubyte4) (voltage_to_torque_limit(pack_voltage));
+
+                        if (torque > limited_torque) {
+                            torque = limited_torque;
+                        }
+                    }
+
+
                     d0 = (torque * 10) % 256;
                     d1 = (torque * 10) / 256;
                     controls_can_frame.data[0] = d0;
@@ -612,22 +672,29 @@ void main (void)
 
             }
 
-            // send out a debug frame with the current state
-            debug_can_frame.data[0] = current_state;
 
-            debug_can_frame.data[1] = tms_message_received;
-            debug_can_frame.data[2] = pack_voltage & 0xFF;
-            debug_can_frame.data[3] = pack_voltage >> 8;
+            if (tms_summary_message_received) {
+                IO_CAN_WriteFIFO(handle_fifo_w_debug, &tms_summary_can_frame, 1);
+            }
+
+            for (i = 0; i < NUM_MODULE_FRAMES; i++) {
+                if (tms_module_message_received[i]) {
+                    IO_CAN_WriteFIFO(handle_fifo_w_debug, &(tms_module_can_frames[i]), 1);
+                }
+            }
+
+            debug_can_frame.data[0] = apps_pct_result & 0xFF;
+            debug_can_frame.data[1] = apps_pct_result >> 8;
+
+            debug_can_frame.data[2] = d0;
+            debug_can_frame.data[3] = d1;
+
+            debug_can_frame.data[4] = bse_result & 0xFF;
+            debug_can_frame.data[5] = bse_result >> 8;
 
             IO_CAN_WriteFIFO(handle_fifo_w, &debug_can_frame, 1);
-
-
             IO_CAN_WriteFIFO(handle_fifo_w_debug, &debug_can_frame, 1);
-            IO_CAN_WriteFIFO(handle_fifo_w_debug, &controls_can_frame, 1);
 
-            if (tms_message_received) {
-                IO_CAN_WriteFIFO(handle_fifo_w_debug, &tms_read_can_frame, 1);
-            }
         }
 
         /* Task end function for IO Driver
