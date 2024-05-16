@@ -142,6 +142,8 @@
 #define TMS_PACK_VOLT_LO 2
 #define TMS_PACK_VOLT_HI 3
 
+#define MOTOR_INFO_CAN_ID 0xA5
+
 #define NUM_MODULES 6
 #define NUM_MODULE_FRAMES (NUM_MODULES * 3)
 
@@ -347,6 +349,7 @@ void main (void)
     // receiving
     ubyte1 handle_tms_summary_r;
     ubyte1 handles_tms_module_info_r[NUM_MODULE_FRAMES];
+    ubyte1 handle_inverter_motor_info_r;
 
     /* can frame used to send torque requests to the inverter */
     IO_CAN_DATA_FRAME controls_can_frame;
@@ -365,6 +368,9 @@ void main (void)
     // CAN frames for reading from tms
     IO_CAN_DATA_FRAME tms_summary_can_frame;
     IO_CAN_DATA_FRAME tms_module_can_frames[NUM_MODULE_FRAMES];
+
+    // CAN frame for reading from inverter
+    IO_CAN_DATA_FRAME inverter_motor_info_can_frame;
 
     /* can frame used for debugging */
     IO_CAN_DATA_FRAME debug_can_frame;
@@ -412,6 +418,13 @@ void main (void)
                          , (i + 1)
                          , 0x1FFFFFFF);
     }
+
+    IO_CAN_ConfigMsg( &handle_inverter_motor_info_r
+                 , CAN_CHANNEL
+                 , IO_CAN_MSG_READ
+                 , IO_CAN_STD_FRAME
+                 , MOTOR_INFO_CAN_ID
+                 , 0x1FFFFFFF);
 
 
     IO_CAN_ConfigFIFO( &handle_fifo_w_debug
@@ -490,6 +503,10 @@ void main (void)
     ubyte4 d0 = 0;
     ubyte4 d1 = 0;
 
+    bool motor_info_message_received = FALSE;
+    ubyte1 last_speed_d0 = 0;
+    ubyte1 last_speed_d1 = 0;
+
 
 
     /*******************************************/
@@ -509,11 +526,11 @@ void main (void)
          */
         IO_Driver_TaskBegin();
 
-        // read voltage from pack
-        // read_can_msg(handle_tms_summary_r, &tms_summary_can_frame, &tms_summary_message_received);
-
+        // read messages from tms
         read_tms_messages(handle_tms_summary_r, &tms_summary_can_frame, &tms_summary_message_received,
                           handles_tms_module_info_r, tms_module_can_frames, tms_module_message_received);
+
+        read_can_msg(handle_inverter_motor_info_r, &inverter_motor_info_can_frame, &motor_info_message_received);
 
         if (tms_summary_message_received == TRUE) {
             pack_voltage = (tms_summary_can_frame.data[TMS_PACK_VOLT_HI] << 8) | tms_summary_can_frame.data[TMS_PACK_VOLT_LO];
@@ -683,14 +700,25 @@ void main (void)
                 }
             }
 
-            debug_can_frame.data[0] = apps_pct_result & 0xFF;
-            debug_can_frame.data[1] = apps_pct_result >> 8;
+            debug_can_frame.data[0] = apps_pct_result;
 
-            debug_can_frame.data[2] = d0;
-            debug_can_frame.data[3] = d1;
+            debug_can_frame.data[1] = d0;
+            debug_can_frame.data[2] = d1;
 
-            debug_can_frame.data[4] = bse_result & 0xFF;
-            debug_can_frame.data[5] = bse_result >> 8;
+            debug_can_frame.data[3] = bse_result & 0xFF;
+            debug_can_frame.data[4] = bse_result >> 8;
+
+            debug_can_frame.data[5] = current_state;
+
+            // if we've gotten speed information from the inverter since last cycle, tell the datalogger
+            // else, just use the old values
+            if (motor_info_message_received) {
+                last_speed_d0 = inverter_motor_info_can_frame.data[2];
+                last_speed_d1 = inverter_motor_info_can_frame.data[3];
+            }
+
+            debug_can_frame.data[6] = last_speed_d0;
+            debug_can_frame.data[7] = last_speed_d1;
 
             IO_CAN_WriteFIFO(handle_fifo_w, &debug_can_frame, 1);
             IO_CAN_WriteFIFO(handle_fifo_w_debug, &debug_can_frame, 1);
