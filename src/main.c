@@ -71,7 +71,9 @@
 
 #define IMPLAUSIBILITY_PERSISTENCE_PERIOD_US MsToUs(100ul)
 
+//***************************************** used to be 25
 #define APPS_THRESHHOLD_BRAKE_PLAUSIBILITY 25
+//*******************************************************
 
 #define APPS_THRESHHOLD_REESTABLISH_PLAUSIBILITY 5
 
@@ -100,7 +102,9 @@
 #define BRAKES_ENGAGED_BSE_THRESHOLD 550
 
 /* percent to torque algorithm */
-#define PCT_TRAVEL_TO_TORQUE(val) ((val) * 2)
+#define PCT_TRAVEL_TO_TORQUE(val) ((int)(((float)(val) / 100.0) * 112.0))
+
+#define CONTINUOUS_TORQUE_MAX 112
 /**************************************************************************
  * SDC Settings
  ***************************************************************************/
@@ -631,6 +635,11 @@ void main (void)
                         }
                     }
 
+		    //***************************
+                    if (torque > CONTINUOUS_TORQUE_MAX) {
+                       torque = CONTINUOUS_TORQUE_MAX;
+                    }
+                    //***************************
 
                     d0 = (torque * 10) % 256;
                     d1 = (torque * 10) / 256;
