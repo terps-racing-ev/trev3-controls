@@ -101,6 +101,8 @@
 
 #define BRAKES_ENGAGED_BSE_THRESHOLD 550
 
+#define BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD 1833
+
 /* percent to torque algorithm */
 #define PCT_TRAVEL_TO_TORQUE(val) ((int)(((float)(val) / 100.0) * 112.0))
 
@@ -621,7 +623,7 @@ void main (void)
                     current_state = NOT_READY;
                 } else if (apps_error || bse_error || (sdc_val == SDC_OFF)) {
                     current_state = ERRORED;
-                } else if (bse_result > BRAKES_ENGAGED_BSE_THRESHOLD && apps_pct_result >= APPS_THRESHHOLD_BRAKE_PLAUSIBILITY) {
+                } else if (bse_result > BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD && apps_pct_result >= APPS_THRESHHOLD_BRAKE_PLAUSIBILITY) {
                     current_state = APPS_5PCT_WAIT;
                 } else {
                     // no transition into another state -> send controls message
