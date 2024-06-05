@@ -664,6 +664,10 @@ void main (void)
                        torque = CONTINUOUS_TORQUE_MAX;
                     }
 
+                    if (torque < 0) {
+                        torque = 0;
+                    }
+
 
                     d0 = (torque * 10) % 256;
                     d1 = (torque * 10) / 256;
