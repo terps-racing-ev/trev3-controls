@@ -149,6 +149,10 @@
 #define TMS_PACK_VOLT_HI 3
 
 #define MOTOR_INFO_CAN_ID 0xA5
+#define VOLTAGE_INFO_CAN_ID 0xA7
+
+#define INVERTER_PACK_VOLT_LO 0
+#define INVERTER_PACK_VOLT_HI 1
 
 #define NUM_MODULES 6
 #define NUM_MODULE_FRAMES (NUM_MODULES * 3)
@@ -356,6 +360,7 @@ void main (void)
     ubyte1 handle_tms_summary_r;
     ubyte1 handles_tms_module_info_r[NUM_MODULE_FRAMES];
     ubyte1 handle_inverter_motor_info_r;
+    ubyte1 handle_inverter_voltage_info_r;
 
     /* can frame used to send torque requests to the inverter */
     IO_CAN_DATA_FRAME controls_can_frame;
@@ -377,6 +382,7 @@ void main (void)
 
     // CAN frame for reading from inverter
     IO_CAN_DATA_FRAME inverter_motor_info_can_frame;
+    IO_CAN_DATA_FRAME inverter_voltage_info_can_frame;
 
     /* can frame used for debugging */
     IO_CAN_DATA_FRAME debug_can_frame;
@@ -430,6 +436,13 @@ void main (void)
                  , IO_CAN_MSG_READ
                  , IO_CAN_STD_FRAME
                  , MOTOR_INFO_CAN_ID
+                 , 0x1FFFFFFF);
+
+    IO_CAN_ConfigMsg( &handle_inverter_voltage_info_r
+                 , CAN_CHANNEL
+                 , IO_CAN_MSG_READ
+                 , IO_CAN_STD_FRAME
+                 , VOLTAGE_INFO_CAN_ID
                  , 0x1FFFFFFF);
 
 
@@ -500,8 +513,6 @@ void main (void)
     /* Voltage checking functionality */
     bool tms_summary_message_received = FALSE;
     bool tms_module_message_received[NUM_MODULE_FRAMES] = {FALSE};
-    ubyte2 pack_voltage = 0;
-    bool pack_voltage_updated_once = FALSE;
     int i;
 
     ubyte4 torque = 0;
@@ -513,6 +524,9 @@ void main (void)
     ubyte1 last_speed_d0 = 0;
     ubyte1 last_speed_d1 = 0;
 
+    bool voltage_info_message_received = FALSE;
+    ubyte2 pack_voltage = 0;
+    bool pack_voltage_updated_once = FALSE;
 
 
     /*******************************************/
@@ -538,8 +552,17 @@ void main (void)
 
         read_can_msg(handle_inverter_motor_info_r, &inverter_motor_info_can_frame, &motor_info_message_received);
 
+        read_can_msg(handle_inverter_voltage_info_r, &inverter_voltage_info_can_frame, &voltage_info_message_received);
+
+        /*
         if (tms_summary_message_received == TRUE) {
             pack_voltage = (tms_summary_can_frame.data[TMS_PACK_VOLT_HI] << 8) | tms_summary_can_frame.data[TMS_PACK_VOLT_LO];
+            pack_voltage_updated_once = TRUE;
+        }
+        */
+
+        if (voltage_info_message_received == TRUE) {
+            pack_voltage = (inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_HI] << 8) | inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_LO];
             pack_voltage_updated_once = TRUE;
         }
 
@@ -637,11 +660,10 @@ void main (void)
                         }
                     }
 
-		    //***************************
                     if (torque > CONTINUOUS_TORQUE_MAX) {
                        torque = CONTINUOUS_TORQUE_MAX;
                     }
-                    //***************************
+
 
                     d0 = (torque * 10) % 256;
                     d1 = (torque * 10) / 256;
@@ -699,16 +721,20 @@ void main (void)
                 }
 
             }
-
-
+            /*
             if (tms_summary_message_received) {
                 IO_CAN_WriteFIFO(handle_fifo_w_debug, &tms_summary_can_frame, 1);
             }
+            */
 
             for (i = 0; i < NUM_MODULE_FRAMES; i++) {
                 if (tms_module_message_received[i]) {
                     IO_CAN_WriteFIFO(handle_fifo_w_debug, &(tms_module_can_frames[i]), 1);
                 }
+            }
+
+            if (voltage_info_message_received) {
+                IO_CAN_WriteFIFO(handle_fifo_w_debug, &inverter_voltage_info_can_frame, 1);
             }
 
             debug_can_frame.data[0] = apps_pct_result;
