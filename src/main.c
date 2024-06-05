@@ -150,6 +150,7 @@
 
 #define MOTOR_INFO_CAN_ID 0xA5
 #define VOLTAGE_INFO_CAN_ID 0xA7
+#define PRECHARGE_VOLTAGE_THRESHHOLD 200
 
 #define INVERTER_PACK_VOLT_LO 0
 #define INVERTER_PACK_VOLT_HI 1
@@ -326,7 +327,12 @@ void read_tms_messages(ubyte1 summary_handle_r, IO_CAN_DATA_FRAME* summary_dst_d
 }
 
 double voltage_to_torque_limit (ubyte2 pack_voltage) {
-    return ((double) (pack_voltage)) * -0.3255 + 231.25;
+    if (pack_voltage < PRECHARGE_VOLTAGE_THRESHHOLD) {
+        return 0;
+    } else {
+        return ((double) (pack_voltage)) * -0.3255 + 231.25;
+    }
+
 }
 
 
