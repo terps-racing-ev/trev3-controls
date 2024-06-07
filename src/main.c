@@ -79,7 +79,7 @@
 
 /* apps 1 */
 
-#define APPS_1_MAX_VOLTAGE 3250
+#define APPS_1_MAX_VOLTAGE 3550
 
 #define APPS_1_MIN_VOLTAGE 850
 
@@ -87,7 +87,7 @@
 
 /* apps 2 */
 
-#define APPS_2_MAX_VOLTAGE 4450
+#define APPS_2_MAX_VOLTAGE 4750
 
 #define APPS_2_MIN_VOLTAGE 930
 
@@ -101,10 +101,11 @@
 
 #define BRAKES_ENGAGED_BSE_THRESHOLD 550
 
-#define BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD 1833
+#define BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD 550
 
 /* percent to torque algorithm */
-#define PCT_TRAVEL_TO_TORQUE(val) ((int)(((float)(val) / 100.0) * 112.0))
+// #define PCT_TRAVEL_TO_TORQUE(val) ((int)(((float)(val) / 100.0) * 112.0))
+#define PCT_TRAVEL_FOR_MAX_TORQUE 80
 
 #define CONTINUOUS_TORQUE_MAX 112
 /**************************************************************************
@@ -150,10 +151,12 @@
 
 #define MOTOR_INFO_CAN_ID 0xA5
 #define VOLTAGE_INFO_CAN_ID 0xA7
-#define PRECHARGE_VOLTAGE_THRESHHOLD 200
 
 #define INVERTER_PACK_VOLT_LO 0
 #define INVERTER_PACK_VOLT_HI 1
+
+#define INVERTER_MOTOR_SPEED_LO 2
+#define INVERTER_MOTOR_SPEED_HI 3
 
 #define NUM_MODULES 6
 #define NUM_MODULE_FRAMES (NUM_MODULES * 3)
@@ -163,6 +166,10 @@
  ***************************************************************************/
  // 5 ms cycle time
  #define CYCLE_TIME MsToUs(5ul)
+
+ #define PRECHARGE_VOLTAGE_THRESHHOLD 268
+ #define TORQUE_LIMITING_RPM_THRESHHOLD 25
+ #define RPM_BASED_TORQUE_LIMIT 30
 
 /* Application Database,
  * needed for TTC-Downloader
@@ -333,6 +340,14 @@ double voltage_to_torque_limit (ubyte2 pack_voltage) {
         return ((double) (pack_voltage)) * -0.3255 + 231.25;
     }
 
+}
+
+ubyte4 pct_travel_to_torque (ubyte4 pct_travel) {
+    if (pct_travel >= PCT_TRAVEL_FOR_MAX_TORQUE) {
+         return CONTINUOUS_TORQUE_MAX;
+    }
+
+    return ((ubyte4)(((float)(pct_travel) / PCT_TRAVEL_FOR_MAX_TORQUE) * 112.0));
 }
 
 
@@ -526,12 +541,20 @@ void main (void)
     ubyte4 d0 = 0;
     ubyte4 d1 = 0;
 
+    // whether a new motor info message has been received since the last time
     bool motor_info_message_received = FALSE;
+    // last received motor speed
     ubyte1 last_speed_d0 = 0;
     ubyte1 last_speed_d1 = 0;
+    ubyte2 last_speed = 0;
+    // whether any motor info message has been received
+    bool motor_speed_updated_once = FALSE;
 
+    // whether a new voltage info message has been received since the last time
     bool voltage_info_message_received = FALSE;
+    // last received pack voltage
     ubyte2 pack_voltage = 0;
+    // whether any voltage info has been received
     bool pack_voltage_updated_once = FALSE;
 
 
@@ -556,19 +579,21 @@ void main (void)
         read_tms_messages(handle_tms_summary_r, &tms_summary_can_frame, &tms_summary_message_received,
                           handles_tms_module_info_r, tms_module_can_frames, tms_module_message_received);
 
+        // read message from inverter with motor speed and update motor speed accordingly
         read_can_msg(handle_inverter_motor_info_r, &inverter_motor_info_can_frame, &motor_info_message_received);
-
-        read_can_msg(handle_inverter_voltage_info_r, &inverter_voltage_info_can_frame, &voltage_info_message_received);
-
-        /*
-        if (tms_summary_message_received == TRUE) {
-            pack_voltage = (tms_summary_can_frame.data[TMS_PACK_VOLT_HI] << 8) | tms_summary_can_frame.data[TMS_PACK_VOLT_LO];
-            pack_voltage_updated_once = TRUE;
+        if (motor_info_message_received) {
+            // d0 and d1 are used for the outgoing CAN message
+            last_speed_d0 = inverter_motor_info_can_frame.data[INVERTER_MOTOR_SPEED_LO];
+            last_speed_d1 = inverter_motor_info_can_frame.data[INVERTER_MOTOR_SPEED_HI];
+            last_speed = (last_speed_d1 << 8) | last_speed_d0;
+            motor_speed_updated_once = TRUE;
         }
-        */
 
+
+        // read message from inverter with voltage and update pack voltage accordingly
+        read_can_msg(handle_inverter_voltage_info_r, &inverter_voltage_info_can_frame, &voltage_info_message_received);
         if (voltage_info_message_received == TRUE) {
-            pack_voltage = (inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_HI] << 8) | inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_LO];
+            pack_voltage = ((inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_HI] << 8) | inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_LO]) / 10;
             pack_voltage_updated_once = TRUE;
         }
 
@@ -656,8 +681,9 @@ void main (void)
                     current_state = APPS_5PCT_WAIT;
                 } else {
                     // no transition into another state -> send controls message
-                    torque = PCT_TRAVEL_TO_TORQUE(apps_pct_result);
+                    torque = pct_travel_to_torque(apps_pct_result);
 
+                    // limit torque based on pack voltage
                     if (pack_voltage_updated_once) {
                         limited_torque = (ubyte4) (voltage_to_torque_limit(pack_voltage));
 
@@ -666,6 +692,15 @@ void main (void)
                         }
                     }
 
+                    // limit torque based on RPM
+                    if (motor_speed_updated_once) {
+                        if (last_speed < TORQUE_LIMITING_RPM_THRESHHOLD &&
+                            torque > RPM_BASED_TORQUE_LIMIT) {
+                                torque = RPM_BASED_TORQUE_LIMIT;
+                            }
+                    }
+
+                    // limit torque based on continuous torque max
                     if (torque > CONTINUOUS_TORQUE_MAX) {
                        torque = CONTINUOUS_TORQUE_MAX;
                     }
@@ -756,13 +791,6 @@ void main (void)
             debug_can_frame.data[4] = bse_result >> 8;
 
             debug_can_frame.data[5] = current_state;
-
-            // if we've gotten speed information from the inverter since last cycle, tell the datalogger
-            // else, just use the old values
-            if (motor_info_message_received) {
-                last_speed_d0 = inverter_motor_info_can_frame.data[2];
-                last_speed_d1 = inverter_motor_info_can_frame.data[3];
-            }
 
             debug_can_frame.data[6] = last_speed_d0;
             debug_can_frame.data[7] = last_speed_d1;
