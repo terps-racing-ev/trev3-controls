@@ -69,7 +69,7 @@
  * that'll trigger the implausibility check */
 #define APPS_MIN_IMPLAUSIBLE_DEVIATION 10
 
-#define IMPLAUSIBILITY_PERSISTENCE_PERIOD_US MsToUs(100ul)
+#define IMPLAUSIBILITY_PERSISTENCE_PERIOD_US MsToUs(200ul)
 
 //***************************************** used to be 25
 #define APPS_THRESHHOLD_BRAKE_PLAUSIBILITY 25
@@ -79,19 +79,25 @@
 
 /* apps 1 */
 
-#define APPS_1_MAX_VOLTAGE 3550
+#define APPS_1_MAX_VOLTAGE 10000
+#define APPS_1_MAX_VOLTAGE_PT 3550
+/*3550*/
+/*4900*/
 
-#define APPS_1_MIN_VOLTAGE 850
+#define APPS_1_MIN_VOLTAGE 830
+/*850*/
+/*1200*/
 
-#define APPS_1_VOLTAGE_RANGE (APPS_1_MAX_VOLTAGE - APPS_1_MIN_VOLTAGE)
+#define APPS_1_VOLTAGE_RANGE (APPS_1_MAX_VOLTAGE_PT - APPS_1_MIN_VOLTAGE)
 
 /* apps 2 */
 
-#define APPS_2_MAX_VOLTAGE 4750
+#define APPS_2_MAX_VOLTAGE 10000
+#define APPS_2_MAX_VOLTAGE_PT 4750
 
 #define APPS_2_MIN_VOLTAGE 930
 
-#define APPS_2_VOLTAGE_RANGE (APPS_2_MAX_VOLTAGE - APPS_2_MIN_VOLTAGE)
+#define APPS_2_VOLTAGE_RANGE (APPS_2_MAX_VOLTAGE_PT - APPS_2_MIN_VOLTAGE)
 
 
 /* bse */
@@ -101,7 +107,7 @@
 
 #define BRAKES_ENGAGED_BSE_THRESHOLD 550
 
-#define BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD 550
+#define BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD 550 //1800
 
 /* percent to torque algorithm */
 // #define PCT_TRAVEL_TO_TORQUE(val) ((int)(((float)(val) / 100.0) * 112.0))
@@ -114,8 +120,9 @@
 #define SDC_ON 1
 
 /**********************************************************/
-#define SDC_OFF 0
+#define SDC_OFF 0 //0
 /**********************************************************/
+
 
 /**************************************************************************
  * Controls Math Macros
@@ -168,8 +175,8 @@
  #define CYCLE_TIME MsToUs(5ul)
 
  #define PRECHARGE_VOLTAGE_THRESHHOLD 268
- #define TORQUE_LIMITING_RPM_THRESHHOLD 25
- #define RPM_BASED_TORQUE_LIMIT 30
+ #define TORQUE_LIMITING_RPM_THRESHHOLD 80
+ #define RPM_BASED_TORQUE_LIMIT 15
 
 /* Application Database,
  * needed for TTC-Downloader
@@ -274,7 +281,8 @@ void get_apps(ubyte2 *apps_pct_result, bool *error) {
 
             // if the values never became plausible, then indicate an error
             *apps_pct_result = 0;
-            *error = TRUE;
+            // *error = TRUE;
+            *error = 1;
             return;
         }
 
@@ -283,7 +291,8 @@ void get_apps(ubyte2 *apps_pct_result, bool *error) {
         *apps_pct_result = ((apps_1_pct) + (apps_2_pct)) / 2;
         *error = FALSE;
     } else {
-        *error = TRUE;
+        // *error = TRUE;
+        *error = 2;
         *apps_pct_result = 0;
     }
 }
@@ -540,6 +549,7 @@ void main (void)
     ubyte4 limited_torque = 0;
     ubyte4 d0 = 0;
     ubyte4 d1 = 0;
+    ubyte4 motor_rpm_torque_limit = CONTINUOUS_TORQUE_MAX;
 
     // whether a new motor info message has been received since the last time
     bool motor_info_message_received = FALSE;
@@ -575,9 +585,11 @@ void main (void)
          */
         IO_Driver_TaskBegin();
 
+	/*
         // read messages from tms
         read_tms_messages(handle_tms_summary_r, &tms_summary_can_frame, &tms_summary_message_received,
                           handles_tms_module_info_r, tms_module_can_frames, tms_module_message_received);
+	*/
 
         // read message from inverter with motor speed and update motor speed accordingly
         read_can_msg(handle_inverter_motor_info_r, &inverter_motor_info_can_frame, &motor_info_message_received);
@@ -683,6 +695,7 @@ void main (void)
                     // no transition into another state -> send controls message
                     torque = pct_travel_to_torque(apps_pct_result);
 
+
                     // limit torque based on pack voltage
                     if (pack_voltage_updated_once) {
                         limited_torque = (ubyte4) (voltage_to_torque_limit(pack_voltage));
@@ -692,11 +705,14 @@ void main (void)
                         }
                     }
 
+
                     // limit torque based on RPM
                     if (motor_speed_updated_once) {
-                        if (last_speed < TORQUE_LIMITING_RPM_THRESHHOLD &&
-                            torque > RPM_BASED_TORQUE_LIMIT) {
-                                torque = RPM_BASED_TORQUE_LIMIT;
+                        if (last_speed < TORQUE_LIMITING_RPM_THRESHHOLD) {
+				motor_rpm_torque_limit = (ubyte4) (15 + (float)(0.25 * last_speed));
+				if (torque > motor_rpm_torque_limit) {
+                                     torque = motor_rpm_torque_limit;
+                                }
                             }
                     }
 
@@ -718,7 +734,6 @@ void main (void)
                     controls_can_frame.data[3] = 0;
                     // forward direction
                     controls_can_frame.data[4] = 1;
-                    // enable inverter
                     controls_can_frame.data[5] = 1;
                     controls_can_frame.data[6] = 0;
                     controls_can_frame.data[7] = 0;
@@ -772,11 +787,13 @@ void main (void)
             }
             */
 
+	    /*
             for (i = 0; i < NUM_MODULE_FRAMES; i++) {
                 if (tms_module_message_received[i]) {
                     IO_CAN_WriteFIFO(handle_fifo_w_debug, &(tms_module_can_frames[i]), 1);
                 }
             }
+            */
 
             if (voltage_info_message_received) {
                 IO_CAN_WriteFIFO(handle_fifo_w_debug, &inverter_voltage_info_can_frame, 1);
@@ -797,6 +814,42 @@ void main (void)
 
             IO_CAN_WriteFIFO(handle_fifo_w, &debug_can_frame, 1);
             IO_CAN_WriteFIFO(handle_fifo_w_debug, &debug_can_frame, 1);
+
+    ubyte2 apps_1_val;
+    bool apps_1_fresh;
+    ubyte2 apps_2_val;
+    bool apps_2_fresh;
+
+    // get voltage values
+    IO_ADC_Get(IO_PIN_APPS_1, &apps_1_val, &apps_1_fresh);
+    IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
+
+	    debug_can_frame.id = 0xDC;
+            if (apps_error) {
+            debug_can_frame.data[0] = apps_error;
+            } else {
+            debug_can_frame.data[0] = 0;
+            }
+
+            if (bse_error) {
+            debug_can_frame.data[1] = 1;
+            } else {
+            debug_can_frame.data[1] = 0;
+            }
+
+debug_can_frame.data[2] = apps_1_val >> 8;
+debug_can_frame.data[3] = apps_1_val & 0xFF;
+
+debug_can_frame.data[4] = apps_2_val >> 8;
+debug_can_frame.data[5] = apps_2_val & 0xFF;
+
+debug_can_frame.data[6] = motor_rpm_torque_limit >> 8;
+debug_can_frame.data[7] = motor_rpm_torque_limit & 0xFF;
+
+            IO_CAN_WriteFIFO(handle_fifo_w, &debug_can_frame, 1);
+            IO_CAN_WriteFIFO(handle_fifo_w_debug, &debug_can_frame, 1);
+
+            debug_can_frame.id = 0xDB;
 
         }
 
