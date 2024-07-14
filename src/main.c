@@ -107,7 +107,7 @@
 
 #define BRAKES_ENGAGED_BSE_THRESHOLD 550
 
-#define BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD 550 //1800
+#define BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD 1800
 
 /* percent to torque algorithm */
 // #define PCT_TRAVEL_TO_TORQUE(val) ((int)(((float)(val) / 100.0) * 112.0))
@@ -152,7 +152,7 @@
 #define VCU_INVERTER_SETTINGS_CAN_ID 0xC1
 #define VCU_DEBUG_CAN_ID 0xDB
 
-#define TMS_SUMMARY_CAN_ID 0x13
+#define TMS_SUMMARY_CAN_ID 0x1
 #define TMS_PACK_VOLT_LO 2
 #define TMS_PACK_VOLT_HI 3
 
@@ -164,9 +164,6 @@
 
 #define INVERTER_MOTOR_SPEED_LO 2
 #define INVERTER_MOTOR_SPEED_HI 3
-
-#define NUM_MODULES 6
-#define NUM_MODULE_FRAMES (NUM_MODULES * 3)
 
 /**************************************************************************
  * Other
@@ -332,16 +329,6 @@ void read_can_msg(ubyte1 handle_r, IO_CAN_DATA_FRAME* dst_data_frame, bool *msg_
 
 }
 
-void read_tms_messages(ubyte1 summary_handle_r, IO_CAN_DATA_FRAME* summary_dst_data_frame, bool* summary_msg_received,
-                       ubyte1* module_handles, IO_CAN_DATA_FRAME* module_data_frames, bool* module_msg_received) {
-    int i = 0;
-    read_can_msg(summary_handle_r, summary_dst_data_frame, summary_msg_received);
-
-    for (i = 0; i < NUM_MODULE_FRAMES; i++) {
-        read_can_msg(module_handles[i], &(module_data_frames[i]), &(module_msg_received[i]));
-    }
-}
-
 double voltage_to_torque_limit (ubyte2 pack_voltage) {
     if (pack_voltage < PRECHARGE_VOLTAGE_THRESHHOLD) {
         return 0;
@@ -388,7 +375,6 @@ void main (void)
 
     // receiving
     ubyte1 handle_tms_summary_r;
-    ubyte1 handles_tms_module_info_r[NUM_MODULE_FRAMES];
     ubyte1 handle_inverter_motor_info_r;
     ubyte1 handle_inverter_voltage_info_r;
 
@@ -408,7 +394,6 @@ void main (void)
 
     // CAN frames for reading from tms
     IO_CAN_DATA_FRAME tms_summary_can_frame;
-    IO_CAN_DATA_FRAME tms_module_can_frames[NUM_MODULE_FRAMES];
 
     // CAN frame for reading from inverter
     IO_CAN_DATA_FRAME inverter_motor_info_can_frame;
@@ -450,16 +435,6 @@ void main (void)
                      , IO_CAN_STD_FRAME
                      , TMS_SUMMARY_CAN_ID
                      , 0x1FFFFFFF);
-
-    // configure the 18 handles for the module info (3 for each module)
-    for (int i = 0; i < NUM_MODULE_FRAMES; i++) {
-        IO_CAN_ConfigMsg( &handles_tms_module_info_r[i]
-                         , CAN_CHANNEL
-                         , IO_CAN_MSG_READ
-                         , IO_CAN_STD_FRAME
-                         , (i + 1)
-                         , 0x1FFFFFFF);
-    }
 
     IO_CAN_ConfigMsg( &handle_inverter_motor_info_r
                  , CAN_CHANNEL
@@ -542,8 +517,6 @@ void main (void)
 
     /* Voltage checking functionality */
     bool tms_summary_message_received = FALSE;
-    bool tms_module_message_received[NUM_MODULE_FRAMES] = {FALSE};
-    int i;
 
     ubyte4 torque = 0;
     ubyte4 limited_torque = 0;
@@ -584,12 +557,8 @@ void main (void)
          * the beginning of every SW cycle
          */
         IO_Driver_TaskBegin();
-
-	/*
-        // read messages from tms
-        read_tms_messages(handle_tms_summary_r, &tms_summary_can_frame, &tms_summary_message_received,
-                          handles_tms_module_info_r, tms_module_can_frames, tms_module_message_received);
-	*/
+        
+        read_can_msg(handle_tms_summary_r, &tms_summary_can_frame, &tms_summary_message_received);
 
         // read message from inverter with motor speed and update motor speed accordingly
         read_can_msg(handle_inverter_motor_info_r, &inverter_motor_info_can_frame, &motor_info_message_received);
@@ -709,11 +678,12 @@ void main (void)
                     // limit torque based on RPM
                     if (motor_speed_updated_once) {
                         if (last_speed < TORQUE_LIMITING_RPM_THRESHHOLD) {
-				motor_rpm_torque_limit = (ubyte4) (15 + (float)(0.25 * last_speed));
-				if (torque > motor_rpm_torque_limit) {
-                                     torque = motor_rpm_torque_limit;
-                                }
+                        	motor_rpm_torque_limit = (ubyte4) (RPM_BASED_TORQUE_LIMIT + (float)(0.25 * last_speed));
+                        	
+                        	if (torque > motor_rpm_torque_limit) {
+                        		torque = motor_rpm_torque_limit;
                             }
+                       }
                     }
 
                     // limit torque based on continuous torque max
@@ -781,19 +751,10 @@ void main (void)
                 }
 
             }
-            /*
+            
             if (tms_summary_message_received) {
-                IO_CAN_WriteFIFO(handle_fifo_w_debug, &tms_summary_can_frame, 1);
+            	IO_CAN_WriteFIFO(handle_fifo_w_debug, &tms_summary_can_frame, 1);
             }
-            */
-
-	    /*
-            for (i = 0; i < NUM_MODULE_FRAMES; i++) {
-                if (tms_module_message_received[i]) {
-                    IO_CAN_WriteFIFO(handle_fifo_w_debug, &(tms_module_can_frames[i]), 1);
-                }
-            }
-            */
 
             if (voltage_info_message_received) {
                 IO_CAN_WriteFIFO(handle_fifo_w_debug, &inverter_voltage_info_can_frame, 1);
@@ -815,16 +776,16 @@ void main (void)
             IO_CAN_WriteFIFO(handle_fifo_w, &debug_can_frame, 1);
             IO_CAN_WriteFIFO(handle_fifo_w_debug, &debug_can_frame, 1);
 
-    ubyte2 apps_1_val;
-    bool apps_1_fresh;
-    ubyte2 apps_2_val;
-    bool apps_2_fresh;
+            ubyte2 apps_1_val;
+            bool apps_1_fresh;
+            ubyte2 apps_2_val;
+            bool apps_2_fresh;
 
-    // get voltage values
-    IO_ADC_Get(IO_PIN_APPS_1, &apps_1_val, &apps_1_fresh);
-    IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
+            // get voltage values
+            IO_ADC_Get(IO_PIN_APPS_1, &apps_1_val, &apps_1_fresh);
+            IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
 
-	    debug_can_frame.id = 0xDC;
+            debug_can_frame.id = 0xDC;
             if (apps_error) {
             debug_can_frame.data[0] = apps_error;
             } else {
@@ -837,14 +798,14 @@ void main (void)
             debug_can_frame.data[1] = 0;
             }
 
-debug_can_frame.data[2] = apps_1_val >> 8;
-debug_can_frame.data[3] = apps_1_val & 0xFF;
+            debug_can_frame.data[2] = apps_1_val >> 8;
+            debug_can_frame.data[3] = apps_1_val & 0xFF;
 
-debug_can_frame.data[4] = apps_2_val >> 8;
-debug_can_frame.data[5] = apps_2_val & 0xFF;
+            debug_can_frame.data[4] = apps_2_val >> 8;
+            debug_can_frame.data[5] = apps_2_val & 0xFF;
 
-debug_can_frame.data[6] = motor_rpm_torque_limit >> 8;
-debug_can_frame.data[7] = motor_rpm_torque_limit & 0xFF;
+            debug_can_frame.data[6] = motor_rpm_torque_limit >> 8;
+            debug_can_frame.data[7] = motor_rpm_torque_limit & 0xFF;
 
             IO_CAN_WriteFIFO(handle_fifo_w, &debug_can_frame, 1);
             IO_CAN_WriteFIFO(handle_fifo_w_debug, &debug_can_frame, 1);
