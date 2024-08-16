@@ -103,7 +103,7 @@
 /* bse */
 #define BSE_MAX_VOLTAGE 4510
 
-#define BSE_MIN_VOLTAGE 490
+#define BSE_MIN_VOLTAGE 100
 
 #define BRAKES_ENGAGED_BSE_THRESHOLD 550
 
@@ -113,7 +113,7 @@
 // #define PCT_TRAVEL_TO_TORQUE(val) ((int)(((float)(val) / 100.0) * 112.0))
 #define PCT_TRAVEL_FOR_MAX_TORQUE 80
 
-#define CONTINUOUS_TORQUE_MAX 112
+#define CONTINUOUS_TORQUE_MAX 200
 /**************************************************************************
  * SDC Settings
  ***************************************************************************/
@@ -152,12 +152,13 @@
 #define VCU_INVERTER_SETTINGS_CAN_ID 0xC1
 #define VCU_DEBUG_CAN_ID 0xDB
 
-#define TMS_SUMMARY_CAN_ID 0x1
-#define TMS_PACK_VOLT_LO 2
-#define TMS_PACK_VOLT_HI 3
+#define TMS_SUMMARY_1_CAN_ID 0x1
+#define TMS_SUMMARY_2_CAN_ID 0x2
+
 
 #define MOTOR_INFO_CAN_ID 0xA5
 #define VOLTAGE_INFO_CAN_ID 0xA7
+#define CURRENT_INFO_CAN_ID 0xA6
 
 #define INVERTER_PACK_VOLT_LO 0
 #define INVERTER_PACK_VOLT_HI 1
@@ -343,7 +344,7 @@ ubyte4 pct_travel_to_torque (ubyte4 pct_travel) {
          return CONTINUOUS_TORQUE_MAX;
     }
 
-    return ((ubyte4)(((float)(pct_travel) / PCT_TRAVEL_FOR_MAX_TORQUE) * 112.0));
+    return ((ubyte4)(((float)(pct_travel) / PCT_TRAVEL_FOR_MAX_TORQUE) * 200.0));
 }
 
 
@@ -374,9 +375,11 @@ void main (void)
     ubyte1 handle_fifo_w_debug;
 
     // receiving
-    ubyte1 handle_tms_summary_r;
+    ubyte1 handle_tms_summary_1_r;
+    ubyte1 handle_tms_summary_2_r;
     ubyte1 handle_inverter_motor_info_r;
     ubyte1 handle_inverter_voltage_info_r;
+    ubyte1 handle_inverter_current_info_r;
 
     /* can frame used to send torque requests to the inverter */
     IO_CAN_DATA_FRAME controls_can_frame;
@@ -393,11 +396,14 @@ void main (void)
     }
 
     // CAN frames for reading from tms
-    IO_CAN_DATA_FRAME tms_summary_can_frame;
+    IO_CAN_DATA_FRAME tms_summary_1_can_frame;
+    IO_CAN_DATA_FRAME tms_summary_2_can_frame;
+
 
     // CAN frame for reading from inverter
     IO_CAN_DATA_FRAME inverter_motor_info_can_frame;
     IO_CAN_DATA_FRAME inverter_voltage_info_can_frame;
+    IO_CAN_DATA_FRAME inverter_current_info_can_frame;
 
     /* can frame used for debugging */
     IO_CAN_DATA_FRAME debug_can_frame;
@@ -429,11 +435,18 @@ void main (void)
     				 , VCU_CONTROLS_CAN_ID
     				 , 0);
 
-    IO_CAN_ConfigMsg( &handle_tms_summary_r
+    IO_CAN_ConfigMsg( &handle_tms_summary_1_r
                      , CAN_CHANNEL
                      , IO_CAN_MSG_READ
                      , IO_CAN_STD_FRAME
-                     , TMS_SUMMARY_CAN_ID
+                     , TMS_SUMMARY_1_CAN_ID
+                     , 0x1FFFFFFF);
+
+    IO_CAN_ConfigMsg( &handle_tms_summary_2_r
+                     , CAN_CHANNEL
+                     , IO_CAN_MSG_READ
+                     , IO_CAN_STD_FRAME
+                     , TMS_SUMMARY_2_CAN_ID
                      , 0x1FFFFFFF);
 
     IO_CAN_ConfigMsg( &handle_inverter_motor_info_r
@@ -450,6 +463,12 @@ void main (void)
                  , VOLTAGE_INFO_CAN_ID
                  , 0x1FFFFFFF);
 
+    IO_CAN_ConfigMsg( &handle_inverter_current_info_r
+                 , CAN_CHANNEL
+                 , IO_CAN_MSG_READ
+                 , IO_CAN_STD_FRAME
+                 , CURRENT_INFO_CAN_ID
+                 , 0x1FFFFFFF);
 
     IO_CAN_ConfigFIFO( &handle_fifo_w_debug
     				 , DEBUG_CAN_CHANNEL
@@ -516,7 +535,8 @@ void main (void)
 
 
     /* Voltage checking functionality */
-    bool tms_summary_message_received = FALSE;
+    bool tms_summary_1_message_received = FALSE;
+    bool tms_summary_2_message_received = FALSE;
 
     ubyte4 torque = 0;
     ubyte4 limited_torque = 0;
@@ -540,6 +560,9 @@ void main (void)
     // whether any voltage info has been received
     bool pack_voltage_updated_once = FALSE;
 
+    //inverter current info received
+    bool current_info_message_received = FALSE;
+
 
     /*******************************************/
     /*       PERIODIC APPLICATION CODE         */
@@ -557,8 +580,13 @@ void main (void)
          * the beginning of every SW cycle
          */
         IO_Driver_TaskBegin();
-        
-        read_can_msg(handle_tms_summary_r, &tms_summary_can_frame, &tms_summary_message_received);
+
+        // read tms messages
+        read_can_msg(handle_tms_summary_1_r, &tms_summary_1_can_frame, &tms_summary_1_message_received);
+        read_can_msg(handle_tms_summary_2_r, &tms_summary_2_can_frame, &tms_summary_2_message_received);
+
+        // read current info from inverter
+        read_can_msg(handle_inverter_current_info_r, &inverter_current_info_can_frame, &current_info_message_received);
 
         // read message from inverter with motor speed and update motor speed accordingly
         read_can_msg(handle_inverter_motor_info_r, &inverter_motor_info_can_frame, &motor_info_message_received);
@@ -666,30 +694,30 @@ void main (void)
 
 
                     // limit torque based on pack voltage
-                    if (pack_voltage_updated_once) {
-                        limited_torque = (ubyte4) (voltage_to_torque_limit(pack_voltage));
+                    // if (pack_voltage_updated_once) {
+                    //     limited_torque = (ubyte4) (voltage_to_torque_limit(pack_voltage));
 
-                        if (torque > limited_torque) {
-                            torque = limited_torque;
-                        }
-                    }
+                    //     if (torque > limited_torque) {
+                    //         torque = limited_torque;
+                    //     }
+                    // }
 
 
-                    // limit torque based on RPM
-                    if (motor_speed_updated_once) {
-                        if (last_speed < TORQUE_LIMITING_RPM_THRESHHOLD) {
-                        	motor_rpm_torque_limit = (ubyte4) (RPM_BASED_TORQUE_LIMIT + (float)(0.25 * last_speed));
-                        	
-                        	if (torque > motor_rpm_torque_limit) {
-                        		torque = motor_rpm_torque_limit;
-                            }
-                       }
-                    }
+                    // // limit torque based on RPM
+                    // if (motor_speed_updated_once) {
+                    //     if (last_speed < TORQUE_LIMITING_RPM_THRESHHOLD) {
+                    //     	motor_rpm_torque_limit = (ubyte4) (RPM_BASED_TORQUE_LIMIT + (float)(0.25 * last_speed));
 
-                    // limit torque based on continuous torque max
-                    if (torque > CONTINUOUS_TORQUE_MAX) {
-                       torque = CONTINUOUS_TORQUE_MAX;
-                    }
+                    //     	if (torque > motor_rpm_torque_limit) {
+                    //     		torque = motor_rpm_torque_limit;
+                    //         }
+                    //    }
+                    // }
+
+                    // // limit torque based on continuous torque max
+                    // if (torque > CONTINUOUS_TORQUE_MAX) {
+                    //    torque = CONTINUOUS_TORQUE_MAX;
+                    // }
 
                     if (torque < 0) {
                         torque = 0;
@@ -751,13 +779,26 @@ void main (void)
                 }
 
             }
-            
-            if (tms_summary_message_received) {
-            	IO_CAN_WriteFIFO(handle_fifo_w_debug, &tms_summary_can_frame, 1);
+
+            // echo tms and inverter battery info messages
+            if (tms_summary_1_message_received) {
+            	IO_CAN_WriteFIFO(handle_fifo_w_debug, &tms_summary_1_can_frame, 1);
+            }
+
+            if (tms_summary_2_message_received) {
+                IO_CAN_WriteFIFO(handle_fifo_w_debug, &tms_summary_2_can_frame, 1);
+            }
+
+            if (motor_info_message_received) {
+                IO_CAN_WriteFIFO(handle_fifo_w_debug, &inverter_motor_info_can_frame, 1);
             }
 
             if (voltage_info_message_received) {
                 IO_CAN_WriteFIFO(handle_fifo_w_debug, &inverter_voltage_info_can_frame, 1);
+            }
+
+            if (current_info_message_received) {
+                IO_CAN_WriteFIFO(handle_fifo_w_debug, &inverter_current_info_can_frame, 1);
             }
 
             debug_can_frame.data[0] = apps_pct_result;
