@@ -9,9 +9,9 @@ space	spe:xc16x:code	8	8
 space	spe:xc16x:bita	2	8
 # chip <name> <id> <mau size> <size> <type>
 chip	spe:DSRAM	4	8	16384	ram
-chip	spe:Flash	2	8	786432	rom
 chip	spe:PSRAM	1	8	65536	ram
 chip	xram	0	8	524288	ram
+chip	spe:Flash	2	8	786432	rom
 chip	spe:DPRAM	3	8	2048	ram
 # map <space id> <start in space> <size in space> <chip id> <start on chip>
 map	7	4194304	524288	0	0

@@ -15,35 +15,12 @@
 #include "IO_DIO.h"
 #include "APDB.h"
 
-/**************************************************************************
- * Utility Macros
- ***************************************************************************/
-
-/* absolute value macro (so we don't have to import all of stdlib.h
- * for one macro)
- */
-#define Abs(k) (((k) < 0) ? ((-1) * (k)) : (k))
-
-/* macro to convert a milliseconds time to microseconds (for rtc functions) */
-#define MsToUs(x) ((x)*(1000ul))
-
-
+#include "apps.h"
+#include "bse.h"
+#include "utilities.h"
 /**************************************************************************
  * Sensor Pins
  ***************************************************************************/
-
-/* APPS 1 -> pin 152 (aka adc 5V 0)*/
-#define IO_PIN_APPS_1 IO_ADC_5V_00
-#define IO_APPS_1_SUPPLY IO_ADC_SENSOR_SUPPLY_0
-
-/* APPS 2 -> pin 140 (aka adc 5V 1)*/
-#define IO_PIN_APPS_2 IO_ADC_5V_01
-#define IO_APPS_2_SUPPLY IO_ADC_SENSOR_SUPPLY_0
-
-/* BSE -> pin 147 (aka adc 5V 7)*/
-#define IO_PIN_BSE IO_ADC_5V_07
-#define IO_BSE_SUPPLY IO_ADC_SENSOR_SUPPLY_1
-
 /* RTD -> pin 263 (aka digital in 0) (switched to ground with pullup) */
 #define IO_PIN_RTD IO_DI_00
 
@@ -64,47 +41,6 @@
 /**************************************************************************
  * APPS, BSE Settings
  ***************************************************************************/
-
-/* min. difference between the APPS pct travels
- * that'll trigger the implausibility check */
-#define APPS_MIN_IMPLAUSIBLE_DEVIATION 10
-
-#define IMPLAUSIBILITY_PERSISTENCE_PERIOD_US MsToUs(100ul)
-
-//***************************************** used to be 25
-#define APPS_THRESHHOLD_BRAKE_PLAUSIBILITY 25
-//*******************************************************
-
-#define APPS_THRESHHOLD_REESTABLISH_PLAUSIBILITY 5
-
-/* apps 1 */
-
-#define APPS_1_MAX_VOLTAGE 4550
-#define APPS_1_MIN_VOLTAGE 1280
-#define APPS_1_VOLTAGE_RANGE (APPS_1_MAX_VOLTAGE - APPS_1_MIN_VOLTAGE)
-
-/* apps 2 */
-#define APPS_2_MAX_VOLTAGE 3300
-#define APPS_2_MIN_VOLTAGE 250
-#define APPS_2_VOLTAGE_RANGE (APPS_2_MAX_VOLTAGE - APPS_2_MIN_VOLTAGE)
-
-#define APPS_VOLTAGE_DEADZONE 150
-#define APPS_REPEATED_ERROR_MAX 5
-#define APPS_DEADZONE 2
-
-#define APPS_IMPLAUSIBILITY_ERROR 1
-#define APPS_OUT_OF_RANGE_ERROR 2
-
-
-/* bse */
-#define BSE_MAX_VOLTAGE 4510
-
-#define BSE_MIN_VOLTAGE 100
-
-#define BRAKES_ENGAGED_BSE_THRESHOLD 550
-
-#define BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD 1800
-
 /* percent to torque algorithm */
 // #define PCT_TRAVEL_TO_TORQUE(val) ((int)(((float)(val) / 100.0) * 112.0))
 #define PCT_TRAVEL_FOR_MAX_TORQUE 80
@@ -203,143 +139,6 @@ void get_rtd(bool *rtd_val) {
 void get_sdc(bool *sdc_val) {
     IO_DI_Get(IO_PIN_SDC, sdc_val);
 }
-
-ubyte2 voltage_to_pct_travel_apps_1(ubyte2 apps_1_pct) {
-    if (apps_1_pct < APPS_1_MIN_VOLTAGE) {
-        return 0;
-    }
-
-    if (apps_1_pct > APPS_1_MAX_VOLTAGE) {
-        return 100;
-    }
-
-    return ((apps_1_pct - APPS_1_MIN_VOLTAGE) / (APPS_1_VOLTAGE_RANGE));
-
-}
-
-ubyte2 voltage_to_pct_travel_apps_2(ubyte2 apps_2_pct) {
-    if (apps_2_pct < APPS_2_MIN_VOLTAGE) {
-        return 0;
-    }
-
-    if (apps_2_pct > APPS_2_MAX_VOLTAGE) {
-        return 100;
-    }
-
-    return ((apps_2_pct - APPS_2_MIN_VOLTAGE) / (APPS_2_VOLTAGE_RANGE));
-
-}
-
-// gets apps values, puts average pct travel into apps_pct_result
-// if an error is detected, turns error to TRUE
-void get_apps(ubyte2 *apps_pct_result, bool *error) {
-    ubyte2 apps_1_val;
-    bool apps_1_fresh;
-    ubyte2 apps_2_val;
-    bool apps_2_fresh;
-
-    // get voltage values
-    IO_ADC_Get(IO_PIN_APPS_1, &apps_1_val, &apps_1_fresh);
-    IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
-
-    bool apps_1_within_threshhold = (apps_1_val >= (APPS_1_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_1_val <= (APPS_1_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
-    bool apps_2_within_threshhold = (apps_2_val >= (APPS_2_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_2_val <= (APPS_2_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
-
-    ubyte4 implausibility_timestamp;
-    ubyte2 apps_1_pct;
-    ubyte2 apps_2_pct;
-    sbyte2 difference;
-
-    // check that both apps are within the treshhold
-    if (apps_1_within_threshhold &&
-        apps_2_within_threshhold) {
-
-        apps_1_pct = voltage_to_pct_travel_apps_1(apps_1_val);
-
-        if (apps_1_pct < 0) {
-            apps_1_pct = 0;
-        }
-
-        apps_2_pct = voltage_to_pct_travel_apps_2(apps_2_val);
-
-        if (apps_2_pct < 0) {
-            apps_2_pct = 0;
-        }
-
-        difference = apps_1_pct - apps_2_pct;
-
-
-        // check if there's an implausible deviation between the two
-        if ((Abs(difference)) >= APPS_MIN_IMPLAUSIBLE_DEVIATION) {
-            IO_RTC_StartTime(&implausibility_timestamp);
-
-            // continuously check APPS for 100 ms to check if it stays implausible
-            while (IO_RTC_GetTimeUS(implausibility_timestamp) <= IMPLAUSIBILITY_PERSISTENCE_PERIOD_US) {
-                IO_ADC_Get(IO_PIN_APPS_1, &apps_1_val, &apps_1_fresh);
-                IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
-
-                apps_1_within_threshhold = (apps_1_val >= (APPS_1_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_1_val <= (APPS_1_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
-                apps_2_within_threshhold = (apps_2_val >= (APPS_2_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_2_val <= (APPS_2_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
-
-                // if the values are plausible
-                if (apps_1_within_threshhold && apps_2_within_threshhold) {
-                    apps_1_pct = voltage_to_pct_travel_apps_1(apps_1_val);
-                    apps_2_pct = voltage_to_pct_travel_apps_2(apps_2_val);
-
-                    difference = apps_1_pct - apps_2_pct;
-
-                    // then return
-                    if ((Abs(difference)) < APPS_MIN_IMPLAUSIBLE_DEVIATION) {
-                        *apps_pct_result = ((apps_1_pct) + (apps_2_pct)) / 2;
-
-                        if (*apps_pct_result <= APPS_DEADZONE) {
-                            *apps_pct_result = 0;
-                        }
-                        *error = FALSE;
-                        return;
-                    }
-                }
-            }
-
-            // if the values never became plausible, then indicate an error
-            *apps_pct_result = 0;
-            *error = APPS_IMPLAUSIBILITY_ERROR;
-            return;
-        }
-
-
-        // set the result to the average of the two
-        *apps_pct_result = ((apps_1_pct) + (apps_2_pct)) / 2;
-        if (*apps_pct_result <= APPS_DEADZONE) {
-            *apps_pct_result = 0;
-        }
-        *error = FALSE;
-    } else {
-        *error = APPS_OUT_OF_RANGE_ERROR;
-        *apps_pct_result = 0;
-    }
-}
-
-void get_bse(ubyte2 *bse_result, bool *error) {
-    ubyte2 bse_val;
-    bool bse_fresh;
-
-    // get voltage from pin
-    IO_ADC_Get(IO_PIN_BSE, &bse_val, &bse_fresh);
-
-    // check if its in the treshhold
-    bool bse_within_threshhold = (bse_val >= BSE_MIN_VOLTAGE) && (bse_val <= BSE_MAX_VOLTAGE);
-
-    // error out if it isn't
-    if (bse_within_threshhold) {
-        *bse_result = bse_val;
-        *error = FALSE;
-    } else {
-        *bse_result = 0;
-        *error = TRUE;
-    }
-}
-
 
 void read_can_msg(ubyte1 handle_r, IO_CAN_DATA_FRAME* dst_data_frame, bool *msg_received) {
     IO_ErrorType can_read_error;
@@ -716,33 +515,6 @@ void main (void)
                 } else {
                     // no transition into another state -> send controls message
                     torque = pct_travel_to_torque(apps_pct_result);
-
-
-                    // limit torque based on pack voltage
-                    // if (pack_voltage_updated_once) {
-                    //     limited_torque = (ubyte4) (voltage_to_torque_limit(pack_voltage));
-
-                    //     if (torque > limited_torque) {
-                    //         torque = limited_torque;
-                    //     }
-                    // }
-
-
-                    // // limit torque based on RPM
-                    // if (motor_speed_updated_once) {
-                    //     if (last_speed < TORQUE_LIMITING_RPM_THRESHHOLD) {
-                    //     	motor_rpm_torque_limit = (ubyte4) (RPM_BASED_TORQUE_LIMIT + (float)(0.25 * last_speed));
-
-                    //     	if (torque > motor_rpm_torque_limit) {
-                    //     		torque = motor_rpm_torque_limit;
-                    //         }
-                    //    }
-                    // }
-
-                    // // limit torque based on continuous torque max
-                    // if (torque > CONTINUOUS_TORQUE_MAX) {
-                    //    torque = CONTINUOUS_TORQUE_MAX;
-                    // }
 
                     if (torque < 0) {
                         torque = 0;
