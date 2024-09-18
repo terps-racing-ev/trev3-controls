@@ -37,7 +37,7 @@ ubyte2 voltage_to_pct_travel_apps_2(ubyte2 apps_2_pct) {
 
 // gets apps values, puts average pct travel into apps_pct_result
 // if an error is detected, turns error to TRUE
-void get_apps(ubyte2 *apps_pct_result, bool *error) {
+void get_apps(ubyte2 *apps_pct_result, bool *error, ubyte1 *num_errors) {
     ubyte2 apps_1_val;
     bool apps_1_fresh;
     ubyte2 apps_2_val;
@@ -101,6 +101,7 @@ void get_apps(ubyte2 *apps_pct_result, bool *error) {
                             *apps_pct_result = 0;
                         }
                         *error = FALSE;
+                        *num_errors = 0;
                         return;
                     }
                 }
@@ -108,7 +109,12 @@ void get_apps(ubyte2 *apps_pct_result, bool *error) {
 
             // if the values never became plausible, then indicate an error
             *apps_pct_result = 0;
-            *error = APPS_IMPLAUSIBILITY_ERROR;
+
+            // only error out if APPS_REPEATED_ERROR_MAX errors have been encountered in a row
+            (*num_errors)++;
+            if ((*num_errors) > APPS_REPEATED_ERROR_MAX) {
+                *error = APPS_IMPLAUSIBILITY_ERROR;
+            }
             return;
         }
 
@@ -118,9 +124,14 @@ void get_apps(ubyte2 *apps_pct_result, bool *error) {
         if (*apps_pct_result <= APPS_DEADZONE) {
             *apps_pct_result = 0;
         }
+        *num_errors = 0;
         *error = FALSE;
     } else {
-        *error = APPS_OUT_OF_RANGE_ERROR;
+        // only error out if APPS_REPEATED_ERROR_MAX errors have been encountered in a row
+        (*num_errors)++;
+        if ((*num_errors) > APPS_REPEATED_ERROR_MAX) {
+            *error = APPS_OUT_OF_RANGE_ERROR;
+        }
         *apps_pct_result = 0;
     }
 }

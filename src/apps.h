@@ -60,7 +60,7 @@
 
 ubyte2 voltage_to_pct_travel_apps_1(ubyte2 apps_1_pct);
 ubyte2 voltage_to_pct_travel_apps_2(ubyte2 apps_2_pct);
-void get_apps(ubyte2 *apps_pct_result, bool *error);
+void get_apps(ubyte2 *apps_pct_result, bool *error, ubyte1 *num_errors);
 
 
 #endif // APPS_H_INCLUDED

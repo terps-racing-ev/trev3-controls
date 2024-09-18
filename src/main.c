@@ -330,8 +330,9 @@ void main (void)
                         NULL );
 
     /* APPS in general */
-    ubyte2 apps_pct_result;
-    bool apps_error;
+    ubyte2 apps_pct_result = 0;
+    bool apps_error = FALSE;
+    ubyte1 num_errors = 0;
 
     /* BSE */
     IO_ADC_ChannelInit( IO_PIN_BSE,
@@ -445,7 +446,7 @@ void main (void)
                 get_rtd(&rtd_val);
                 get_bse(&bse_result, &bse_error);
                 get_sdc(&sdc_val);
-                get_apps(&apps_pct_result, &apps_error);
+                get_apps(&apps_pct_result, &apps_error, &num_errors);
 
                 // transitions
                 // rtd on and brakes engaged -> play rtd sound
@@ -472,7 +473,7 @@ void main (void)
                     IO_DO_Set(IO_PIN_BUZZER, TRUE);
 
 
-                    // clear Inverter faults (
+                    // clear Inverter faults
                     inverter_settings_can_frame.data[0] = 20;
                     inverter_settings_can_frame.data[1] = 0;
                     inverter_settings_can_frame.data[2] = 1;
@@ -501,7 +502,7 @@ void main (void)
                 // get the rtd, apps, and bse
                 get_rtd(&rtd_val);
                 get_sdc(&sdc_val);
-                get_apps(&apps_pct_result, &apps_error);
+                get_apps(&apps_pct_result, &apps_error, &num_errors);
                 get_bse(&bse_result, &bse_error);
 
                 // transitions
@@ -551,7 +552,7 @@ void main (void)
                 // when brakes are engaged and apps > 25%, the car goes into this state
                 get_rtd(&rtd_val);
                 get_sdc(&sdc_val);
-                get_apps(&apps_pct_result, &apps_error);
+                get_apps(&apps_pct_result, &apps_error, &num_errors);
                 get_bse(&bse_result, &bse_error);
 
                 //*************************************
