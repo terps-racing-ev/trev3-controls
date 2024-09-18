@@ -69,7 +69,7 @@
  * that'll trigger the implausibility check */
 #define APPS_MIN_IMPLAUSIBLE_DEVIATION 10
 
-#define IMPLAUSIBILITY_PERSISTENCE_PERIOD_US MsToUs(200ul)
+#define IMPLAUSIBILITY_PERSISTENCE_PERIOD_US MsToUs(100ul)
 
 //***************************************** used to be 25
 #define APPS_THRESHHOLD_BRAKE_PLAUSIBILITY 25
@@ -79,25 +79,21 @@
 
 /* apps 1 */
 
-#define APPS_1_MAX_VOLTAGE 10000
-#define APPS_1_MAX_VOLTAGE_PT 3550
-/*3550*/
-/*4900*/
-
-#define APPS_1_MIN_VOLTAGE 830
-/*850*/
-/*1200*/
-
-#define APPS_1_VOLTAGE_RANGE (APPS_1_MAX_VOLTAGE_PT - APPS_1_MIN_VOLTAGE)
+#define APPS_1_MAX_VOLTAGE 4550
+#define APPS_1_MIN_VOLTAGE 1280
+#define APPS_1_VOLTAGE_RANGE (APPS_1_MAX_VOLTAGE - APPS_1_MIN_VOLTAGE)
 
 /* apps 2 */
+#define APPS_2_MAX_VOLTAGE 3300
+#define APPS_2_MIN_VOLTAGE 250
+#define APPS_2_VOLTAGE_RANGE (APPS_2_MAX_VOLTAGE - APPS_2_MIN_VOLTAGE)
 
-#define APPS_2_MAX_VOLTAGE 10000
-#define APPS_2_MAX_VOLTAGE_PT 4750
+#define APPS_VOLTAGE_DEADZONE 150
+#define APPS_REPEATED_ERROR_MAX 5
+#define APPS_DEADZONE 2
 
-#define APPS_2_MIN_VOLTAGE 930
-
-#define APPS_2_VOLTAGE_RANGE (APPS_2_MAX_VOLTAGE_PT - APPS_2_MIN_VOLTAGE)
+#define APPS_IMPLAUSIBILITY_ERROR 1
+#define APPS_OUT_OF_RANGE_ERROR 2
 
 
 /* bse */
@@ -122,16 +118,6 @@
 /**********************************************************/
 #define SDC_OFF 0 //0
 /**********************************************************/
-
-
-/**************************************************************************
- * Controls Math Macros
- ***************************************************************************/
-
-/* TODO: voltage->pct travel code*/
-// converts voltage into percent from 0 - 100
-#define VoltageToPctTravelApps1(val) ((((val) - APPS_1_MIN_VOLTAGE) / (APPS_1_VOLTAGE_RANGE / 100)))
-#define VoltageToPctTravelApps2(val) ((((val) - APPS_2_MIN_VOLTAGE) / (APPS_2_VOLTAGE_RANGE / 100)))
 
 /**************************************************************************
  * CAN Constants
@@ -218,6 +204,31 @@ void get_sdc(bool *sdc_val) {
     IO_DI_Get(IO_PIN_SDC, sdc_val);
 }
 
+ubyte2 voltage_to_pct_travel_apps_1(ubyte2 apps_1_pct) {
+    if (apps_1_pct < APPS_1_MIN_VOLTAGE) {
+        return 0;
+    }
+
+    if (apps_1_pct > APPS_1_MAX_VOLTAGE) {
+        return 100;
+    }
+
+    return ((apps_1_pct - APPS_1_MIN_VOLTAGE) / (APPS_1_VOLTAGE_RANGE));
+
+}
+
+ubyte2 voltage_to_pct_travel_apps_2(ubyte2 apps_2_pct) {
+    if (apps_2_pct < APPS_2_MIN_VOLTAGE) {
+        return 0;
+    }
+
+    if (apps_2_pct > APPS_2_MAX_VOLTAGE) {
+        return 100;
+    }
+
+    return ((apps_2_pct - APPS_2_MIN_VOLTAGE) / (APPS_2_VOLTAGE_RANGE));
+
+}
 
 // gets apps values, puts average pct travel into apps_pct_result
 // if an error is detected, turns error to TRUE
@@ -231,8 +242,8 @@ void get_apps(ubyte2 *apps_pct_result, bool *error) {
     IO_ADC_Get(IO_PIN_APPS_1, &apps_1_val, &apps_1_fresh);
     IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
 
-    bool apps_1_within_threshhold = (apps_1_val >= APPS_1_MIN_VOLTAGE) && (apps_1_val <= APPS_1_MAX_VOLTAGE);
-    bool apps_2_within_threshhold = (apps_2_val >= APPS_2_MIN_VOLTAGE) && (apps_2_val <= APPS_2_MAX_VOLTAGE);
+    bool apps_1_within_threshhold = (apps_1_val >= (APPS_1_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_1_val <= (APPS_1_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
+    bool apps_2_within_threshhold = (apps_2_val >= (APPS_2_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_2_val <= (APPS_2_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
 
     ubyte4 implausibility_timestamp;
     ubyte2 apps_1_pct;
@@ -240,11 +251,20 @@ void get_apps(ubyte2 *apps_pct_result, bool *error) {
     sbyte2 difference;
 
     // check that both apps are within the treshhold
-    if (apps_1_fresh && apps_1_within_threshhold &&
-        apps_2_fresh && apps_2_within_threshhold) {
+    if (apps_1_within_threshhold &&
+        apps_2_within_threshhold) {
 
-        apps_1_pct = VoltageToPctTravelApps1(apps_1_val);
-        apps_2_pct = VoltageToPctTravelApps2(apps_2_val);
+        apps_1_pct = voltage_to_pct_travel_apps_1(apps_1_val);
+
+        if (apps_1_pct < 0) {
+            apps_1_pct = 0;
+        }
+
+        apps_2_pct = voltage_to_pct_travel_apps_2(apps_2_val);
+
+        if (apps_2_pct < 0) {
+            apps_2_pct = 0;
+        }
 
         difference = apps_1_pct - apps_2_pct;
 
@@ -258,19 +278,23 @@ void get_apps(ubyte2 *apps_pct_result, bool *error) {
                 IO_ADC_Get(IO_PIN_APPS_1, &apps_1_val, &apps_1_fresh);
                 IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
 
-                apps_1_within_threshhold = (apps_1_val >= APPS_1_MIN_VOLTAGE) && (apps_1_val <= APPS_1_MAX_VOLTAGE);
-                apps_2_within_threshhold = (apps_2_val >= APPS_2_MIN_VOLTAGE) && (apps_2_val <= APPS_2_MAX_VOLTAGE);
+                apps_1_within_threshhold = (apps_1_val >= (APPS_1_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_1_val <= (APPS_1_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
+                apps_2_within_threshhold = (apps_2_val >= (APPS_2_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_2_val <= (APPS_2_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
 
                 // if the values are plausible
                 if (apps_1_within_threshhold && apps_2_within_threshhold) {
-                    apps_1_pct = VoltageToPctTravelApps1(apps_1_val);
-                    apps_2_pct = VoltageToPctTravelApps2(apps_2_val);
+                    apps_1_pct = voltage_to_pct_travel_apps_1(apps_1_val);
+                    apps_2_pct = voltage_to_pct_travel_apps_2(apps_2_val);
 
                     difference = apps_1_pct - apps_2_pct;
 
                     // then return
                     if ((Abs(difference)) < APPS_MIN_IMPLAUSIBLE_DEVIATION) {
                         *apps_pct_result = ((apps_1_pct) + (apps_2_pct)) / 2;
+
+                        if (*apps_pct_result <= APPS_DEADZONE) {
+                            *apps_pct_result = 0;
+                        }
                         *error = FALSE;
                         return;
                     }
@@ -279,18 +303,19 @@ void get_apps(ubyte2 *apps_pct_result, bool *error) {
 
             // if the values never became plausible, then indicate an error
             *apps_pct_result = 0;
-            // *error = TRUE;
-            *error = 1;
+            *error = APPS_IMPLAUSIBILITY_ERROR;
             return;
         }
 
 
         // set the result to the average of the two
         *apps_pct_result = ((apps_1_pct) + (apps_2_pct)) / 2;
+        if (*apps_pct_result <= APPS_DEADZONE) {
+            *apps_pct_result = 0;
+        }
         *error = FALSE;
     } else {
-        // *error = TRUE;
-        *error = 2;
+        *error = APPS_OUT_OF_RANGE_ERROR;
         *apps_pct_result = 0;
     }
 }
@@ -306,7 +331,7 @@ void get_bse(ubyte2 *bse_result, bool *error) {
     bool bse_within_threshhold = (bse_val >= BSE_MIN_VOLTAGE) && (bse_val <= BSE_MAX_VOLTAGE);
 
     // error out if it isn't
-    if (bse_fresh && bse_within_threshhold) {
+    if (bse_within_threshhold) {
         *bse_result = bse_val;
         *error = FALSE;
     } else {
