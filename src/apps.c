@@ -8,29 +8,29 @@
 #include "apps.h"
 #include "utilities.h"
 
-ubyte2 voltage_to_pct_travel_apps_1(ubyte2 apps_1_pct) {
-    if (apps_1_pct < APPS_1_MIN_VOLTAGE) {
+ubyte2 voltage_to_pct_travel_apps_1(ubyte2 apps_1_voltage) {
+    if (apps_1_voltage < APPS_1_MIN_VOLTAGE) {
         return 0;
     }
 
-    if (apps_1_pct > APPS_1_MAX_VOLTAGE) {
+    if (apps_1_voltage > APPS_1_MAX_VOLTAGE) {
         return 100;
     }
 
-    return ((apps_1_pct - APPS_1_MIN_VOLTAGE) / (APPS_1_VOLTAGE_RANGE));
+    return ((apps_1_voltage - APPS_1_MIN_VOLTAGE) / (APPS_1_VOLTAGE_RANGE / 100));
 
 }
 
-ubyte2 voltage_to_pct_travel_apps_2(ubyte2 apps_2_pct) {
-    if (apps_2_pct < APPS_2_MIN_VOLTAGE) {
+ubyte2 voltage_to_pct_travel_apps_2(ubyte2 apps_2_voltage) {
+    if (apps_2_voltage < APPS_2_MIN_VOLTAGE) {
         return 0;
     }
 
-    if (apps_2_pct > APPS_2_MAX_VOLTAGE) {
+    if (apps_2_voltage > APPS_2_MAX_VOLTAGE) {
         return 100;
     }
 
-    return ((apps_2_pct - APPS_2_MIN_VOLTAGE) / (APPS_2_VOLTAGE_RANGE));
+    return ((apps_2_voltage - APPS_2_MIN_VOLTAGE) / (APPS_2_VOLTAGE_RANGE / 100));
 
 }
 
