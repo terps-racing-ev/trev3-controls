@@ -88,6 +88,8 @@
 #define INVERTER_MOTOR_SPEED_LO 2
 #define INVERTER_MOTOR_SPEED_HI 3
 
+#define ORION_CAN_ID 0x99
+
 /**************************************************************************
  * Other
  ***************************************************************************/
@@ -204,6 +206,7 @@ void main (void)
     ubyte1 handle_inverter_motor_info_r;
     ubyte1 handle_inverter_voltage_info_r;
     ubyte1 handle_inverter_current_info_r;
+    ubyte1 handle_orion_r;
 
     /* can frame used to send torque requests to the inverter */
     IO_CAN_DATA_FRAME controls_can_frame;
@@ -228,6 +231,10 @@ void main (void)
     IO_CAN_DATA_FRAME inverter_motor_info_can_frame;
     IO_CAN_DATA_FRAME inverter_voltage_info_can_frame;
     IO_CAN_DATA_FRAME inverter_current_info_can_frame;
+
+
+    // CAN frame for orion
+    IO_CAN_DATA_FRAME orion_can_frame;
 
     /* can frame used for debugging */
     IO_CAN_DATA_FRAME debug_can_frame;
@@ -294,6 +301,13 @@ void main (void)
                  , CURRENT_INFO_CAN_ID
                  , 0x1FFFFFFF);
 
+    IO_CAN_ConfigMsg( &handle_orion_r
+                 , CAN_CHANNEL
+                 , IO_CAN_MSG_READ
+                 , IO_CAN_STD_FRAME
+                 , ORION_CAN_ID
+                 , 0x1FFFFFFF);
+
     IO_CAN_ConfigFIFO( &handle_fifo_w_debug
     				 , DEBUG_CAN_CHANNEL
     				 , FIFO_BUFFER_SIZE
@@ -301,6 +315,8 @@ void main (void)
     				 , IO_CAN_STD_FRAME
     				 , VCU_CONTROLS_CAN_ID
     				 , 0);
+
+
 
     /* rtd with 10k pull-up resistor*/
     bool rtd_val;
@@ -388,6 +404,9 @@ void main (void)
     //inverter current info received
     bool current_info_message_received = FALSE;
 
+    // orion message received
+    bool orion_message_received = TRUE;
+
 
     /*******************************************/
     /*       PERIODIC APPLICATION CODE         */
@@ -426,6 +445,10 @@ void main (void)
 
         // read message from inverter with voltage and update pack voltage accordingly
         read_can_msg(handle_inverter_voltage_info_r, &inverter_voltage_info_can_frame, &voltage_info_message_received);
+
+        // read message from orion
+        read_can_msg(handle_orion_r, &orion_can_frame, &orion_message_received);
+
         if (voltage_info_message_received == TRUE) {
             pack_voltage = ((inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_HI] << 8) | inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_LO]) / 10;
             pack_voltage_updated_once = TRUE;
@@ -597,6 +620,11 @@ void main (void)
 
             if (current_info_message_received) {
                 IO_CAN_WriteFIFO(handle_fifo_w_debug, &inverter_current_info_can_frame, 1);
+            }
+
+            if (orion_message_received) {
+                orion_can_frame.id = 0x11;
+                IO_CAN_WriteFIFO(handle_fifo_w, &orion_can_frame, 1);
             }
 
             debug_can_frame.data[0] = apps_pct_result;
