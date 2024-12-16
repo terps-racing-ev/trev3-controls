@@ -17,6 +17,7 @@
 
 #include "apps.h"
 #include "bse.h"
+#include "tsil.h"
 #include "utilities.h"
 /**************************************************************************
  * Sensor Pins
@@ -67,7 +68,7 @@
 
 /* The system sends CAN messages from a FIFO buffer, this constant defines
  * its size. If a message is added to the full buffer, it is ignored.
- */
+ */ 
 #define FIFO_BUFFER_SIZE 20
 
 #define VCU_CONTROLS_CAN_ID 0xC0
@@ -88,7 +89,8 @@
 #define INVERTER_MOTOR_SPEED_LO 2
 #define INVERTER_MOTOR_SPEED_HI 3
 
-#define ORION_CAN_ID 0x99
+#define ORION_CAN_ID 0x6B2
+#define ORION_IMD_STATUS_INDEX 0
 
 /**************************************************************************
  * Other
@@ -368,6 +370,10 @@ void main (void)
     /* buzzer */
     IO_DO_Init( IO_PIN_BUZZER );
 
+    /* lights */
+    IO_DO_Init( TSIL_GREEN_PIN );
+    IO_DO_Init( TSIL_RED_PIN );
+
     /* VCU State */
     enum VCU_State current_state = NOT_READY;
 
@@ -405,7 +411,8 @@ void main (void)
     bool current_info_message_received = FALSE;
 
     // orion message received
-    bool orion_message_received = TRUE;
+    bool orion_message_received = FALSE;
+    bool orion_message_received_once = FALSE;
 
 
     /*******************************************/
@@ -415,6 +422,7 @@ void main (void)
     /* main loop, executed periodically with a
      * defined cycle time (here: CYCLE_TIME_MS ms)
      */
+     
     while (1)
     {
         /* get a timestamp to implement the cycle time */
@@ -448,6 +456,10 @@ void main (void)
 
         // read message from orion
         read_can_msg(handle_orion_r, &orion_can_frame, &orion_message_received);
+
+        if (orion_message_received) {
+            orion_message_received_once = TRUE;
+        }
 
         if (voltage_info_message_received == TRUE) {
             pack_voltage = ((inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_HI] << 8) | inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_LO]) / 10;
@@ -601,15 +613,15 @@ void main (void)
 
             }
 
-            // echo tms and inverter battery info messages
+            // echo tms messages
             if (tms_summary_1_message_received) {
             	IO_CAN_WriteFIFO(handle_fifo_w_debug, &tms_summary_1_can_frame, 1);
             }
-
             if (tms_summary_2_message_received) {
                 IO_CAN_WriteFIFO(handle_fifo_w_debug, &tms_summary_2_can_frame, 1);
             }
 
+            // echo motor info message
             if (motor_info_message_received) {
                 IO_CAN_WriteFIFO(handle_fifo_w_debug, &inverter_motor_info_can_frame, 1);
             }
@@ -618,15 +630,30 @@ void main (void)
                 IO_CAN_WriteFIFO(handle_fifo_w_debug, &inverter_voltage_info_can_frame, 1);
             }
 
+
             if (current_info_message_received) {
                 IO_CAN_WriteFIFO(handle_fifo_w_debug, &inverter_current_info_can_frame, 1);
             }
 
-            if (orion_message_received) {
-                orion_can_frame.id = 0x11;
-                IO_CAN_WriteFIFO(handle_fifo_w, &orion_can_frame, 1);
+            // use the orion message to control light status
+            if (orion_message_received_once) {
+                // check IMD status and update light status accordingly
+                if (orion_can_frame.data[ORION_IMD_STATUS_INDEX] == 1) {
+                    set_light_to(SOLID_GREEN);
+                } else {
+                    set_light_to(BLINKING_RED);
+                }
+            } else {
+                set_light_to(BLINKING_RED);
             }
 
+
+            // run the lights (function call needed for lights to blink)
+            do_lights_action();
+
+
+            // send debug message
+            debug_can_frame.id = 0xDB;
             debug_can_frame.data[0] = apps_pct_result;
 
             debug_can_frame.data[1] = d0;
@@ -648,11 +675,15 @@ void main (void)
             ubyte2 apps_2_val;
             bool apps_2_fresh;
 
+
+
+            // send another debug message
             // get voltage values
             IO_ADC_Get(IO_PIN_APPS_1, &apps_1_val, &apps_1_fresh);
             IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
 
             debug_can_frame.id = 0xDC;
+
             if (apps_error) {
             debug_can_frame.data[0] = apps_error;
             } else {
@@ -677,7 +708,7 @@ void main (void)
             IO_CAN_WriteFIFO(handle_fifo_w, &debug_can_frame, 1);
             IO_CAN_WriteFIFO(handle_fifo_w_debug, &debug_can_frame, 1);
 
-            debug_can_frame.id = 0xDB;
+            
 
         }
 

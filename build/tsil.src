@@ -1,0 +1,810 @@
+	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09007774
+	; Options: -f cc39256a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2024 -DRTS_TTC_FLASH_DATE_MONTH=12 -DRTS_TTC_FLASH_DATE_DAY=15 -DRTS_TTC_FLASH_DATE_HOUR=21 -DRTS_TTC_FLASH_DATE_MINUTE=2 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\tsil.src
+	; Module start
+	.source	'src/tsil.c'
+code_set_light_to	.section	code, cluster 'set_light_to', new
+	.global	_set_light_to
+
+; src/tsil.c	     1  #include "IO_Driver.h"
+; src/tsil.c	     2  #include "IO_RTC.h"
+; src/tsil.c	     3  #include "IO_ADC.h"
+; src/tsil.c	     4  #include "IO_DIO.h"
+; src/tsil.c	     5  #include "APDB.h"
+; src/tsil.c	     6  
+; src/tsil.c	     7  #include "tsil.h"
+; src/tsil.c	     8  #include "utilities.h"
+; src/tsil.c	     9  
+; src/tsil.c	    10  enum TSIL_State current_state = BLINKING_RED;
+; src/tsil.c	    11  bool blinking_state = LIGHT_OFF;
+; src/tsil.c	    12  
+; src/tsil.c	    13  // timer which controls the blinking of the light
+; src/tsil.c	    14  ubyte4 light_timestamp;
+; src/tsil.c	    15  bool timer_initialized = FALSE;
+; src/tsil.c	    16  
+; src/tsil.c	    17  void set_light_to(enum TSIL_State s) {
+; Function _set_light_to
+_12:
+_set_light_to	.proc	far
+
+; src/tsil.c	    18      current_state = s;
+	extp	#@pag(_current_state),#0x1
+	movb	@pof(_current_state),rl2
+_101:
+
+; src/tsil.c	    19  }
+	ret
+_48:
+	; End of function
+	; End of section
+
+code_do_lights_action	.section	code, cluster 'do_lights_action', new
+	.global	_do_lights_action
+
+; src/tsil.c	    20  
+; src/tsil.c	    21  // if current state is blinking red, check whether the light needs to turn
+; src/tsil.c	    22  // on/off and do so.
+; src/tsil.c	    23  // if current state is solid green, make sure green light is on
+; src/tsil.c	    24  void do_lights_action() {
+; Function _do_lights_action
+_24:
+_do_lights_action	.proc	far
+
+; src/tsil.c	    25      if (current_state == BLINKING_RED) {
+	extp	#@pag(_current_state),#0x1
+	movb	rh4,@pof(_current_state)
+_69:
+	cmpb	rh4,#0x1
+	jmp+	cc_ne,_2
+_70:
+
+; src/tsil.c	    26          // if the timer hasn't been intialized yet (i.e. first function call with
+; src/tsil.c	    27          // blinking red as the current state), initialize the timer
+; src/tsil.c	    28          if (timer_initialized == FALSE) {
+	movb	rh4,#0x0
+_71:
+	extp	#@pag(_timer_initialized),#0x1
+	cmpb	rh4,@pof(_timer_initialized)
+	jmp+	cc_ne,_3
+_72:
+
+; src/tsil.c	    29              IO_RTC_StartTime(&light_timestamp);
+	movw	r2,#@sof(_light_timestamp)
+	movw	r3,#@seg(_light_timestamp)
+	call	_IO_RTC_StartTime
+_73:
+
+; src/tsil.c	    30              timer_initialized = TRUE;
+	movb	rh4,#0x1
+_74:
+	extp	#@pag(_timer_initialized),#0x1
+	movb	@pof(_timer_initialized),rh4
+_3:
+
+; src/tsil.c	    31          }
+; src/tsil.c	    32  
+; src/tsil.c	    33          // make sure green light is off
+; src/tsil.c	    34          IO_DO_Set( TSIL_GREEN_PIN, LIGHT_OFF );
+	movb	rl2,#0x19
+_75:
+	movb	rh2,#0x0
+	call	_IO_DO_Set
+_76:
+
+; src/tsil.c	    35  
+; src/tsil.c	    36          // blink on if we need to
+; src/tsil.c	    37          if (blinking_state == LIGHT_OFF && IO_RTC_GetTimeUS(light_timestamp) > BLINK_TIME_US) {
+	movb	rh4,#0x0
+_77:
+	extp	#@pag(_blinking_state),#0x1
+	cmpb	rh4,@pof(_blinking_state)
+	jmp+	cc_ne,_4
+_78:
+	exts	#@seg(_light_timestamp),#0x1
+	movw	r2,@sof(_light_timestamp)
+	exts	#@seg(_light_timestamp+0x2),#0x1
+	movw	r3,@sof(_light_timestamp+0x2)
+	call	_IO_RTC_GetTimeUS
+_79:
+	cmpw	r2,#0xd090
+	subcw	r3,#0x3
+	jmp+	cc_ule,_5
+_80:
+
+; src/tsil.c	    38              // turn light on
+; src/tsil.c	    39              IO_DO_Set( TSIL_RED_PIN, LIGHT_ON );
+	movb	rl2,#0x18
+_81:
+	movb	rh2,#0x1
+	call	_IO_DO_Set
+_82:
+
+; src/tsil.c	    40              blinking_state = LIGHT_ON;
+	movb	rh4,#0x1
+_83:
+	extp	#@pag(_blinking_state),#0x1
+	movb	@pof(_blinking_state),rh4
+_84:
+	jmp	_6
+_5:
+_4:
+
+; src/tsil.c	    41  
+; src/tsil.c	    42              // reset the timer
+; src/tsil.c	    43              IO_RTC_StartTime(&light_timestamp);
+; src/tsil.c	    44          } else if (blinking_state == LIGHT_ON && IO_RTC_GetTimeUS(light_timestamp) > BLINK_TIME_US) {
+	movb	rh4,#0x1
+_85:
+	extp	#@pag(_blinking_state),#0x1
+	cmpb	rh4,@pof(_blinking_state)
+	jmp+	cc_ne,_7
+_86:
+	exts	#@seg(_light_timestamp),#0x1
+	movw	r2,@sof(_light_timestamp)
+	exts	#@seg(_light_timestamp+0x2),#0x1
+	movw	r3,@sof(_light_timestamp+0x2)
+	call	_IO_RTC_GetTimeUS
+_87:
+	cmpw	r2,#0xd090
+	subcw	r3,#0x3
+	jmp+	cc_ule,_8
+_88:
+
+; src/tsil.c	    45              // turn light off
+; src/tsil.c	    46              IO_DO_Set( TSIL_RED_PIN, LIGHT_OFF );
+	movb	rl2,#0x18
+_89:
+	movb	rh2,#0x0
+	call	_IO_DO_Set
+_90:
+
+; src/tsil.c	    47              blinking_state = LIGHT_OFF;
+	extp	#@pag(_blinking_state),#0x1
+	movb	@pof(_blinking_state),ZEROS
+_6:
+
+; src/tsil.c	    48  
+; src/tsil.c	    49              // reset the timer
+; src/tsil.c	    50              IO_RTC_StartTime(&light_timestamp);
+	movw	r2,#@sof(_light_timestamp)
+	movw	r3,#@seg(_light_timestamp)
+	call	_IO_RTC_StartTime
+_91:
+
+; src/tsil.c	    51          }
+; src/tsil.c	    52  
+; src/tsil.c	    53      } else if (current_state == SOLID_GREEN) {
+; src/tsil.c	    54          // make sure red light is off
+; src/tsil.c	    55          IO_DO_Set( TSIL_RED_PIN, LIGHT_OFF );
+; src/tsil.c	    56          blinking_state = LIGHT_OFF;
+; src/tsil.c	    57  
+; src/tsil.c	    58          // turn on green light
+; src/tsil.c	    59          IO_DO_Set( TSIL_GREEN_PIN, LIGHT_ON );
+; src/tsil.c	    60      }
+; src/tsil.c	    61  }
+	ret
+_2:
+	cmpb	rh4,#0x0
+	jmp+	cc_ne,_10
+_92:
+	movb	rl2,#0x18
+_93:
+	movb	rh2,#0x0
+	call	_IO_DO_Set
+_94:
+	extp	#@pag(_blinking_state),#0x1
+	movb	@pof(_blinking_state),ZEROS
+_95:
+	movb	rl2,#0x19
+_96:
+	movb	rh2,#0x1
+	call	_IO_DO_Set
+_10:
+_8:
+_7:
+	ret
+_43:
+	; End of function
+	; End of section
+
+huge_current_state	.section	huge, byte, init, cluster 'current_state', new
+	.global	_current_state
+_current_state	.label	byte
+	.db	0x1
+	; End of section
+
+huge_blinking_state	.section	huge, byte, init, cluster 'blinking_state', new
+	.global	_blinking_state
+_blinking_state	.label	byte
+	.db	0x0
+	; End of section
+
+huge_light_timestamp	.section	huge, clear, cluster 'light_timestamp', new
+	.global	_light_timestamp
+_light_timestamp	.label	word
+	.ds	4
+	; End of section
+
+huge_timer_initialized	.section	huge, byte, init, cluster 'timer_initialized', new
+	.global	_timer_initialized
+_timer_initialized	.label	byte
+	.db	0x0
+	; End of section
+
+	.calls	'_do_lights_action','_IO_RTC_StartTime'
+	.calls	'_do_lights_action','_IO_DO_Set'
+	.calls	'_do_lights_action','_IO_RTC_GetTimeUS'
+	.calls	'_set_light_to','',4,0
+	.calls	'_do_lights_action','',4,0
+	.extern	_IO_RTC_StartTime : far
+	.extern	_IO_RTC_GetTimeUS : far
+	.extern	_IO_DO_Set : far
+	.debug		.debug_info
+_36:
+	.dl	1102
+	.dw	3
+	.dl	_37
+	.db	4
+_35:
+	.db	1
+	.db	'src/tsil.c',0
+	.db	'TASKING VX-toolset for C166: C compiler',0
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
+	.db	12,1
+	.dl	_38
+	.db	2
+	.db	'unsigned int',0,2,7
+_60:
+	.db	2
+	.db	'unsigned long int',0,4,7,3,5
+	.dl	242
+	.db	4
+	.dl	263
+	.db	5
+	.db	'IO_RTC_StartTime',0,1,118,15,6
+	.dl	226
+	.db	1,1,1,1,6
+	.db	'timestamp',0,1,118,49,2
+	.dl	269
+	.db	0,5
+	.db	'IO_RTC_GetTimeUS',0,1,143,1,9,6
+	.dl	242
+	.db	1,1,1,1,6
+	.db	'timestamp',0,1,143,1,35,2
+	.dl	242
+	.db	0
+_59:
+	.db	2
+	.db	'unsigned char',0,1,8,5
+	.db	'IO_DO_Set',0,2,147,2,14,6
+	.dl	226
+	.db	1,1,1,1,6
+	.db	'do_channel',0,2,147,2,32,2
+	.dl	376
+	.db	6
+	.db	'do_value',0,2,148,2,30,2
+	.dl	376
+	.db	0
+_57:
+	.db	7
+	.db	'TSIL_State',0,3,19,6,1,8
+	.db	'SOLID_GREEN',0,0,8
+	.db	'BLINKING_RED',0,1,0,9
+	.db	'void',0,3,5
+	.dl	504
+	.db	10
+	.db	'__prof_adm',0,4,1,1
+	.dl	510
+	.db	10
+	.db	'__codeptr',0,4,1,1
+	.dl	242
+	.db	10
+	.db	'ubyte1',0,5,21,29
+	.dl	376
+	.db	10
+	.db	'ubyte2',0,5,22,29
+	.dl	226
+	.db	10
+	.db	'ubyte4',0,5,23,29
+	.dl	242
+	.db	10
+	.db	'bool',0,5,31,29
+	.dl	376
+	.db	10
+	.db	'IO_ErrorType',0,6,153,1,17
+	.dl	226
+	.db	7
+	.db	'_io_driver_reset_reason',0,7,162,3,14,1,8
+	.db	'IO_DRIVER_RESET_REASON_PORST',0,0,8
+	.db	'IO_DRIVER_RESET_REASON_WDT',0,1,8
+	.db	'IO_DRIVER_RESET_REASON_TRAP',0,2,8
+	.db	'IO_DRIVER_RESET_REASON_SW',0,3,8
+	.db	'IO_DRIVER_RESET_REASON_UNKNOWN',0,4,0,10
+	.db	'IO_DRIVER_RESET_REASON',0,7,169,3,3
+	.dl	633
+	.db	11
+	.db	'_io_driver_trap_info',0,7,174,3,16,10,12
+	.db	'trap_id',0
+	.dl	226
+	.db	2,2,35,0,12
+	.db	'cpu_tfr',0
+	.dl	226
+	.db	2,2,35,2,12
+	.db	'cpu_trapstat',0
+	.dl	226
+	.db	2,2,35,4,12
+	.db	'fault_location',0
+	.dl	242
+	.db	4,2,35,6,0,10
+	.db	'IO_DRIVER_TRAP_INFO',0,7,197,3,3
+	.dl	847
+	.db	11
+	.db	'bl_t_date_',0,8,122,16,4,12
+	.db	'date',0
+	.dl	242
+	.db	4,2,35,0,0,10
+	.db	'BL_T_DATE',0,8,131,1,3
+	.dl	984
+	.db	11
+	.db	'bl_t_can_id_',0,8,138,1,16,8,12
+	.db	'extended',0
+	.dl	242
+	.db	4,2,35,0,12
+	.db	'ID',0
+	.dl	242
+	.db	4,2,35,4,0,10
+	.db	'BL_T_CAN_ID',0,8,146,1,3
+	.dl	1034
+	.db	0
+	; End of section
+
+	.debug		.debug_abbrev
+_37:
+	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,16,6,0,0,2,36,0,3,8,11,15,62,15,0,0,3,15,0,51,15,73,19,0,0,4,38,0
+	.db	73,19,0,0,5,46,1,3,8,58,15,59,15,57,15,51,15,73,19,54,15,39,12,63,12,60,12,0,0,6,5,0,3,8,58,15,59,15,57
+	.db	15,51,15,73,19,0,0,7,4,1,3,8,58,15,59,15,57,15,11,15,0,0,8,40,0,3,8,28,13,0,0,9,59,0,3,8,0,0,10,22,0,3
+	.db	8,58,15,59,15,57,15,73,19,0,0,11,19,1,3,8,58,15,59,15,57,15,11,15,0,0,12,13,0,3,8,73,19,11,15,56,9,0,0
+	.db	0
+	; End of section
+
+	.debug		.debug_line
+_38:
+	.dl	_62-_61
+_61:
+	.dw	3
+	.dl	_64-_63
+_63:
+	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1
+	.db	'..\\..\\..\\Environment\\inc',0,0
+	.db	'IO_RTC.h',0,1,0,0
+	.db	'IO_DIO.h',0,1,0,0
+	.db	'src\\tsil.h',0,0,0,0
+	.db	'src/tsil.c',0,0,0,0
+	.db	'ptypes_xe167.h',0,1,0,0
+	.db	'IO_Constants.h',0,1,0,0
+	.db	'IO_Driver.h',0,1,0,0
+	.db	'APDB.h',0,1,0,0,0
+_64:
+_62:
+	; End of section
+
+	.debug		.debug_pubnames
+	.dl	70
+	.dw	2
+	.dl	_36,1106,274
+	.db	'IO_RTC_StartTime',0
+	.dl	324
+	.db	'IO_RTC_GetTimeUS',0
+	.dl	393
+	.db	'IO_DO_Set',0
+	.dl	0
+	; End of section
+
+	.debug		.debug_info, cluster 'do_lights_action'
+_39:
+	.dl	291
+	.dw	3
+	.dl	_40
+	.db	4,1
+	.db	'src/tsil.c',0
+	.db	'TASKING VX-toolset for C166: C compiler',0
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
+	.db	12,1
+	.dl	_42,_41
+	.db	2
+	.dl	_35
+	.db	3
+	.db	'do_lights_action',0,1,24,6,6,1,1
+	.dl	_24,_43,_23
+	.db	12,19,146,176,2,0,64,36,146,161,2,0,33,4
+	.dl	_24,_43
+	.db	0,0
+	; End of section
+
+	.debug		.debug_abbrev, cluster 'do_lights_action'
+_40:
+	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,85,6,16,6,0,0,2,61,0,24,16,0,0,3,46,1,3,8,58,15,59,15,57,15,51,15
+	.db	54,15,63,12,17,1,18,1,64,6,42,9,0,0,4,11,0,17,1,18,1,0,0,0
+	; End of section
+
+	.debug		.debug_line, cluster 'do_lights_action'
+_41:
+	.dl	_66-_65
+_65:
+	.dw	3
+	.dl	_68-_67
+_67:
+	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
+	.db	'src/tsil.c',0,0,0,0,0
+_68:
+	.db	5,9,7,0,5,2
+	.dl	_24
+	.db	3,24,1,5,5,9
+	.dw	_69-_24
+	.db	1,5,34,9
+	.dw	_70-_69
+	.db	3,3,1,5,9,9
+	.dw	_71-_70
+	.db	1,5,31,9
+	.dw	_72-_71
+	.db	3,1,1,5,33,9
+	.dw	_73-_72
+	.db	3,1,1,5,31,9
+	.dw	_74-_73
+	.db	1,5,20,9
+	.dw	_3-_74
+	.db	3,4,1,5,36,9
+	.dw	_75-_3
+	.db	1,5,31,9
+	.dw	_76-_75
+	.db	3,3,1,5,13,9
+	.dw	_77-_76
+	.db	1,5,61,9
+	.dw	_78-_77
+	.db	1,5,78,9
+	.dw	_79-_78
+	.db	1,5,24,9
+	.dw	_80-_79
+	.db	3,2,1,5,38,9
+	.dw	_81-_80
+	.db	1,5,30,9
+	.dw	_82-_81
+	.db	3,1,1,5,28,9
+	.dw	_83-_82
+	.db	1,5,48,9
+	.dw	_84-_83
+	.db	3,127,1,5,38,9
+	.dw	_4-_84
+	.db	3,5,1,5,20,9
+	.dw	_85-_4
+	.db	1,5,67,9
+	.dw	_86-_85
+	.db	1,5,84,9
+	.dw	_87-_86
+	.db	1,5,24,9
+	.dw	_88-_87
+	.db	3,2,1,5,38,9
+	.dw	_89-_88
+	.db	1,5,28,9
+	.dw	_90-_89
+	.db	3,1,1,5,31,9
+	.dw	_6-_90
+	.db	3,3,1,5,1,9
+	.dw	_91-_6
+	.db	3,11,1,5,12,7,9
+	.dw	_2-_91
+	.db	3,120,1,5,20,9
+	.dw	_92-_2
+	.db	3,2,1,5,34,9
+	.dw	_93-_92
+	.db	1,5,24,9
+	.dw	_94-_93
+	.db	3,1,1,5,20,9
+	.dw	_95-_94
+	.db	3,3,1,5,36,9
+	.dw	_96-_95
+	.db	1,5,1,9
+	.dw	_7-_96
+	.db	3,2,1,7,9
+	.dw	_43-_7
+	.db	0,1,1
+_66:
+	; End of section
+
+	.debug		.debug_ranges, cluster 'do_lights_action'
+_42:
+	.dl	-1,_24,0,_43-_24,0,0
+	; End of section
+
+	.debug		.debug_pubnames
+	.dl	35
+	.dw	2
+	.dl	_39,295,235
+	.db	'do_lights_action',0
+	.dl	0
+	; End of section
+
+	.debug		.debug_info, cluster 'set_light_to'
+_44:
+	.dl	303
+	.dw	3
+	.dl	_45
+	.db	4,1
+	.db	'src/tsil.c',0
+	.db	'TASKING VX-toolset for C166: C compiler',0
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
+	.db	12,1
+	.dl	_47,_46
+	.db	2
+	.dl	_35
+	.db	3
+	.db	'set_light_to',0,1,17,6,6,1,1,1
+	.dl	_12,_48,_11
+	.db	12,19,146,176,2,0,64,36,146,161,2,0,33,4
+	.db	's',0,1,17,35,2
+	.dl	_57,_58
+	.db	5
+	.dl	_12,_48
+	.db	0,0
+	; End of section
+
+	.debug		.debug_abbrev, cluster 'set_light_to'
+_45:
+	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,85,6,16,6,0,0,2,61,0,24,16,0,0,3,46,1,3,8,58,15,59,15,57,15,51,15
+	.db	54,15,39,12,63,12,17,1,18,1,64,6,42,9,0,0,4,5,0,3,8,58,15,59,15,57,15,51,15,73,16,2,6,0,0,5,11,0,17,1
+	.db	18,1,0,0,0
+	; End of section
+
+	.debug		.debug_line, cluster 'set_light_to'
+_46:
+	.dl	_98-_97
+_97:
+	.dw	3
+	.dl	_100-_99
+_99:
+	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
+	.db	'src/tsil.c',0,0,0,0,0
+_100:
+	.db	5,19,7,0,5,2
+	.dl	_12
+	.db	3,17,1,5,1,9
+	.dw	_101-_12
+	.db	3,1,1,7,9
+	.dw	_48-_101
+	.db	0,1,1
+_98:
+	; End of section
+
+	.debug		.debug_ranges, cluster 'set_light_to'
+_47:
+	.dl	-1,_12,0,_48-_12,0,0
+	; End of section
+
+	.debug		.debug_pubnames
+	.dl	31
+	.dw	2
+	.dl	_44,307,235
+	.db	'set_light_to',0
+	.dl	0
+	; End of section
+
+	.debug		.debug_info, cluster 'current_state'
+_49:
+	.dl	254
+	.dw	3
+	.dl	_50
+	.db	4,1
+	.db	'src/tsil.c',0
+	.db	'TASKING VX-toolset for C166: C compiler',0
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
+	.db	12,1,2
+	.dl	_35
+	.db	3
+	.db	'current_state',0,4,10,17,5
+	.dl	_57
+	.db	1,5,3
+	.dl	_current_state
+	.db	0
+	; End of section
+
+	.debug		.debug_abbrev, cluster 'current_state'
+_50:
+	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,0,0,2,61,0,24,16,0,0,3,52,0,3,8,58,15,59,15,57,15,51,15,73,16,63
+	.db	12,2,9,0,0,0
+	; End of section
+
+	.debug		.debug_info, cluster 'blinking_state'
+_51:
+	.dl	255
+	.dw	3
+	.dl	_52
+	.db	4,1
+	.db	'src/tsil.c',0
+	.db	'TASKING VX-toolset for C166: C compiler',0
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
+	.db	12,1,2
+	.dl	_35
+	.db	3
+	.db	'blinking_state',0,4,11,6,5
+	.dl	_59
+	.db	1,5,3
+	.dl	_blinking_state
+	.db	0
+	; End of section
+
+	.debug		.debug_abbrev, cluster 'blinking_state'
+_52:
+	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,0,0,2,61,0,24,16,0,0,3,52,0,3,8,58,15,59,15,57,15,51,15,73,16,63
+	.db	12,2,9,0,0,0
+	; End of section
+
+	.debug		.debug_info, cluster 'light_timestamp'
+_53:
+	.dl	256
+	.dw	3
+	.dl	_54
+	.db	4,1
+	.db	'src/tsil.c',0
+	.db	'TASKING VX-toolset for C166: C compiler',0
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
+	.db	12,1,2
+	.dl	_35
+	.db	3
+	.db	'light_timestamp',0,4,14,8,5
+	.dl	_60
+	.db	1,5,3
+	.dl	_light_timestamp
+	.db	0
+	; End of section
+
+	.debug		.debug_abbrev, cluster 'light_timestamp'
+_54:
+	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,0,0,2,61,0,24,16,0,0,3,52,0,3,8,58,15,59,15,57,15,51,15,73,16,63
+	.db	12,2,9,0,0,0
+	; End of section
+
+	.debug		.debug_info, cluster 'timer_initialized'
+_55:
+	.dl	258
+	.dw	3
+	.dl	_56
+	.db	4,1
+	.db	'src/tsil.c',0
+	.db	'TASKING VX-toolset for C166: C compiler',0
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
+	.db	12,1,2
+	.dl	_35
+	.db	3
+	.db	'timer_initialized',0,4,15,6,5
+	.dl	_59
+	.db	1,5,3
+	.dl	_timer_initialized
+	.db	0
+	; End of section
+
+	.debug		.debug_abbrev, cluster 'timer_initialized'
+_56:
+	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,0,0,2,61,0,24,16,0,0,3,52,0,3,8,58,15,59,15,57,15,51,15,73,16,63
+	.db	12,2,9,0,0,0
+	; End of section
+
+	.debug		.debug_loc, cluster 'do_lights_action'
+_23:
+	.dl	-1,_24,0,_43-_24
+	.dw	58
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_25-_29
+_29:
+	.db	146,177,2,0,47
+	.dw	_28-_30
+_30:
+_25:
+	.db	18,49,46,40
+	.dw	_26-_31
+_31:
+	.db	146,178,2,0,47
+	.dw	_28-_32
+_32:
+_26:
+	.db	18,50,46,40
+	.dw	_27-_33
+_33:
+	.db	146,179,2,0,47
+	.dw	_28-_34
+_34:
+_27:
+	.db	146,180,2,0
+_28:
+	.db	22,19,62,36,33
+	.dl	0,0
+	; End of section
+
+	.debug		.debug_loc, cluster 'set_light_to'
+_58:
+	.dl	-1,_12,0,_48-_12
+	.dw	4
+	.db	82,157,8,0
+	.dl	0,0
+_11:
+	.dl	-1,_12,0,_48-_12
+	.dw	58
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_13-_17
+_17:
+	.db	146,177,2,0,47
+	.dw	_16-_18
+_18:
+_13:
+	.db	18,49,46,40
+	.dw	_14-_19
+_19:
+	.db	146,178,2,0,47
+	.dw	_16-_20
+_20:
+_14:
+	.db	18,50,46,40
+	.dw	_15-_21
+_21:
+	.db	146,179,2,0,47
+	.dw	_16-_22
+_22:
+_15:
+	.db	146,180,2,0
+_16:
+	.db	22,19,62,36,33
+	.dl	0,0
+	; End of section
+
+	.debug		.debug_frame
+_102:
+	.dl	184
+	.dl	-1
+	.db	3,0,2,2,173,2,15,60,127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_103-_107
+_107:
+	.db	146,177,2,0,47
+	.dw	_106-_108
+_108:
+_103:
+	.db	18,49,46,40
+	.dw	_104-_109
+_109:
+	.db	146,178,2,0,47
+	.dw	_106-_110
+_110:
+_104:
+	.db	18,50,46,40
+	.dw	_105-_111
+_111:
+	.db	146,179,2,0,47
+	.dw	_106-_112
+_112:
+_105:
+	.db	146,180,2,0
+_106:
+	.db	22,19,62,36,33,48,34,16,173,2,12,19,146,176,2,0,64,36,146,161,2,0,33,8,15,22,161,2,5,19,146,161,2,4,8
+	.db	162,2,8,166,2,8,177,2,8,178,2,8,179,2,8,180,2,8,0,8,1,8,6,8,7,8,8,8,9,8,10,8,167,2,8,168,2,8,169,2,8,170
+	.db	2,8,171,2,8,172,2,16,174,2,12,19,146,176,2,0,64,36,146,161,2,0,33,16,175,2,12,19,146,176,2,0,64,36,146
+	.db	161,2,2,33,8,176,2
+	; End of section
+
+	.debug		.debug_frame, cluster 'set_light_to'
+	.dl	32
+	.dl	_102,_12,_48-_12
+	.db	8,160,2,8,3,8,4,8,5,8,11,8,12,8,13,8,14,0,0,0
+	; End of section
+
+	.debug		.debug_frame, cluster 'do_lights_action'
+	.dl	12
+	.dl	_102,_24,_43-_24
+	; End of section
+
+
+
+	; Module end
+	.end
