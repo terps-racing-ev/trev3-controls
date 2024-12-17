@@ -91,6 +91,15 @@
 
 #define ORION_CAN_ID 0x6B2
 #define ORION_IMD_STATUS_INDEX 0
+#define ORION_BMS_STATUS_INDEX 1
+
+// 10 second CAN timeout on Orion
+#define ORION_CAN_TIMEOUT_S 10
+#define ORION_CAN_TIMEOUT_US MsToUs(ORION_CAN_TIMEOUT_S * 1000)
+
+// 3 second period for ignoring Orion
+#define ORION_IGNORE_PERIOD_S 3
+#define ORION_IGNORE_PERIOD_US MsToUs(ORION_IGNORE_PERIOD_S * 1000)
 
 /**************************************************************************
  * Other
@@ -370,10 +379,6 @@ void main (void)
     /* buzzer */
     IO_DO_Init( IO_PIN_BUZZER );
 
-    /* lights */
-    IO_DO_Init( TSIL_GREEN_PIN );
-    IO_DO_Init( TSIL_RED_PIN );
-
     /* VCU State */
     enum VCU_State current_state = NOT_READY;
 
@@ -385,6 +390,7 @@ void main (void)
     bool tms_summary_1_message_received = FALSE;
     bool tms_summary_2_message_received = FALSE;
 
+    // variables to hold torque
     ubyte4 torque = 0;
     ubyte4 limited_torque = 0;
     ubyte4 d0 = 0;
@@ -413,6 +419,23 @@ void main (void)
     // orion message received
     bool orion_message_received = FALSE;
     bool orion_message_received_once = FALSE;
+    bool orion_good = TRUE;
+
+    // lights
+    IO_DO_Init( TSIL_GREEN_PIN );
+    IO_DO_Init( TSIL_RED_PIN );
+
+    // make sure light is green
+    set_light_to(SOLID_GREEN);
+
+    bool been_ignore_period_since_start = FALSE;
+    ubyte4 time_since_start;
+    ubyte4 orion_can_timeout;
+
+    IO_RTC_StartTime(&time_since_start);
+    IO_RTC_StartTime(&orion_can_timeout);
+
+
 
 
     /*******************************************/
@@ -458,6 +481,8 @@ void main (void)
         read_can_msg(handle_orion_r, &orion_can_frame, &orion_message_received);
 
         if (orion_message_received) {
+            // reset the timeout if a message has been received
+            IO_RTC_StartTime(&orion_can_timeout);
             orion_message_received_once = TRUE;
         }
 
@@ -635,18 +660,43 @@ void main (void)
                 IO_CAN_WriteFIFO(handle_fifo_w_debug, &inverter_current_info_can_frame, 1);
             }
 
-            // use the orion message to control light status
-            if (orion_message_received_once) {
-                // check IMD status and update light status accordingly
-                if (orion_can_frame.data[ORION_IMD_STATUS_INDEX] == 1) {
-                    set_light_to(SOLID_GREEN);
-                } else {
-                    set_light_to(BLINKING_RED);
+
+            // code to control lights 
+
+            // check if it's been "ignore period" seconds since start
+            if (been_ignore_period_since_start == FALSE) {
+                if (IO_RTC_GetTimeUS(time_since_start) > ORION_IGNORE_PERIOD_US) {
+                    been_ignore_period_since_start = TRUE;
                 }
-            } else {
-                set_light_to(BLINKING_RED);
             }
 
+
+
+            // only check CAN message if it's been "ignore period" seconds since start
+            if (been_ignore_period_since_start == TRUE) {
+                // if CAN timeout, set light to blinking red
+                if (IO_RTC_GetTimeUS(orion_can_timeout) > ORION_CAN_TIMEOUT_US) {
+                    set_light_to(BLINKING_RED);
+                } else {
+                    if (orion_message_received_once == TRUE) {
+                        get_sdc(&sdc_val);
+
+                        // if SDC is good and BMS is good and IMD is good
+                        // set lights to green
+                        if (orion_can_frame.data[ORION_BMS_STATUS_INDEX] &&
+                            orion_can_frame.data[ORION_IMD_STATUS_INDEX] && 
+                            (sdc_val != SDC_OFF)) {
+                                set_light_to(SOLID_GREEN);
+                        
+                        // if either IMD or BMS is bad set lights to red
+                        // (we don't check SDC)
+                        } else if (!orion_can_frame.data[ORION_BMS_STATUS_INDEX] || 
+                                   !orion_can_frame.data[ORION_IMD_STATUS_INDEX]) {
+                                set_light_to(BLINKING_RED);
+                        }
+                    }
+                }
+            }
 
             // run the lights (function call needed for lights to blink)
             do_lights_action();

@@ -1,5 +1,5 @@
 	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09007774
-	; Options: -f cc39256a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2024 -DRTS_TTC_FLASH_DATE_MONTH=12 -DRTS_TTC_FLASH_DATE_DAY=15 -DRTS_TTC_FLASH_DATE_HOUR=21 -DRTS_TTC_FLASH_DATE_MINUTE=2 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\tsil.src
+	; Options: -f cc22076a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2024 -DRTS_TTC_FLASH_DATE_MONTH=12 -DRTS_TTC_FLASH_DATE_DAY=17 -DRTS_TTC_FLASH_DATE_HOUR=13 -DRTS_TTC_FLASH_DATE_MINUTE=15 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\tsil.src
 	; Module start
 	.source	'src/tsil.c'
 code_set_light_to	.section	code, cluster 'set_light_to', new
@@ -14,7 +14,7 @@ code_set_light_to	.section	code, cluster 'set_light_to', new
 ; src/tsil.c	     7  #include "tsil.h"
 ; src/tsil.c	     8  #include "utilities.h"
 ; src/tsil.c	     9  
-; src/tsil.c	    10  enum TSIL_State current_state = BLINKING_RED;
+; src/tsil.c	    10  enum TSIL_State current_state = SOLID_GREEN;
 ; src/tsil.c	    11  bool blinking_state = LIGHT_OFF;
 ; src/tsil.c	    12  
 ; src/tsil.c	    13  // timer which controls the blinking of the light
@@ -209,7 +209,7 @@ _43:
 huge_current_state	.section	huge, byte, init, cluster 'current_state', new
 	.global	_current_state
 _current_state	.label	byte
-	.db	0x1
+	.db	0x0
 	; End of section
 
 huge_blinking_state	.section	huge, byte, init, cluster 'blinking_state', new
@@ -401,7 +401,7 @@ _62:
 
 	.debug		.debug_info, cluster 'do_lights_action'
 _39:
-	.dl	291
+	.dl	292
 	.dw	3
 	.dl	_40
 	.db	4,1
@@ -413,7 +413,7 @@ _39:
 	.db	2
 	.dl	_35
 	.db	3
-	.db	'do_lights_action',0,1,24,6,6,1,1
+	.db	'do_lights_action',0,1,24,6,6,1,1,1
 	.dl	_24,_43,_23
 	.db	12,19,146,176,2,0,64,36,146,161,2,0,33,4
 	.dl	_24,_43
@@ -423,7 +423,7 @@ _39:
 	.debug		.debug_abbrev, cluster 'do_lights_action'
 _40:
 	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,85,6,16,6,0,0,2,61,0,24,16,0,0,3,46,1,3,8,58,15,59,15,57,15,51,15
-	.db	54,15,63,12,17,1,18,1,64,6,42,9,0,0,4,11,0,17,1,18,1,0,0,0
+	.db	54,15,39,12,63,12,17,1,18,1,64,6,42,9,0,0,4,11,0,17,1,18,1,0,0,0
 	; End of section
 
 	.debug		.debug_line, cluster 'do_lights_action'
@@ -518,7 +518,7 @@ _42:
 	.debug		.debug_pubnames
 	.dl	35
 	.dw	2
-	.dl	_39,295,235
+	.dl	_39,296,235
 	.db	'do_lights_action',0
 	.dl	0
 	; End of section

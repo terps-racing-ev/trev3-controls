@@ -7,7 +7,7 @@
 #include "tsil.h"
 #include "utilities.h"
 
-enum TSIL_State current_state = BLINKING_RED;
+enum TSIL_State current_state = SOLID_GREEN;
 bool blinking_state = LIGHT_OFF;
 
 // timer which controls the blinking of the light
