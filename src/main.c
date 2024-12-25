@@ -153,22 +153,20 @@ void get_sdc(bool *sdc_val) {
     IO_DI_Get(IO_PIN_SDC, sdc_val);
 }
 
-void read_can_msg(ubyte1 handle_r, IO_CAN_DATA_FRAME* dst_data_frame, bool *msg_received, ubyte4 id, ubyte1 channel) {
+void read_can_msg(ubyte1* handle_r, IO_CAN_DATA_FRAME* dst_data_frame, bool *msg_received, ubyte4 id, ubyte1 channel) {
     IO_ErrorType can_read_error;
 
     *msg_received = FALSE;
 
-    can_read_error = IO_CAN_MsgStatus(handle_r);
+    can_read_error = IO_CAN_MsgStatus(*handle_r);
 
     if (can_read_error == IO_E_OK) {
-        IO_CAN_ReadMsg(handle_r, dst_data_frame);
+        IO_CAN_ReadMsg(*handle_r, dst_data_frame);
         *msg_received = TRUE;
     } else if (can_read_error == IO_E_CAN_OVERFLOW) {
-        IO_CAN_DeInitHandle(handle_r);
+        IO_CAN_DeInitHandle(*handle_r);
 
-        ubyte1 temp = handle_r;
-
-        IO_CAN_ConfigMsg( &temp
+        IO_CAN_ConfigMsg( handle_r
                 , channel
                 , IO_CAN_MSG_READ
                 , IO_CAN_STD_FRAME
@@ -468,14 +466,14 @@ void main (void)
         IO_Driver_TaskBegin();
 
         // read tms messages
-        read_can_msg(handle_tms_summary_1_r, &tms_summary_1_can_frame, &tms_summary_1_message_received, TMS_SUMMARY_1_CAN_ID, CAN_CHANNEL);
-        read_can_msg(handle_tms_summary_2_r, &tms_summary_2_can_frame, &tms_summary_2_message_received, TMS_SUMMARY_2_CAN_ID, CAN_CHANNEL);
+        read_can_msg(&handle_tms_summary_1_r, &tms_summary_1_can_frame, &tms_summary_1_message_received, TMS_SUMMARY_1_CAN_ID, CAN_CHANNEL);
+        read_can_msg(&handle_tms_summary_2_r, &tms_summary_2_can_frame, &tms_summary_2_message_received, TMS_SUMMARY_2_CAN_ID, CAN_CHANNEL);
 
         // read current info from inverter
-        read_can_msg(handle_inverter_current_info_r, &inverter_current_info_can_frame, &current_info_message_received, CURRENT_INFO_CAN_ID, CAN_CHANNEL);
+        read_can_msg(&handle_inverter_current_info_r, &inverter_current_info_can_frame, &current_info_message_received, CURRENT_INFO_CAN_ID, CAN_CHANNEL);
 
         // read message from inverter with motor speed and update motor speed accordingly
-        read_can_msg(handle_inverter_motor_info_r, &inverter_motor_info_can_frame, &motor_info_message_received, MOTOR_INFO_CAN_ID, CAN_CHANNEL);
+        read_can_msg(&handle_inverter_motor_info_r, &inverter_motor_info_can_frame, &motor_info_message_received, MOTOR_INFO_CAN_ID, CAN_CHANNEL);
         if (motor_info_message_received) {
             // d0 and d1 are used for the outgoing CAN message
             last_speed_d0 = inverter_motor_info_can_frame.data[INVERTER_MOTOR_SPEED_LO];
@@ -486,10 +484,10 @@ void main (void)
 
 
         // read message from inverter with voltage and update pack voltage accordingly
-        read_can_msg(handle_inverter_voltage_info_r, &inverter_voltage_info_can_frame, &voltage_info_message_received, VOLTAGE_INFO_CAN_ID, CAN_CHANNEL);
+        read_can_msg(&handle_inverter_voltage_info_r, &inverter_voltage_info_can_frame, &voltage_info_message_received, VOLTAGE_INFO_CAN_ID, CAN_CHANNEL);
 
         // read message from orion
-        read_can_msg(handle_orion_r, &orion_can_frame, &orion_message_received, ORION_CAN_ID, CAN_CHANNEL);
+        read_can_msg(&handle_orion_r, &orion_can_frame, &orion_message_received, ORION_CAN_ID, CAN_CHANNEL);
 
         if (orion_message_received) {
             // reset the timeout if a message has been received
