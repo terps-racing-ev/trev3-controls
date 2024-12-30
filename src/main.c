@@ -57,6 +57,12 @@
 /**********************************************************/
 
 /**************************************************************************
+ * Brake Light
+ ***************************************************************************/
+ #define BRAKE_LIGHT_PIN IO_DO_02
+
+
+/**************************************************************************
  * CAN Constants
  ***************************************************************************/
 
@@ -444,6 +450,9 @@ void main (void)
     IO_RTC_StartTime(&time_since_start);
     IO_RTC_StartTime(&orion_can_timeout);
 
+    // brake lights
+    IO_DO_Init( BRAKE_LIGHT_PIN );
+
 
 
 
@@ -670,7 +679,7 @@ void main (void)
             }
 
 
-            // code to control lights 
+            // code to control tsil lights 
 
             // check if it's been "ignore period" seconds since start
             if (been_ignore_period_since_start == FALSE) {
@@ -678,8 +687,6 @@ void main (void)
                     been_ignore_period_since_start = TRUE;
                 }
             }
-
-
 
             // only check CAN message if it's been "ignore period" seconds since start
             if (been_ignore_period_since_start == TRUE) {
@@ -709,6 +716,16 @@ void main (void)
 
             // run the lights (function call needed for lights to blink)
             do_lights_action();
+
+
+            // code for brake light
+            get_bse(&bse_result, &bse_error);
+
+            if (!bse_error && (bse_result > BRAKES_ENGAGED_BSE_THRESHOLD)) {
+                IO_DO_Set(BRAKE_LIGHT_PIN, TRUE);
+            } else {
+                IO_DO_Set(BRAKE_LIGHT_PIN, FALSE);
+            }
 
 
             // send debug message
