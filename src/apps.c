@@ -7,6 +7,13 @@
 
 #include "apps.h"
 #include "utilities.h"
+#include "moving_average.h"
+
+bool moving_average_structs_initialized = FALSE;
+
+struct moving_average_info apps_1_moving_average_info;
+struct moving_average_info apps_2_moving_average_info;
+
 
 ubyte2 voltage_to_pct_travel_apps_1(ubyte2 apps_1_voltage) {
     if (apps_1_voltage < APPS_1_MIN_VOLTAGE) {
@@ -38,6 +45,13 @@ ubyte2 voltage_to_pct_travel_apps_2(ubyte2 apps_2_voltage) {
 // gets apps values, puts average pct travel into apps_pct_result
 // if an error is detected, turns error to TRUE
 void get_apps(ubyte2 *apps_pct_result, bool *error, ubyte1 *num_errors) {
+    if (!moving_average_structs_initialized) {
+        initialize_moving_average_struct(&apps_1_moving_average_info);
+        initialize_moving_average_struct(&apps_2_moving_average_info);
+        moving_average_structs_initialized = TRUE;
+    }
+
+
     ubyte2 apps_1_val;
     bool apps_1_fresh;
     ubyte2 apps_2_val;
@@ -46,6 +60,10 @@ void get_apps(ubyte2 *apps_pct_result, bool *error, ubyte1 *num_errors) {
     // get voltage values
     IO_ADC_Get(IO_PIN_APPS_1, &apps_1_val, &apps_1_fresh);
     IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
+
+    // uncomment once ready to use moving average filter
+    // apps_1_val = filter_point(apps_1_val, &apps_1_moving_average_info);
+    // apps_2_val = filter_point(apps_2_val, &apps_2_moving_average_info);
 
     bool apps_1_within_threshhold = (apps_1_val >= (APPS_1_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_1_val <= (APPS_1_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
     bool apps_2_within_threshhold = (apps_2_val >= (APPS_2_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_2_val <= (APPS_2_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
