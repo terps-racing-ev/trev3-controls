@@ -751,12 +751,14 @@ void main (void)
             ubyte2 apps_2_val;
             bool apps_2_fresh;
 
-
+            ubyte2 bse_val;
+            bool bse_fresh;
 
             // send another debug message
             // get voltage values
             IO_ADC_Get(IO_PIN_APPS_1, &apps_1_val, &apps_1_fresh);
             IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
+            IO_ADC_Get(IO_PIN_BSE, &bse_val, &bse_fresh);
 
             debug_can_frame.id = 0xDC;
 
@@ -772,14 +774,15 @@ void main (void)
             debug_can_frame.data[1] = 0;
             }
 
-            debug_can_frame.data[2] = apps_1_val >> 8;
-            debug_can_frame.data[3] = apps_1_val & 0xFF;
+            debug_can_frame.data[2] = apps_1_val & 0xFF;
+            debug_can_frame.data[3] = apps_1_val >> 8;
 
-            debug_can_frame.data[4] = apps_2_val >> 8;
-            debug_can_frame.data[5] = apps_2_val & 0xFF;
+            debug_can_frame.data[4] = apps_2_val & 0xFF;
+            debug_can_frame.data[5] = apps_2_val >> 8;
 
-            debug_can_frame.data[6] = motor_rpm_torque_limit >> 8;
-            debug_can_frame.data[7] = motor_rpm_torque_limit & 0xFF;
+            debug_can_frame.data[6] = bse_val & 0xFF;
+            debug_can_frame.data[7] = bse_val >> 8;
+            
 
             IO_CAN_WriteFIFO(handle_fifo_w, &debug_can_frame, 1);
             IO_CAN_WriteFIFO(handle_fifo_w_debug, &debug_can_frame, 1);
