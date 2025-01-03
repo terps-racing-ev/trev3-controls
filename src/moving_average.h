@@ -1,6 +1,7 @@
 #ifndef MOVING_AVERAGE_H_INCLUDED
 #define MOVING_AVERAGE_H_INCLUDED
 
+// change this to change how many points are considered in the filter
 #define MOVING_AVERAGE_SIZE 10
 
 #include "APDB.h"
