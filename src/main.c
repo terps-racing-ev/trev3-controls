@@ -735,6 +735,7 @@ void main (void)
             debug_can_frame.data[1] = d0;
             debug_can_frame.data[2] = d1;
 
+            // if the moving average filter is being used then this is filtered
             debug_can_frame.data[3] = bse_result & 0xFF;
             debug_can_frame.data[4] = bse_result >> 8;
 
@@ -774,6 +775,7 @@ void main (void)
             debug_can_frame.data[1] = 0;
             }
 
+            // all these are unfiltered
             debug_can_frame.data[2] = apps_1_val & 0xFF;
             debug_can_frame.data[3] = apps_1_val >> 8;
 
