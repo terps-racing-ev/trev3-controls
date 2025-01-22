@@ -2,15 +2,15 @@
 #define MOVING_AVERAGE_H_INCLUDED
 
 // change this to change how many points are considered in the filter
-#define MOVING_AVERAGE_SIZE 10
+#define MOVING_AVERAGE_SIZE 101
 
-#include "APDB.h"
 
 // to use this moving average filter, create a "moving_average_info" struct to store the data points\
 // call initialize_moving_average_struct on this once to initialize it
 // and when you get a new data point, do filtered_point = filter_point(unfiltered_point, &info_struct)
 // to get the filtered point and update the struct
 
+#include "APDB.h"
 
 struct moving_average_info {
     // input data points

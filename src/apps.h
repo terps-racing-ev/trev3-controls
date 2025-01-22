@@ -38,13 +38,13 @@
 #define APPS_THRESHHOLD_REESTABLISH_PLAUSIBILITY 5
 
 /* apps 1 */
-#define APPS_1_MAX_VOLTAGE 4550
-#define APPS_1_MIN_VOLTAGE 1280
+#define APPS_1_MAX_VOLTAGE 4190
+#define APPS_1_MIN_VOLTAGE 925
 #define APPS_1_VOLTAGE_RANGE (APPS_1_MAX_VOLTAGE - APPS_1_MIN_VOLTAGE)
 
 /* apps 2 */
-#define APPS_2_MAX_VOLTAGE 3300
-#define APPS_2_MIN_VOLTAGE 250
+#define APPS_2_MAX_VOLTAGE 4590
+#define APPS_2_MIN_VOLTAGE 1325
 #define APPS_2_VOLTAGE_RANGE (APPS_2_MAX_VOLTAGE - APPS_2_MIN_VOLTAGE)
 
 /* voltage range above max and below min that doesn't count as an error */
@@ -61,9 +61,11 @@
 
 
 
-ubyte2 voltage_to_pct_travel_apps_1(ubyte2 apps_1_pct);
-ubyte2 voltage_to_pct_travel_apps_2(ubyte2 apps_2_pct);
+ubyte2 voltage_to_pct_travel_apps_1(ubyte2 apps_1_voltage);
+ubyte2 voltage_to_pct_travel_apps_2(ubyte2 apps_2_voltage);
 void get_apps(ubyte2 *apps_pct_result, bool *error, ubyte1 *num_errors);
 
+ubyte2 get_filtered_apps1_voltage();
+ubyte2 get_filtered_apps2_voltage();
 
 #endif // APPS_H_INCLUDED
