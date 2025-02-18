@@ -37,6 +37,6 @@ void get_bse(ubyte2 *bse_result, bool *error) {
         *error = FALSE;
     } else {
         *bse_result = 0;
-        *error = IGNORE_BSE_ERROR;
+        *error = !(IGNORE_BSE_ERROR);
     }
 }
