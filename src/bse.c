@@ -7,6 +7,7 @@
 
 #include "moving_average.h"
 #include "bse.h"
+#include "debug_defines.h"
 
 bool moving_average_struct_initialized = FALSE;
 struct moving_average_info bse_moving_average_info;
@@ -36,6 +37,6 @@ void get_bse(ubyte2 *bse_result, bool *error) {
         *error = FALSE;
     } else {
         *bse_result = 0;
-        *error = TRUE;
+        *error = IGNORE_BSE_ERROR;
     }
 }

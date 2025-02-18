@@ -1,5 +1,5 @@
 	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09007774
-	; Options: -f cc13896a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=1 -DRTS_TTC_FLASH_DATE_DAY=3 -DRTS_TTC_FLASH_DATE_HOUR=8 -DRTS_TTC_FLASH_DATE_MINUTE=39 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\bse.src
+	; Options: -f cc39712a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=2 -DRTS_TTC_FLASH_DATE_DAY=17 -DRTS_TTC_FLASH_DATE_HOUR=20 -DRTS_TTC_FLASH_DATE_MINUTE=45 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\bse.src
 	; Module start
 	.source	'src/bse.c'
 code_get_bse	.section	code, cluster 'get_bse', new
@@ -14,11 +14,12 @@ code_get_bse	.section	code, cluster 'get_bse', new
 ; src/bse.c	     7  
 ; src/bse.c	     8  #include "moving_average.h"
 ; src/bse.c	     9  #include "bse.h"
-; src/bse.c	    10  
-; src/bse.c	    11  bool moving_average_struct_initialized = FALSE;
-; src/bse.c	    12  struct moving_average_info bse_moving_average_info;
-; src/bse.c	    13  
-; src/bse.c	    14  void get_bse(ubyte2 *bse_result, bool *error) {
+; src/bse.c	    10  #include "debug_defines.h"
+; src/bse.c	    11  
+; src/bse.c	    12  bool moving_average_struct_initialized = FALSE;
+; src/bse.c	    13  struct moving_average_info bse_moving_average_info;
+; src/bse.c	    14  
+; src/bse.c	    15  void get_bse(ubyte2 *bse_result, bool *error) {
 ; Function _get_bse
 _6:
 _get_bse	.proc	far
@@ -39,7 +40,7 @@ _252:
 	movw	r6,r5
 _253:
 
-; src/bse.c	    15      if (!moving_average_struct_initialized) {
+; src/bse.c	    16      if (!moving_average_struct_initialized) {
 	movb	rh4,#0x0
 _251:
 	extp	#@pag(_moving_average_struct_initialized),#0x1
@@ -47,28 +48,28 @@ _251:
 	jmp+	cc_ne,_2
 _262:
 
-; src/bse.c	    16          initialize_moving_average_struct(&bse_moving_average_info);
+; src/bse.c	    17          initialize_moving_average_struct(&bse_moving_average_info);
 	movw	r2,#@sof(_bse_moving_average_info)
 _250:
 	movw	r3,#@seg(_bse_moving_average_info)
 	call	_initialize_moving_average_struct
 _263:
 
-; src/bse.c	    17          moving_average_struct_initialized = TRUE;
+; src/bse.c	    18          moving_average_struct_initialized = TRUE;
 	movb	rh4,#0x1
 _264:
 	extp	#@pag(_moving_average_struct_initialized),#0x1
 	movb	@pof(_moving_average_struct_initialized),rh4
 _2:
 
-; src/bse.c	    18      }
-; src/bse.c	    19  
+; src/bse.c	    19      }
 ; src/bse.c	    20  
-; src/bse.c	    21      ubyte2 bse_val;
-; src/bse.c	    22      bool bse_fresh;
-; src/bse.c	    23  
-; src/bse.c	    24      // get voltage from pin
-; src/bse.c	    25      IO_ADC_Get(IO_PIN_BSE, &bse_val, &bse_fresh);
+; src/bse.c	    21  
+; src/bse.c	    22      ubyte2 bse_val;
+; src/bse.c	    23      bool bse_fresh;
+; src/bse.c	    24  
+; src/bse.c	    25      // get voltage from pin
+; src/bse.c	    26      IO_ADC_Get(IO_PIN_BSE, &bse_val, &bse_fresh);
 	movb	rl2,#0xf
 _265:
 	movw	r4,r15
@@ -82,55 +83,58 @@ _266:
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r12,r5
 	call	_IO_ADC_Get
-_38:
-
-; src/bse.c	    26  
-; src/bse.c	    27      // uncomment to use moving average filter
-; src/bse.c	    28      // bse_val = filter_point(bse_val, &bse_moving_average_info);
-; src/bse.c	    29  
-; src/bse.c	    30      // check if its in the treshhold
-; src/bse.c	    31      bool bse_within_threshhold = (bse_val >= BSE_MIN_VOLTAGE) && (bse_val <= BSE_MAX_VOLTAGE);
-	movw	r11,[r15+#0x0]
-	subw	r11,#0x64
 _267:
 
-; src/bse.c	    32  
-; src/bse.c	    33      // error out if it isn't
-; src/bse.c	    34      if (bse_within_threshhold) {
-	cmpw	r11,#0x113a
-	jmp-	cc_ugt,_3
+; src/bse.c	    27  
+; src/bse.c	    28      // uncomment to use moving average filter
+; src/bse.c	    29      bse_val = filter_point(bse_val, &bse_moving_average_info);
+	movw	r2,[r15+#0x0]
 _268:
-
-; src/bse.c	    35          *bse_result = bse_val;
-	movw	r11,[r15+#0x0]
+	movw	r4,#@sof(_bse_moving_average_info)
+	movw	r5,#@seg(_bse_moving_average_info)
+	call	_filter_point
 _269:
-	exts	r9,#0x1
-	movw	[r8],r11
+	movw	[r15+#0x0],r2
+_38:
+
+; src/bse.c	    30  
+; src/bse.c	    31      // check if its in the treshhold
+; src/bse.c	    32      bool bse_within_threshhold = (bse_val >= BSE_MIN_VOLTAGE) && (bse_val <= BSE_MAX_VOLTAGE);
+	movw	r11,[r15+#0x0]
+	subw	r11,#0x64
 _270:
 
-; src/bse.c	    36          *error = FALSE;
-	movb	rh4,#0x0
+; src/bse.c	    33  
+; src/bse.c	    34      // error out if it isn't
+; src/bse.c	    35      if (bse_within_threshhold) {
+	cmpw	r11,#0x113a
+	jmp-	cc_ugt,_3
 _271:
+
+; src/bse.c	    36          *bse_result = bse_val;
+	movw	r11,[r15+#0x0]
+_272:
 	jmp	_4
 _3:
 
-; src/bse.c	    37      } else {
-; src/bse.c	    38          *bse_result = 0;
+; src/bse.c	    37          *error = FALSE;
+; src/bse.c	    38      } else {
+; src/bse.c	    39          *bse_result = 0;
 	movw	r11,#0x0
-_272:
+_4:
 	exts	r9,#0x1
 	movw	[r8],r11
 _273:
 
-; src/bse.c	    39          *error = TRUE;
-	movb	rh4,#0x1
-_4:
+; src/bse.c	    40          *error = IGNORE_BSE_ERROR;
+	movb	rh4,#0x0
+_274:
 	exts	r6,#0x1
 	movb	[r10],rh4
-_274:
+_275:
 
-; src/bse.c	    40      }
-; src/bse.c	    41  }
+; src/bse.c	    41      }
+; src/bse.c	    42  }
 	addw	r15,#0x4
 _95:
 	movw	r10,[r15+]
@@ -155,18 +159,20 @@ _moving_average_struct_initialized	.label	byte
 huge_bse_moving_average_info	.section	huge, clear, cluster 'bse_moving_average_info', new
 	.global	_bse_moving_average_info
 _bse_moving_average_info	.label	word
-	.ds	24
+	.ds	206
 	; End of section
 
 	.calls	'_get_bse','_initialize_moving_average_struct'
 	.calls	'_get_bse','_IO_ADC_Get'
+	.calls	'_get_bse','_filter_point'
 	.calls	'_get_bse','',4,12
 	.extern	_IO_ADC_Get : far
+	.extern	_filter_point : far
 	.extern	_initialize_moving_average_struct : far
 	.extern	__lc_ub_user_stack : nearbyte
 	.debug		.debug_info
 _18:
-	.dl	1193
+	.dl	1266
 	.dw	3
 	.dl	_19
 	.db	4
@@ -205,36 +211,45 @@ _32:
 	.db	6
 	.db	'fresh',0,1,134,3,39,2
 	.dl	275
-	.db	0,7,20
+	.db	0,7,202,1
 	.dl	225
-	.db	8,9,0
+	.db	8,100,0
 _39:
 	.db	9
-	.db	'moving_average_info',0,2,8,8,24,10
+	.db	'moving_average_info',0,2,15,8,206,1,10
 	.db	'points',0
 	.dl	364
-	.db	20,2,35,0,10
+	.db	202,1,2,35,0,10
 	.db	'all_points_filled',0
 	.dl	241
-	.db	1,2,35,20,10
+	.db	1,3,35,202,1,10
 	.db	'next_point_index',0
 	.dl	225
-	.db	2,2,35,22,0,3,5
-	.dl	373
-	.db	11
-	.db	'initialize_moving_average_struct',0,2,22,6,6,1,1,1,1,6
-	.db	'info_struct',0,2,22,67,2
-	.dl	468
+	.db	2,3,35,204,1,0,3,5
+	.dl	374
+	.db	5
+	.db	'filter_point',0,2,27,8,6
+	.dl	225
+	.db	1,1,1,1,6
+	.db	'data_point',0,2,27,28,2
+	.dl	225
+	.db	6
+	.db	'info_struct',0,2,27,68,2
+	.dl	473
+	.db	0,11
+	.db	'initialize_moving_average_struct',0,2,29,6,6,1,1,1,1,6
+	.db	'info_struct',0,2,29,67,2
+	.dl	473
 	.db	0,12
 	.db	'void',0,3,5
-	.dl	538
+	.dl	611
 	.db	13
 	.db	'__prof_adm',0,3,1,1
-	.dl	544
+	.dl	617
 	.db	2
 	.db	'unsigned long int',0,4,7,13
 	.db	'__codeptr',0,3,1,1
-	.dl	569
+	.dl	642
 	.db	13
 	.db	'ubyte1',0,4,21,29
 	.dl	241
@@ -243,7 +258,7 @@ _39:
 	.dl	225
 	.db	13
 	.db	'ubyte4',0,4,23,29
-	.dl	569
+	.dl	642
 	.db	13
 	.db	'bool',0,4,31,29
 	.dl	241
@@ -258,7 +273,7 @@ _39:
 	.db	'IO_DRIVER_RESET_REASON_SW',0,3,15
 	.db	'IO_DRIVER_RESET_REASON_UNKNOWN',0,4,0,13
 	.db	'IO_DRIVER_RESET_REASON',0,6,169,3,3
-	.dl	688
+	.dl	761
 	.db	9
 	.db	'_io_driver_trap_info',0,6,174,3,16,10,10
 	.db	'trap_id',0
@@ -271,32 +286,32 @@ _39:
 	.dl	225
 	.db	2,2,35,4,10
 	.db	'fault_location',0
-	.dl	569
+	.dl	642
 	.db	4,2,35,6,0,13
 	.db	'IO_DRIVER_TRAP_INFO',0,6,197,3,3
-	.dl	902
+	.dl	975
 	.db	9
 	.db	'bl_t_date_',0,7,122,16,4,10
 	.db	'date',0
-	.dl	569
+	.dl	642
 	.db	4,2,35,0,0,13
 	.db	'BL_T_DATE',0,7,131,1,3
-	.dl	1039
+	.dl	1112
 	.db	9
 	.db	'bl_t_can_id_',0,7,138,1,16,8,10
 	.db	'extended',0
-	.dl	569
+	.dl	642
 	.db	4,2,35,0,10
 	.db	'ID',0
-	.dl	569
+	.dl	642
 	.db	4,2,35,4,0,13
 	.db	'BL_T_CAN_ID',0,7,146,1,3
-	.dl	1089
+	.dl	1162
 	.db	16
 	.dl	241
 	.db	17,0,18
 	.db	'_lc_ub_user_stack',0,3,1,1,2
-	.dl	1160
+	.dl	1233
 	.db	1,1,0
 	; End of section
 
@@ -331,11 +346,13 @@ _255:
 	; End of section
 
 	.debug		.debug_pubnames
-	.dl	66
+	.dl	83
 	.dw	2
-	.dl	_18,1197,280
+	.dl	_18,1270,280
 	.db	'IO_ADC_Get',0
-	.dl	474
+	.dl	479
+	.db	'filter_point',0
+	.dl	547
 	.db	'initialize_moving_average_struct',0
 	.dl	0
 	; End of section
@@ -354,23 +371,23 @@ _21:
 	.db	2
 	.dl	_17
 	.db	3
-	.db	'get_bse',0,1,14,6,6,1,1,1
+	.db	'get_bse',0,1,15,6,6,1,1,1
 	.dl	_6,_25,_5
 	.db	12,19,146,176,2,0,64,36,146,161,2,0,33,4
-	.db	'bse_result',0,1,14,22,2
+	.db	'bse_result',0,1,15,22,2
 	.dl	_30,_31
 	.db	4
-	.db	'error',0,1,14,40,2
+	.db	'error',0,1,15,40,2
 	.dl	_32,_33
 	.db	5
 	.dl	_6,_25
 	.db	5
 	.dl	_2,_25
 	.db	6
-	.db	'bse_val',0,1,21,12,2
+	.db	'bse_val',0,1,22,12,2
 	.dl	_34,_35
 	.db	6
-	.db	'bse_fresh',0,1,22,10,2
+	.db	'bse_fresh',0,1,23,10,2
 	.dl	_36,_37
 	.db	7
 	.dl	_38,_25
@@ -396,7 +413,7 @@ _260:
 _261:
 	.db	5,6,7,0,5,2
 	.dl	_6
-	.db	3,13,1,5,10,9
+	.db	3,14,1,5,10,9
 	.dw	_253-_6
 	.db	3,1,1,5,43,9
 	.dw	_262-_253
@@ -410,30 +427,32 @@ _261:
 	.dw	_265-_2
 	.db	1,5,39,9
 	.dw	_266-_265
-	.db	1,5,67,9
-	.dw	_38-_266
-	.db	3,6,1,5,5,9
-	.dw	_267-_38
-	.db	3,3,1,5,23,9
+	.db	1,5,28,9
+	.dw	_267-_266
+	.db	3,3,1,5,38,9
 	.dw	_268-_267
-	.db	3,1,1,5,21,9
+	.db	1,5,13,9
 	.dw	_269-_268
-	.db	1,5,18,9
-	.dw	_270-_269
-	.db	3,1,1,5,30,9
+	.db	1,5,67,9
+	.dw	_38-_269
+	.db	3,3,1,5,5,9
+	.dw	_270-_38
+	.db	3,3,1,5,23,9
 	.dw	_271-_270
-	.db	3,127,1,5,23,9
-	.dw	_3-_271
+	.db	3,1,1,5,30,9
+	.dw	_272-_271
+	.db	1,5,23,9
+	.dw	_3-_272
 	.db	3,3,1,5,21,9
-	.dw	_272-_3
+	.dw	_4-_3
 	.db	1,5,18,9
-	.dw	_273-_272
+	.dw	_273-_4
 	.db	3,1,1,5,16,9
-	.dw	_4-_273
+	.dw	_274-_273
 	.db	1,5,1,9
-	.dw	_274-_4
+	.dw	_275-_274
 	.db	3,2,1,9
-	.dw	_25-_274
+	.dw	_25-_275
 	.db	0,1,1
 _259:
 	; End of section
@@ -463,7 +482,7 @@ _26:
 	.db	12,1,2
 	.dl	_17
 	.db	3
-	.db	'moving_average_struct_initialized',0,3,11,6,5
+	.db	'moving_average_struct_initialized',0,3,12,6,5
 	.dl	_36
 	.db	1,5,3
 	.dl	_moving_average_struct_initialized
@@ -488,7 +507,7 @@ _28:
 	.db	12,1,2
 	.dl	_17
 	.db	3
-	.db	'bse_moving_average_info',0,3,12,28,5
+	.db	'bse_moving_average_info',0,3,13,28,5
 	.dl	_39
 	.db	1,5,3
 	.dl	_bse_moving_average_info
@@ -841,34 +860,34 @@ _143:
 	; End of section
 
 	.debug		.debug_frame
-_275:
+_276:
 	.dl	184
 	.dl	-1
 	.db	3,0,2,2,173,2,15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_276-_280
-_280:
-	.db	146,177,2,0,47
-	.dw	_279-_281
+	.dw	_277-_281
 _281:
-_276:
-	.db	18,49,46,40
-	.dw	_277-_282
+	.db	146,177,2,0,47
+	.dw	_280-_282
 _282:
-	.db	146,178,2,0,47
-	.dw	_279-_283
-_283:
 _277:
-	.db	18,50,46,40
-	.dw	_278-_284
+	.db	18,49,46,40
+	.dw	_278-_283
+_283:
+	.db	146,178,2,0,47
+	.dw	_280-_284
 _284:
-	.db	146,179,2,0,47
+_278:
+	.db	18,50,46,40
 	.dw	_279-_285
 _285:
-_278:
-	.db	146,180,2,0
+	.db	146,179,2,0,47
+	.dw	_280-_286
+_286:
 _279:
+	.db	146,180,2,0
+_280:
 	.db	22,19,62,36,33,48,34,16,173,2,12,19,146,176,2,0,64,36,146,161,2,0,33,8,15,22,161,2,5,19,146,161,2,4,8
 	.db	162,2,8,166,2,8,177,2,8,178,2,8,179,2,8,180,2,8,0,8,1,8,6,8,7,8,8,8,9,8,10,8,167,2,8,168,2,8,169,2,8,170
 	.db	2,8,171,2,8,172,2,16,174,2,12,19,146,176,2,0,64,36,146,161,2,0,33,16,175,2,12,19,146,176,2,0,64,36,146
@@ -877,7 +896,7 @@ _279:
 
 	.debug		.debug_frame, cluster 'get_bse'
 	.dl	756
-	.dl	_275,_6,_25-_6
+	.dl	_276,_6,_25-_6
 	.db	4
 	.dl	(_40-_6)/2
 	.db	15,60,127,0,18,10

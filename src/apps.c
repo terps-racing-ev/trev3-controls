@@ -8,6 +8,8 @@
 #include "apps.h"
 #include "utilities.h"
 #include "moving_average.h"
+#include "debug_defines.h"
+
 
 bool moving_average_structs_initialized = FALSE;
 
@@ -165,7 +167,7 @@ void get_apps(ubyte2 *apps_pct_result, bool *error, ubyte1 *num_errors) {
 
             // only error out if APPS_REPEATED_ERROR_MAX errors have been encountered in a row
             (*num_errors)++;
-            if ((*num_errors) > APPS_REPEATED_ERROR_MAX) {
+            if ((*num_errors) > APPS_REPEATED_ERROR_MAX && !(IGNORE_APPS_ERROR)) {
                 *error = APPS_IMPLAUSIBILITY_ERROR;
             }
             return;
@@ -182,7 +184,7 @@ void get_apps(ubyte2 *apps_pct_result, bool *error, ubyte1 *num_errors) {
     } else {
         // only error out if APPS_REPEATED_ERROR_MAX errors have been encountered in a row
         (*num_errors)++;
-        if ((*num_errors) > APPS_REPEATED_ERROR_MAX) {
+        if ((*num_errors) > APPS_REPEATED_ERROR_MAX && !(IGNORE_APPS_ERROR)) {
             *error = APPS_OUT_OF_RANGE_ERROR;
         }
         *apps_pct_result = 0;

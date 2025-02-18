@@ -19,6 +19,9 @@
 #include "bse.h"
 #include "tsil.h"
 #include "utilities.h"
+#include "debug_defines.h"
+
+
 /**************************************************************************
  * Sensor Pins
  ***************************************************************************/
@@ -152,11 +155,19 @@ APDB appl_db =
           };
 
 void get_rtd(bool *rtd_val) {
-    IO_DI_Get(IO_PIN_RTD, rtd_val);
+    if (IGNORE_RTD_SWITCH) {
+        *rtd_val = RTD_ON;
+    } else {
+        IO_DI_Get(IO_PIN_RTD, rtd_val);
+    }    
 }
 
 void get_sdc(bool *sdc_val) {
-    IO_DI_Get(IO_PIN_SDC, sdc_val);
+    if (IGNORE_SDC_OFF) {
+        *sdc_val = SDC_OFF;
+    } else {
+        IO_DI_Get(IO_PIN_SDC, sdc_val);
+    }
 }
 
 void read_can_msg(ubyte1* handle_r, IO_CAN_DATA_FRAME* dst_data_frame, bool *msg_received, ubyte4 id, ubyte1 channel) {
@@ -528,7 +539,7 @@ void main (void)
 
                 // transitions
                 // rtd on and brakes engaged -> play rtd sound
-                if (rtd_val == RTD_ON && (!bse_error && bse_result > BRAKES_ENGAGED_BSE_THRESHOLD) && !apps_error && !(sdc_val == SDC_OFF)) {
+                if (rtd_val == RTD_ON && (IGNORE_RTD_BRAKES || (!bse_error && bse_result > BRAKES_ENGAGED_BSE_THRESHOLD)) && !apps_error && !(sdc_val == SDC_OFF)) {
                     // rtd on -> switch to playing rtd sound
                     current_state = PLAYING_RTD_SOUND;
                 } else {
@@ -589,7 +600,7 @@ void main (void)
                     current_state = NOT_READY;
                 } else if (apps_error || bse_error || (sdc_val == SDC_OFF)) {
                     current_state = ERRORED;
-                } else if (bse_result > BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD && apps_pct_result >= APPS_THRESHHOLD_BRAKE_PLAUSIBILITY) {
+                } else if (!(IGNORE_BRAKE_PLAUSIBILITY) && bse_result > BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD && apps_pct_result >= APPS_THRESHHOLD_BRAKE_PLAUSIBILITY) {
                     current_state = APPS_5PCT_WAIT;
                 } else {
                     // no transition into another state -> send controls message
