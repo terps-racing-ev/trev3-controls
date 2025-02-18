@@ -164,7 +164,7 @@ void get_rtd(bool *rtd_val) {
 
 void get_sdc(bool *sdc_val) {
     if (IGNORE_SDC_OFF) {
-        *sdc_val = SDC_OFF;
+        *sdc_val = SDC_ON;
     } else {
         IO_DI_Get(IO_PIN_SDC, sdc_val);
     }
