@@ -31,18 +31,12 @@ void get_bse(ubyte2 *bse_result, bool *error) {
     // check if its in the treshhold
     bool bse_within_threshhold = (bse_val >= BSE_MIN_VOLTAGE) && (bse_val <= BSE_MAX_VOLTAGE);
 
-    // TODO CHANGE BACK
-    // error out if it isn't
-    // if (bse_within_threshhold) {
-    //     *bse_result = bse_val;
-    //     *error = FALSE;
-    // } else {
-    //     *bse_result = 0;
-    //     // *error = !(IGNORE_BSE_ERROR);
-    //     *error = TRUE;
-    // }
-
-    // todo delete
-    *error = (IGNORE_BSE_ERROR) ? FALSE : !bse_within_threshhold;
-    *bse_result = (error) ? 0 : bse_val;
+    //error out if it isn't
+    if (bse_within_threshhold) {
+        *bse_result = bse_val;
+        *error = FALSE;
+    } else {
+        *bse_result = 0;
+        *error = !(IGNORE_BSE_ERROR);
+    }
 }

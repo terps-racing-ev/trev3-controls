@@ -618,7 +618,7 @@ void main (void)
                     controls_can_frame.data[2] = 0;
                     controls_can_frame.data[3] = 0;
                     // forward direction
-                    controls_can_frame.data[4] = 1;
+                    controls_can_frame.data[4] = 1; // TODO Originally 0
                     controls_can_frame.data[5] = 1;
                     controls_can_frame.data[6] = 0;
                     controls_can_frame.data[7] = 0;
@@ -785,8 +785,8 @@ void main (void)
             // get voltage values
             IO_ADC_Get(IO_PIN_BSE, &bse_val, &bse_fresh);
 
-            // TODO
-            get_bse(&bse_val, &bse_error);
+            // TODO WE ADDED THIS FOR TESTING
+            //get_bse(&bse_val, &bse_error);
 
             debug_can_frame.id = 0xDC;
 

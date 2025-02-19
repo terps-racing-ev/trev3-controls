@@ -1,5 +1,5 @@
 	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09007774
-	; Options: -f cc18148a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=2 -DRTS_TTC_FLASH_DATE_DAY=18 -DRTS_TTC_FLASH_DATE_HOUR=19 -DRTS_TTC_FLASH_DATE_MINUTE=52 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\main.src
+	; Options: -f cc26604a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=2 -DRTS_TTC_FLASH_DATE_DAY=19 -DRTS_TTC_FLASH_DATE_HOUR=14 -DRTS_TTC_FLASH_DATE_MINUTE=15 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\main.src
 	; Module start
 	.source	'src/main.c'
 code_get_rtd	.section	code, cluster 'get_rtd', new
@@ -735,9 +735,9 @@ _1156:
 	addw	r11,#0x14
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0xae],r11
+	movw	[r15+#0xac],r11
 	movw	r11,#@seg(__lc_ub_user_stack+0xffff)
-	movw	[r15+#0xba],r11
+	movw	[r15+#0xb8],r11
 _1157:
 
 ; src/main.c	   307                       , CAN_CHANNEL
@@ -757,8 +757,8 @@ _1160:
 ; src/main.c	   311                       , 0x1FFFFFFF);
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
-	movw	r2,[r15+#0xae]
-	movw	r3,[r15+#0xba]
+	movw	r2,[r15+#0xac]
+	movw	r3,[r15+#0xb8]
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
 _1161:
@@ -769,9 +769,9 @@ _1161:
 	addw	r11,#0x19
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0xb0],r11
+	movw	[r15+#0xae],r11
 	movw	r11,#@seg(__lc_ub_user_stack+0xffff)
-	movw	[r15+#0xbc],r11
+	movw	[r15+#0xba],r11
 _1162:
 
 ; src/main.c	   314                       , CAN_CHANNEL
@@ -791,8 +791,8 @@ _1165:
 ; src/main.c	   318                       , 0x1FFFFFFF);
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
-	movw	r2,[r15+#0xb0]
-	movw	r3,[r15+#0xbc]
+	movw	r2,[r15+#0xae]
+	movw	r3,[r15+#0xba]
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
 _1166:
@@ -803,9 +803,9 @@ _1166:
 	addw	r11,#0x18
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0xb4],r11
+	movw	[r15+#0xb2],r11
 	movw	r11,#@seg(__lc_ub_user_stack+0xffff)
-	movw	[r15+#0xc0],r11
+	movw	[r15+#0xbe],r11
 _1167:
 
 ; src/main.c	   321                   , CAN_CHANNEL
@@ -825,8 +825,8 @@ _1170:
 ; src/main.c	   325                   , 0x1FFFFFFF);
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
-	movw	r2,[r15+#0xb4]
-	movw	r3,[r15+#0xc0]
+	movw	r2,[r15+#0xb2]
+	movw	r3,[r15+#0xbe]
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
 _1171:
@@ -837,9 +837,9 @@ _1171:
 	addw	r11,#0x15
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0xb6],r11
+	movw	[r15+#0xb4],r11
 	movw	r11,#@seg(__lc_ub_user_stack+0xffff)
-	movw	[r15+#0xc2],r11
+	movw	[r15+#0xc0],r11
 _1172:
 
 ; src/main.c	   328                   , CAN_CHANNEL
@@ -859,8 +859,8 @@ _1175:
 ; src/main.c	   332                   , 0x1FFFFFFF);
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
-	movw	r2,[r15+#0xb6]
-	movw	r3,[r15+#0xc2]
+	movw	r2,[r15+#0xb4]
+	movw	r3,[r15+#0xc0]
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
 _1176:
@@ -872,7 +872,7 @@ _1176:
 	andw	r7,#0x3fff
 	orw	r7,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r11,#@seg(__lc_ub_user_stack+0xffff)
-	movw	[r15+#0xb8],r11
+	movw	[r15+#0xb6],r11
 _1177:
 
 ; src/main.c	   335                   , CAN_CHANNEL
@@ -893,7 +893,7 @@ _1180:
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
 	movw	r2,r7
-	movw	r3,[r15+#0xb8]
+	movw	r3,[r15+#0xb6]
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
 _1181:
@@ -904,9 +904,9 @@ _1181:
 	addw	r11,#0x17
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0xb2],r11
+	movw	[r15+#0xb0],r11
 	movw	r11,#@seg(__lc_ub_user_stack+0xffff)
-	movw	[r15+#0xbe],r11
+	movw	[r15+#0xbc],r11
 _1182:
 
 ; src/main.c	   342                   , CAN_CHANNEL
@@ -926,8 +926,8 @@ _1185:
 ; src/main.c	   346                   , 0x1FFFFFFF);
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
-	movw	r2,[r15+#0xb2]
-	movw	r3,[r15+#0xbe]
+	movw	r2,[r15+#0xb0]
+	movw	r3,[r15+#0xbc]
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
 _1186:
@@ -1227,7 +1227,7 @@ _1024:
 	addw	r2,#0xa0
 	andw	r2,#0x3fff
 	orw	r2,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0xec],r2
+	movw	[r15+#0xea],r2
 	movw	r11,#@seg(__lc_ub_user_stack+0xffff)
 	movw	[r15+#0x100],r11
 	movw	r3,[r15+#0x100]
@@ -1260,7 +1260,7 @@ _1220:
 	movw	r11,r15
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0xde],r11
+	movw	[r15+#0xdc],r11
 	movw	r8,#@seg(__lc_ub_user_stack+0xffff)
 _283:
 
@@ -1276,13 +1276,13 @@ _283:
 	addw	r11,#0x9c
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0xc4],r11
+	movw	[r15+#0xc2],r11
 _1221:
 	movw	r11,r15
 	addw	r11,#0x6e
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0xe0],r11
+	movw	[r15+#0xde],r11
 _284:
 
 ; src/main.c	   490          read_can_msg(&handle_tms_summary_2_r, &tms_summary_2_can_frame, &tms_summary_2_message_received, TMS_SUMMARY_2_CAN_ID, CAN_CHANNEL);
@@ -1296,7 +1296,7 @@ _1222:
 	addw	r11,#0x60
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0xe2],r11
+	movw	[r15+#0xe0],r11
 _294:
 
 ; src/main.c	   491  
@@ -1312,7 +1312,7 @@ _1223:
 	addw	r11,#0x52
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0xe4],r11
+	movw	[r15+#0xe2],r11
 _297:
 
 ; src/main.c	   494  
@@ -1328,7 +1328,7 @@ _1224:
 	addw	r11,#0x36
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0xe6],r11
+	movw	[r15+#0xe4],r11
 _300:
 
 ; src/main.c	   497          if (motor_info_message_received) {
@@ -1352,7 +1352,7 @@ _1225:
 	addw	r11,#0x44
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0xe8],r11
+	movw	[r15+#0xe6],r11
 _303:
 
 ; src/main.c	   508  
@@ -1368,7 +1368,7 @@ _1226:
 	addw	r11,#0x7c
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0xea],r11
+	movw	[r15+#0xe8],r11
 _306:
 
 ; src/main.c	   511  
@@ -1408,13 +1408,13 @@ _309:
 	addw	r11,#0x98
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0xac],r11
+	movw	[r15+#0xc6],r11
 _1227:
 	movw	r11,r15
 	addw	r11,#0x96
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0xc6],r11
+	movw	[r15+#0xc4],r11
 _315:
 
 ; src/main.c	   537                  get_sdc(&sdc_val);
@@ -1470,7 +1470,7 @@ _1230:
 	addw	r11,#0x8c
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0xee],r11
+	movw	[r15+#0xec],r11
 _1231:
 
 ; src/main.c	   560                      just_entered_sound_state = FALSE;
@@ -1493,7 +1493,7 @@ _1231:
 	addw	r11,#0x1a
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0xf0],r11
+	movw	[r15+#0xee],r11
 _1232:
 
 ; src/main.c	   576  
@@ -1541,7 +1541,7 @@ _1232:
 ; src/main.c	   618                      controls_can_frame.data[2] = 0;
 ; src/main.c	   619                      controls_can_frame.data[3] = 0;
 ; src/main.c	   620                      // forward direction
-; src/main.c	   621                      controls_can_frame.data[4] = 1;
+; src/main.c	   621                      controls_can_frame.data[4] = 1; // TODO Originally 0
 ; src/main.c	   622                      controls_can_frame.data[5] = 1;
 ; src/main.c	   623                      controls_can_frame.data[6] = 0;
 ; src/main.c	   624                      controls_can_frame.data[7] = 0;
@@ -1765,22 +1765,22 @@ _1239:
 	addw	r11,#0xa8
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0xdc],r11
+	movw	[r15+#0xf0],r11
 _13:
-	movw	r2,[r15+#0xde]
+	movw	r2,[r15+#0xdc]
 	movw	r3,r8
 	call	_IO_RTC_StartTime
 _1240:
 	call	_IO_Driver_TaskBegin
 _292:
-	movw	r11,[r15+#0xc4]
+	movw	r11,[r15+#0xc2]
 	movb	rh4,#0x0
 _1241:
 	exts	r8,#0x1
 	movb	[r11],rh4
 _1242:
-	movw	r11,[r15+#0xae]
-	movw	r12,[r15+#0xba]
+	movw	r11,[r15+#0xac]
+	movw	r12,[r15+#0xb8]
 	exts	r12,#0x1
 	movb	rl2,[r11]
 	call	_IO_CAN_MsgStatus
@@ -1790,16 +1790,16 @@ _1026:
 	cmpw	r2,#0x0
 	jmp	cc_ne,_14
 _1243:
-	movw	r11,[r15+#0xae]
-	movw	r12,[r15+#0xba]
+	movw	r11,[r15+#0xac]
+	movw	r12,[r15+#0xb8]
 	exts	r12,#0x1
 	movb	rl2,[r11]
 _1027:
-	movw	r4,[r15+#0xe0]
+	movw	r4,[r15+#0xde]
 	movw	r5,r8
 	call	_IO_CAN_ReadMsg
 _1244:
-	movw	r11,[r15+#0xc4]
+	movw	r11,[r15+#0xc2]
 	movb	rh4,#0x1
 _1245:
 	exts	r8,#0x1
@@ -1816,8 +1816,8 @@ _14:
 	cmpw	r2,#0x28
 	jmp	cc_ne,_16
 _1247:
-	movw	r11,[r15+#0xae]
-	movw	r12,[r15+#0xba]
+	movw	r11,[r15+#0xac]
+	movw	r12,[r15+#0xb8]
 	exts	r12,#0x1
 	movb	rl2,[r11]
 _1028:
@@ -1832,8 +1832,8 @@ _1250:
 _1251:
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
-	movw	r2,[r15+#0xae]
-	movw	r3,[r15+#0xba]
+	movw	r2,[r15+#0xac]
+	movw	r3,[r15+#0xb8]
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
 
@@ -1846,8 +1846,8 @@ _1252:
 	exts	r8,#0x1
 	movb	[r11],rh4
 _1253:
-	movw	r11,[r15+#0xb0]
-	movw	r12,[r15+#0xbc]
+	movw	r11,[r15+#0xae]
+	movw	r12,[r15+#0xba]
 	exts	r12,#0x1
 	movb	rl2,[r11]
 	call	_IO_CAN_MsgStatus
@@ -1857,12 +1857,12 @@ _1029:
 	cmpw	r2,#0x0
 	jmp	cc_ne,_17
 _1254:
-	movw	r11,[r15+#0xb0]
-	movw	r12,[r15+#0xbc]
+	movw	r11,[r15+#0xae]
+	movw	r12,[r15+#0xba]
 	exts	r12,#0x1
 	movb	rl2,[r11]
 _1030:
-	movw	r4,[r15+#0xe2]
+	movw	r4,[r15+#0xe0]
 	movw	r5,r8
 	call	_IO_CAN_ReadMsg
 _1255:
@@ -1883,8 +1883,8 @@ _17:
 	cmpw	r2,#0x28
 	jmp	cc_ne,_19
 _1258:
-	movw	r11,[r15+#0xb0]
-	movw	r12,[r15+#0xbc]
+	movw	r11,[r15+#0xae]
+	movw	r12,[r15+#0xba]
 	exts	r12,#0x1
 	movb	rl2,[r11]
 _1031:
@@ -1899,8 +1899,8 @@ _1261:
 _1262:
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
-	movw	r2,[r15+#0xb0]
-	movw	r3,[r15+#0xbc]
+	movw	r2,[r15+#0xae]
+	movw	r3,[r15+#0xba]
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
 
@@ -1913,7 +1913,7 @@ _1263:
 	exts	r8,#0x1
 	movb	[r11],rh4
 _1264:
-	movw	r11,[r15+#0xb8]
+	movw	r11,[r15+#0xb6]
 	exts	r11,#0x1
 	movb	rl2,[r7]
 	call	_IO_CAN_MsgStatus
@@ -1923,11 +1923,11 @@ _1032:
 	cmpw	r2,#0x0
 	jmp	cc_ne,_20
 _1265:
-	movw	r11,[r15+#0xb8]
+	movw	r11,[r15+#0xb6]
 	exts	r11,#0x1
 	movb	rl2,[r7]
 _1033:
-	movw	r4,[r15+#0xe4]
+	movw	r4,[r15+#0xe2]
 	movw	r5,r8
 	call	_IO_CAN_ReadMsg
 _1266:
@@ -1948,7 +1948,7 @@ _20:
 	cmpw	r2,#0x28
 	jmp	cc_ne,_22
 _1269:
-	movw	r11,[r15+#0xb8]
+	movw	r11,[r15+#0xb6]
 	exts	r11,#0x1
 	movb	rl2,[r7]
 _1034:
@@ -1964,7 +1964,7 @@ _1273:
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
 	movw	r2,r7
-	movw	r3,[r15+#0xb8]
+	movw	r3,[r15+#0xb6]
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
 
@@ -1977,8 +1977,8 @@ _1274:
 	exts	r8,#0x1
 	movb	[r11],rh4
 _1275:
-	movw	r11,[r15+#0xb4]
-	movw	r12,[r15+#0xc0]
+	movw	r11,[r15+#0xb2]
+	movw	r12,[r15+#0xbe]
 	exts	r12,#0x1
 	movb	rl2,[r11]
 	call	_IO_CAN_MsgStatus
@@ -1988,12 +1988,12 @@ _1035:
 	cmpw	r2,#0x0
 	jmp	cc_ne,_23
 _1276:
-	movw	r11,[r15+#0xb4]
-	movw	r12,[r15+#0xc0]
+	movw	r11,[r15+#0xb2]
+	movw	r12,[r15+#0xbe]
 	exts	r12,#0x1
 	movb	rl2,[r11]
 _1036:
-	movw	r4,[r15+#0xe6]
+	movw	r4,[r15+#0xe4]
 	movw	r5,r8
 	call	_IO_CAN_ReadMsg
 _1277:
@@ -2014,8 +2014,8 @@ _23:
 	cmpw	r2,#0x28
 	jmp	cc_ne,_25
 _1280:
-	movw	r11,[r15+#0xb4]
-	movw	r12,[r15+#0xc0]
+	movw	r11,[r15+#0xb2]
+	movw	r12,[r15+#0xbe]
 	exts	r12,#0x1
 	movb	rl2,[r11]
 _1037:
@@ -2030,8 +2030,8 @@ _1283:
 _1284:
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
-	movw	r2,[r15+#0xb4]
-	movw	r3,[r15+#0xc0]
+	movw	r2,[r15+#0xb2]
+	movw	r3,[r15+#0xbe]
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
 
@@ -2056,8 +2056,8 @@ _1288:
 	exts	r8,#0x1
 	movb	[r11],rh4
 _1289:
-	movw	r11,[r15+#0xb6]
-	movw	r12,[r15+#0xc2]
+	movw	r11,[r15+#0xb4]
+	movw	r12,[r15+#0xc0]
 	exts	r12,#0x1
 	movb	rl2,[r11]
 	call	_IO_CAN_MsgStatus
@@ -2067,12 +2067,12 @@ _1040:
 	cmpw	r2,#0x0
 	jmp	cc_ne,_27
 _1290:
-	movw	r11,[r15+#0xb6]
-	movw	r12,[r15+#0xc2]
+	movw	r11,[r15+#0xb4]
+	movw	r12,[r15+#0xc0]
 	exts	r12,#0x1
 	movb	rl2,[r11]
 _1041:
-	movw	r4,[r15+#0xe8]
+	movw	r4,[r15+#0xe6]
 	movw	r5,r8
 	call	_IO_CAN_ReadMsg
 _1291:
@@ -2093,8 +2093,8 @@ _27:
 	cmpw	r2,#0x28
 	jmp	cc_ne,_29
 _1294:
-	movw	r11,[r15+#0xb6]
-	movw	r12,[r15+#0xc2]
+	movw	r11,[r15+#0xb4]
+	movw	r12,[r15+#0xc0]
 	exts	r12,#0x1
 	movb	rl2,[r11]
 _1042:
@@ -2109,8 +2109,8 @@ _1297:
 _1298:
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
-	movw	r2,[r15+#0xb6]
-	movw	r3,[r15+#0xc2]
+	movw	r2,[r15+#0xb4]
+	movw	r3,[r15+#0xc0]
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
 
@@ -2123,8 +2123,8 @@ _1299:
 	exts	r8,#0x1
 	movb	[r11],rh4
 _1300:
-	movw	r11,[r15+#0xb2]
-	movw	r12,[r15+#0xbe]
+	movw	r11,[r15+#0xb0]
+	movw	r12,[r15+#0xbc]
 	exts	r12,#0x1
 	movb	rl2,[r11]
 	call	_IO_CAN_MsgStatus
@@ -2134,12 +2134,12 @@ _1043:
 	cmpw	r2,#0x0
 	jmp	cc_ne,_30
 _1301:
-	movw	r11,[r15+#0xb2]
-	movw	r12,[r15+#0xbe]
+	movw	r11,[r15+#0xb0]
+	movw	r12,[r15+#0xbc]
 	exts	r12,#0x1
 	movb	rl2,[r11]
 _1044:
-	movw	r4,[r15+#0xea]
+	movw	r4,[r15+#0xe8]
 	movw	r5,r8
 	call	_IO_CAN_ReadMsg
 _1302:
@@ -2160,8 +2160,8 @@ _30:
 	cmpw	r2,#0x28
 	jmp	cc_ne,_32
 _1305:
-	movw	r11,[r15+#0xb2]
-	movw	r12,[r15+#0xbe]
+	movw	r11,[r15+#0xb0]
+	movw	r12,[r15+#0xbc]
 	exts	r12,#0x1
 	movb	rl2,[r11]
 _1045:
@@ -2176,8 +2176,8 @@ _1308:
 _1309:
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
-	movw	r2,[r15+#0xb2]
-	movw	r3,[r15+#0xbe]
+	movw	r2,[r15+#0xb0]
+	movw	r3,[r15+#0xbc]
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
 
@@ -2188,7 +2188,7 @@ _31:
 _1310:
 	jmp	cc_eq,_33
 _1311:
-	movw	r2,[r15+#0xec]
+	movw	r2,[r15+#0xea]
 	movw	r3,[r15+#0x100]
 	call	_IO_RTC_StartTime
 _33:
@@ -2224,9 +2224,9 @@ _1048:
 	movw	r5,r8
 	call	_IO_DI_Get
 _314:
-	movw	r2,[r15+#0xc6]
+	movw	r2,[r15+#0xc4]
 	movw	r3,r8
-	movw	r4,[r15+#0xac]
+	movw	r4,[r15+#0xc6]
 	movw	r5,r8
 	call	_get_bse
 _320:
@@ -2283,7 +2283,7 @@ _1331:
 _1050:
 	jmp	cc_eq,_44
 _1332:
-	movw	r2,[r15+#0xee]
+	movw	r2,[r15+#0xec]
 	movw	r3,r8
 	call	_IO_RTC_StartTime
 _1051:
@@ -2320,7 +2320,7 @@ _1344:
 _1345:
 	movb	rl2,[r15+#0x13]
 _1346:
-	movw	r4,[r15+#0xf0]
+	movw	r4,[r15+#0xee]
 	call	_IO_CAN_WriteFIFO
 _1347:
 	jmp	_45
@@ -2385,9 +2385,9 @@ _335:
 	movw	r12,r8
 	call	_get_apps
 _1357:
-	movw	r2,[r15+#0xc6]
+	movw	r2,[r15+#0xc4]
 	movw	r3,r8
-	movw	r4,[r15+#0xac]
+	movw	r4,[r15+#0xc6]
 	movw	r5,r8
 	call	_get_bse
 _1358:
@@ -2629,9 +2629,9 @@ _70:
 _1066:
 	call	_do_lights_action
 _1418:
-	movw	r2,[r15+#0xc6]
+	movw	r2,[r15+#0xc4]
 	movw	r3,r8
-	movw	r4,[r15+#0xac]
+	movw	r4,[r15+#0xc6]
 	movw	r5,r8
 	call	_get_bse
 _1419:
@@ -2710,7 +2710,7 @@ _1443:
 _324:
 	movb	rl2,#0xf
 _1444:
-	movw	r4,[r15+#0xdc]
+	movw	r4,[r15+#0xf0]
 	movw	r5,r8
 	movw	r11,[r15+#0xf2]
 	movw	r12,r8
@@ -2718,30 +2718,23 @@ _1444:
 _1445:
 
 ; src/main.c	   787  
-; src/main.c	   788              // TODO
-; src/main.c	   789              get_bse(&bse_val, &bse_error);
-	movw	r2,[r15+#0xdc]
-	movw	r3,r8
-	movw	r4,[r15+#0xac]
-	movw	r5,r8
-	call	_get_bse
-_1446:
-
+; src/main.c	   788              // TODO WE ADDED THIS FOR TESTING
+; src/main.c	   789              //get_bse(&bse_val, &bse_error);
 ; src/main.c	   790  
 ; src/main.c	   791              debug_can_frame.id = 0xDC;
 	movw	r11,#0xdc
 	movw	r12,#0x0
-_1447:
+_1446:
 	movw	[r15+#0x32],r11
 	movw	[r15+#0x34],r12
-_1448:
+_1447:
 
 ; src/main.c	   792  
 ; src/main.c	   793              if (apps_error) {
 	movb	rh4,[r15+#0x90]
-_1449:
+_1448:
 	jmp	cc_ne,_75
-_1450:
+_1449:
 
 ; src/main.c	   794              debug_can_frame.data[0] = apps_error;
 ; src/main.c	   795              } else {
@@ -2749,13 +2742,13 @@ _1450:
 	movb	rh4,#0x0
 _75:
 	movb	[r15+#0x28],rh4
-_1451:
+_1450:
 
 ; src/main.c	   797              }
 ; src/main.c	   798  
 ; src/main.c	   799              if (bse_error) {
 	movb	rh4,[r15+#0x98]
-_1452:
+_1451:
 
 ; src/main.c	   800              debug_can_frame.data[1] = 1;
 ; src/main.c	   801              } else {
@@ -2763,9 +2756,9 @@ _1452:
 	movb	rl4,#0x0
 	cmpb	rl4,rh4
 	addcb	rl4,#0x0
-_1453:
+_1452:
 	movb	[r15+#0x29],rl4
-_1454:
+_1453:
 
 ; src/main.c	   803              }
 ; src/main.c	   804  
@@ -2781,54 +2774,54 @@ _1072:
 
 ; src/main.c	   807              debug_can_frame.data[2] = apps_1_val & 0xFF;
 	movb	[r15+#0x2a],rl6
-_1455:
+_1454:
 
 ; src/main.c	   808              debug_can_frame.data[3] = apps_1_val >> 8;
 	shr	r6,#0x8
-_1456:
+_1455:
 	movb	[r15+#0x2b],rl6
-_1457:
+_1456:
 
 ; src/main.c	   809  
 ; src/main.c	   810              debug_can_frame.data[4] = apps_2_val & 0xFF;
 	movb	[r15+#0x2c],rl2
-_1458:
+_1457:
 
 ; src/main.c	   811              debug_can_frame.data[5] = apps_2_val >> 8;
 	shr	r2,#0x8
 _1074:
 	movb	[r15+#0x2d],rl2
-_1459:
+_1458:
 
 ; src/main.c	   812  
 ; src/main.c	   813              // unfiltered bse
 ; src/main.c	   814              debug_can_frame.data[6] = bse_val & 0xFF;
 	movw	r4,[r15+#0xa8]
-_1460:
+_1459:
 	movb	[r15+#0x2e],rl4
-_1461:
+_1460:
 
 ; src/main.c	   815              debug_can_frame.data[7] = bse_val >> 8;
 	movw	r4,[r15+#0xa8]
 	shr	r4,#0x8
-_1462:
+_1461:
 	movb	[r15+#0x2f],rl4
-_1463:
+_1462:
 
 ; src/main.c	   816              
 ; src/main.c	   817  
 ; src/main.c	   818              IO_CAN_WriteFIFO(handle_fifo_w, &debug_can_frame, 1);
 	movb	rl2,[r15+#0x13]
-_1464:
+_1463:
 	movb	rh2,#0x1
 	movw	r4,r9
 	movw	r5,r8
 	call	_IO_CAN_WriteFIFO
-_1465:
+_1464:
 
 ; src/main.c	   819              IO_CAN_WriteFIFO(handle_fifo_w_debug, &debug_can_frame, 1);
 	movb	rl2,[r15+#0x12]
-_1466:
+_1465:
 	movb	rh2,#0x1
 	movw	r4,r9
 	movw	r5,r8
@@ -2859,11 +2852,11 @@ _76:
 	movw	r3,[r15+#0x2]
 	movw	r2,[r15+#0x0]
 	call	_IO_RTC_GetTimeUS
-_1467:
+_1466:
 	cmpw	r2,#0x1388
 	subcw	r3,#0x0
 	jmp+	cc_ult,_76
-_1468:
+_1467:
 	jmp	_13
 _182:
 	; End of function
@@ -2880,7 +2873,7 @@ _appl_db	.label	word
 	.db	0x0
 	.db	0x0
 	.db	0x0
-	.dl	0xd27227e9
+	.dl	0x3dd327e9
 	.db	0x0
 	.db	0x0
 	.db	0x0
@@ -5415,70 +5408,68 @@ _1124:
 	.dw	_324-_1443
 	.db	3,12,1,5,47,9
 	.dw	_1444-_324
-	.db	1,5,32,9
+	.db	1,5,34,9
 	.dw	_1445-_1444
-	.db	3,3,1,5,34,9
+	.db	3,5,1,5,32,9
 	.dw	_1446-_1445
-	.db	3,2,1,5,32,9
+	.db	1,5,17,9
 	.dw	_1447-_1446
-	.db	1,5,17,9
-	.dw	_1448-_1447
 	.db	3,2,1,5,13,9
-	.dw	_1449-_1448
+	.dw	_1448-_1447
 	.db	1,5,39,7,9
-	.dw	_1450-_1449
+	.dw	_1449-_1448
 	.db	3,3,1,5,37,9
-	.dw	_75-_1450
+	.dw	_75-_1449
 	.db	1,5,17,9
-	.dw	_1451-_75
+	.dw	_1450-_75
 	.db	3,3,1,5,39,9
-	.dw	_1452-_1451
+	.dw	_1451-_1450
 	.db	3,3,1,5,37,9
-	.dw	_1453-_1452
+	.dw	_1452-_1451
 	.db	3,126,1,5,52,9
-	.dw	_1454-_1453
+	.dw	_1453-_1452
 	.db	3,5,1,5,24,9
-	.dw	_1071-_1454
+	.dw	_1071-_1453
 	.db	1,5,52,9
 	.dw	_1073-_1071
 	.db	3,1,1,5,37,9
 	.dw	_1072-_1073
 	.db	3,1,1,5,50,9
-	.dw	_1455-_1072
+	.dw	_1454-_1072
 	.db	3,1,1,5,37,9
-	.dw	_1456-_1455
+	.dw	_1455-_1454
 	.db	1,9
-	.dw	_1457-_1456
+	.dw	_1456-_1455
 	.db	3,2,1,5,50,9
-	.dw	_1458-_1457
+	.dw	_1457-_1456
 	.db	3,1,1,5,37,9
-	.dw	_1074-_1458
+	.dw	_1074-_1457
 	.db	1,5,39,9
-	.dw	_1459-_1074
+	.dw	_1458-_1074
 	.db	3,3,1,5,37,9
-	.dw	_1460-_1459
+	.dw	_1459-_1458
 	.db	1,5,47,9
-	.dw	_1461-_1460
+	.dw	_1460-_1459
 	.db	3,1,1,5,37,9
+	.dw	_1461-_1460
+	.db	1,5,30,9
 	.dw	_1462-_1461
-	.db	1,5,30,9
-	.dw	_1463-_1462
 	.db	3,3,1,5,63,9
-	.dw	_1464-_1463
+	.dw	_1463-_1462
 	.db	1,5,30,9
-	.dw	_1465-_1464
+	.dw	_1464-_1463
 	.db	3,1,1,5,69,9
-	.dw	_1466-_1465
+	.dw	_1465-_1464
 	.db	1,5,26,9
-	.dw	_35-_1466
+	.dw	_35-_1465
 	.db	3,10,1,5,33,9
 	.dw	_76-_35
 	.db	3,8,1,5,56,9
-	.dw	_1467-_76
+	.dw	_1466-_76
 	.db	1,5,13,9
-	.dw	_1468-_1467
+	.dw	_1467-_1466
 	.db	3,153,125,1,5,1,9
-	.dw	_182-_1468
+	.dw	_182-_1467
 	.db	3,233,2,0,1,1
 _1122:
 	; End of section
@@ -5681,11 +5672,11 @@ _327:
 	.dw	3
 	.db	145,160,127
 	.dl	0,0
-_293:
-	.dl	-1,_138,_1026-_138,_1027-_138
+_302:
+	.dl	-1,_138,_1035-_138,_1036-_138
 	.dw	1
 	.db	82
-	.dl	_14-_138,_1028-_138
+	.dl	_23-_138,_1037-_138
 	.dw	1
 	.db	82
 	.dl	0,0
@@ -5694,6 +5685,22 @@ _299:
 	.dw	1
 	.db	82
 	.dl	_20-_138,_1034-_138
+	.dw	1
+	.db	82
+	.dl	0,0
+_308:
+	.dl	-1,_138,_1043-_138,_1044-_138
+	.dw	1
+	.db	82
+	.dl	_30-_138,_1045-_138
+	.dw	1
+	.db	82
+	.dl	0,0
+_293:
+	.dl	-1,_138,_1026-_138,_1027-_138
+	.dw	1
+	.db	82
+	.dl	_14-_138,_1028-_138
 	.dw	1
 	.db	82
 	.dl	0,0
@@ -5710,22 +5717,6 @@ _296:
 	.dw	1
 	.db	82
 	.dl	_17-_138,_1031-_138
-	.dw	1
-	.db	82
-	.dl	0,0
-_302:
-	.dl	-1,_138,_1035-_138,_1036-_138
-	.dw	1
-	.db	82
-	.dl	_23-_138,_1037-_138
-	.dw	1
-	.db	82
-	.dl	0,0
-_308:
-	.dl	-1,_138,_1043-_138,_1044-_138
-	.dw	1
-	.db	82
-	.dl	_30-_138,_1045-_138
 	.dw	1
 	.db	82
 	.dl	0,0
@@ -7087,34 +7078,34 @@ _751:
 	; End of section
 
 	.debug		.debug_frame
-_1469:
+_1468:
 	.dl	184
 	.dl	-1
 	.db	3,0,2,2,173,2,15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_1470-_1474
-_1474:
+	.dw	_1469-_1473
+_1473:
 	.db	146,177,2,0,47
-	.dw	_1473-_1475
-_1475:
-_1470:
+	.dw	_1472-_1474
+_1474:
+_1469:
 	.db	18,49,46,40
-	.dw	_1471-_1476
-_1476:
+	.dw	_1470-_1475
+_1475:
 	.db	146,178,2,0,47
-	.dw	_1473-_1477
-_1477:
-_1471:
+	.dw	_1472-_1476
+_1476:
+_1470:
 	.db	18,50,46,40
+	.dw	_1471-_1477
+_1477:
+	.db	146,179,2,0,47
 	.dw	_1472-_1478
 _1478:
-	.db	146,179,2,0,47
-	.dw	_1473-_1479
-_1479:
-_1472:
+_1471:
 	.db	146,180,2,0
-_1473:
+_1472:
 	.db	22,19,62,36,33,48,34,16,173,2,12,19,146,176,2,0,64,36,146,161,2,0,33,8,15,22,161,2,5,19,146,161,2,4,8
 	.db	162,2,8,166,2,8,177,2,8,178,2,8,179,2,8,180,2,8,0,8,1,8,6,8,7,8,8,8,9,8,10,8,167,2,8,168,2,8,169,2,8,170
 	.db	2,8,171,2,8,172,2,16,174,2,12,19,146,176,2,0,64,36,146,161,2,0,33,16,175,2,12,19,146,176,2,0,64,36,146
@@ -7123,18 +7114,18 @@ _1473:
 
 	.debug		.debug_frame, cluster 'get_rtd'
 	.dl	12
-	.dl	_1469,_78,_157-_78
+	.dl	_1468,_78,_157-_78
 	; End of section
 
 	.debug		.debug_frame, cluster 'get_sdc'
 	.dl	28
-	.dl	_1469,_90,_162-_90
+	.dl	_1468,_90,_162-_90
 	.db	8,160,2,8,5,8,11,8,12,8,13,8,14,0,0,0
 	; End of section
 
 	.debug		.debug_frame, cluster 'read_can_msg'
 	.dl	1204
-	.dl	_1469,_102,_167-_102
+	.dl	_1468,_102,_167-_102
 	.db	4
 	.dl	(_346-_102)/2
 	.db	15,60,127,0,18,10
@@ -7572,7 +7563,7 @@ _675:
 
 	.debug		.debug_frame, cluster 'voltage_to_torque_limit'
 	.dl	464
-	.dl	_1469,_114,_172-_114
+	.dl	_1468,_114,_172-_114
 	.db	8,160,2,4
 	.dl	(_692-_114)/2
 	.db	15,60,127,0,18,10
@@ -7740,7 +7731,7 @@ _811:
 
 	.debug		.debug_frame, cluster 'pct_travel_to_torque'
 	.dl	612
-	.dl	_1469,_126,_177-_126
+	.dl	_1468,_126,_177-_126
 	.db	8,160,2,4
 	.dl	(_820-_126)/2
 	.db	15,60,127,0,18,10
@@ -7961,34 +7952,34 @@ _981:
 	; End of section
 
 	.debug		.debug_frame
-_1480:
+_1479:
 	.dl	148
 	.dl	-1
 	.db	3,0,2,2,173,2,15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_1481-_1485
-_1485:
+	.dw	_1480-_1484
+_1484:
 	.db	146,177,2,0,47
-	.dw	_1484-_1486
-_1486:
-_1481:
+	.dw	_1483-_1485
+_1485:
+_1480:
 	.db	18,49,46,40
-	.dw	_1482-_1487
-_1487:
+	.dw	_1481-_1486
+_1486:
 	.db	146,178,2,0,47
-	.dw	_1484-_1488
-_1488:
-_1482:
+	.dw	_1483-_1487
+_1487:
+_1481:
 	.db	18,50,46,40
+	.dw	_1482-_1488
+_1488:
+	.db	146,179,2,0,47
 	.dw	_1483-_1489
 _1489:
-	.db	146,179,2,0,47
-	.dw	_1484-_1490
-_1490:
-_1483:
+_1482:
 	.db	146,180,2,0
-_1484:
+_1483:
 	.db	22,19,62,36,33,48,34,16,173,2,12,19,146,176,2,0,64,36,146,161,2,0,33,8,15,22,161,2,5,19,146,161,2,4,8
 	.db	177,2,8,178,2,8,179,2,8,180,2,16,174,2,12,19,146,176,2,0,64,36,146,161,2,0,33,16,175,2,12,19,146,176,2
 	.db	0,64,36,146,161,2,2,33,8,176,2,0,0
@@ -7996,7 +7987,7 @@ _1484:
 
 	.debug		.debug_frame, cluster 'main'
 	.dl	112
-	.dl	_1480,_138,_182-_138
+	.dl	_1479,_138,_182-_138
 	.db	8,166,2,8,167,2,8,168,2,8,169,2,8,170,2,8,171,2,8,172,2,4
 	.dl	(_990-_138)/2
 	.db	15,62,127,0,18,10
