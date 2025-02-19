@@ -49,7 +49,7 @@
 // #define PCT_TRAVEL_TO_TORQUE(val) ((int)(((float)(val) / 100.0) * 112.0))
 #define PCT_TRAVEL_FOR_MAX_TORQUE 80
 
-#define CONTINUOUS_TORQUE_MAX 200
+#define CONTINUOUS_TORQUE_MAX 30
 /**************************************************************************
  * SDC Settings
  ***************************************************************************/
@@ -464,6 +464,8 @@ void main (void)
     // brake lights
     IO_DO_Init( BRAKE_LIGHT_PIN );
 
+    int faults_cleared = 0;
+
 
 
 
@@ -532,6 +534,7 @@ void main (void)
         } else {
 
             if (current_state == NOT_READY) {
+                faults_cleared = 0;
                 get_rtd(&rtd_val);
                 get_bse(&bse_result, &bse_error);
                 get_sdc(&sdc_val);
@@ -563,6 +566,7 @@ void main (void)
 
 
                     // clear Inverter faults
+                    faults_cleared = 1;
                     inverter_settings_can_frame.data[0] = 20;
                     inverter_settings_can_frame.data[1] = 0;
                     inverter_settings_can_frame.data[2] = 1;
@@ -618,11 +622,13 @@ void main (void)
                     controls_can_frame.data[2] = 0;
                     controls_can_frame.data[3] = 0;
                     // forward direction
-                    controls_can_frame.data[4] = 1; // TODO Originally 0
+                    controls_can_frame.data[4] = 0; // TODO Originally 1
                     controls_can_frame.data[5] = 1;
                     controls_can_frame.data[6] = 0;
                     controls_can_frame.data[7] = 0;
                     IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
+                    IO_CAN_WriteFIFO(handle_fifo_w_debug, &controls_can_frame, 1);
+
                 }
             } else if (current_state == ERRORED) {
                 get_rtd(&rtd_val);
@@ -772,6 +778,22 @@ void main (void)
 
             IO_CAN_WriteFIFO(handle_fifo_w, &debug_can_frame, 1);
             IO_CAN_WriteFIFO(handle_fifo_w_debug, &debug_can_frame, 1);
+
+            // TODO: STATE
+            debug_can_frame.id = 0x69;
+            debug_can_frame.data[0] = (faults_cleared == 1);
+            debug_can_frame.data[1] = (faults_cleared == 1);
+            debug_can_frame.data[2] = (faults_cleared == 1);
+            debug_can_frame.data[3] = (faults_cleared == 1);
+            debug_can_frame.data[4] = (faults_cleared == 1);
+            debug_can_frame.data[5] = (faults_cleared == 1);
+            debug_can_frame.data[6] = (faults_cleared == 1);
+            debug_can_frame.data[7] = (faults_cleared == 1);
+
+            
+            IO_CAN_WriteFIFO(handle_fifo_w, &debug_can_frame, 1);
+            IO_CAN_WriteFIFO(handle_fifo_w_debug, &debug_can_frame, 1);
+            // END TODO:
 
             ubyte2 apps_1_val;
             bool apps_1_fresh;
