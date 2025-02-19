@@ -627,6 +627,9 @@ void main (void)
             } else if (current_state == ERRORED) {
                 get_rtd(&rtd_val);
 
+                set_light_to(BLINKING_RED);
+                do_lights_action();
+
                 if (rtd_val == RTD_OFF) {
                     // rtd off -> switch to not ready state
                     current_state = NOT_READY;
@@ -702,6 +705,8 @@ void main (void)
             // only check CAN message if it's been "ignore period" seconds since start
             if (been_ignore_period_since_start == TRUE) {
                 // if CAN timeout, set light to blinking red
+                // TODO ADD THIS BACK IN
+                /*
                 if (IO_RTC_GetTimeUS(orion_can_timeout) > ORION_CAN_TIMEOUT_US) {
                     set_light_to(BLINKING_RED);
                 } else {
@@ -722,7 +727,17 @@ void main (void)
                                 set_light_to(BLINKING_RED);
                         }
                     }
-                }
+                }*/
+            }
+            // TODO REMOVE THIS
+            if (current_state == DRIVING) {
+                set_light_to(SOLID_GREEN);
+            }else{
+                set_light_to(BLINKING_RED);
+            }
+
+            if (rtd_val == RTD_OFF) {
+                current_state == NOT_READY;
             }
 
             // run the lights (function call needed for lights to blink)
@@ -769,6 +784,9 @@ void main (void)
             // send another debug message
             // get voltage values
             IO_ADC_Get(IO_PIN_BSE, &bse_val, &bse_fresh);
+
+            // TODO
+            get_bse(&bse_val, &bse_error);
 
             debug_can_frame.id = 0xDC;
 
