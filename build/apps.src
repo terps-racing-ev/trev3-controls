@@ -1,5 +1,5 @@
 	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09007774
-	; Options: -f cc36308a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=2 -DRTS_TTC_FLASH_DATE_DAY=19 -DRTS_TTC_FLASH_DATE_HOUR=14 -DRTS_TTC_FLASH_DATE_MINUTE=35 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\apps.src
+	; Options: -f cc53388a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=2 -DRTS_TTC_FLASH_DATE_DAY=19 -DRTS_TTC_FLASH_DATE_HOUR=14 -DRTS_TTC_FLASH_DATE_MINUTE=59 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\apps.src
 	; Module start
 	.source	'src/apps.c'
 code_voltage_to_pct_travel_apps_1	.section	code, cluster 'voltage_to_pct_travel_apps_1', new
@@ -137,26 +137,26 @@ _184:
 ; src/apps.c	    51          // get voltage values
 ; src/apps.c	    52          IO_ADC_Get(IO_PIN_APPS_1, &apps_1_val, &apps_1_fresh);
 	movb	rl2,#0x8
-_730:
+_736:
 	movw	r4,r15
 	andw	r4,#0x3fff
 	orw	r4,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r12,#@seg(__lc_ub_user_stack+0xffff)
-_731:
+_737:
 	movw	r11,#0x2
 	addw	r11,r15
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r5,r12
 	call	_IO_ADC_Get
-_732:
+_738:
 
 ; src/apps.c	    53  
 ; src/apps.c	    54          // uncomment once ready to use moving average filter
 ; src/apps.c	    55          //return filter_point(apps_1_val, &apps_1_moving_average_info);
 ; src/apps.c	    56          return apps_1_val;
 	movw	r2,[r15+#0x0]
-_733:
+_739:
 	jmp	_13
 _12:
 
@@ -198,26 +198,26 @@ _187:
 ; src/apps.c	    67          // get voltage values
 ; src/apps.c	    68          IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
 	movb	rl2,#0x9
-_738:
+_744:
 	movw	r4,r15
 	andw	r4,#0x3fff
 	orw	r4,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r12,#@seg(__lc_ub_user_stack+0xffff)
-_739:
+_745:
 	movw	r11,#0x2
 	addw	r11,r15
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r5,r12
 	call	_IO_ADC_Get
-_740:
+_746:
 
 ; src/apps.c	    69  
 ; src/apps.c	    70          // uncomment once ready to use moving average filter
 ; src/apps.c	    71          //return filter_point(apps_2_val, &apps_2_moving_average_info);
 ; src/apps.c	    72          return apps_2_val;
 	movw	r2,[r15+#0x0]
-_741:
+_747:
 	jmp	_16
 _15:
 
@@ -349,59 +349,79 @@ _660:
 	movw	r11,r6
 	movw	r12,r7
 	call	_IO_ADC_Get
-_169:
+_661:
 
 ; src/apps.c	    98  
 ; src/apps.c	    99      // uncomment once ready to use moving average filter
-; src/apps.c	   100      //apps_1_val = filter_point(apps_1_val, &apps_1_moving_average_info);
-; src/apps.c	   101      //apps_2_val = filter_point(apps_2_val, &apps_2_moving_average_info);
-; src/apps.c	   102  
-; src/apps.c	   103      bool apps_1_within_threshhold = (apps_1_val >= (APPS_1_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_1_val <= (APPS_1_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
+; src/apps.c	   100      apps_1_val = filter_point(apps_1_val, &apps_1_moving_average_info);
+	movw	r2,[r15+#0x2]
+_662:
+	movw	r4,#@sof(_apps_1_moving_average_info)
+	movw	r5,#@seg(_apps_1_moving_average_info)
+	call	_filter_point
+_663:
+	movw	[r15+#0x2],r2
+_664:
+
+; src/apps.c	   101      apps_2_val = filter_point(apps_2_val, &apps_2_moving_average_info);
+	movw	r2,[r15+#0x0]
+_665:
+	movw	r4,#@sof(_apps_2_moving_average_info)
+	movw	r5,#@seg(_apps_2_moving_average_info)
+	call	_filter_point
+_666:
+	movw	[r15+#0x0],r2
+_169:
+
+; src/apps.c	   102      //apps_1_val = get_filtered_apps1_voltage();
+; src/apps.c	   103      //apps_2_val = get_filtered_apps2_voltage();
+; src/apps.c	   104  
+; src/apps.c	   105      bool apps_1_within_threshhold = (apps_1_val >= (APPS_1_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_1_val <= (APPS_1_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
 	movw	r11,[r15+#0x2]
 	subw	r11,#0x371
-_661:
+_667:
 	movw	r4,#0x0
 	cmpw	r11,#0xde7
 	jmp	cc_ugt,_19
 	movw	r4,#0x1
 _19:
 
-; src/apps.c	   104      bool apps_2_within_threshhold = (apps_2_val >= (APPS_2_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_2_val <= (APPS_2_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
+; src/apps.c	   106      bool apps_2_within_threshhold = (apps_2_val >= (APPS_2_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_2_val <= (APPS_2_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
 	movw	r11,[r15+#0x0]
 	subw	r11,#0x34c
-_662:
+_668:
 	movw	r5,#0x0
 	cmpw	r11,#0xe46
 	jmp	cc_ugt,_20
 	movw	r5,#0x1
 _20:
 
-; src/apps.c	   105  
-; src/apps.c	   106      ubyte4 implausibility_timestamp;
-; src/apps.c	   107      ubyte2 apps_1_pct;
-; src/apps.c	   108      ubyte2 apps_2_pct;
-; src/apps.c	   109      sbyte2 difference;
-; src/apps.c	   110  
-; src/apps.c	   111      // check that both apps are within the treshhold
-; src/apps.c	   112      if (apps_1_within_threshhold &&
+; src/apps.c	   107  
+; src/apps.c	   108      ubyte4 implausibility_timestamp;
+; src/apps.c	   109      ubyte2 apps_1_pct;
+; src/apps.c	   110      ubyte2 apps_2_pct;
+; src/apps.c	   111      sbyte2 difference;
+; src/apps.c	   112  
+; src/apps.c	   113      // check that both apps are within the treshhold
+; src/apps.c	   114      if (apps_1_within_threshhold &&
 	cmpb	rl4,#0x0
 	jmp-	cc_eq,_21
-_663:
+_669:
 
-; src/apps.c	   113          apps_2_within_threshhold) {
+; src/apps.c	   115          apps_2_within_threshhold) {
 	cmpb	rl5,#0x0
 	jmp	cc_eq,_22
-_664:
+_670:
 
-; src/apps.c	   114  
-; src/apps.c	   115          apps_1_pct = voltage_to_pct_travel_apps_1(apps_1_val);
+; src/apps.c	   116  
+; src/apps.c	   117          apps_1_pct = voltage_to_pct_travel_apps_1(apps_1_val);
 	movw	r11,[r15+#0x2]
 _176:
 
 ; src/apps.c	    21      if (apps_1_voltage < APPS_1_MIN_VOLTAGE) {      (inlined)
 	cmpw	r11,#0x407
 	jmp+	cc_uge,_23
-_665:
+_671:
 	movw	r11,#0x0
 
 ; src/apps.c	    22          return 0;      (inlined)
@@ -413,7 +433,7 @@ _23:
 ; src/apps.c	    25      if (apps_1_voltage > APPS_1_MAX_VOLTAGE) {      (inlined)
 	cmpw	r11,#0x10c2
 	jmp+	cc_ule,_25
-_666:
+_672:
 	movw	r11,#0x64
 
 ; src/apps.c	    26          return 100;      (inlined)
@@ -428,19 +448,19 @@ _25:
 _26:
 _24:
 
-; src/apps.c	   116  
-; src/apps.c	   117          if (apps_1_pct < 0) {
-; src/apps.c	   118              apps_1_pct = 0;
-; src/apps.c	   119          }
-; src/apps.c	   120  
-; src/apps.c	   121          apps_2_pct = voltage_to_pct_travel_apps_2(apps_2_val);
+; src/apps.c	   118  
+; src/apps.c	   119          if (apps_1_pct < 0) {
+; src/apps.c	   120              apps_1_pct = 0;
+; src/apps.c	   121          }
+; src/apps.c	   122  
+; src/apps.c	   123          apps_2_pct = voltage_to_pct_travel_apps_2(apps_2_val);
 	movw	r12,[r15+#0x0]
 _179:
 
 ; src/apps.c	    34      if (apps_2_voltage < APPS_2_MIN_VOLTAGE) {      (inlined)
 	cmpw	r12,#0x3e2
 	jmp+	cc_uge,_27
-_667:
+_673:
 	movw	r12,#0x0
 
 ; src/apps.c	    35          return 0;      (inlined)
@@ -452,7 +472,7 @@ _27:
 ; src/apps.c	    38      if (apps_2_voltage > APPS_2_MAX_VOLTAGE) {      (inlined)
 	cmpw	r12,#0x10fc
 	jmp+	cc_ule,_29
-_668:
+_674:
 	movw	r12,#0x64
 
 ; src/apps.c	    39          return 100;      (inlined)
@@ -461,9 +481,9 @@ _668:
 ; src/apps.c	    38      if (apps_2_voltage > APPS_2_MAX_VOLTAGE) {      (inlined)
 _29:
 	subw	r12,#0x3e2
-_669:
+_675:
 	movw	r13,#0x21
-_670:
+_676:
 	movw	MDL,r12
 	divu	r13
 	movw	r12,MDL
@@ -474,129 +494,129 @@ _28:
 	movw	r13,r11
 _620:
 
-; src/apps.c	   122  
-; src/apps.c	   123          if (apps_2_pct < 0) {
-; src/apps.c	   124              apps_2_pct = 0;
-; src/apps.c	   125          }
-; src/apps.c	   126  
-; src/apps.c	   127          difference = apps_1_pct - apps_2_pct;
-	subw	r13,r12
-_671:
-
+; src/apps.c	   124  
+; src/apps.c	   125          if (apps_2_pct < 0) {
+; src/apps.c	   126              apps_2_pct = 0;
+; src/apps.c	   127          }
 ; src/apps.c	   128  
-; src/apps.c	   129  
-; src/apps.c	   130          // check if there's an implausible deviation between the two
-; src/apps.c	   131          if ((Abs(difference)) >= APPS_MIN_IMPLAUSIBLE_DEVIATION) {
+; src/apps.c	   129          difference = apps_1_pct - apps_2_pct;
+	subw	r13,r12
+_677:
+
+; src/apps.c	   130  
+; src/apps.c	   131  
+; src/apps.c	   132          // check if there's an implausible deviation between the two
+; src/apps.c	   133          if ((Abs(difference)) >= APPS_MIN_IMPLAUSIBLE_DEVIATION) {
 	jmp	cc_nn,_31
-_672:
+_678:
 	negw	r13
 _31:
 	cmpw	r13,#0xa
 	jmp+	cc_slt,_32
-_673:
+_679:
 
-; src/apps.c	   132              IO_RTC_StartTime(&implausibility_timestamp);
+; src/apps.c	   134              IO_RTC_StartTime(&implausibility_timestamp);
 	movw	r2,#0x6
 	addw	r2,r15
 	andw	r2,#0x3fff
 	orw	r2,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r3,#@seg(__lc_ub_user_stack+0xffff)
 	call	_IO_RTC_StartTime
-_674:
+_680:
 
-; src/apps.c	   133  
-; src/apps.c	   134              // continuously check APPS for 100 ms to check if it stays implausible
-; src/apps.c	   135              while (IO_RTC_GetTimeUS(implausibility_timestamp) <= IMPLAUSIBILITY_PERSISTENCE_PERIOD_US) {
+; src/apps.c	   135  
+; src/apps.c	   136              // continuously check APPS for 100 ms to check if it stays implausible
+; src/apps.c	   137              while (IO_RTC_GetTimeUS(implausibility_timestamp) <= IMPLAUSIBILITY_PERSISTENCE_PERIOD_US) {
 	movw	r3,[r15+#0x8]
 	movw	r2,[r15+#0x6]
 	call	_IO_RTC_GetTimeUS
-_675:
+_681:
 	cmpw	r2,#0x86a0
 	subcw	r3,#0x1
 	jmp+	cc_ugt,_33
 _34:
 
-; src/apps.c	   136                  IO_ADC_Get(IO_PIN_APPS_1, &apps_1_val, &apps_1_fresh);
+; src/apps.c	   138                  IO_ADC_Get(IO_PIN_APPS_1, &apps_1_val, &apps_1_fresh);
 	movb	rl2,#0x8
-_676:
+_682:
 	movw	r4,r10
 	movw	r5,r9
 	movw	r11,r8
 	movw	r12,r9
 	call	_IO_ADC_Get
-_677:
+_683:
 
-; src/apps.c	   137                  IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
+; src/apps.c	   139                  IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
 	movb	rl2,#0x9
-_678:
+_684:
 	movw	r4,r0
 	movw	r5,r7
 	movw	r11,r6
 	movw	r12,r7
 	call	_IO_ADC_Get
-_679:
+_685:
 
-; src/apps.c	   138  
-; src/apps.c	   139                  // uncomment once ready to use moving average filter
-; src/apps.c	   140                  apps_1_val = filter_point(apps_1_val, &apps_1_moving_average_info);
+; src/apps.c	   140  
+; src/apps.c	   141                  // uncomment once ready to use moving average filter
+; src/apps.c	   142                  apps_1_val = filter_point(apps_1_val, &apps_1_moving_average_info);
 	movw	r2,[r15+#0x2]
-_680:
+_686:
 	movw	r4,#@sof(_apps_1_moving_average_info)
 	movw	r5,#@seg(_apps_1_moving_average_info)
 	call	_filter_point
-_681:
+_687:
 	movw	[r15+#0x2],r2
-_682:
+_688:
 
-; src/apps.c	   141                  apps_2_val = filter_point(apps_2_val, &apps_2_moving_average_info);
+; src/apps.c	   143                  apps_2_val = filter_point(apps_2_val, &apps_2_moving_average_info);
 	movw	r2,[r15+#0x0]
-_683:
+_689:
 	movw	r4,#@sof(_apps_2_moving_average_info)
 	movw	r5,#@seg(_apps_2_moving_average_info)
 	call	_filter_point
-_684:
+_690:
 	movw	[r15+#0x0],r2
-_685:
+_691:
 
-; src/apps.c	   142  
-; src/apps.c	   143                  apps_1_within_threshhold = (apps_1_val >= (APPS_1_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_1_val <= (APPS_1_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
+; src/apps.c	   144  
+; src/apps.c	   145                  apps_1_within_threshhold = (apps_1_val >= (APPS_1_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_1_val <= (APPS_1_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
 	movw	r11,[r15+#0x2]
 	subw	r11,#0x371
-_686:
+_692:
 	movw	r4,#0x0
 	cmpw	r11,#0xde7
 	jmp	cc_ugt,_35
 	movw	r4,#0x1
 _35:
 
-; src/apps.c	   144                  apps_2_within_threshhold = (apps_2_val >= (APPS_2_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_2_val <= (APPS_2_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
+; src/apps.c	   146                  apps_2_within_threshhold = (apps_2_val >= (APPS_2_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_2_val <= (APPS_2_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
 	movw	r11,[r15+#0x0]
 	subw	r11,#0x34c
-_687:
+_693:
 	movw	r5,#0x0
 	cmpw	r11,#0xe46
 	jmp	cc_ugt,_36
 	movw	r5,#0x1
 _36:
 
-; src/apps.c	   145  
-; src/apps.c	   146                  // if the values are plausible
-; src/apps.c	   147                  if (apps_1_within_threshhold && apps_2_within_threshhold) {
+; src/apps.c	   147  
+; src/apps.c	   148                  // if the values are plausible
+; src/apps.c	   149                  if (apps_1_within_threshhold && apps_2_within_threshhold) {
 	cmpb	rl4,#0x0
 	jmp-	cc_eq,_37
-_688:
+_694:
 	cmpb	rl5,#0x0
 	jmp-	cc_eq,_38
-_689:
+_695:
 
-; src/apps.c	   148                      apps_1_pct = voltage_to_pct_travel_apps_1(apps_1_val);
+; src/apps.c	   150                      apps_1_pct = voltage_to_pct_travel_apps_1(apps_1_val);
 	movw	r11,[r15+#0x2]
 _182:
 
 ; src/apps.c	    21      if (apps_1_voltage < APPS_1_MIN_VOLTAGE) {      (inlined)
 	cmpw	r11,#0x407
 	jmp+	cc_uge,_39
-_690:
+_696:
 	movw	r11,#0x0
 
 ; src/apps.c	    22          return 0;      (inlined)
@@ -608,7 +628,7 @@ _39:
 ; src/apps.c	    25      if (apps_1_voltage > APPS_1_MAX_VOLTAGE) {      (inlined)
 	cmpw	r11,#0x10c2
 	jmp+	cc_ule,_41
-_691:
+_697:
 	movw	r11,#0x64
 
 ; src/apps.c	    26          return 100;      (inlined)
@@ -623,14 +643,14 @@ _41:
 _42:
 _40:
 
-; src/apps.c	   149                      apps_2_pct = voltage_to_pct_travel_apps_2(apps_2_val);
+; src/apps.c	   151                      apps_2_pct = voltage_to_pct_travel_apps_2(apps_2_val);
 	movw	r12,[r15+#0x0]
 _183:
 
 ; src/apps.c	    34      if (apps_2_voltage < APPS_2_MIN_VOLTAGE) {      (inlined)
 	cmpw	r12,#0x3e2
 	jmp+	cc_uge,_43
-_692:
+_698:
 	movw	r12,#0x0
 
 ; src/apps.c	    35          return 0;      (inlined)
@@ -642,7 +662,7 @@ _43:
 ; src/apps.c	    38      if (apps_2_voltage > APPS_2_MAX_VOLTAGE) {      (inlined)
 	cmpw	r12,#0x10fc
 	jmp+	cc_ule,_45
-_693:
+_699:
 	movw	r12,#0x64
 
 ; src/apps.c	    39          return 100;      (inlined)
@@ -651,9 +671,9 @@ _693:
 ; src/apps.c	    38      if (apps_2_voltage > APPS_2_MAX_VOLTAGE) {      (inlined)
 _45:
 	subw	r12,#0x3e2
-_694:
+_700:
 	movw	r13,#0x21
-_695:
+_701:
 	movw	MDL,r12
 	divu	r13
 	movw	r12,MDL
@@ -664,59 +684,59 @@ _44:
 	movw	r13,r11
 _621:
 
-; src/apps.c	   150  
-; src/apps.c	   151                      difference = apps_1_pct - apps_2_pct;
-	subw	r13,r12
-_696:
-
 ; src/apps.c	   152  
-; src/apps.c	   153                      // then return
-; src/apps.c	   154                      if ((Abs(difference)) < APPS_MIN_IMPLAUSIBLE_DEVIATION) {
+; src/apps.c	   153                      difference = apps_1_pct - apps_2_pct;
+	subw	r13,r12
+_702:
+
+; src/apps.c	   154  
+; src/apps.c	   155                      // then return
+; src/apps.c	   156                      if ((Abs(difference)) < APPS_MIN_IMPLAUSIBLE_DEVIATION) {
 	jmp	cc_nn,_47
-_697:
+_703:
 	negw	r13
 _47:
 	cmpw	r13,#0xa
 	jmp-	cc_sge,_48
-_698:
+_704:
 
-; src/apps.c	   155                          *apps_pct_result = ((apps_1_pct) + (apps_2_pct)) / 2;
+; src/apps.c	   157                          *apps_pct_result = ((apps_1_pct) + (apps_2_pct)) / 2;
 	addw	r11,r12
 	shr	r11,#0x1
-_699:
+_705:
 
-; src/apps.c	   156  
-; src/apps.c	   157                          if (*apps_pct_result <= APPS_DEADZONE) {
+; src/apps.c	   158  
+; src/apps.c	   159                          if (*apps_pct_result <= APPS_DEADZONE) {
 	cmpw	r11,#0x2
 	jmp+	cc_ugt,_49
-_700:
+_706:
 
-; src/apps.c	   158                              *apps_pct_result = 0;
+; src/apps.c	   160                              *apps_pct_result = 0;
 	movw	r11,#0x0
 _49:
 
-; src/apps.c	   159                          }
-; src/apps.c	   160                          *error = FALSE;
+; src/apps.c	   161                          }
+; src/apps.c	   162                          *error = FALSE;
 	movw	r12,[r15+#0xe]
 	movw	r13,[r15+#0xc]
 	exts	r13,#0x1
 	movw	[r12],r11
-_701:
+_707:
 	movb	rh4,#0x0
-_702:
+_708:
 	movw	r11,[r15+#0x12]
 	movw	r12,[r15+#0x10]
 	exts	r12,#0x1
 	movb	[r11],rh4
-_703:
+_709:
 
-; src/apps.c	   161                          *num_errors = 0;
+; src/apps.c	   163                          *num_errors = 0;
 	movw	r11,[r15+#0xa]
 	exts	r1,#0x1
 	movb	[r11],rh4
-_704:
+_710:
 
-; src/apps.c	   162                          return;
+; src/apps.c	   164                          return;
 	jmp	_50
 _48:
 _38:
@@ -724,127 +744,127 @@ _37:
 	movw	r3,[r15+#0x8]
 	movw	r2,[r15+#0x6]
 	call	_IO_RTC_GetTimeUS
-_705:
+_711:
 	cmpw	r2,#0x86a0
 	subcw	r3,#0x1
 	jmp+	cc_ule,_34
 _33:
 
-; src/apps.c	   163                      }
-; src/apps.c	   164                  }
-; src/apps.c	   165              }
-; src/apps.c	   166  
-; src/apps.c	   167              // if the values never became plausible, then indicate an error
-; src/apps.c	   168              *apps_pct_result = 0;
+; src/apps.c	   165                      }
+; src/apps.c	   166                  }
+; src/apps.c	   167              }
+; src/apps.c	   168  
+; src/apps.c	   169              // if the values never became plausible, then indicate an error
+; src/apps.c	   170              *apps_pct_result = 0;
 	movw	r11,#0x0
-_706:
+_712:
 	movw	r12,[r15+#0xe]
 	movw	r13,[r15+#0xc]
 	exts	r13,#0x1
 	movw	[r12],r11
-_707:
+_713:
 
-; src/apps.c	   169  
-; src/apps.c	   170              // only error out if APPS_REPEATED_ERROR_MAX errors have been encountered in a row
-; src/apps.c	   171              (*num_errors)++;
+; src/apps.c	   171  
+; src/apps.c	   172              // only error out if APPS_REPEATED_ERROR_MAX errors have been encountered in a row
+; src/apps.c	   173              (*num_errors)++;
 	movw	r11,[r15+#0xa]
 	exts	r1,#0x1
 	movb	rh4,[r11]
-_708:
+_714:
 	addb	rh4,#0x1
 	exts	r1,#0x1
 	movb	[r11],rh4
-_709:
+_715:
 
-; src/apps.c	   172              if ((*num_errors) > APPS_REPEATED_ERROR_MAX && !(IGNORE_APPS_ERROR)) {
+; src/apps.c	   174              if ((*num_errors) > APPS_REPEATED_ERROR_MAX && !(IGNORE_APPS_ERROR)) {
 	exts	r1,#0x1
 	movb	rh4,[r11]
-_710:
+_716:
 	cmpb	rh4,#0x5
 	jmp+	cc_ule,_51
-_711:
+_717:
 
-; src/apps.c	   173                  *error = APPS_IMPLAUSIBILITY_ERROR;
+; src/apps.c	   175                  *error = APPS_IMPLAUSIBILITY_ERROR;
 	movb	rh4,#0x1
-_712:
+_718:
 	movw	r11,[r15+#0x12]
 	movw	r12,[r15+#0x10]
 	exts	r12,#0x1
 	movb	[r11],rh4
-_713:
+_719:
 
-; src/apps.c	   174              }
-; src/apps.c	   175              return;
+; src/apps.c	   176              }
+; src/apps.c	   177              return;
 	jmp	_52
 _32:
 
-; src/apps.c	   176          }
-; src/apps.c	   177  
-; src/apps.c	   178  
-; src/apps.c	   179          // set the result to the average of the two
-; src/apps.c	   180          *apps_pct_result = ((apps_1_pct) + (apps_2_pct)) / 2;
+; src/apps.c	   178          }
+; src/apps.c	   179  
+; src/apps.c	   180  
+; src/apps.c	   181          // set the result to the average of the two
+; src/apps.c	   182          *apps_pct_result = ((apps_1_pct) + (apps_2_pct)) / 2;
 	addw	r11,r12
 	shr	r11,#0x1
-_714:
+_720:
 
-; src/apps.c	   181          if (*apps_pct_result <= APPS_DEADZONE) {
+; src/apps.c	   183          if (*apps_pct_result <= APPS_DEADZONE) {
 	cmpw	r11,#0x2
 	jmp+	cc_ugt,_53
-_715:
+_721:
 
-; src/apps.c	   182              *apps_pct_result = 0;
+; src/apps.c	   184              *apps_pct_result = 0;
 	movw	r11,#0x0
 _53:
 
-; src/apps.c	   183          }
-; src/apps.c	   184          *num_errors = 0;
+; src/apps.c	   185          }
+; src/apps.c	   186          *num_errors = 0;
 	movw	r12,[r15+#0xe]
 	movw	r13,[r15+#0xc]
 	exts	r13,#0x1
 	movw	[r12],r11
-_716:
+_722:
 	movw	r11,[r15+#0xa]
-_717:
+_723:
 	movb	rh4,#0x0
-_718:
+_724:
 	exts	r1,#0x1
 	movb	[r11],rh4
-_719:
+_725:
 
-; src/apps.c	   185          *error = FALSE;
+; src/apps.c	   187          *error = FALSE;
 	movw	r11,[r15+#0x12]
 	movw	r12,[r15+#0x10]
 	exts	r12,#0x1
 	movb	[r11],rh4
-_720:
+_726:
 	jmp	_54
 _22:
 _21:
 
-; src/apps.c	   186      } else {
-; src/apps.c	   187          // only error out if APPS_REPEATED_ERROR_MAX errors have been encountered in a row
-; src/apps.c	   188          (*num_errors)++;
+; src/apps.c	   188      } else {
+; src/apps.c	   189          // only error out if APPS_REPEATED_ERROR_MAX errors have been encountered in a row
+; src/apps.c	   190          (*num_errors)++;
 	movw	r11,[r15+#0xa]
 	exts	r1,#0x1
 	movb	rh4,[r11]
-_721:
+_727:
 	addb	rh4,#0x1
 	exts	r1,#0x1
 	movb	[r11],rh4
-_722:
+_728:
 
-; src/apps.c	   189          if ((*num_errors) > APPS_REPEATED_ERROR_MAX && !(IGNORE_APPS_ERROR)) {
+; src/apps.c	   191          if ((*num_errors) > APPS_REPEATED_ERROR_MAX && !(IGNORE_APPS_ERROR)) {
 _622:
 	exts	r1,#0x1
 	movb	rh4,[r11]
 _623:
 	cmpb	rh4,#0x5
 	jmp+	cc_ule,_55
-_723:
+_729:
 
-; src/apps.c	   190              *error = APPS_OUT_OF_RANGE_ERROR;
+; src/apps.c	   192              *error = APPS_OUT_OF_RANGE_ERROR;
 	movb	rh4,#0x2
-_724:
+_730:
 	movw	r11,[r15+#0x12]
 	movw	r12,[r15+#0x10]
 _624:
@@ -852,10 +872,10 @@ _624:
 	movb	[r11],rh4
 _55:
 
-; src/apps.c	   191          }
-; src/apps.c	   192          *apps_pct_result = 0;
+; src/apps.c	   193          }
+; src/apps.c	   194          *apps_pct_result = 0;
 	movw	r11,#0x0
-_725:
+_731:
 	movw	r12,[r15+#0xe]
 	movw	r13,[r15+#0xc]
 _625:
@@ -863,8 +883,8 @@ _625:
 	movw	[r12],r11
 _54:
 
-; src/apps.c	   193      }
-; src/apps.c	   194  }
+; src/apps.c	   195      }
+; src/apps.c	   196  }
 _52:
 _51:
 _50:
@@ -911,9 +931,9 @@ _apps_2_moving_average_info	.label	word
 	.calls	'_get_filtered_apps2_voltage','_IO_ADC_Get'
 	.calls	'_get_apps','_initialize_moving_average_struct'
 	.calls	'_get_apps','_IO_ADC_Get'
+	.calls	'_get_apps','_filter_point'
 	.calls	'_get_apps','_IO_RTC_StartTime'
 	.calls	'_get_apps','_IO_RTC_GetTimeUS'
-	.calls	'_get_apps','_filter_point'
 	.calls	'_voltage_to_pct_travel_apps_1','',4,0
 	.calls	'_voltage_to_pct_travel_apps_2','',4,0
 	.calls	'_get_filtered_apps1_voltage','',4,4
@@ -1342,16 +1362,16 @@ _130:
 	.db	5
 	.dl	_169,_134
 	.db	6
-	.db	'apps_1_within_threshhold',0,1,103,10,2
+	.db	'apps_1_within_threshhold',0,1,105,10,2
 	.dl	_165,_170
 	.db	6
-	.db	'apps_2_within_threshhold',0,1,104,10,2
+	.db	'apps_2_within_threshhold',0,1,106,10,2
 	.dl	_165,_171
 	.db	6
-	.db	'implausibility_timestamp',0,1,106,12,2
+	.db	'implausibility_timestamp',0,1,108,12,2
 	.dl	_172,_173
 	.db	6
-	.db	'difference',0,1,109,12,2
+	.db	'difference',0,1,111,12,2
 	.dl	_174,_175
 	.db	7
 	.dl	_151,_176,_24
@@ -1430,206 +1450,218 @@ _648:
 	.dw	_659-_658
 	.db	1,5,45,9
 	.dw	_660-_659
-	.db	1,5,102,9
-	.dw	_169-_660
-	.db	3,6,1,5,113,9
-	.dw	_661-_169
-	.db	1,5,102,9
-	.dw	_19-_661
-	.db	3,1,1,5,113,9
-	.dw	_662-_19
-	.db	1,5,9,9
-	.dw	_20-_662
-	.db	3,8,1,9
-	.dw	_663-_20
-	.db	3,1,1,5,51,9
+	.db	1,5,31,9
+	.dw	_661-_660
+	.db	3,3,1,5,44,9
+	.dw	_662-_661
+	.db	1,5,16,9
+	.dw	_663-_662
+	.db	1,5,31,9
 	.dw	_664-_663
+	.db	3,1,1,5,44,9
+	.dw	_665-_664
+	.db	1,5,16,9
+	.dw	_666-_665
+	.db	1,5,102,9
+	.dw	_169-_666
+	.db	3,4,1,5,113,9
+	.dw	_667-_169
+	.db	1,5,102,9
+	.dw	_19-_667
+	.db	3,1,1,5,113,9
+	.dw	_668-_19
+	.db	1,5,9,9
+	.dw	_20-_668
+	.db	3,8,1,9
+	.dw	_669-_20
+	.db	3,1,1,5,51,9
+	.dw	_670-_669
 	.db	3,2,1,5,5,9
-	.dw	_176-_664
-	.db	3,162,127,1,5,9,9
-	.dw	_665-_176
+	.dw	_176-_670
+	.db	3,160,127,1,5,9,9
+	.dw	_671-_176
 	.db	3,1,1,5,5,9
-	.dw	_23-_665
+	.dw	_23-_671
 	.db	3,3,1,5,9,9
-	.dw	_666-_23
+	.dw	_672-_23
 	.db	3,1,1,5,29,9
-	.dw	_25-_666
+	.dw	_25-_672
 	.db	3,3,1,5,51,9
 	.dw	_24-_25
-	.db	3,220,0,1,5,5,9
+	.db	3,222,0,1,5,5,9
 	.dw	_179-_24
-	.db	3,169,127,1,5,9,9
-	.dw	_667-_179
+	.db	3,167,127,1,5,9,9
+	.dw	_673-_179
 	.db	3,1,1,5,5,9
-	.dw	_27-_667
+	.dw	_27-_673
 	.db	3,3,1,5,9,9
-	.dw	_668-_27
+	.dw	_674-_27
 	.db	3,1,1,5,29,9
-	.dw	_29-_668
+	.dw	_29-_674
 	.db	3,3,1,5,75,9
-	.dw	_669-_29
+	.dw	_675-_29
 	.db	1,5,51,9
-	.dw	_670-_669
+	.dw	_676-_675
 	.db	1,5,50,9
-	.dw	_28-_670
-	.db	3,207,0,1,5,33,9
+	.dw	_28-_676
+	.db	3,209,0,1,5,33,9
 	.dw	_620-_28
 	.db	3,6,1,5,14,9
-	.dw	_671-_620
+	.dw	_677-_620
 	.db	3,4,1,7,9
-	.dw	_672-_671
-	.db	1,5,9,9
-	.dw	_31-_672
-	.db	1,5,31,9
-	.dw	_673-_31
-	.db	3,1,1,5,37,9
-	.dw	_674-_673
-	.db	3,3,1,5,102,9
-	.dw	_675-_674
-	.db	1,5,28,9
-	.dw	_34-_675
-	.db	3,1,1,5,57,9
-	.dw	_676-_34
-	.db	1,5,28,9
-	.dw	_677-_676
-	.db	3,1,1,5,57,9
 	.dw	_678-_677
-	.db	1,5,43,9
-	.dw	_679-_678
-	.db	3,3,1,5,56,9
+	.db	1,5,9,9
+	.dw	_31-_678
+	.db	1,5,31,9
+	.dw	_679-_31
+	.db	3,1,1,5,37,9
 	.dw	_680-_679
-	.db	1,5,28,9
+	.db	3,3,1,5,102,9
 	.dw	_681-_680
-	.db	1,5,43,9
-	.dw	_682-_681
-	.db	3,1,1,5,56,9
-	.dw	_683-_682
 	.db	1,5,28,9
+	.dw	_34-_681
+	.db	3,1,1,5,57,9
+	.dw	_682-_34
+	.db	1,5,28,9
+	.dw	_683-_682
+	.db	3,1,1,5,57,9
 	.dw	_684-_683
-	.db	1,5,109,9
+	.db	1,5,43,9
 	.dw	_685-_684
-	.db	3,2,1,5,120,9
+	.db	3,3,1,5,56,9
 	.dw	_686-_685
-	.db	1,5,109,9
-	.dw	_35-_686
-	.db	3,1,1,5,120,9
-	.dw	_687-_35
-	.db	1,5,21,9
-	.dw	_36-_687
-	.db	3,3,1,5,49,9
-	.dw	_688-_36
-	.db	1,5,63,9
+	.db	1,5,28,9
+	.dw	_687-_686
+	.db	1,5,43,9
+	.dw	_688-_687
+	.db	3,1,1,5,56,9
 	.dw	_689-_688
+	.db	1,5,28,9
+	.dw	_690-_689
+	.db	1,5,109,9
+	.dw	_691-_690
+	.db	3,2,1,5,120,9
+	.dw	_692-_691
+	.db	1,5,109,9
+	.dw	_35-_692
+	.db	3,1,1,5,120,9
+	.dw	_693-_35
+	.db	1,5,21,9
+	.dw	_36-_693
+	.db	3,3,1,5,49,9
+	.dw	_694-_36
+	.db	1,5,63,9
+	.dw	_695-_694
 	.db	3,1,1,5,5,9
-	.dw	_182-_689
-	.db	3,129,127,1,5,9,9
-	.dw	_690-_182
+	.dw	_182-_695
+	.db	3,255,126,1,5,9,9
+	.dw	_696-_182
 	.db	3,1,1,5,5,9
-	.dw	_39-_690
+	.dw	_39-_696
 	.db	3,3,1,5,9,9
-	.dw	_691-_39
+	.dw	_697-_39
 	.db	3,1,1,5,29,9
-	.dw	_41-_691
+	.dw	_41-_697
 	.db	3,3,1,5,63,9
 	.dw	_40-_41
-	.db	3,248,0,1,5,5,9
+	.db	3,250,0,1,5,5,9
 	.dw	_183-_40
-	.db	3,141,127,1,5,9,9
-	.dw	_692-_183
+	.db	3,139,127,1,5,9,9
+	.dw	_698-_183
 	.db	3,1,1,5,5,9
-	.dw	_43-_692
+	.dw	_43-_698
 	.db	3,3,1,5,9,9
-	.dw	_693-_43
+	.dw	_699-_43
 	.db	3,1,1,5,29,9
-	.dw	_45-_693
+	.dw	_45-_699
 	.db	3,3,1,5,75,9
-	.dw	_694-_45
+	.dw	_700-_45
 	.db	1,5,51,9
-	.dw	_695-_694
+	.dw	_701-_700
 	.db	1,5,62,9
-	.dw	_44-_695
-	.db	3,235,0,1,5,45,9
+	.dw	_44-_701
+	.db	3,237,0,1,5,45,9
 	.dw	_621-_44
 	.db	3,2,1,5,26,9
-	.dw	_696-_621
+	.dw	_702-_621
 	.db	3,3,1,7,9
-	.dw	_697-_696
-	.db	1,5,21,9
-	.dw	_47-_697
-	.db	1,5,58,9
-	.dw	_698-_47
-	.db	3,1,1,5,25,9
-	.dw	_699-_698
-	.db	3,2,1,5,46,9
-	.dw	_700-_699
-	.db	3,1,1,5,39,9
-	.dw	_49-_700
-	.db	3,2,1,5,34,9
-	.dw	_701-_49
-	.db	1,5,32,9
-	.dw	_702-_701
-	.db	1,5,37,9
 	.dw	_703-_702
-	.db	3,1,1,5,25,9
-	.dw	_704-_703
-	.db	3,1,1,5,37,9
-	.dw	_37-_704
-	.db	3,101,1,5,102,9
-	.dw	_705-_37
-	.db	1,5,32,9
-	.dw	_33-_705
-	.db	3,33,1,5,30,9
-	.dw	_706-_33
-	.db	1,5,15,9
-	.dw	_707-_706
-	.db	3,3,1,5,26,9
-	.dw	_708-_707
-	.db	1,5,18,9
-	.dw	_709-_708
-	.db	3,1,1,5,17,9
-	.dw	_710-_709
-	.db	1,5,26,9
-	.dw	_711-_710
-	.db	3,1,1,5,24,9
-	.dw	_712-_711
-	.db	1,5,13,9
-	.dw	_713-_712
-	.db	3,2,1,5,42,9
-	.dw	_32-_713
-	.db	3,5,1,5,9,9
-	.dw	_714-_32
-	.db	3,1,1,5,30,9
-	.dw	_715-_714
-	.db	3,1,1,5,24,9
-	.dw	_53-_715
-	.db	3,2,1,5,21,9
-	.dw	_716-_53
-	.db	1,5,23,9
-	.dw	_717-_716
 	.db	1,5,21,9
-	.dw	_718-_717
-	.db	1,5,16,9
-	.dw	_719-_718
+	.dw	_47-_703
+	.db	1,5,58,9
+	.dw	_704-_47
+	.db	3,1,1,5,25,9
+	.dw	_705-_704
+	.db	3,2,1,5,46,9
+	.dw	_706-_705
+	.db	3,1,1,5,39,9
+	.dw	_49-_706
+	.db	3,2,1,5,34,9
+	.dw	_707-_49
+	.db	1,5,32,9
+	.dw	_708-_707
+	.db	1,5,37,9
+	.dw	_709-_708
+	.db	3,1,1,5,25,9
+	.dw	_710-_709
+	.db	3,1,1,5,37,9
+	.dw	_37-_710
+	.db	3,101,1,5,102,9
+	.dw	_711-_37
+	.db	1,5,32,9
+	.dw	_33-_711
+	.db	3,33,1,5,30,9
+	.dw	_712-_33
+	.db	1,5,15,9
+	.dw	_713-_712
+	.db	3,3,1,5,26,9
+	.dw	_714-_713
+	.db	1,5,18,9
+	.dw	_715-_714
+	.db	3,1,1,5,17,9
+	.dw	_716-_715
+	.db	1,5,26,9
+	.dw	_717-_716
 	.db	3,1,1,5,24,9
-	.dw	_720-_719
-	.db	3,127,1,5,11,9
-	.dw	_21-_720
-	.db	3,4,1,5,22,9
-	.dw	_721-_21
-	.db	1,5,14,9
-	.dw	_722-_721
-	.db	3,1,1,5,13,9
-	.dw	_623-_722
-	.db	1,5,22,9
-	.dw	_723-_623
-	.db	3,1,1,5,20,9
+	.dw	_718-_717
+	.db	1,5,13,9
+	.dw	_719-_718
+	.db	3,2,1,5,42,9
+	.dw	_32-_719
+	.db	3,5,1,5,9,9
+	.dw	_720-_32
+	.db	3,1,1,5,30,9
+	.dw	_721-_720
+	.db	3,1,1,5,24,9
+	.dw	_53-_721
+	.db	3,2,1,5,21,9
+	.dw	_722-_53
+	.db	1,5,23,9
+	.dw	_723-_722
+	.db	1,5,21,9
 	.dw	_724-_723
+	.db	1,5,16,9
+	.dw	_725-_724
+	.db	3,1,1,5,24,9
+	.dw	_726-_725
+	.db	3,127,1,5,11,9
+	.dw	_21-_726
+	.db	3,4,1,5,22,9
+	.dw	_727-_21
+	.db	1,5,14,9
+	.dw	_728-_727
+	.db	3,1,1,5,13,9
+	.dw	_623-_728
+	.db	1,5,22,9
+	.dw	_729-_623
+	.db	3,1,1,5,20,9
+	.dw	_730-_729
 	.db	1,5,28,9
-	.dw	_55-_724
+	.dw	_55-_730
 	.db	3,2,1,5,26,9
-	.dw	_725-_55
+	.dw	_731-_55
 	.db	1,5,1,9
-	.dw	_50-_725
+	.dw	_50-_731
 	.db	3,2,1,9
 	.dw	_134-_50
 	.db	0,1,1
@@ -1688,14 +1720,14 @@ _136:
 
 	.debug		.debug_line, cluster 'get_filtered_apps1_voltage'
 _137:
-	.dl	_727-_726
-_726:
+	.dl	_733-_732
+_732:
 	.dw	3
-	.dl	_729-_728
-_728:
+	.dl	_735-_734
+_734:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
 	.db	'src/apps.c',0,0,0,0,0
-_729:
+_735:
 	.db	5,8,7,0,5,2
 	.dl	_81
 	.db	3,45,1,5,5,9
@@ -1703,21 +1735,21 @@ _729:
 	.db	3,1,1,5,20,9
 	.dw	_184-_196
 	.db	3,5,1,5,36,9
-	.dw	_730-_184
+	.dw	_736-_184
 	.db	1,5,49,9
-	.dw	_731-_730
+	.dw	_737-_736
 	.db	1,5,16,9
-	.dw	_732-_731
+	.dw	_738-_737
 	.db	3,4,1,5,9,9
-	.dw	_733-_732
+	.dw	_739-_738
 	.db	1,5,12,9
-	.dw	_12-_733
+	.dw	_12-_739
 	.db	3,3,1,5,1,9
 	.dw	_13-_12
 	.db	3,1,1,9
 	.dw	_139-_13
 	.db	0,1,1
-_727:
+_733:
 	; End of section
 
 	.debug		.debug_ranges, cluster 'get_filtered_apps1_voltage'
@@ -1772,14 +1804,14 @@ _141:
 
 	.debug		.debug_line, cluster 'get_filtered_apps2_voltage'
 _142:
-	.dl	_735-_734
-_734:
+	.dl	_741-_740
+_740:
 	.dw	3
-	.dl	_737-_736
-_736:
+	.dl	_743-_742
+_742:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
 	.db	'src/apps.c',0,0,0,0,0
-_737:
+_743:
 	.db	5,8,7,0,5,2
 	.dl	_93
 	.db	3,61,1,5,5,9
@@ -1787,21 +1819,21 @@ _737:
 	.db	3,1,1,5,20,9
 	.dw	_187-_238
 	.db	3,5,1,5,36,9
-	.dw	_738-_187
+	.dw	_744-_187
 	.db	1,5,49,9
-	.dw	_739-_738
+	.dw	_745-_744
 	.db	1,5,16,9
-	.dw	_740-_739
+	.dw	_746-_745
 	.db	3,4,1,5,9,9
-	.dw	_741-_740
+	.dw	_747-_746
 	.db	1,5,12,9
-	.dw	_15-_741
+	.dw	_15-_747
 	.db	3,3,1,5,1,9
 	.dw	_16-_15
 	.db	3,1,1,9
 	.dw	_144-_16
 	.db	0,1,1
-_735:
+_741:
 	; End of section
 
 	.debug		.debug_ranges, cluster 'get_filtered_apps2_voltage'
@@ -2725,34 +2757,34 @@ _73:
 	; End of section
 
 	.debug		.debug_frame
-_742:
+_748:
 	.dl	184
 	.dl	-1
 	.db	3,0,2,2,173,2,15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_743-_747
-_747:
+	.dw	_749-_753
+_753:
 	.db	146,177,2,0,47
-	.dw	_746-_748
-_748:
-_743:
-	.db	18,49,46,40
-	.dw	_744-_749
+	.dw	_752-_754
+_754:
 _749:
+	.db	18,49,46,40
+	.dw	_750-_755
+_755:
 	.db	146,178,2,0,47
-	.dw	_746-_750
+	.dw	_752-_756
+_756:
 _750:
-_744:
 	.db	18,50,46,40
-	.dw	_745-_751
-_751:
+	.dw	_751-_757
+_757:
 	.db	146,179,2,0,47
-	.dw	_746-_752
-_752:
-_745:
+	.dw	_752-_758
+_758:
+_751:
 	.db	146,180,2,0
-_746:
+_752:
 	.db	22,19,62,36,33,48,34,16,173,2,12,19,146,176,2,0,64,36,146,161,2,0,33,8,15,22,161,2,5,19,146,161,2,4,8
 	.db	162,2,8,166,2,8,177,2,8,178,2,8,179,2,8,180,2,8,0,8,1,8,6,8,7,8,8,8,9,8,10,8,167,2,8,168,2,8,169,2,8,170
 	.db	2,8,171,2,8,172,2,16,174,2,12,19,146,176,2,0,64,36,146,161,2,0,33,16,175,2,12,19,146,176,2,0,64,36,146
@@ -2761,19 +2793,19 @@ _746:
 
 	.debug		.debug_frame, cluster 'voltage_to_pct_travel_apps_1'
 	.dl	32
-	.dl	_742,_57,_124-_57
+	.dl	_748,_57,_124-_57
 	.db	8,160,2,8,3,8,4,8,5,8,11,8,12,8,13,8,14,0,0,0
 	; End of section
 
 	.debug		.debug_frame, cluster 'voltage_to_pct_travel_apps_2'
 	.dl	28
-	.dl	_742,_69,_129-_69
+	.dl	_748,_69,_129-_69
 	.db	8,160,2,8,3,8,4,8,5,8,12,8,13,8,14,0
 	; End of section
 
 	.debug		.debug_frame, cluster 'get_filtered_apps1_voltage'
 	.dl	156
-	.dl	_742,_81,_139-_81
+	.dl	_748,_81,_139-_81
 	.db	4
 	.dl	(_196-_81)/2
 	.db	15,60,127,0,18,10
@@ -2833,7 +2865,7 @@ _231:
 
 	.debug		.debug_frame, cluster 'get_filtered_apps2_voltage'
 	.dl	156
-	.dl	_742,_93,_144-_93
+	.dl	_748,_93,_144-_93
 	.db	4
 	.dl	(_238-_93)/2
 	.db	15,60,127,0,18,10
@@ -2893,7 +2925,7 @@ _273:
 
 	.debug		.debug_frame, cluster 'get_apps'
 	.dl	1208
-	.dl	_742,_105,_134-_105
+	.dl	_748,_105,_134-_105
 	.db	4
 	.dl	(_280-_105)/2
 	.db	15,60,127,0,18,10

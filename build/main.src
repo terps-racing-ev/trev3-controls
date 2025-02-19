@@ -1,5 +1,5 @@
 	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09007774
-	; Options: -f cc26604a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=2 -DRTS_TTC_FLASH_DATE_DAY=19 -DRTS_TTC_FLASH_DATE_HOUR=14 -DRTS_TTC_FLASH_DATE_MINUTE=15 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\main.src
+	; Options: -f cc45984a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=2 -DRTS_TTC_FLASH_DATE_DAY=19 -DRTS_TTC_FLASH_DATE_HOUR=15 -DRTS_TTC_FLASH_DATE_MINUTE=0 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\main.src
 	; Module start
 	.source	'src/main.c'
 code_get_rtd	.section	code, cluster 'get_rtd', new
@@ -2873,7 +2873,7 @@ _appl_db	.label	word
 	.db	0x0
 	.db	0x0
 	.db	0x0
-	.dl	0x3dd327e9
+	.dl	0x1f327e9
 	.db	0x0
 	.db	0x0
 	.db	0x0
@@ -5672,6 +5672,30 @@ _327:
 	.dw	3
 	.db	145,160,127
 	.dl	0,0
+_305:
+	.dl	-1,_138,_1040-_138,_1041-_138
+	.dw	1
+	.db	82
+	.dl	_27-_138,_1042-_138
+	.dw	1
+	.db	82
+	.dl	0,0
+_308:
+	.dl	-1,_138,_1043-_138,_1044-_138
+	.dw	1
+	.db	82
+	.dl	_30-_138,_1045-_138
+	.dw	1
+	.db	82
+	.dl	0,0
+_296:
+	.dl	-1,_138,_1029-_138,_1030-_138
+	.dw	1
+	.db	82
+	.dl	_17-_138,_1031-_138
+	.dw	1
+	.db	82
+	.dl	0,0
 _302:
 	.dl	-1,_138,_1035-_138,_1036-_138
 	.dw	1
@@ -5688,35 +5712,11 @@ _299:
 	.dw	1
 	.db	82
 	.dl	0,0
-_308:
-	.dl	-1,_138,_1043-_138,_1044-_138
-	.dw	1
-	.db	82
-	.dl	_30-_138,_1045-_138
-	.dw	1
-	.db	82
-	.dl	0,0
 _293:
 	.dl	-1,_138,_1026-_138,_1027-_138
 	.dw	1
 	.db	82
 	.dl	_14-_138,_1028-_138
-	.dw	1
-	.db	82
-	.dl	0,0
-_305:
-	.dl	-1,_138,_1040-_138,_1041-_138
-	.dw	1
-	.db	82
-	.dl	_27-_138,_1042-_138
-	.dw	1
-	.db	82
-	.dl	0,0
-_296:
-	.dl	-1,_138,_1029-_138,_1030-_138
-	.dw	1
-	.db	82
-	.dl	_17-_138,_1031-_138
 	.dw	1
 	.db	82
 	.dl	0,0
