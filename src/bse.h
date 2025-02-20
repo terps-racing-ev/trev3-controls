@@ -1,13 +1,12 @@
 #ifndef BSE_H_INCLUDED
 #define BSE_H_INCLUDED
 
-#include "IO_Driver.h"
-#include "IO_CAN.h"
-#include "IO_RTC.h"
-#include "IO_ADC.h"
-#include "IO_DIO.h"
 #include "APDB.h"
-
+#include "IO_ADC.h"
+#include "IO_CAN.h"
+#include "IO_DIO.h"
+#include "IO_Driver.h"
+#include "IO_RTC.h"
 
 /**************************************************************************
  * Sensor Pins
@@ -17,6 +16,7 @@
 #define IO_BSE_SUPPLY IO_ADC_SENSOR_SUPPLY_1
 
 // Regen constants
+// TODO: Update regen constants during brake tuning
 #define FRONT_BRAKE_SLOPE 0
 #define FRONT_BRAKE_OFFSET 0
 
@@ -32,8 +32,8 @@ ubyte2 get_regen_torque(bse_voltage);
 #define BRAKES_ENGAGED_BSE_THRESHOLD 550
 #define BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD 1800
 
-    // BSE functions
-    void get_bse(ubyte2 *bse_result, bool *error);
+// BSE functions
+void get_bse(ubyte2 *bse_result, bool *error);
 void get_brake_pressure(ubyte2 *pressure_result)
 
-#endif // BSE_H_INCLUDED
+#endif  // BSE_H_INCLUDED

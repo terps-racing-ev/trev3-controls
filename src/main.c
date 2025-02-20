@@ -588,7 +588,7 @@ void main(void) {
           }
 
           // REGEN: Check if brake pedal pressed and APPS not pushed down
-          // Torque * 10 is sent in torque request
+          // Inverter expects actual torque * 10
           if (torque == 0 && bse_result >= BRAKES_ENGAGED_BSE_THRESHOLD) {
             // REGEN: send negative torque request if brakes engaged
             regen_torque = get_regen_torque(bse_result);
