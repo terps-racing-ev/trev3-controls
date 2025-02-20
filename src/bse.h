@@ -24,7 +24,7 @@
 #define REAR_BRAKE_OFFSET 0
 
 // Regen functions
-ubyte2 get_regen_torque(bse_voltage);
+ubyte2 get_regen_torque(ubyte2 bse_voltage);
 
 // BSE constants
 #define BSE_MAX_VOLTAGE 4510
@@ -34,6 +34,5 @@ ubyte2 get_regen_torque(bse_voltage);
 
 // BSE functions
 void get_bse(ubyte2 *bse_result, bool *error);
-void get_brake_pressure(ubyte2 *pressure_result)
 
 #endif  // BSE_H_INCLUDED
