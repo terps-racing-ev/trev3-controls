@@ -1,5 +1,12 @@
 *.hex
 
+# Filesystem/IDE 
+.DS_Store
+.vscode/
+.vscode/*
+.idea/
+.idea/*
+
 # Prerequisites
 *.d
 
