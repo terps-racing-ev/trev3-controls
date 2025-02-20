@@ -47,5 +47,5 @@ void get_bse(ubyte2 *bse_result, ubyte2 *regen_torque, bool *error) {
 
 // Calculate regen torque based on the difference in the Torque vs Voltage line for the front and rear brakes
 ubyte2 get_regen_torque(bse_voltage) {
-  return (FRONT_BRAKE_SLOPE * bse_voltage) + FRONT_BRAKE_OFFSET - (REAR_BRAKE_SLOPE * bse_voltage) + REAR_BRAKE_OFFSET;
+  return ((FRONT_BRAKE_SLOPE * bse_voltage) + FRONT_BRAKE_OFFSET) - ((REAR_BRAKE_SLOPE * bse_voltage) + REAR_BRAKE_OFFSET);
 }
