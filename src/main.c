@@ -49,7 +49,7 @@
 // #define PCT_TRAVEL_TO_TORQUE(val) ((int)(((float)(val) / 100.0) * 112.0))
 #define PCT_TRAVEL_FOR_MAX_TORQUE 80
 
-#define CONTINUOUS_TORQUE_MAX 30
+#define CONTINUOUS_TORQUE_MAX 200 //TODO Originally 30
 /**************************************************************************
  * SDC Settings
  ***************************************************************************/
@@ -207,7 +207,7 @@ ubyte4 pct_travel_to_torque (ubyte4 pct_travel) {
          return CONTINUOUS_TORQUE_MAX;
     }
 
-    return ((ubyte4)(((float)(pct_travel) / PCT_TRAVEL_FOR_MAX_TORQUE) * 200.0));
+    return ((ubyte4)(((float)(pct_travel) / PCT_TRAVEL_FOR_MAX_TORQUE) * ((float) CONTINUOUS_TORQUE_MAX)));
 }
 
 

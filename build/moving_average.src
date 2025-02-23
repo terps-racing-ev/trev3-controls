@@ -1,5 +1,5 @@
-	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09007775
-	; Options: -f cc7412a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=2 -DRTS_TTC_FLASH_DATE_DAY=19 -DRTS_TTC_FLASH_DATE_HOUR=17 -DRTS_TTC_FLASH_DATE_MINUTE=6 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\moving_average.src
+	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09007774
+	; Options: -f cc40188a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=2 -DRTS_TTC_FLASH_DATE_DAY=22 -DRTS_TTC_FLASH_DATE_HOUR=19 -DRTS_TTC_FLASH_DATE_MINUTE=44 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\moving_average.src
 	; Module start
 	.source	'src/moving_average.c'
 code_initialize_moving_average_struct	.section	code, cluster 'initialize_moving_average_struct', new
@@ -276,7 +276,7 @@ _41:
 	.extern	__udil : far
 	.debug		.debug_info
 _34:
-	.dl	564
+	.dl	559
 	.dw	3
 	.dl	_35
 	.db	4
@@ -284,27 +284,27 @@ _33:
 	.db	1
 	.db	'src/moving_average.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\trev\\Documents\\ProgrammingEnvironments\\Environment\\testing\\trev2-controls\\',0,12,1
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\testing\\trev2-controls\\',0,12,1
 	.dl	_36
 _47:
 	.db	2
 	.db	'unsigned int',0,2,7,3,202,1
-	.dl	163
+	.dl	158
 	.db	4,100,0,2
 	.db	'unsigned char',0,1,8,5
 	.db	'moving_average_info',0,1,15,8,206,1,6
 	.db	'points',0
-	.dl	179
+	.dl	174
 	.db	202,1,2,35,0,6
 	.db	'all_points_filled',0
-	.dl	189
+	.dl	184
 	.db	1,3,35,202,1,6
 	.db	'next_point_index',0
-	.dl	163
+	.dl	158
 	.db	2,3,35,204,1,0
 _49:
 	.db	7,5
-	.dl	206
+	.dl	201
 _51:
 	.db	2
 	.db	'unsigned long int',0,4,7
@@ -312,42 +312,42 @@ _56:
 	.db	2
 	.db	'int',0,2,5,8
 	.db	'void',0,7,5
-	.dl	339
+	.dl	334
 	.db	9
 	.db	'__prof_adm',0,2,1,1
-	.dl	345
+	.dl	340
 	.db	9
 	.db	'__codeptr',0,2,1,1
-	.dl	311
+	.dl	306
 	.db	9
 	.db	'ubyte1',0,3,21,29
-	.dl	189
+	.dl	184
 	.db	9
 	.db	'ubyte2',0,3,22,29
-	.dl	163
+	.dl	158
 	.db	9
 	.db	'ubyte4',0,3,23,29
-	.dl	311
+	.dl	306
 	.db	9
 	.db	'bool',0,3,31,29
-	.dl	189
+	.dl	184
 	.db	5
 	.db	'bl_t_date_',0,4,122,16,4,6
 	.db	'date',0
-	.dl	311
+	.dl	306
 	.db	4,2,35,0,0,9
 	.db	'BL_T_DATE',0,4,131,1,3
-	.dl	446
+	.dl	441
 	.db	5
 	.db	'bl_t_can_id_',0,4,138,1,16,8,6
 	.db	'extended',0
-	.dl	311
+	.dl	306
 	.db	4,2,35,0,6
 	.db	'ID',0
-	.dl	311
+	.dl	306
 	.db	4,2,35,4,0,9
 	.db	'BL_T_CAN_ID',0,4,146,1,3
-	.dl	496
+	.dl	491
 	.db	0
 	; End of section
 
@@ -377,13 +377,13 @@ _367:
 
 	.debug		.debug_info, cluster 'filter_point'
 _37:
-	.dl	373
+	.dl	368
 	.dw	3
 	.dl	_38
 	.db	4,1
 	.db	'src/moving_average.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\trev\\Documents\\ProgrammingEnvironments\\Environment\\testing\\trev2-controls\\',0,12,1
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\testing\\trev2-controls\\',0,12,1
 	.dl	_40,_39
 	.db	2
 	.dl	_33
@@ -516,20 +516,20 @@ _40:
 	.debug		.debug_pubnames
 	.dl	31
 	.dw	2
-	.dl	_37,377,172
+	.dl	_37,372,167
 	.db	'filter_point',0
 	.dl	0
 	; End of section
 
 	.debug		.debug_info, cluster 'initialize_moving_average_struct'
 _42:
-	.dl	270
+	.dl	265
 	.dw	3
 	.dl	_43
 	.db	4,1
 	.db	'src/moving_average.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\trev\\Documents\\ProgrammingEnvironments\\Environment\\testing\\trev2-controls\\',0,12,1
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\testing\\trev2-controls\\',0,12,1
 	.dl	_45,_44
 	.db	2
 	.dl	_33
@@ -589,7 +589,7 @@ _45:
 	.debug		.debug_pubnames
 	.dl	51
 	.dw	2
-	.dl	_42,274,172
+	.dl	_42,269,167
 	.db	'initialize_moving_average_struct',0
 	.dl	0
 	; End of section
