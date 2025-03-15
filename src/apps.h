@@ -38,13 +38,13 @@
 #define APPS_THRESHHOLD_REESTABLISH_PLAUSIBILITY 5
 
 /* apps 1 */
-#define APPS_1_MAX_VOLTAGE 4190
-#define APPS_1_MIN_VOLTAGE 925
+#define APPS_1_MAX_VOLTAGE 4290//Recalibrated from 4190
+#define APPS_1_MIN_VOLTAGE 1031//Recalibrated from 925
 #define APPS_1_VOLTAGE_RANGE (APPS_1_MAX_VOLTAGE - APPS_1_MIN_VOLTAGE)
 
 /* apps 2 */
-#define APPS_2_MAX_VOLTAGE 4590
-#define APPS_2_MIN_VOLTAGE 1325
+#define APPS_2_MAX_VOLTAGE 4348//Recalibrated from 4590
+#define APPS_2_MIN_VOLTAGE 994//Recalibrated from 1325
 #define APPS_2_VOLTAGE_RANGE (APPS_2_MAX_VOLTAGE - APPS_2_MIN_VOLTAGE)
 
 /* voltage range above max and below min that doesn't count as an error */

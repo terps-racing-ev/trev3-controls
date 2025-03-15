@@ -49,7 +49,7 @@
 // #define PCT_TRAVEL_TO_TORQUE(val) ((int)(((float)(val) / 100.0) * 112.0))
 #define PCT_TRAVEL_FOR_MAX_TORQUE 80
 
-#define CONTINUOUS_TORQUE_MAX 200
+#define CONTINUOUS_TORQUE_MAX 200 //TODO Originally 30
 /**************************************************************************
  * SDC Settings
  ***************************************************************************/
@@ -207,7 +207,7 @@ ubyte4 pct_travel_to_torque (ubyte4 pct_travel) {
          return CONTINUOUS_TORQUE_MAX;
     }
 
-    return ((ubyte4)(((float)(pct_travel) / PCT_TRAVEL_FOR_MAX_TORQUE) * 200.0));
+    return ((ubyte4)(((float)(pct_travel) / PCT_TRAVEL_FOR_MAX_TORQUE) * ((float) CONTINUOUS_TORQUE_MAX)));
 }
 
 
@@ -464,6 +464,8 @@ void main (void)
     // brake lights
     IO_DO_Init( BRAKE_LIGHT_PIN );
 
+    int faults_cleared = 0;
+
 
 
 
@@ -532,6 +534,7 @@ void main (void)
         } else {
 
             if (current_state == NOT_READY) {
+                faults_cleared = 0;
                 get_rtd(&rtd_val);
                 get_bse(&bse_result, &bse_error);
                 get_sdc(&sdc_val);
@@ -563,6 +566,7 @@ void main (void)
 
 
                     // clear Inverter faults
+                    faults_cleared = 1;
                     inverter_settings_can_frame.data[0] = 20;
                     inverter_settings_can_frame.data[1] = 0;
                     inverter_settings_can_frame.data[2] = 1;
@@ -618,14 +622,19 @@ void main (void)
                     controls_can_frame.data[2] = 0;
                     controls_can_frame.data[3] = 0;
                     // forward direction
-                    controls_can_frame.data[4] = 1;
+                    controls_can_frame.data[4] = 0; // TODO Originally 1
                     controls_can_frame.data[5] = 1;
                     controls_can_frame.data[6] = 0;
                     controls_can_frame.data[7] = 0;
                     IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
+                    IO_CAN_WriteFIFO(handle_fifo_w_debug, &controls_can_frame, 1);
+
                 }
             } else if (current_state == ERRORED) {
                 get_rtd(&rtd_val);
+
+                set_light_to(BLINKING_RED);
+                do_lights_action();
 
                 if (rtd_val == RTD_OFF) {
                     // rtd off -> switch to not ready state
@@ -702,6 +711,8 @@ void main (void)
             // only check CAN message if it's been "ignore period" seconds since start
             if (been_ignore_period_since_start == TRUE) {
                 // if CAN timeout, set light to blinking red
+                // TODO ADD THIS BACK IN
+                /*
                 if (IO_RTC_GetTimeUS(orion_can_timeout) > ORION_CAN_TIMEOUT_US) {
                     set_light_to(BLINKING_RED);
                 } else {
@@ -722,7 +733,17 @@ void main (void)
                                 set_light_to(BLINKING_RED);
                         }
                     }
-                }
+                }*/
+            }
+            // TODO REMOVE THIS
+            if (current_state == DRIVING) {
+                set_light_to(SOLID_GREEN);
+            }else{
+                set_light_to(BLINKING_RED);
+            }
+
+            if (rtd_val == RTD_OFF) {
+                current_state == NOT_READY;
             }
 
             // run the lights (function call needed for lights to blink)
@@ -758,6 +779,22 @@ void main (void)
             IO_CAN_WriteFIFO(handle_fifo_w, &debug_can_frame, 1);
             IO_CAN_WriteFIFO(handle_fifo_w_debug, &debug_can_frame, 1);
 
+            // TODO: STATE
+            debug_can_frame.id = 0x69;
+            debug_can_frame.data[0] = (faults_cleared == 1);
+            debug_can_frame.data[1] = (faults_cleared == 1);
+            debug_can_frame.data[2] = (faults_cleared == 1);
+            debug_can_frame.data[3] = (faults_cleared == 1);
+            debug_can_frame.data[4] = (faults_cleared == 1);
+            debug_can_frame.data[5] = (faults_cleared == 1);
+            debug_can_frame.data[6] = (faults_cleared == 1);
+            debug_can_frame.data[7] = (faults_cleared == 1);
+
+            
+            IO_CAN_WriteFIFO(handle_fifo_w, &debug_can_frame, 1);
+            IO_CAN_WriteFIFO(handle_fifo_w_debug, &debug_can_frame, 1);
+            // END TODO:
+
             ubyte2 apps_1_val;
             bool apps_1_fresh;
             ubyte2 apps_2_val;
@@ -769,6 +806,9 @@ void main (void)
             // send another debug message
             // get voltage values
             IO_ADC_Get(IO_PIN_BSE, &bse_val, &bse_fresh);
+
+            // TODO WE ADDED THIS FOR TESTING
+            //get_bse(&bse_val, &bse_error);
 
             debug_can_frame.id = 0xDC;
 

@@ -1,5 +1,5 @@
 	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09007774
-	; Options: -f cc26644a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=1 -DRTS_TTC_FLASH_DATE_DAY=22 -DRTS_TTC_FLASH_DATE_HOUR=14 -DRTS_TTC_FLASH_DATE_MINUTE=27 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\moving_average.src
+	; Options: -f cc40188a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=2 -DRTS_TTC_FLASH_DATE_DAY=22 -DRTS_TTC_FLASH_DATE_HOUR=19 -DRTS_TTC_FLASH_DATE_MINUTE=44 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\moving_average.src
 	; Module start
 	.source	'src/moving_average.c'
 code_initialize_moving_average_struct	.section	code, cluster 'initialize_moving_average_struct', new
@@ -17,22 +17,22 @@ _initialize_moving_average_struct	.proc	far
 	movw	r12,r3
 	addw	r11,#0xca
 	addcw	r12,#0x0
-_397:
-	movb	rh4,#0x0
 _398:
+	movb	rh4,#0x0
+_399:
 	exts	r12,#0x1
 	movb	[r11],rh4
-_399:
+_400:
 
 ; src/moving_average.c	     5      info_struct->next_point_index = 0;
 	addw	r2,#0xcc
 	addcw	r3,#0x0
 _60:
 	movw	r11,#0x0
-_400:
+_401:
 	exts	r3,#0x1
 	movw	[r2],r11
-_401:
+_402:
 
 ; src/moving_average.c	     6  }
 	ret
@@ -83,40 +83,40 @@ _361:
 	movw	r4,r3
 _360:
 	movw	r5,r8
-_375:
+_374:
 	addw	r4,r13
 	addcw	r5,r14
-_376:
+_375:
 	exts	r5,#0x1
 	movw	[r4],r2
-_377:
+_376:
 	exts	r12,#0x1
 	movw	r13,[r11]
-_378:
+_377:
 
 ; src/moving_average.c	    11  
 ; src/moving_average.c	    12      // wrap around the index of the next point if necessary
 ; src/moving_average.c	    13      (info_struct->next_point_index)++;
 	addw	r13,#0x1
-_379:
+_378:
 
 ; src/moving_average.c	    14      if (info_struct->next_point_index >= MOVING_AVERAGE_SIZE) {
 	cmpw	r13,#0x65
 	jmp+	cc_ult,_2
-_380:
+_379:
 
 ; src/moving_average.c	    15          info_struct->next_point_index = 0;
 	movw	r13,#0x0
-_381:
+_380:
 
 ; src/moving_average.c	    16          info_struct->all_points_filled = TRUE;
 	movw	r14,r3
 	movw	r4,r8
 	addw	r14,#0xca
 	addcw	r4,#0x0
-_382:
+_381:
 	movb	rh5,#0x1
-_383:
+_382:
 	exts	r4,#0x1
 	movb	[r14],rh5
 _2:
@@ -125,23 +125,27 @@ _2:
 ; src/moving_average.c	    18  
 ; src/moving_average.c	    19      ubyte4 sum = 0;
 ; src/moving_average.c	    20      ubyte4 mas = MOVING_AVERAGE_SIZE;
-; src/moving_average.c	    21      ubyte4 npi = info_struct->next_point_index;
+; src/moving_average.c	    21      ubyte4 npi = info_struct->next_point_index + 1;
 	exts	r12,#0x1
 	movw	[r11],r13
-_384:
+_383:
 
 ; src/moving_average.c	    22      if (info_struct->all_points_filled) {
 	movw	r11,r3
 	movw	r12,r8
 	addw	r11,#0xca
 	addcw	r12,#0x0
-_385:
+_384:
 	movw	r5,#0x0
 	CoLOAD	r5,r5
 _362:
+	movw	r14,r13
+_385:
+	addw	r14,#0x1
+_386:
 	exts	r12,#0x1
 	movb	rh4,[r11]
-_386:
+_387:
 	jmp	cc_eq,_3
 _54:
 
@@ -156,10 +160,10 @@ _4:
 	movw	r11,[r3]
 	movw	r12,#0x0
 -usr1	CoADD	r11,r12
-_387:
+_388:
 	addw	r3,#0x2
 	addcw	r8,#0x0
-_388:
+_389:
 	jmp	cc_nusr1,_4
 _55:
 
@@ -167,7 +171,7 @@ _55:
 ; src/moving_average.c	    26  
 ; src/moving_average.c	    27          return (ubyte2) (sum / (mas));
 	movw	r11,#0x65
-_389:
+_390:
 	movw	MDL,MAL
 	movw	MDH,MAH
 	divlu	r11
@@ -181,9 +185,8 @@ _3:
 	movw	r13,r13
 _365:
 	jmp-	cc_eq,_6
+	subw	r13,#0x1
 	movw	MRW,r13
-_366:
-	addw	MRW,ONES
 _7:
 
 ; src/moving_average.c	    30              sum += info_struct->points[i];
@@ -191,10 +194,10 @@ _7:
 	movw	r11,[r3]
 	movw	r12,#0x0
 -usr1	CoADD	r11,r12
-_390:
+_391:
 	addw	r3,#0x2
 	addcw	r8,#0x0
-_391:
+_392:
 	jmp	cc_nusr1,_7
 _6:
 
@@ -203,8 +206,8 @@ _6:
 	CoSTORE	r2,MAL
 _364:
 	CoSTORE	r3,MAH
-_392:
-	movw	r4,r13
+_393:
+	movw	r4,r14
 	call	__udil
 
 ; src/moving_average.c	    33      }
@@ -273,7 +276,7 @@ _41:
 	.extern	__udil : far
 	.debug		.debug_info
 _34:
-	.dl	637
+	.dl	559
 	.dw	3
 	.dl	_35
 	.db	4
@@ -281,28 +284,27 @@ _33:
 	.db	1
 	.db	'src/moving_average.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
-	.db	12,1
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\testing\\trev2-controls\\',0,12,1
 	.dl	_36
 _47:
 	.db	2
 	.db	'unsigned int',0,2,7,3,202,1
-	.dl	236
+	.dl	158
 	.db	4,100,0,2
 	.db	'unsigned char',0,1,8,5
 	.db	'moving_average_info',0,1,15,8,206,1,6
 	.db	'points',0
-	.dl	252
+	.dl	174
 	.db	202,1,2,35,0,6
 	.db	'all_points_filled',0
-	.dl	262
+	.dl	184
 	.db	1,3,35,202,1,6
 	.db	'next_point_index',0
-	.dl	236
+	.dl	158
 	.db	2,3,35,204,1,0
 _49:
 	.db	7,5
-	.dl	279
+	.dl	201
 _51:
 	.db	2
 	.db	'unsigned long int',0,4,7
@@ -310,42 +312,42 @@ _56:
 	.db	2
 	.db	'int',0,2,5,8
 	.db	'void',0,7,5
-	.dl	412
+	.dl	334
 	.db	9
 	.db	'__prof_adm',0,2,1,1
-	.dl	418
+	.dl	340
 	.db	9
 	.db	'__codeptr',0,2,1,1
-	.dl	384
+	.dl	306
 	.db	9
 	.db	'ubyte1',0,3,21,29
-	.dl	262
+	.dl	184
 	.db	9
 	.db	'ubyte2',0,3,22,29
-	.dl	236
+	.dl	158
 	.db	9
 	.db	'ubyte4',0,3,23,29
-	.dl	384
+	.dl	306
 	.db	9
 	.db	'bool',0,3,31,29
-	.dl	262
+	.dl	184
 	.db	5
 	.db	'bl_t_date_',0,4,122,16,4,6
 	.db	'date',0
-	.dl	384
+	.dl	306
 	.db	4,2,35,0,0,9
 	.db	'BL_T_DATE',0,4,131,1,3
-	.dl	519
+	.dl	441
 	.db	5
 	.db	'bl_t_can_id_',0,4,138,1,16,8,6
 	.db	'extended',0
-	.dl	384
+	.dl	306
 	.db	4,2,35,0,6
 	.db	'ID',0
-	.dl	384
+	.dl	306
 	.db	4,2,35,4,0,9
 	.db	'BL_T_CAN_ID',0,4,146,1,3
-	.dl	569
+	.dl	491
 	.db	0
 	; End of section
 
@@ -358,31 +360,30 @@ _35:
 
 	.debug		.debug_line
 _36:
-	.dl	_368-_367
-_367:
+	.dl	_367-_366
+_366:
 	.dw	3
-	.dl	_370-_369
-_369:
+	.dl	_369-_368
+_368:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1
 	.db	'..\\..\\..\\Environment\\inc',0,0
 	.db	'src\\moving_average.h',0,0,0,0
 	.db	'src/moving_average.c',0,0,0,0
 	.db	'ptypes_xe167.h',0,1,0,0
 	.db	'APDB.h',0,1,0,0,0
-_370:
-_368:
+_369:
+_367:
 	; End of section
 
 	.debug		.debug_info, cluster 'filter_point'
 _37:
-	.dl	446
+	.dl	368
 	.dw	3
 	.dl	_38
 	.db	4,1
 	.db	'src/moving_average.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
-	.db	12,1
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\testing\\trev2-controls\\',0,12,1
 	.dl	_40,_39
 	.db	2
 	.dl	_33
@@ -429,78 +430,82 @@ _38:
 
 	.debug		.debug_line, cluster 'filter_point'
 _39:
-	.dl	_372-_371
-_371:
+	.dl	_371-_370
+_370:
 	.dw	3
-	.dl	_374-_373
-_373:
+	.dl	_373-_372
+_372:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
 	.db	'src/moving_average.c',0,0,0,0,0
-_374:
+_373:
 	.db	5,8,7,0,5,2
 	.dl	_22
 	.db	3,7,1,5,36,9
 	.dw	_361-_22
 	.db	3,2,1,5,24,9
-	.dw	_375-_361
+	.dw	_374-_361
 	.db	1,5,56,9
-	.dw	_376-_375
+	.dw	_375-_374
 	.db	1,5,36,9
-	.dw	_377-_376
+	.dw	_376-_375
 	.db	1,9
+	.dw	_377-_376
+	.db	3,3,1,5,5,9
 	.dw	_378-_377
-	.db	3,3,1,5,5,9
-	.dw	_379-_378
 	.db	3,1,1,5,39,9
-	.dw	_380-_379
+	.dw	_379-_378
 	.db	3,1,1,5,20,9
-	.dw	_381-_380
+	.dw	_380-_379
 	.db	3,1,1,5,42,9
-	.dw	_382-_381
+	.dw	_381-_380
 	.db	1,5,40,9
-	.dw	_383-_382
+	.dw	_382-_381
 	.db	1,5,16,9
-	.dw	_2-_383
+	.dw	_2-_382
 	.db	3,5,1,5,20,9
-	.dw	_384-_2
+	.dw	_383-_2
 	.db	3,1,1,5,16,9
-	.dw	_385-_384
-	.db	3,125,1,5,20,9
-	.dw	_362-_385
-	.db	3,3,1,5,5,9
-	.dw	_386-_362
+	.dw	_384-_383
+	.db	3,125,1,5,50,9
+	.dw	_362-_384
+	.db	3,2,1,5,48,9
+	.dw	_385-_362
+	.db	1,5,20,9
+	.dw	_386-_385
+	.db	3,1,1,5,5,9
+	.dw	_387-_386
 	.db	1,5,48,7,9
-	.dw	_54-_386
+	.dw	_54-_387
 	.db	3,1,1,5,39,9
 	.dw	_4-_54
 	.db	3,1,1,5,51,9
-	.dw	_387-_4
+	.dw	_388-_4
 	.db	3,127,1,5,48,9
-	.dw	_388-_387
+	.dw	_389-_388
 	.db	1,5,33,7,9
-	.dw	_55-_388
+	.dw	_55-_389
 	.db	3,4,1,5,30,9
-	.dw	_389-_55
+	.dw	_390-_55
 	.db	1,5,9,9
-	.dw	_359-_389
+	.dw	_359-_390
 	.db	1,5,40,9
 	.dw	_3-_359
 	.db	3,2,1,5,39,9
 	.dw	_7-_3
 	.db	3,1,1,5,61,9
-	.dw	_390-_7
+	.dw	_391-_7
 	.db	3,127,1,5,40,9
-	.dw	_391-_390
+	.dw	_392-_391
 	.db	1,5,26,7,9
-	.dw	_6-_391
+	.dw	_6-_392
 	.db	3,3,1,5,30,9
-	.dw	_392-_6
+	.dw	_393-_6
 	.db	1,5,1,9
-	.dw	_5-_392
+	.dw	_5-_393
 	.db	3,4,1,9
 	.dw	_41-_5
 	.db	0,1,1
-_372:
+_371:
 	; End of section
 
 	.debug		.debug_ranges, cluster 'filter_point'
@@ -511,21 +516,20 @@ _40:
 	.debug		.debug_pubnames
 	.dl	31
 	.dw	2
-	.dl	_37,450,245
+	.dl	_37,372,167
 	.db	'filter_point',0
 	.dl	0
 	; End of section
 
 	.debug		.debug_info, cluster 'initialize_moving_average_struct'
 _42:
-	.dl	343
+	.dl	265
 	.dw	3
 	.dl	_43
 	.db	4,1
 	.db	'src/moving_average.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
-	.db	12,1
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\testing\\trev2-controls\\',0,12,1
 	.dl	_45,_44
 	.db	2
 	.dl	_33
@@ -549,32 +553,32 @@ _43:
 
 	.debug		.debug_line, cluster 'initialize_moving_average_struct'
 _44:
-	.dl	_394-_393
-_393:
+	.dl	_395-_394
+_394:
 	.dw	3
-	.dl	_396-_395
-_395:
+	.dl	_397-_396
+_396:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
 	.db	'src/moving_average.c',0,0,0,0,0
-_396:
+_397:
 	.db	5,16,7,0,5,2
 	.dl	_10
 	.db	3,3,1,5,38,9
-	.dw	_397-_10
+	.dw	_398-_10
 	.db	1,5,36,9
-	.dw	_398-_397
-	.db	1,5,16,9
 	.dw	_399-_398
+	.db	1,5,16,9
+	.dw	_400-_399
 	.db	3,1,1,5,37,9
-	.dw	_60-_399
+	.dw	_60-_400
 	.db	1,5,35,9
-	.dw	_400-_60
+	.dw	_401-_60
 	.db	1,5,1,9
-	.dw	_401-_400
+	.dw	_402-_401
 	.db	3,1,1,7,9
-	.dw	_46-_401
+	.dw	_46-_402
 	.db	0,1,1
-_394:
+_395:
 	; End of section
 
 	.debug		.debug_ranges, cluster 'initialize_moving_average_struct'
@@ -585,7 +589,7 @@ _45:
 	.debug		.debug_pubnames
 	.dl	51
 	.dw	2
-	.dl	_42,347,245
+	.dl	_42,269,167
 	.db	'initialize_moving_average_struct',0
 	.dl	0
 	; End of section
@@ -1033,7 +1037,7 @@ _58:
 	.dl	-1,_22,_365-_22,_7-_22
 	.dw	1
 	.db	93
-	.dl	_366-_22,_6-_22
+	.dl	_7-_22,_6-_22
 	.dw	3
 	.db	144,166,2
 	.dl	0,0
@@ -1096,34 +1100,34 @@ _14:
 	; End of section
 
 	.debug		.debug_frame
-_402:
+_403:
 	.dl	184
 	.dl	-1
 	.db	3,0,2,2,173,2,15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_403-_407
-_407:
-	.db	146,177,2,0,47
-	.dw	_406-_408
+	.dw	_404-_408
 _408:
-_403:
-	.db	18,49,46,40
-	.dw	_404-_409
+	.db	146,177,2,0,47
+	.dw	_407-_409
 _409:
-	.db	146,178,2,0,47
-	.dw	_406-_410
-_410:
 _404:
-	.db	18,50,46,40
-	.dw	_405-_411
+	.db	18,49,46,40
+	.dw	_405-_410
+_410:
+	.db	146,178,2,0,47
+	.dw	_407-_411
 _411:
-	.db	146,179,2,0,47
+_405:
+	.db	18,50,46,40
 	.dw	_406-_412
 _412:
-_405:
-	.db	146,180,2,0
+	.db	146,179,2,0,47
+	.dw	_407-_413
+_413:
 _406:
+	.db	146,180,2,0
+_407:
 	.db	22,19,62,36,33,48,34,16,173,2,12,19,146,176,2,0,64,36,146,161,2,0,33,8,15,22,161,2,5,19,146,161,2,4,8
 	.db	162,2,8,166,2,8,177,2,8,178,2,8,179,2,8,180,2,8,0,8,1,8,6,8,7,8,8,8,9,8,10,8,167,2,8,168,2,8,169,2,8,170
 	.db	2,8,171,2,8,172,2,16,174,2,12,19,146,176,2,0,64,36,146,161,2,0,33,16,175,2,12,19,146,176,2,0,64,36,146
@@ -1132,13 +1136,13 @@ _406:
 
 	.debug		.debug_frame, cluster 'initialize_moving_average_struct'
 	.dl	24
-	.dl	_402,_10,_46-_10
+	.dl	_403,_10,_46-_10
 	.db	8,160,2,8,5,8,13,8,14,0,0,0
 	; End of section
 
 	.debug		.debug_frame, cluster 'filter_point'
 	.dl	1072
-	.dl	_402,_22,_41-_22
+	.dl	_403,_22,_41-_22
 	.db	4
 	.dl	(_61-_22)/2
 	.db	15,60,127,0,18,10

@@ -53,6 +53,7 @@ ubyte2 get_filtered_apps1_voltage() {
 
         // uncomment once ready to use moving average filter
         return filter_point(apps_1_val, &apps_1_moving_average_info);
+        // return apps_1_val;
     }
 
     return 0;
@@ -68,6 +69,7 @@ ubyte2 get_filtered_apps2_voltage() {
 
         // uncomment once ready to use moving average filter
         return filter_point(apps_2_val, &apps_2_moving_average_info);
+        // return apps_2_val;
     }
 
     return 0;
@@ -95,8 +97,10 @@ void get_apps(ubyte2 *apps_pct_result, bool *error, ubyte1 *num_errors) {
     IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
 
     // uncomment once ready to use moving average filter
-    apps_1_val = filter_point(apps_1_val, &apps_1_moving_average_info);
-    apps_2_val = filter_point(apps_2_val, &apps_2_moving_average_info);
+    // apps_1_val = filter_point(apps_1_val, &apps_1_moving_average_info);
+    // apps_2_val = filter_point(apps_2_val, &apps_2_moving_average_info);
+    apps_1_val = get_filtered_apps1_voltage();
+    apps_2_val = get_filtered_apps2_voltage();
 
     bool apps_1_within_threshhold = (apps_1_val >= (APPS_1_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_1_val <= (APPS_1_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
     bool apps_2_within_threshhold = (apps_2_val >= (APPS_2_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_2_val <= (APPS_2_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
