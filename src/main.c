@@ -622,7 +622,7 @@ void main (void)
                     controls_can_frame.data[2] = 0;
                     controls_can_frame.data[3] = 0;
                     // forward direction
-                    controls_can_frame.data[4] = 0; // TODO Originally 1
+                    controls_can_frame.data[4] = 0; // TODO Set to backwards(0) for testing
                     controls_can_frame.data[5] = 1;
                     controls_can_frame.data[6] = 0;
                     controls_can_frame.data[7] = 0;
@@ -711,8 +711,6 @@ void main (void)
             // only check CAN message if it's been "ignore period" seconds since start
             if (been_ignore_period_since_start == TRUE) {
                 // if CAN timeout, set light to blinking red
-                // TODO ADD THIS BACK IN
-                /*
                 if (IO_RTC_GetTimeUS(orion_can_timeout) > ORION_CAN_TIMEOUT_US) {
                     set_light_to(BLINKING_RED);
                 } else {
@@ -733,13 +731,7 @@ void main (void)
                                 set_light_to(BLINKING_RED);
                         }
                     }
-                }*/
-            }
-            // TODO REMOVE THIS
-            if (current_state == DRIVING) {
-                set_light_to(SOLID_GREEN);
-            }else{
-                set_light_to(BLINKING_RED);
+                }
             }
 
             if (rtd_val == RTD_OFF) {

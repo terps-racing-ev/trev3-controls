@@ -51,3 +51,6 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# stupid build folder go build it yourself
+/build/
