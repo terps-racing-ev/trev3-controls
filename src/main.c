@@ -45,8 +45,6 @@
 /**************************************************************************
  * APPS, BSE Settings
  ***************************************************************************/
-/* percent to torque algorithm */
-// #define PCT_TRAVEL_TO_TORQUE(val) ((int)(((float)(val) / 100.0) * 112.0))
 #define PCT_TRAVEL_FOR_MAX_TORQUE 80
 
 #define CONTINUOUS_TORQUE_MAX 200
@@ -370,7 +368,7 @@ void main (void)
     IO_ADC_ChannelInit( IO_PIN_APPS_1,
                         IO_ADC_RATIOMETRIC,
                         0,
-                        0,
+                        IO_ADC_PD_10K,
                         IO_APPS_1_SUPPLY,
                         NULL );
 
@@ -378,7 +376,7 @@ void main (void)
     IO_ADC_ChannelInit( IO_PIN_APPS_2,
                         IO_ADC_RATIOMETRIC,
                         0,
-                        0,
+                        IO_ADC_PD_10K,
                         IO_APPS_2_SUPPLY,
                         NULL );
 
@@ -666,6 +664,8 @@ void main (void)
 
             }
 
+            /************ POST FSM ***********/
+            
             // echo tms messages
             if (tms_summary_1_message_received) {
             	IO_CAN_WriteFIFO(handle_fifo_w_debug, &tms_summary_1_can_frame, 1);

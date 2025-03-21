@@ -1,5 +1,5 @@
 	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09007774
-	; Options: -f cc55232a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=3 -DRTS_TTC_FLASH_DATE_DAY=15 -DRTS_TTC_FLASH_DATE_HOUR=20 -DRTS_TTC_FLASH_DATE_MINUTE=26 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\main.src
+	; Options: -f cc1764a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=3 -DRTS_TTC_FLASH_DATE_DAY=17 -DRTS_TTC_FLASH_DATE_HOUR=13 -DRTS_TTC_FLASH_DATE_MINUTE=17 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\main.src
 	; Module start
 	.source	'src/main.c'
 code_get_rtd	.section	code, cluster 'get_rtd', new
@@ -52,116 +52,114 @@ code_get_rtd	.section	code, cluster 'get_rtd', new
 ; src/main.c	    45  /**************************************************************************
 ; src/main.c	    46   * APPS, BSE Settings
 ; src/main.c	    47   ***************************************************************************/
-; src/main.c	    48  /* percent to torque algorithm */
-; src/main.c	    49  // #define PCT_TRAVEL_TO_TORQUE(val) ((int)(((float)(val) / 100.0) * 112.0))
-; src/main.c	    50  #define PCT_TRAVEL_FOR_MAX_TORQUE 80
-; src/main.c	    51  
-; src/main.c	    52  #define CONTINUOUS_TORQUE_MAX 200
-; src/main.c	    53  /**************************************************************************
-; src/main.c	    54   * SDC Settings
-; src/main.c	    55   ***************************************************************************/
-; src/main.c	    56  #define SDC_ON 1
-; src/main.c	    57  
+; src/main.c	    48  #define PCT_TRAVEL_FOR_MAX_TORQUE 80
+; src/main.c	    49  
+; src/main.c	    50  #define CONTINUOUS_TORQUE_MAX 200
+; src/main.c	    51  /**************************************************************************
+; src/main.c	    52   * SDC Settings
+; src/main.c	    53   ***************************************************************************/
+; src/main.c	    54  #define SDC_ON 1
+; src/main.c	    55  
+; src/main.c	    56  /**********************************************************/
+; src/main.c	    57  #define SDC_OFF 0 //0
 ; src/main.c	    58  /**********************************************************/
-; src/main.c	    59  #define SDC_OFF 0 //0
-; src/main.c	    60  /**********************************************************/
-; src/main.c	    61  
-; src/main.c	    62  /**************************************************************************
-; src/main.c	    63   * Brake Light
-; src/main.c	    64   ***************************************************************************/
-; src/main.c	    65   #define BRAKE_LIGHT_PIN IO_DO_02
-; src/main.c	    66  
-; src/main.c	    67  
-; src/main.c	    68  /**************************************************************************
-; src/main.c	    69   * CAN Constants
-; src/main.c	    70   ***************************************************************************/
+; src/main.c	    59  
+; src/main.c	    60  /**************************************************************************
+; src/main.c	    61   * Brake Light
+; src/main.c	    62   ***************************************************************************/
+; src/main.c	    63   #define BRAKE_LIGHT_PIN IO_DO_02
+; src/main.c	    64  
+; src/main.c	    65  
+; src/main.c	    66  /**************************************************************************
+; src/main.c	    67   * CAN Constants
+; src/main.c	    68   ***************************************************************************/
+; src/main.c	    69  
+; src/main.c	    70  #define CAN_CHANNEL IO_CAN_CHANNEL_0
 ; src/main.c	    71  
-; src/main.c	    72  #define CAN_CHANNEL IO_CAN_CHANNEL_0
+; src/main.c	    72  #define DEBUG_CAN_CHANNEL IO_CAN_CHANNEL_1
 ; src/main.c	    73  
-; src/main.c	    74  #define DEBUG_CAN_CHANNEL IO_CAN_CHANNEL_1
+; src/main.c	    74  #define BAUD_RATE 500
 ; src/main.c	    75  
-; src/main.c	    76  #define BAUD_RATE 500
-; src/main.c	    77  
-; src/main.c	    78  /* The system sends CAN messages from a FIFO buffer, this constant defines
-; src/main.c	    79   * its size. If a message is added to the full buffer, it is ignored.
-; src/main.c	    80   */ 
-; src/main.c	    81  #define FIFO_BUFFER_SIZE 20
-; src/main.c	    82  
-; src/main.c	    83  #define VCU_CONTROLS_CAN_ID 0xC0
-; src/main.c	    84  #define VCU_INVERTER_SETTINGS_CAN_ID 0xC1
-; src/main.c	    85  #define VCU_DEBUG_CAN_ID 0xDB
-; src/main.c	    86  
-; src/main.c	    87  #define TMS_SUMMARY_1_CAN_ID 0x1
-; src/main.c	    88  #define TMS_SUMMARY_2_CAN_ID 0x2
-; src/main.c	    89  
-; src/main.c	    90  
-; src/main.c	    91  #define MOTOR_INFO_CAN_ID 0xA5
-; src/main.c	    92  #define VOLTAGE_INFO_CAN_ID 0xA7
-; src/main.c	    93  #define CURRENT_INFO_CAN_ID 0xA6
-; src/main.c	    94  
-; src/main.c	    95  #define INVERTER_PACK_VOLT_LO 0
-; src/main.c	    96  #define INVERTER_PACK_VOLT_HI 1
-; src/main.c	    97  
-; src/main.c	    98  #define INVERTER_MOTOR_SPEED_LO 2
-; src/main.c	    99  #define INVERTER_MOTOR_SPEED_HI 3
-; src/main.c	   100  
-; src/main.c	   101  #define ORION_CAN_ID 0x6B2
-; src/main.c	   102  #define ORION_IMD_STATUS_INDEX 0
-; src/main.c	   103  #define ORION_BMS_STATUS_INDEX 1
-; src/main.c	   104  
-; src/main.c	   105  // 10 second CAN timeout on Orion
-; src/main.c	   106  #define ORION_CAN_TIMEOUT_S 10
-; src/main.c	   107  #define ORION_CAN_TIMEOUT_US MsToUs(ORION_CAN_TIMEOUT_S * 1000)
-; src/main.c	   108  
-; src/main.c	   109  // 3 second period for ignoring Orion
-; src/main.c	   110  #define ORION_IGNORE_PERIOD_S 3
-; src/main.c	   111  #define ORION_IGNORE_PERIOD_US MsToUs(ORION_IGNORE_PERIOD_S * 1000)
-; src/main.c	   112  
-; src/main.c	   113  /**************************************************************************
-; src/main.c	   114   * Other
-; src/main.c	   115   ***************************************************************************/
-; src/main.c	   116   // 5 ms cycle time
-; src/main.c	   117   #define CYCLE_TIME MsToUs(5ul)
-; src/main.c	   118  
-; src/main.c	   119   #define PRECHARGE_VOLTAGE_THRESHHOLD 268
-; src/main.c	   120   #define TORQUE_LIMITING_RPM_THRESHHOLD 80
-; src/main.c	   121   #define RPM_BASED_TORQUE_LIMIT 15
-; src/main.c	   122  
-; src/main.c	   123  /* Application Database,
-; src/main.c	   124   * needed for TTC-Downloader
-; src/main.c	   125   */
-; src/main.c	   126  APDB appl_db =
-; src/main.c	   127            { 0                      /* ubyte4 versionAPDB        */
-; src/main.c	   128            , {0}                    /* BL_T_DATE flashDate       */
-; src/main.c	   129                                     /* BL_T_DATE buildDate                   */
-; src/main.c	   130            , { (ubyte4) (((((ubyte4) RTS_TTC_FLASH_DATE_YEAR) & 0x0FFF) << 0) |
-; src/main.c	   131                          ((((ubyte4) RTS_TTC_FLASH_DATE_MONTH) & 0x0F) << 12) |
-; src/main.c	   132                          ((((ubyte4) RTS_TTC_FLASH_DATE_DAY) & 0x1F) << 16) |
-; src/main.c	   133                          ((((ubyte4) RTS_TTC_FLASH_DATE_HOUR) & 0x1F) << 21) |
-; src/main.c	   134                          ((((ubyte4) RTS_TTC_FLASH_DATE_MINUTE) & 0x3F) << 26)) }
-; src/main.c	   135            , 0                      /* ubyte4 nodeType           */
-; src/main.c	   136            , 0                      /* ubyte4 startAddress       */
-; src/main.c	   137            , 0                      /* ubyte4 codeSize           */
-; src/main.c	   138            , 0                      /* ubyte4 legacyAppCRC       */
-; src/main.c	   139            , 0                      /* ubyte4 appCRC             */
-; src/main.c	   140            , 1                      /* ubyte1 nodeNr             */
-; src/main.c	   141            , 0                      /* ubyte4 CRCInit            */
-; src/main.c	   142            , 0                      /* ubyte4 flags              */
-; src/main.c	   143            , 0                      /* ubyte4 hook1              */
-; src/main.c	   144            , 0                      /* ubyte4 hook2              */
-; src/main.c	   145            , 0                      /* ubyte4 hook3              */
-; src/main.c	   146            , APPL_START             /* ubyte4 mainAddress        */
-; src/main.c	   147            , {0, 1}                 /* BL_T_CAN_ID canDownloadID */
-; src/main.c	   148            , {0, 2}                 /* BL_T_CAN_ID canUploadID   */
-; src/main.c	   149            , 0                      /* ubyte4 legacyHeaderCRC    */
-; src/main.c	   150            , 0                      /* ubyte4 version            */
-; src/main.c	   151            , 500                    /* ubyte2 canBaudrate        */
-; src/main.c	   152            , 0                      /* ubyte1 canChannel         */
-; src/main.c	   153            , {0}                    /* ubyte1 reserved[8*4]      */
-; src/main.c	   154            , 0                      /* ubyte4 headerCRC          */
-; src/main.c	   155            };
-; src/main.c	   156  
-; src/main.c	   157  void get_rtd(bool *rtd_val) {
+; src/main.c	    76  /* The system sends CAN messages from a FIFO buffer, this constant defines
+; src/main.c	    77   * its size. If a message is added to the full buffer, it is ignored.
+; src/main.c	    78   */ 
+; src/main.c	    79  #define FIFO_BUFFER_SIZE 20
+; src/main.c	    80  
+; src/main.c	    81  #define VCU_CONTROLS_CAN_ID 0xC0
+; src/main.c	    82  #define VCU_INVERTER_SETTINGS_CAN_ID 0xC1
+; src/main.c	    83  #define VCU_DEBUG_CAN_ID 0xDB
+; src/main.c	    84  
+; src/main.c	    85  #define TMS_SUMMARY_1_CAN_ID 0x1
+; src/main.c	    86  #define TMS_SUMMARY_2_CAN_ID 0x2
+; src/main.c	    87  
+; src/main.c	    88  
+; src/main.c	    89  #define MOTOR_INFO_CAN_ID 0xA5
+; src/main.c	    90  #define VOLTAGE_INFO_CAN_ID 0xA7
+; src/main.c	    91  #define CURRENT_INFO_CAN_ID 0xA6
+; src/main.c	    92  
+; src/main.c	    93  #define INVERTER_PACK_VOLT_LO 0
+; src/main.c	    94  #define INVERTER_PACK_VOLT_HI 1
+; src/main.c	    95  
+; src/main.c	    96  #define INVERTER_MOTOR_SPEED_LO 2
+; src/main.c	    97  #define INVERTER_MOTOR_SPEED_HI 3
+; src/main.c	    98  
+; src/main.c	    99  #define ORION_CAN_ID 0x6B2
+; src/main.c	   100  #define ORION_IMD_STATUS_INDEX 0
+; src/main.c	   101  #define ORION_BMS_STATUS_INDEX 1
+; src/main.c	   102  
+; src/main.c	   103  // 10 second CAN timeout on Orion
+; src/main.c	   104  #define ORION_CAN_TIMEOUT_S 10
+; src/main.c	   105  #define ORION_CAN_TIMEOUT_US MsToUs(ORION_CAN_TIMEOUT_S * 1000)
+; src/main.c	   106  
+; src/main.c	   107  // 3 second period for ignoring Orion
+; src/main.c	   108  #define ORION_IGNORE_PERIOD_S 3
+; src/main.c	   109  #define ORION_IGNORE_PERIOD_US MsToUs(ORION_IGNORE_PERIOD_S * 1000)
+; src/main.c	   110  
+; src/main.c	   111  /**************************************************************************
+; src/main.c	   112   * Other
+; src/main.c	   113   ***************************************************************************/
+; src/main.c	   114   // 5 ms cycle time
+; src/main.c	   115   #define CYCLE_TIME MsToUs(5ul)
+; src/main.c	   116  
+; src/main.c	   117   #define PRECHARGE_VOLTAGE_THRESHHOLD 268
+; src/main.c	   118   #define TORQUE_LIMITING_RPM_THRESHHOLD 80
+; src/main.c	   119   #define RPM_BASED_TORQUE_LIMIT 15
+; src/main.c	   120  
+; src/main.c	   121  /* Application Database,
+; src/main.c	   122   * needed for TTC-Downloader
+; src/main.c	   123   */
+; src/main.c	   124  APDB appl_db =
+; src/main.c	   125            { 0                      /* ubyte4 versionAPDB        */
+; src/main.c	   126            , {0}                    /* BL_T_DATE flashDate       */
+; src/main.c	   127                                     /* BL_T_DATE buildDate                   */
+; src/main.c	   128            , { (ubyte4) (((((ubyte4) RTS_TTC_FLASH_DATE_YEAR) & 0x0FFF) << 0) |
+; src/main.c	   129                          ((((ubyte4) RTS_TTC_FLASH_DATE_MONTH) & 0x0F) << 12) |
+; src/main.c	   130                          ((((ubyte4) RTS_TTC_FLASH_DATE_DAY) & 0x1F) << 16) |
+; src/main.c	   131                          ((((ubyte4) RTS_TTC_FLASH_DATE_HOUR) & 0x1F) << 21) |
+; src/main.c	   132                          ((((ubyte4) RTS_TTC_FLASH_DATE_MINUTE) & 0x3F) << 26)) }
+; src/main.c	   133            , 0                      /* ubyte4 nodeType           */
+; src/main.c	   134            , 0                      /* ubyte4 startAddress       */
+; src/main.c	   135            , 0                      /* ubyte4 codeSize           */
+; src/main.c	   136            , 0                      /* ubyte4 legacyAppCRC       */
+; src/main.c	   137            , 0                      /* ubyte4 appCRC             */
+; src/main.c	   138            , 1                      /* ubyte1 nodeNr             */
+; src/main.c	   139            , 0                      /* ubyte4 CRCInit            */
+; src/main.c	   140            , 0                      /* ubyte4 flags              */
+; src/main.c	   141            , 0                      /* ubyte4 hook1              */
+; src/main.c	   142            , 0                      /* ubyte4 hook2              */
+; src/main.c	   143            , 0                      /* ubyte4 hook3              */
+; src/main.c	   144            , APPL_START             /* ubyte4 mainAddress        */
+; src/main.c	   145            , {0, 1}                 /* BL_T_CAN_ID canDownloadID */
+; src/main.c	   146            , {0, 2}                 /* BL_T_CAN_ID canUploadID   */
+; src/main.c	   147            , 0                      /* ubyte4 legacyHeaderCRC    */
+; src/main.c	   148            , 0                      /* ubyte4 version            */
+; src/main.c	   149            , 500                    /* ubyte2 canBaudrate        */
+; src/main.c	   150            , 0                      /* ubyte1 canChannel         */
+; src/main.c	   151            , {0}                    /* ubyte1 reserved[8*4]      */
+; src/main.c	   152            , 0                      /* ubyte4 headerCRC          */
+; src/main.c	   153            };
+; src/main.c	   154  
+; src/main.c	   155  void get_rtd(bool *rtd_val) {
 ; Function _get_rtd
 _85:
 _get_rtd	.proc	far
@@ -169,17 +167,17 @@ _get_rtd	.proc	far
 	movw	r5,r3
 _354:
 
-; src/main.c	   158      if (IGNORE_RTD_SWITCH) {
-; src/main.c	   159          *rtd_val = RTD_ON;
-; src/main.c	   160      } else {
-; src/main.c	   161          IO_DI_Get(IO_PIN_RTD, rtd_val);
+; src/main.c	   156      if (IGNORE_RTD_SWITCH) {
+; src/main.c	   157          *rtd_val = RTD_ON;
+; src/main.c	   158      } else {
+; src/main.c	   159          IO_DI_Get(IO_PIN_RTD, rtd_val);
 	movb	rl2,#0x26
 _353:
 	call	_IO_DI_Get
 _355:
 
-; src/main.c	   162      }    
-; src/main.c	   163  }
+; src/main.c	   160      }    
+; src/main.c	   161  }
 	ret
 _164:
 	; End of function
@@ -188,24 +186,24 @@ _164:
 code_get_sdc	.section	code, cluster 'get_sdc', new
 	.global	_get_sdc
 
-; src/main.c	   164  
-; src/main.c	   165  void get_sdc(bool *sdc_val) {
+; src/main.c	   162  
+; src/main.c	   163  void get_sdc(bool *sdc_val) {
 ; Function _get_sdc
 _97:
 _get_sdc	.proc	far
 
-; src/main.c	   166      if (IGNORE_SDC_OFF) {
-; src/main.c	   167          *sdc_val = SDC_ON;
+; src/main.c	   164      if (IGNORE_SDC_OFF) {
+; src/main.c	   165          *sdc_val = SDC_ON;
 	movb	rh4,#0x1
 _1017:
 	exts	r3,#0x1
 	movb	[r2],rh4
 _1018:
 
-; src/main.c	   168      } else {
-; src/main.c	   169          IO_DI_Get(IO_PIN_SDC, sdc_val);
-; src/main.c	   170      }
-; src/main.c	   171  }
+; src/main.c	   166      } else {
+; src/main.c	   167          IO_DI_Get(IO_PIN_SDC, sdc_val);
+; src/main.c	   168      }
+; src/main.c	   169  }
 	ret
 _169:
 	; End of function
@@ -214,8 +212,8 @@ _169:
 code_read_can_msg	.section	code, cluster 'read_can_msg', new
 	.global	_read_can_msg
 
-; src/main.c	   172  
-; src/main.c	   173  void read_can_msg(ubyte1* handle_r, IO_CAN_DATA_FRAME* dst_data_frame, bool *msg_received, ubyte4 id, ubyte1 channel) {
+; src/main.c	   170  
+; src/main.c	   171  void read_can_msg(ubyte1* handle_r, IO_CAN_DATA_FRAME* dst_data_frame, bool *msg_received, ubyte4 id, ubyte1 channel) {
 ; Function _read_can_msg
 _109:
 _read_can_msg	.proc	far
@@ -247,30 +245,30 @@ _433:
 	movw	r1,r14
 _1023:
 
-; src/main.c	   174      IO_ErrorType can_read_error;
-; src/main.c	   175  
-; src/main.c	   176      *msg_received = FALSE;
+; src/main.c	   172      IO_ErrorType can_read_error;
+; src/main.c	   173  
+; src/main.c	   174      *msg_received = FALSE;
 	movb	rh4,#0x0
 _692:
 	exts	r0,#0x1
 	movb	[r10],rh4
 _1024:
 
-; src/main.c	   177  
-; src/main.c	   178      can_read_error = IO_CAN_MsgStatus(*handle_r);
+; src/main.c	   175  
+; src/main.c	   176      can_read_error = IO_CAN_MsgStatus(*handle_r);
 	exts	r7,#0x1
 	movb	rl2,[r6]
 _693:
 	call	_IO_CAN_MsgStatus
 _694:
 
-; src/main.c	   179  
-; src/main.c	   180      if (can_read_error == IO_E_OK) {
+; src/main.c	   177  
+; src/main.c	   178      if (can_read_error == IO_E_OK) {
 	cmpw	r2,#0x0
 	jmp+	cc_ne,_2
 _1025:
 
-; src/main.c	   181          IO_CAN_ReadMsg(*handle_r, dst_data_frame);
+; src/main.c	   179          IO_CAN_ReadMsg(*handle_r, dst_data_frame);
 	exts	r7,#0x1
 	movb	rl2,[r6]
 _698:
@@ -279,7 +277,7 @@ _698:
 	call	_IO_CAN_ReadMsg
 _1026:
 
-; src/main.c	   182          *msg_received = TRUE;
+; src/main.c	   180          *msg_received = TRUE;
 	movb	rh4,#0x1
 _1027:
 	exts	r0,#0x1
@@ -288,28 +286,28 @@ _1028:
 	jmp	_3
 _2:
 
-; src/main.c	   183      } else if (can_read_error == IO_E_CAN_OVERFLOW) {
+; src/main.c	   181      } else if (can_read_error == IO_E_CAN_OVERFLOW) {
 	cmpw	r2,#0x28
 	jmp+	cc_ne,_4
 _1029:
 
-; src/main.c	   184          IO_CAN_DeInitHandle(*handle_r);
+; src/main.c	   182          IO_CAN_DeInitHandle(*handle_r);
 	exts	r7,#0x1
 	movb	rl2,[r6]
 _699:
 	call	_IO_CAN_DeInitHandle
 _1030:
 
-; src/main.c	   185  
-; src/main.c	   186          IO_CAN_ConfigMsg( handle_r
-; src/main.c	   187                  , channel
-; src/main.c	   188                  , IO_CAN_MSG_READ
+; src/main.c	   183  
+; src/main.c	   184          IO_CAN_ConfigMsg( handle_r
+; src/main.c	   185                  , channel
+; src/main.c	   186                  , IO_CAN_MSG_READ
 	movb	rh4,#0x0
 _1031:
 
-; src/main.c	   189                  , IO_CAN_STD_FRAME
-; src/main.c	   190                  , id
-; src/main.c	   191                  , 0x1FFFFFFF);
+; src/main.c	   187                  , IO_CAN_STD_FRAME
+; src/main.c	   188                  , id
+; src/main.c	   189                  , 0x1FFFFFFF);
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
 	movw	r2,r6
@@ -324,9 +322,9 @@ _701:
 _4:
 _3:
 
-; src/main.c	   192      }
-; src/main.c	   193  
-; src/main.c	   194  }
+; src/main.c	   190      }
+; src/main.c	   191  
+; src/main.c	   192  }
 	addw	r15,#0x2
 _444:
 	movw	r10,[r15+]
@@ -351,8 +349,8 @@ _174:
 code_voltage_to_torque_limit	.section	code, cluster 'voltage_to_torque_limit', new
 	.global	_voltage_to_torque_limit
 
-; src/main.c	   195  
-; src/main.c	   196  double voltage_to_torque_limit (ubyte2 pack_voltage) {
+; src/main.c	   193  
+; src/main.c	   194  double voltage_to_torque_limit (ubyte2 pack_voltage) {
 ; Function _voltage_to_torque_limit
 _121:
 _voltage_to_torque_limit	.proc	far
@@ -363,12 +361,12 @@ _713:
 	movw	[-r15],r10
 _724:
 
-; src/main.c	   197      if (pack_voltage < PRECHARGE_VOLTAGE_THRESHHOLD) {
+; src/main.c	   195      if (pack_voltage < PRECHARGE_VOLTAGE_THRESHHOLD) {
 	cmpw	r2,#0x10c
 	jmp+	cc_uge,_5
 _1036:
 
-; src/main.c	   198          return 0;
+; src/main.c	   196          return 0;
 	movw	r2,#0x0
 _828:
 	movw	r3,r2
@@ -378,8 +376,8 @@ _1037:
 	jmp	_6
 _5:
 
-; src/main.c	   199      } else {
-; src/main.c	   200          return ((double) (pack_voltage)) * -0.3255 + 231.25;
+; src/main.c	   197      } else {
+; src/main.c	   198          return ((double) (pack_voltage)) * -0.3255 + 231.25;
 	call	__us2dpf
 _829:
 	movw	r11,#0x45a2
@@ -396,9 +394,9 @@ _1039:
 _1040:
 	call	__add_dpf
 
-; src/main.c	   201      }
-; src/main.c	   202  
-; src/main.c	   203  }
+; src/main.c	   199      }
+; src/main.c	   200  
+; src/main.c	   201  }
 _6:
 	movw	r10,[r15+]
 _735:
@@ -414,8 +412,8 @@ _179:
 code_pct_travel_to_torque	.section	code, cluster 'pct_travel_to_torque', new
 	.global	_pct_travel_to_torque
 
-; src/main.c	   204  
-; src/main.c	   205  ubyte4 pct_travel_to_torque (ubyte4 pct_travel) {
+; src/main.c	   202  
+; src/main.c	   203  ubyte4 pct_travel_to_torque (ubyte4 pct_travel) {
 ; Function _pct_travel_to_torque
 _133:
 _pct_travel_to_torque	.proc	far
@@ -424,14 +422,14 @@ _830:
 	movw	[-r15],r6
 _841:
 
-; src/main.c	   206      if (pct_travel >= PCT_TRAVEL_FOR_MAX_TORQUE) {
+; src/main.c	   204      if (pct_travel >= PCT_TRAVEL_FOR_MAX_TORQUE) {
 	movw	r11,r3
 	cmpw	r2,#0x50
 	subcw	r11,#0x0
 	jmp+	cc_ult,_8
 _1045:
 
-; src/main.c	   207           return CONTINUOUS_TORQUE_MAX;
+; src/main.c	   205           return CONTINUOUS_TORQUE_MAX;
 	movw	r2,#0xc8
 _914:
 	movw	r3,#0x0
@@ -439,9 +437,9 @@ _1046:
 	jmp	_9
 _8:
 
-; src/main.c	   208      }
-; src/main.c	   209  
-; src/main.c	   210      return ((ubyte4)(((float)(pct_travel) / PCT_TRAVEL_FOR_MAX_TORQUE) * ((float) CONTINUOUS_TORQUE_MAX)));
+; src/main.c	   206      }
+; src/main.c	   207  
+; src/main.c	   208      return ((ubyte4)(((float)(pct_travel) / PCT_TRAVEL_FOR_MAX_TORQUE) * ((float) CONTINUOUS_TORQUE_MAX)));
 	call	__ul2spf
 _915:
 	movw	r4,#0x0
@@ -456,7 +454,7 @@ _1049:
 _1050:
 	call	__spf2ul
 
-; src/main.c	   211  }
+; src/main.c	   209  }
 _9:
 	movw	r6,[r15+]
 _852:
@@ -470,68 +468,68 @@ _184:
 code_main	.section	code, cluster 'main', new
 	.global	_main
 
-; src/main.c	   212  
-; src/main.c	   213  
-; src/main.c	   214  void main (void)
+; src/main.c	   210  
+; src/main.c	   211  
+; src/main.c	   212  void main (void)
 ; Function _main
 _145:
 _main	.proc	far
 	subw	r15,#0x106
 _916:
 
-; src/main.c	   215  {
-; src/main.c	   216      ubyte4 timestamp;
+; src/main.c	   213  {
+; src/main.c	   214      ubyte4 timestamp;
+; src/main.c	   215  
+; src/main.c	   216      enum VCU_State { NOT_READY, PLAYING_RTD_SOUND, DRIVING, ERRORED, APPS_5PCT_WAIT };
 ; src/main.c	   217  
-; src/main.c	   218      enum VCU_State { NOT_READY, PLAYING_RTD_SOUND, DRIVING, ERRORED, APPS_5PCT_WAIT };
-; src/main.c	   219  
+; src/main.c	   218      /*******************************************/
+; src/main.c	   219      /*             INITIALIZATION              */
 ; src/main.c	   220      /*******************************************/
-; src/main.c	   221      /*             INITIALIZATION              */
-; src/main.c	   222      /*******************************************/
-; src/main.c	   223  
-; src/main.c	   224      /* Initialize the IO driver (without safety functions) */
-; src/main.c	   225      IO_Driver_Init(NULL);
+; src/main.c	   221  
+; src/main.c	   222      /* Initialize the IO driver (without safety functions) */
+; src/main.c	   223      IO_Driver_Init(NULL);
 	movw	r2,#0x0
 	movw	r3,r2
 	call	_IO_Driver_Init
 _1055:
 
-; src/main.c	   226  
-; src/main.c	   227      /* Add your initialization code here            */
-; src/main.c	   228      /*  - Use the IO driver functions to initialize */
-; src/main.c	   229      /*    all required IOs and interfaces           */
-; src/main.c	   230  
-; src/main.c	   231      /* NOTE: turns 5v sensor supply 1 on */
-; src/main.c	   232      IO_POWER_Set (IO_ADC_SENSOR_SUPPLY_0, IO_POWER_ON);
+; src/main.c	   224  
+; src/main.c	   225      /* Add your initialization code here            */
+; src/main.c	   226      /*  - Use the IO driver functions to initialize */
+; src/main.c	   227      /*    all required IOs and interfaces           */
+; src/main.c	   228  
+; src/main.c	   229      /* NOTE: turns 5v sensor supply 1 on */
+; src/main.c	   230      IO_POWER_Set (IO_ADC_SENSOR_SUPPLY_0, IO_POWER_ON);
 	movb	rl2,#0x24
 _1056:
 	movb	rh2,#0x1
 	call	_IO_POWER_Set
 _1057:
 
-; src/main.c	   233      IO_POWER_Set (IO_ADC_SENSOR_SUPPLY_1, IO_POWER_ON);
+; src/main.c	   231      IO_POWER_Set (IO_ADC_SENSOR_SUPPLY_1, IO_POWER_ON);
 	movb	rl2,#0x25
 _1058:
 	movb	rh2,#0x1
 	call	_IO_POWER_Set
 _219:
 
-; src/main.c	   234  
-; src/main.c	   235      /* CAN variables and initialization */
-; src/main.c	   236      // transmitting
-; src/main.c	   237      ubyte1 handle_fifo_w;
-; src/main.c	   238      ubyte1 handle_fifo_w_debug;
-; src/main.c	   239  
-; src/main.c	   240      // receiving
-; src/main.c	   241      ubyte1 handle_tms_summary_1_r;
-; src/main.c	   242      ubyte1 handle_tms_summary_2_r;
-; src/main.c	   243      ubyte1 handle_inverter_motor_info_r;
-; src/main.c	   244      ubyte1 handle_inverter_voltage_info_r;
-; src/main.c	   245      ubyte1 handle_inverter_current_info_r;
-; src/main.c	   246      ubyte1 handle_orion_r;
-; src/main.c	   247  
-; src/main.c	   248      /* can frame used to send torque requests to the inverter */
-; src/main.c	   249      IO_CAN_DATA_FRAME controls_can_frame;
-; src/main.c	   250      controls_can_frame.id = VCU_CONTROLS_CAN_ID;
+; src/main.c	   232  
+; src/main.c	   233      /* CAN variables and initialization */
+; src/main.c	   234      // transmitting
+; src/main.c	   235      ubyte1 handle_fifo_w;
+; src/main.c	   236      ubyte1 handle_fifo_w_debug;
+; src/main.c	   237  
+; src/main.c	   238      // receiving
+; src/main.c	   239      ubyte1 handle_tms_summary_1_r;
+; src/main.c	   240      ubyte1 handle_tms_summary_2_r;
+; src/main.c	   241      ubyte1 handle_inverter_motor_info_r;
+; src/main.c	   242      ubyte1 handle_inverter_voltage_info_r;
+; src/main.c	   243      ubyte1 handle_inverter_current_info_r;
+; src/main.c	   244      ubyte1 handle_orion_r;
+; src/main.c	   245  
+; src/main.c	   246      /* can frame used to send torque requests to the inverter */
+; src/main.c	   247      IO_CAN_DATA_FRAME controls_can_frame;
+; src/main.c	   248      controls_can_frame.id = VCU_CONTROLS_CAN_ID;
 	movw	r11,#0xc0
 _232:
 	movw	r12,#0x0
@@ -541,21 +539,21 @@ _234:
 	movw	[r15+#0x10],r12
 _235:
 
-; src/main.c	   251      controls_can_frame.id_format = IO_CAN_STD_FRAME;
+; src/main.c	   249      controls_can_frame.id_format = IO_CAN_STD_FRAME;
 	movb	rh4,#0x0
 _1059:
 	movb	[r15+#0xd],rh4
 _1060:
 
-; src/main.c	   252      controls_can_frame.length = 8;
+; src/main.c	   250      controls_can_frame.length = 8;
 	movb	rl4,#0x8
 _1061:
 	movb	[r15+#0xc],rl4
 _236:
 
-; src/main.c	   253  
-; src/main.c	   254      IO_CAN_DATA_FRAME inverter_settings_can_frame;
-; src/main.c	   255      inverter_settings_can_frame.id = VCU_INVERTER_SETTINGS_CAN_ID;
+; src/main.c	   251  
+; src/main.c	   252      IO_CAN_DATA_FRAME inverter_settings_can_frame;
+; src/main.c	   253      inverter_settings_can_frame.id = VCU_INVERTER_SETTINGS_CAN_ID;
 	movw	r11,#0xc1
 _1062:
 	movw	[r15+#0x24],r11
@@ -563,16 +561,16 @@ _239:
 	movw	[r15+#0x26],r12
 _240:
 
-; src/main.c	   256      inverter_settings_can_frame.id_format = IO_CAN_STD_FRAME;
+; src/main.c	   254      inverter_settings_can_frame.id_format = IO_CAN_STD_FRAME;
 	movb	[r15+#0x23],rh4
 _1063:
 
-; src/main.c	   257      inverter_settings_can_frame.length = 8;
+; src/main.c	   255      inverter_settings_can_frame.length = 8;
 	movb	[r15+#0x22],rl4
 _241:
 
-; src/main.c	   258      for (int i = 0; i < 8; i++) {
-; src/main.c	   259          inverter_settings_can_frame.data[i] = 0;
+; src/main.c	   256      for (int i = 0; i < 8; i++) {
+; src/main.c	   257          inverter_settings_can_frame.data[i] = 0;
 	movw	r11,#0x1a
 	addw	r11,r15
 _11:
@@ -586,25 +584,25 @@ _1066:
 	jmp+	cc_ult,_11
 _242:
 
-; src/main.c	   260      }
-; src/main.c	   261  
-; src/main.c	   262      // CAN frames for reading from tms
-; src/main.c	   263      IO_CAN_DATA_FRAME tms_summary_1_can_frame;
-; src/main.c	   264      IO_CAN_DATA_FRAME tms_summary_2_can_frame;
-; src/main.c	   265  
-; src/main.c	   266  
-; src/main.c	   267      // CAN frame for reading from inverter
-; src/main.c	   268      IO_CAN_DATA_FRAME inverter_motor_info_can_frame;
-; src/main.c	   269      IO_CAN_DATA_FRAME inverter_voltage_info_can_frame;
-; src/main.c	   270      IO_CAN_DATA_FRAME inverter_current_info_can_frame;
-; src/main.c	   271  
-; src/main.c	   272  
-; src/main.c	   273      // CAN frame for orion
-; src/main.c	   274      IO_CAN_DATA_FRAME orion_can_frame;
-; src/main.c	   275  
-; src/main.c	   276      /* can frame used for debugging */
-; src/main.c	   277      IO_CAN_DATA_FRAME debug_can_frame;
-; src/main.c	   278      debug_can_frame.id = VCU_DEBUG_CAN_ID;
+; src/main.c	   258      }
+; src/main.c	   259  
+; src/main.c	   260      // CAN frames for reading from tms
+; src/main.c	   261      IO_CAN_DATA_FRAME tms_summary_1_can_frame;
+; src/main.c	   262      IO_CAN_DATA_FRAME tms_summary_2_can_frame;
+; src/main.c	   263  
+; src/main.c	   264  
+; src/main.c	   265      // CAN frame for reading from inverter
+; src/main.c	   266      IO_CAN_DATA_FRAME inverter_motor_info_can_frame;
+; src/main.c	   267      IO_CAN_DATA_FRAME inverter_voltage_info_can_frame;
+; src/main.c	   268      IO_CAN_DATA_FRAME inverter_current_info_can_frame;
+; src/main.c	   269  
+; src/main.c	   270  
+; src/main.c	   271      // CAN frame for orion
+; src/main.c	   272      IO_CAN_DATA_FRAME orion_can_frame;
+; src/main.c	   273  
+; src/main.c	   274      /* can frame used for debugging */
+; src/main.c	   275      IO_CAN_DATA_FRAME debug_can_frame;
+; src/main.c	   276      debug_can_frame.id = VCU_DEBUG_CAN_ID;
 	movw	r11,#0xdb
 _253:
 	movw	r12,#0x0
@@ -614,18 +612,18 @@ _255:
 	movw	[r15+#0x34],r12
 _256:
 
-; src/main.c	   279      debug_can_frame.id_format = IO_CAN_STD_FRAME;
+; src/main.c	   277      debug_can_frame.id_format = IO_CAN_STD_FRAME;
 	movb	[r15+#0x31],rh4
 _1067:
 
-; src/main.c	   280      debug_can_frame.length = 8;
+; src/main.c	   278      debug_can_frame.length = 8;
 	movb	rh4,#0x8
 _1068:
 	movb	[r15+#0x30],rh4
 _257:
 
-; src/main.c	   281      for (int i = 0; i < 8; i++) {
-; src/main.c	   282          debug_can_frame.data[i] = 0;
+; src/main.c	   279      for (int i = 0; i < 8; i++) {
+; src/main.c	   280          debug_can_frame.data[i] = 0;
 	movw	r11,#0x28
 	addw	r11,r15
 _12:
@@ -639,87 +637,87 @@ _1071:
 	jmp+	cc_ult,_12
 _258:
 
-; src/main.c	   283      }
-; src/main.c	   284  
-; src/main.c	   285      /* initialize can channel and fifo buffer */
-; src/main.c	   286      IO_CAN_Init( CAN_CHANNEL
+; src/main.c	   281      }
+; src/main.c	   282  
+; src/main.c	   283      /* initialize can channel and fifo buffer */
+; src/main.c	   284      IO_CAN_Init( CAN_CHANNEL
 	movb	rl2,#0x3a
 _1072:
 
-; src/main.c	   287                 , BAUD_RATE
+; src/main.c	   285                 , BAUD_RATE
 	movw	r3,#0x1f4
 _1073:
 
-; src/main.c	   288                 , 0
-; src/main.c	   289                 , 0
+; src/main.c	   286                 , 0
+; src/main.c	   287                 , 0
 	movb	rl4,rh2
 _1074:
 
-; src/main.c	   290                 , 0);
+; src/main.c	   288                 , 0);
 	movb	rh4,rh2
 	call	_IO_CAN_Init
 _937:
 
-; src/main.c	   291  
-; src/main.c	   292      IO_CAN_Init( DEBUG_CAN_CHANNEL
+; src/main.c	   289  
+; src/main.c	   290      IO_CAN_Init( DEBUG_CAN_CHANNEL
 	movb	rl2,#0x3b
 _1075:
 
-; src/main.c	   293                 , BAUD_RATE
+; src/main.c	   291                 , BAUD_RATE
 	movw	r3,#0x1f4
 _1076:
 
-; src/main.c	   294                 , 0
+; src/main.c	   292                 , 0
 	movb	rh2,#0x0
 _1077:
 
-; src/main.c	   295                 , 0
+; src/main.c	   293                 , 0
 	movb	rl4,rh2
 _1078:
 
-; src/main.c	   296                 , 0);
+; src/main.c	   294                 , 0);
 	movb	rh4,rh2
 	call	_IO_CAN_Init
 _1079:
 
-; src/main.c	   297  
-; src/main.c	   298      IO_CAN_ConfigFIFO( &handle_fifo_w
+; src/main.c	   295  
+; src/main.c	   296      IO_CAN_ConfigFIFO( &handle_fifo_w
 	movw	r2,r15
 	addw	r2,#0x13
 	andw	r2,#0x3fff
 	orw	r2,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 _1080:
 
-; src/main.c	   299      				 , CAN_CHANNEL
+; src/main.c	   297      				 , CAN_CHANNEL
 	movb	rl4,#0x3a
 _1081:
 
-; src/main.c	   300      				 , FIFO_BUFFER_SIZE
+; src/main.c	   298      				 , FIFO_BUFFER_SIZE
 	movb	rh4,#0x14
 _1082:
 
-; src/main.c	   301      				 , IO_CAN_MSG_WRITE
+; src/main.c	   299      				 , IO_CAN_MSG_WRITE
 	movb	rl5,#0x1
 _1083:
 
-; src/main.c	   302      				 , IO_CAN_STD_FRAME
+; src/main.c	   300      				 , IO_CAN_STD_FRAME
 	movb	rh5,#0x0
 _1084:
 
-; src/main.c	   303      				 , VCU_CONTROLS_CAN_ID
+; src/main.c	   301      				 , VCU_CONTROLS_CAN_ID
 	movw	r11,#0xc0
 	movw	r13,#0x0
 _1085:
 
-; src/main.c	   304      				 , 0);
+; src/main.c	   302      				 , 0);
 	movw	r3,#@seg(__lc_ub_user_stack+0xffff)
 	movw	r12,r13
 	movw	r14,r13
 	call	_IO_CAN_ConfigFIFO
 _1086:
 
-; src/main.c	   305  
-; src/main.c	   306      IO_CAN_ConfigMsg( &handle_tms_summary_1_r
+; src/main.c	   303  
+; src/main.c	   304      IO_CAN_ConfigMsg( &handle_tms_summary_1_r
 	movw	r7,r15
 	addw	r7,#0x14
 	andw	r7,#0x3fff
@@ -728,21 +726,21 @@ _1086:
 	movw	[r15+#0xb4],r11
 _1087:
 
-; src/main.c	   307                       , CAN_CHANNEL
+; src/main.c	   305                       , CAN_CHANNEL
 	movb	rl4,#0x3a
 _1088:
 
-; src/main.c	   308                       , IO_CAN_MSG_READ
+; src/main.c	   306                       , IO_CAN_MSG_READ
 	movb	rh4,#0x0
 _1089:
 
-; src/main.c	   309                       , IO_CAN_STD_FRAME
-; src/main.c	   310                       , TMS_SUMMARY_1_CAN_ID
+; src/main.c	   307                       , IO_CAN_STD_FRAME
+; src/main.c	   308                       , TMS_SUMMARY_1_CAN_ID
 	movw	r11,#0x1
 	movw	r12,#0x0
 _1090:
 
-; src/main.c	   311                       , 0x1FFFFFFF);
+; src/main.c	   309                       , 0x1FFFFFFF);
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
 	movw	r2,r7
@@ -751,8 +749,8 @@ _1090:
 	call	_IO_CAN_ConfigMsg
 _1091:
 
-; src/main.c	   312  
-; src/main.c	   313      IO_CAN_ConfigMsg( &handle_tms_summary_2_r
+; src/main.c	   310  
+; src/main.c	   311      IO_CAN_ConfigMsg( &handle_tms_summary_2_r
 	movw	r0,r15
 	addw	r0,#0x19
 	andw	r0,#0x3fff
@@ -761,21 +759,21 @@ _1091:
 	movw	[r15+#0xb6],r11
 _1092:
 
-; src/main.c	   314                       , CAN_CHANNEL
+; src/main.c	   312                       , CAN_CHANNEL
 	movb	rl4,#0x3a
 _1093:
 
-; src/main.c	   315                       , IO_CAN_MSG_READ
+; src/main.c	   313                       , IO_CAN_MSG_READ
 	movb	rh4,#0x0
 _1094:
 
-; src/main.c	   316                       , IO_CAN_STD_FRAME
-; src/main.c	   317                       , TMS_SUMMARY_2_CAN_ID
+; src/main.c	   314                       , IO_CAN_STD_FRAME
+; src/main.c	   315                       , TMS_SUMMARY_2_CAN_ID
 	movw	r11,#0x2
 	movw	r12,#0x0
 _1095:
 
-; src/main.c	   318                       , 0x1FFFFFFF);
+; src/main.c	   316                       , 0x1FFFFFFF);
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
 	movw	r2,r0
@@ -784,8 +782,8 @@ _1095:
 	call	_IO_CAN_ConfigMsg
 _1096:
 
-; src/main.c	   319  
-; src/main.c	   320      IO_CAN_ConfigMsg( &handle_inverter_motor_info_r
+; src/main.c	   317  
+; src/main.c	   318      IO_CAN_ConfigMsg( &handle_inverter_motor_info_r
 	movw	r11,r15
 	addw	r11,#0x18
 	andw	r11,#0x3fff
@@ -795,21 +793,21 @@ _1096:
 	movw	[r15+#0xba],r11
 _1097:
 
-; src/main.c	   321                   , CAN_CHANNEL
+; src/main.c	   319                   , CAN_CHANNEL
 	movb	rl4,#0x3a
 _1098:
 
-; src/main.c	   322                   , IO_CAN_MSG_READ
+; src/main.c	   320                   , IO_CAN_MSG_READ
 	movb	rh4,#0x0
 _1099:
 
-; src/main.c	   323                   , IO_CAN_STD_FRAME
-; src/main.c	   324                   , MOTOR_INFO_CAN_ID
+; src/main.c	   321                   , IO_CAN_STD_FRAME
+; src/main.c	   322                   , MOTOR_INFO_CAN_ID
 	movw	r11,#0xa5
 	movw	r12,#0x0
 _1100:
 
-; src/main.c	   325                   , 0x1FFFFFFF);
+; src/main.c	   323                   , 0x1FFFFFFF);
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
 	movw	r2,[r15+#0xae]
@@ -818,8 +816,8 @@ _1100:
 	call	_IO_CAN_ConfigMsg
 _1101:
 
-; src/main.c	   326  
-; src/main.c	   327      IO_CAN_ConfigMsg( &handle_inverter_voltage_info_r
+; src/main.c	   324  
+; src/main.c	   325      IO_CAN_ConfigMsg( &handle_inverter_voltage_info_r
 	movw	r11,r15
 	addw	r11,#0x15
 	andw	r11,#0x3fff
@@ -829,21 +827,21 @@ _1101:
 	movw	[r15+#0xbc],r11
 _1102:
 
-; src/main.c	   328                   , CAN_CHANNEL
+; src/main.c	   326                   , CAN_CHANNEL
 	movb	rl4,#0x3a
 _1103:
 
-; src/main.c	   329                   , IO_CAN_MSG_READ
+; src/main.c	   327                   , IO_CAN_MSG_READ
 	movb	rh4,#0x0
 _1104:
 
-; src/main.c	   330                   , IO_CAN_STD_FRAME
-; src/main.c	   331                   , VOLTAGE_INFO_CAN_ID
+; src/main.c	   328                   , IO_CAN_STD_FRAME
+; src/main.c	   329                   , VOLTAGE_INFO_CAN_ID
 	movw	r11,#0xa7
 	movw	r12,#0x0
 _1105:
 
-; src/main.c	   332                   , 0x1FFFFFFF);
+; src/main.c	   330                   , 0x1FFFFFFF);
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
 	movw	r2,[r15+#0xb0]
@@ -852,8 +850,8 @@ _1105:
 	call	_IO_CAN_ConfigMsg
 _1106:
 
-; src/main.c	   333  
-; src/main.c	   334      IO_CAN_ConfigMsg( &handle_inverter_current_info_r
+; src/main.c	   331  
+; src/main.c	   332      IO_CAN_ConfigMsg( &handle_inverter_current_info_r
 	movw	r10,r15
 	addw	r10,#0x16
 	andw	r10,#0x3fff
@@ -862,21 +860,21 @@ _1106:
 	movw	[r15+#0xb2],r11
 _1107:
 
-; src/main.c	   335                   , CAN_CHANNEL
+; src/main.c	   333                   , CAN_CHANNEL
 	movb	rl4,#0x3a
 _1108:
 
-; src/main.c	   336                   , IO_CAN_MSG_READ
+; src/main.c	   334                   , IO_CAN_MSG_READ
 	movb	rh4,#0x0
 _1109:
 
-; src/main.c	   337                   , IO_CAN_STD_FRAME
-; src/main.c	   338                   , CURRENT_INFO_CAN_ID
+; src/main.c	   335                   , IO_CAN_STD_FRAME
+; src/main.c	   336                   , CURRENT_INFO_CAN_ID
 	movw	r11,#0xa6
 	movw	r12,#0x0
 _1110:
 
-; src/main.c	   339                   , 0x1FFFFFFF);
+; src/main.c	   337                   , 0x1FFFFFFF);
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
 	movw	r2,r10
@@ -885,8 +883,8 @@ _1110:
 	call	_IO_CAN_ConfigMsg
 _1111:
 
-; src/main.c	   340  
-; src/main.c	   341      IO_CAN_ConfigMsg( &handle_orion_r
+; src/main.c	   338  
+; src/main.c	   339      IO_CAN_ConfigMsg( &handle_orion_r
 	movw	r11,r15
 	addw	r11,#0x17
 	andw	r11,#0x3fff
@@ -896,21 +894,21 @@ _1111:
 	movw	[r15+#0xb8],r11
 _1112:
 
-; src/main.c	   342                   , CAN_CHANNEL
+; src/main.c	   340                   , CAN_CHANNEL
 	movb	rl4,#0x3a
 _1113:
 
-; src/main.c	   343                   , IO_CAN_MSG_READ
+; src/main.c	   341                   , IO_CAN_MSG_READ
 	movb	rh4,#0x0
 _1114:
 
-; src/main.c	   344                   , IO_CAN_STD_FRAME
-; src/main.c	   345                   , ORION_CAN_ID
+; src/main.c	   342                   , IO_CAN_STD_FRAME
+; src/main.c	   343                   , ORION_CAN_ID
 	movw	r11,#0x6b2
 	movw	r12,#0x0
 _1115:
 
-; src/main.c	   346                   , 0x1FFFFFFF);
+; src/main.c	   344                   , 0x1FFFFFFF);
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
 	movw	r2,[r15+#0xac]
@@ -919,291 +917,291 @@ _1115:
 	call	_IO_CAN_ConfigMsg
 _1116:
 
-; src/main.c	   347  
-; src/main.c	   348      IO_CAN_ConfigFIFO( &handle_fifo_w_debug
+; src/main.c	   345  
+; src/main.c	   346      IO_CAN_ConfigFIFO( &handle_fifo_w_debug
 	movw	r2,r15
 	addw	r2,#0x12
 	andw	r2,#0x3fff
 	orw	r2,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 _1117:
 
-; src/main.c	   349      				 , DEBUG_CAN_CHANNEL
+; src/main.c	   347      				 , DEBUG_CAN_CHANNEL
 	movb	rl4,#0x3b
 _1118:
 
-; src/main.c	   350      				 , FIFO_BUFFER_SIZE
+; src/main.c	   348      				 , FIFO_BUFFER_SIZE
 	movb	rh4,#0x14
 _1119:
 
-; src/main.c	   351      				 , IO_CAN_MSG_WRITE
+; src/main.c	   349      				 , IO_CAN_MSG_WRITE
 	movb	rl5,#0x1
 _1120:
 
-; src/main.c	   352      				 , IO_CAN_STD_FRAME
+; src/main.c	   350      				 , IO_CAN_STD_FRAME
 	movb	rh5,#0x0
 _1121:
 
-; src/main.c	   353      				 , VCU_CONTROLS_CAN_ID
+; src/main.c	   351      				 , VCU_CONTROLS_CAN_ID
 	movw	r11,#0xc0
 	movw	r12,#0x0
 _1122:
 
-; src/main.c	   354      				 , 0);
+; src/main.c	   352      				 , 0);
 	movw	r3,#@seg(__lc_ub_user_stack+0xffff)
 	movw	r13,r12
 	movw	r14,r12
 	call	_IO_CAN_ConfigFIFO
 _260:
 
+; src/main.c	   353  
+; src/main.c	   354  
 ; src/main.c	   355  
-; src/main.c	   356  
-; src/main.c	   357  
-; src/main.c	   358      /* rtd with 10k pull-up resistor*/
-; src/main.c	   359      bool rtd_val;
-; src/main.c	   360      IO_DI_Init( IO_PIN_RTD,
+; src/main.c	   356      /* rtd with 10k pull-up resistor*/
+; src/main.c	   357      bool rtd_val;
+; src/main.c	   358      IO_DI_Init( IO_PIN_RTD,
 	movb	rl2,#0x26
 _1123:
 
-; src/main.c	   361                  IO_DI_PU_10K );
+; src/main.c	   359                  IO_DI_PU_10K );
 	movb	rh2,#0x1
 	call	_IO_DI_Init
 _262:
 
-; src/main.c	   362  
-; src/main.c	   363  
-; src/main.c	   364      /* rtd variables */
-; src/main.c	   365      ubyte4 rtd_timestamp;
-; src/main.c	   366      bool just_entered_sound_state = TRUE;
+; src/main.c	   360  
+; src/main.c	   361  
+; src/main.c	   362      /* rtd variables */
+; src/main.c	   363      ubyte4 rtd_timestamp;
+; src/main.c	   364      bool just_entered_sound_state = TRUE;
 	movb	rh4,#0x1
 _938:
 	movb	[r15+#0xff],rh4
 _940:
 
-; src/main.c	   367  
-; src/main.c	   368  
-; src/main.c	   369      /* APPS 1 */
-; src/main.c	   370      IO_ADC_ChannelInit( IO_PIN_APPS_1,
+; src/main.c	   365  
+; src/main.c	   366  
+; src/main.c	   367      /* APPS 1 */
+; src/main.c	   368      IO_ADC_ChannelInit( IO_PIN_APPS_1,
 	movb	rl2,#0x8
 _1124:
 
-; src/main.c	   371                          IO_ADC_RATIOMETRIC,
+; src/main.c	   369                          IO_ADC_RATIOMETRIC,
 	movb	rh2,[r15+#0xff]
 _939:
 
-; src/main.c	   372                          0,
+; src/main.c	   370                          0,
 	movb	rl3,#0x0
 _1125:
 
-; src/main.c	   373                          0,
-; src/main.c	   374                          IO_APPS_1_SUPPLY,
+; src/main.c	   371                          0,
+; src/main.c	   372                          IO_APPS_1_SUPPLY,
 	movb	rl4,#0x24
 _1126:
 
-; src/main.c	   375                          NULL );
+; src/main.c	   373                          NULL );
 	movw	r11,#0x0
 	movb	rh3,rl3
 	movw	r12,r11
 	call	_IO_ADC_ChannelInit
 _941:
 
-; src/main.c	   376  
-; src/main.c	   377      /* APPS 2 */
-; src/main.c	   378      IO_ADC_ChannelInit( IO_PIN_APPS_2,
+; src/main.c	   374  
+; src/main.c	   375      /* APPS 2 */
+; src/main.c	   376      IO_ADC_ChannelInit( IO_PIN_APPS_2,
 	movb	rl2,#0x9
 _1127:
 
-; src/main.c	   379                          IO_ADC_RATIOMETRIC,
+; src/main.c	   377                          IO_ADC_RATIOMETRIC,
 	movb	rh2,#0x1
 _1128:
 
-; src/main.c	   380                          0,
+; src/main.c	   378                          0,
 	movb	rl3,#0x0
 _1129:
 
-; src/main.c	   381                          0,
-; src/main.c	   382                          IO_APPS_2_SUPPLY,
+; src/main.c	   379                          0,
+; src/main.c	   380                          IO_APPS_2_SUPPLY,
 	movb	rl4,#0x24
 _1130:
 
-; src/main.c	   383                          NULL );
+; src/main.c	   381                          NULL );
 	movw	r11,#0x0
 	movb	rh3,rl3
 	movw	r12,r11
 	call	_IO_ADC_ChannelInit
 _265:
 
-; src/main.c	   384  
-; src/main.c	   385      /* APPS in general */
-; src/main.c	   386      ubyte2 apps_pct_result = 0;
+; src/main.c	   382  
+; src/main.c	   383      /* APPS in general */
+; src/main.c	   384      ubyte2 apps_pct_result = 0;
 	movw	r12,#0x0
 _1131:
 	movw	[r15+#0x92],r12
 _1132:
 
-; src/main.c	   387      bool apps_error = FALSE;
+; src/main.c	   385      bool apps_error = FALSE;
 	movb	rh3,#0x0
 _1133:
 	movb	[r15+#0x90],rh3
 _1134:
 
-; src/main.c	   388      ubyte1 num_errors = 0;
+; src/main.c	   386      ubyte1 num_errors = 0;
 	movb	[r15+#0x94],rh3
 _1135:
 
-; src/main.c	   389  
-; src/main.c	   390      /* BSE */
-; src/main.c	   391      IO_ADC_ChannelInit( IO_PIN_BSE,
+; src/main.c	   387  
+; src/main.c	   388      /* BSE */
+; src/main.c	   389      IO_ADC_ChannelInit( IO_PIN_BSE,
 	movb	rl2,#0xf
 _1136:
 
-; src/main.c	   392                          IO_ADC_RATIOMETRIC,
+; src/main.c	   390                          IO_ADC_RATIOMETRIC,
 	movb	rh2,#0x1
 _1137:
 
-; src/main.c	   393                          0,
-; src/main.c	   394                          0,
-; src/main.c	   395                          IO_BSE_SUPPLY,
+; src/main.c	   391                          0,
+; src/main.c	   392                          0,
+; src/main.c	   393                          IO_BSE_SUPPLY,
 	movb	rl4,#0x25
 _1138:
 
-; src/main.c	   396                          NULL );
+; src/main.c	   394                          NULL );
 	movb	rl3,rh3
 	movw	r11,r12
 	call	_IO_ADC_ChannelInit
 _269:
 
-; src/main.c	   397      ubyte2 bse_result;
-; src/main.c	   398      bool bse_error;
-; src/main.c	   399  
-; src/main.c	   400      /* sdc with 10k pull-down resistor*/
-; src/main.c	   401      bool sdc_val;
-; src/main.c	   402      IO_DI_Init( IO_PIN_SDC,
+; src/main.c	   395      ubyte2 bse_result;
+; src/main.c	   396      bool bse_error;
+; src/main.c	   397  
+; src/main.c	   398      /* sdc with 10k pull-down resistor*/
+; src/main.c	   399      bool sdc_val;
+; src/main.c	   400      IO_DI_Init( IO_PIN_SDC,
 	movb	rl2,#0x27
 _1139:
 
-; src/main.c	   403                  IO_DI_PD_10K );
+; src/main.c	   401                  IO_DI_PD_10K );
 	movb	rh2,#0x0
 	call	_IO_DI_Init
 _1140:
 
-; src/main.c	   404  
-; src/main.c	   405      /* buzzer */
-; src/main.c	   406      IO_DO_Init( IO_PIN_BUZZER );
+; src/main.c	   402  
+; src/main.c	   403      /* buzzer */
+; src/main.c	   404      IO_DO_Init( IO_PIN_BUZZER );
 	movb	rl2,#0x0
 	call	_IO_DO_Init
 _273:
 
-; src/main.c	   407  
-; src/main.c	   408      /* VCU State */
-; src/main.c	   409      enum VCU_State current_state = NOT_READY;
+; src/main.c	   405  
+; src/main.c	   406      /* VCU State */
+; src/main.c	   407      enum VCU_State current_state = NOT_READY;
 	movb	rh4,#0x0
 _942:
 	movb	[r15+#0xfe],rh4
 _944:
 
-; src/main.c	   410  
-; src/main.c	   411      // sensor input is invalid during the first cycle
-; src/main.c	   412      bool first_cycle = TRUE;
+; src/main.c	   408  
+; src/main.c	   409      // sensor input is invalid during the first cycle
+; src/main.c	   410      bool first_cycle = TRUE;
 	movb	rl4,#0x1
 _945:
 	movb	[r15+#0x101],rl4
 _946:
 
-; src/main.c	   413  
-; src/main.c	   414  
-; src/main.c	   415      /* Voltage checking functionality */
-; src/main.c	   416      bool tms_summary_1_message_received = FALSE;
+; src/main.c	   411  
+; src/main.c	   412  
+; src/main.c	   413      /* Voltage checking functionality */
+; src/main.c	   414      bool tms_summary_1_message_received = FALSE;
 	movb	[r15+#0x9c],rh4
 _1141:
 
-; src/main.c	   417      bool tms_summary_2_message_received = FALSE;
+; src/main.c	   415      bool tms_summary_2_message_received = FALSE;
 	movb	[r15+#0x9b],rh4
 _1142:
 
-; src/main.c	   418  
-; src/main.c	   419      // variables to hold torque
-; src/main.c	   420      ubyte4 torque = 0;
-; src/main.c	   421      ubyte4 limited_torque = 0;
-; src/main.c	   422      ubyte4 d0 = 0;
-; src/main.c	   423      ubyte4 d1 = 0;
-; src/main.c	   424      ubyte4 motor_rpm_torque_limit = CONTINUOUS_TORQUE_MAX;
-; src/main.c	   425  
-; src/main.c	   426      // whether a new motor info message has been received since the last time
-; src/main.c	   427      bool motor_info_message_received = FALSE;
+; src/main.c	   416  
+; src/main.c	   417      // variables to hold torque
+; src/main.c	   418      ubyte4 torque = 0;
+; src/main.c	   419      ubyte4 limited_torque = 0;
+; src/main.c	   420      ubyte4 d0 = 0;
+; src/main.c	   421      ubyte4 d1 = 0;
+; src/main.c	   422      ubyte4 motor_rpm_torque_limit = CONTINUOUS_TORQUE_MAX;
+; src/main.c	   423  
+; src/main.c	   424      // whether a new motor info message has been received since the last time
+; src/main.c	   425      bool motor_info_message_received = FALSE;
 	movb	[r15+#0x9a],rh4
 _1143:
 
-; src/main.c	   428      // last received motor speed
-; src/main.c	   429      ubyte1 last_speed_d0 = 0;
+; src/main.c	   426      // last received motor speed
+; src/main.c	   427      ubyte1 last_speed_d0 = 0;
 	movb	[r15+#0x104],rh4
 _947:
 
-; src/main.c	   430      ubyte1 last_speed_d1 = 0;
+; src/main.c	   428      ubyte1 last_speed_d1 = 0;
 	movb	[r15+#0x103],rh4
 _948:
 
-; src/main.c	   431      ubyte2 last_speed = 0;
-; src/main.c	   432      // whether any motor info message has been received
-; src/main.c	   433      bool motor_speed_updated_once = FALSE;
-; src/main.c	   434  
-; src/main.c	   435      // whether a new voltage info message has been received since the last time
-; src/main.c	   436      bool voltage_info_message_received = FALSE;
+; src/main.c	   429      ubyte2 last_speed = 0;
+; src/main.c	   430      // whether any motor info message has been received
+; src/main.c	   431      bool motor_speed_updated_once = FALSE;
+; src/main.c	   432  
+; src/main.c	   433      // whether a new voltage info message has been received since the last time
+; src/main.c	   434      bool voltage_info_message_received = FALSE;
 	movb	[r15+#0x9f],rh4
 _1144:
 
-; src/main.c	   437      // last received pack voltage
-; src/main.c	   438      ubyte2 pack_voltage = 0;
-; src/main.c	   439      // whether any voltage info has been received
-; src/main.c	   440      bool pack_voltage_updated_once = FALSE;
-; src/main.c	   441  
-; src/main.c	   442      //inverter current info received
-; src/main.c	   443      bool current_info_message_received = FALSE;
+; src/main.c	   435      // last received pack voltage
+; src/main.c	   436      ubyte2 pack_voltage = 0;
+; src/main.c	   437      // whether any voltage info has been received
+; src/main.c	   438      bool pack_voltage_updated_once = FALSE;
+; src/main.c	   439  
+; src/main.c	   440      //inverter current info received
+; src/main.c	   441      bool current_info_message_received = FALSE;
 	movb	rh4,[r15+#0xfe]
 _1145:
 	movb	[r15+#0x9d],rh4
 _1146:
 
-; src/main.c	   444  
-; src/main.c	   445      // orion message received
-; src/main.c	   446      bool orion_message_received = FALSE;
+; src/main.c	   442  
+; src/main.c	   443      // orion message received
+; src/main.c	   444      bool orion_message_received = FALSE;
 	movb	[r15+#0x9e],rh4
 _1147:
 
-; src/main.c	   447      bool orion_message_received_once = FALSE;
+; src/main.c	   445      bool orion_message_received_once = FALSE;
 	movb	[r15+#0x102],rh4
 _949:
 
-; src/main.c	   448      bool orion_good = TRUE;
-; src/main.c	   449  
-; src/main.c	   450      // lights
-; src/main.c	   451      IO_DO_Init( TSIL_GREEN_PIN );
+; src/main.c	   446      bool orion_good = TRUE;
+; src/main.c	   447  
+; src/main.c	   448      // lights
+; src/main.c	   449      IO_DO_Init( TSIL_GREEN_PIN );
 	movb	rl2,#0x19
 	call	_IO_DO_Init
 _943:
 
-; src/main.c	   452      IO_DO_Init( TSIL_RED_PIN );
+; src/main.c	   450      IO_DO_Init( TSIL_RED_PIN );
 	movb	rl2,#0x18
 	call	_IO_DO_Init
 _1148:
 
-; src/main.c	   453  
-; src/main.c	   454      // make sure light is green
-; src/main.c	   455      set_light_to(SOLID_GREEN);
+; src/main.c	   451  
+; src/main.c	   452      // make sure light is green
+; src/main.c	   453      set_light_to(SOLID_GREEN);
 	movb	rl2,#0x0
 	call	_set_light_to
 _287:
 
-; src/main.c	   456  
-; src/main.c	   457      bool been_ignore_period_since_start = FALSE;
+; src/main.c	   454  
+; src/main.c	   455      bool been_ignore_period_since_start = FALSE;
 	movb	rh4,#0x0
 _950:
 	movb	[r15+#0x100],rh4
 _952:
 
-; src/main.c	   458      ubyte4 time_since_start;
-; src/main.c	   459      ubyte4 orion_can_timeout;
-; src/main.c	   460  
-; src/main.c	   461      IO_RTC_StartTime(&time_since_start);
+; src/main.c	   456      ubyte4 time_since_start;
+; src/main.c	   457      ubyte4 orion_can_timeout;
+; src/main.c	   458  
+; src/main.c	   459      IO_RTC_StartTime(&time_since_start);
 	movw	r2,r15
 	addw	r2,#0xa4
 	andw	r2,#0x3fff
@@ -1212,7 +1210,7 @@ _952:
 	call	_IO_RTC_StartTime
 _951:
 
-; src/main.c	   462      IO_RTC_StartTime(&orion_can_timeout);
+; src/main.c	   460      IO_RTC_StartTime(&orion_can_timeout);
 	movw	r2,r15
 	addw	r2,#0xa0
 	andw	r2,#0x3fff
@@ -1224,27 +1222,27 @@ _951:
 	call	_IO_RTC_StartTime
 _1149:
 
-; src/main.c	   463  
-; src/main.c	   464      // brake lights
-; src/main.c	   465      IO_DO_Init( BRAKE_LIGHT_PIN );
+; src/main.c	   461  
+; src/main.c	   462      // brake lights
+; src/main.c	   463      IO_DO_Init( BRAKE_LIGHT_PIN );
 	movb	rl2,#0x1a
 	call	_IO_DO_Init
 _1150:
 
-; src/main.c	   466  
-; src/main.c	   467  
+; src/main.c	   464  
+; src/main.c	   465  
+; src/main.c	   466      /*******************************************/
+; src/main.c	   467      /*       PERIODIC APPLICATION CODE         */
 ; src/main.c	   468      /*******************************************/
-; src/main.c	   469      /*       PERIODIC APPLICATION CODE         */
-; src/main.c	   470      /*******************************************/
-; src/main.c	   471  
-; src/main.c	   472      /* main loop, executed periodically with a
-; src/main.c	   473       * defined cycle time (here: CYCLE_TIME_MS ms)
-; src/main.c	   474       */
-; src/main.c	   475       
-; src/main.c	   476      while (1)
-; src/main.c	   477      {
-; src/main.c	   478          /* get a timestamp to implement the cycle time */
-; src/main.c	   479          IO_RTC_StartTime(&timestamp);
+; src/main.c	   469  
+; src/main.c	   470      /* main loop, executed periodically with a
+; src/main.c	   471       * defined cycle time (here: CYCLE_TIME_MS ms)
+; src/main.c	   472       */
+; src/main.c	   473       
+; src/main.c	   474      while (1)
+; src/main.c	   475      {
+; src/main.c	   476          /* get a timestamp to implement the cycle time */
+; src/main.c	   477          IO_RTC_StartTime(&timestamp);
 	movw	r11,r15
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
@@ -1252,14 +1250,14 @@ _1150:
 	movw	r8,#@seg(__lc_ub_user_stack+0xffff)
 _291:
 
-; src/main.c	   480          /* Task begin function for IO Driver
-; src/main.c	   481           * This function needs to be called at
-; src/main.c	   482           * the beginning of every SW cycle
-; src/main.c	   483           */
-; src/main.c	   484          IO_Driver_TaskBegin();
-; src/main.c	   485  
-; src/main.c	   486          // read tms messages
-; src/main.c	   487          read_can_msg(&handle_tms_summary_1_r, &tms_summary_1_can_frame, &tms_summary_1_message_received, TMS_SUMMARY_1_CAN_ID, CAN_CHANNEL);
+; src/main.c	   478          /* Task begin function for IO Driver
+; src/main.c	   479           * This function needs to be called at
+; src/main.c	   480           * the beginning of every SW cycle
+; src/main.c	   481           */
+; src/main.c	   482          IO_Driver_TaskBegin();
+; src/main.c	   483  
+; src/main.c	   484          // read tms messages
+; src/main.c	   485          read_can_msg(&handle_tms_summary_1_r, &tms_summary_1_can_frame, &tms_summary_1_message_received, TMS_SUMMARY_1_CAN_ID, CAN_CHANNEL);
 	movw	r11,r15
 	addw	r11,#0x9c
 	andw	r11,#0x3fff
@@ -1273,7 +1271,7 @@ _1151:
 	movw	[r15+#0xdc],r11
 _292:
 
-; src/main.c	   488          read_can_msg(&handle_tms_summary_2_r, &tms_summary_2_can_frame, &tms_summary_2_message_received, TMS_SUMMARY_2_CAN_ID, CAN_CHANNEL);
+; src/main.c	   486          read_can_msg(&handle_tms_summary_2_r, &tms_summary_2_can_frame, &tms_summary_2_message_received, TMS_SUMMARY_2_CAN_ID, CAN_CHANNEL);
 	movw	r11,r15
 	addw	r11,#0x9b
 	andw	r11,#0x3fff
@@ -1287,9 +1285,9 @@ _1152:
 	movw	[r15+#0xde],r11
 _302:
 
-; src/main.c	   489  
-; src/main.c	   490          // read current info from inverter
-; src/main.c	   491          read_can_msg(&handle_inverter_current_info_r, &inverter_current_info_can_frame, &current_info_message_received, CURRENT_INFO_CAN_ID, CAN_CHANNEL);
+; src/main.c	   487  
+; src/main.c	   488          // read current info from inverter
+; src/main.c	   489          read_can_msg(&handle_inverter_current_info_r, &inverter_current_info_can_frame, &current_info_message_received, CURRENT_INFO_CAN_ID, CAN_CHANNEL);
 	movw	r11,r15
 	addw	r11,#0x9d
 	andw	r11,#0x3fff
@@ -1303,9 +1301,9 @@ _1153:
 	movw	[r15+#0xe0],r11
 _305:
 
-; src/main.c	   492  
-; src/main.c	   493          // read message from inverter with motor speed and update motor speed accordingly
-; src/main.c	   494          read_can_msg(&handle_inverter_motor_info_r, &inverter_motor_info_can_frame, &motor_info_message_received, MOTOR_INFO_CAN_ID, CAN_CHANNEL);
+; src/main.c	   490  
+; src/main.c	   491          // read message from inverter with motor speed and update motor speed accordingly
+; src/main.c	   492          read_can_msg(&handle_inverter_motor_info_r, &inverter_motor_info_can_frame, &motor_info_message_received, MOTOR_INFO_CAN_ID, CAN_CHANNEL);
 	movw	r11,r15
 	addw	r11,#0x9a
 	andw	r11,#0x3fff
@@ -1319,17 +1317,17 @@ _1154:
 	movw	[r15+#0xe2],r11
 _308:
 
-; src/main.c	   495          if (motor_info_message_received) {
-; src/main.c	   496              // d0 and d1 are used for the outgoing CAN message
-; src/main.c	   497              last_speed_d0 = inverter_motor_info_can_frame.data[INVERTER_MOTOR_SPEED_LO];
-; src/main.c	   498              last_speed_d1 = inverter_motor_info_can_frame.data[INVERTER_MOTOR_SPEED_HI];
-; src/main.c	   499              last_speed = (last_speed_d1 << 8) | last_speed_d0;
-; src/main.c	   500              motor_speed_updated_once = TRUE;
-; src/main.c	   501          }
-; src/main.c	   502  
-; src/main.c	   503  
-; src/main.c	   504          // read message from inverter with voltage and update pack voltage accordingly
-; src/main.c	   505          read_can_msg(&handle_inverter_voltage_info_r, &inverter_voltage_info_can_frame, &voltage_info_message_received, VOLTAGE_INFO_CAN_ID, CAN_CHANNEL);
+; src/main.c	   493          if (motor_info_message_received) {
+; src/main.c	   494              // d0 and d1 are used for the outgoing CAN message
+; src/main.c	   495              last_speed_d0 = inverter_motor_info_can_frame.data[INVERTER_MOTOR_SPEED_LO];
+; src/main.c	   496              last_speed_d1 = inverter_motor_info_can_frame.data[INVERTER_MOTOR_SPEED_HI];
+; src/main.c	   497              last_speed = (last_speed_d1 << 8) | last_speed_d0;
+; src/main.c	   498              motor_speed_updated_once = TRUE;
+; src/main.c	   499          }
+; src/main.c	   500  
+; src/main.c	   501  
+; src/main.c	   502          // read message from inverter with voltage and update pack voltage accordingly
+; src/main.c	   503          read_can_msg(&handle_inverter_voltage_info_r, &inverter_voltage_info_can_frame, &voltage_info_message_received, VOLTAGE_INFO_CAN_ID, CAN_CHANNEL);
 	movw	r11,r15
 	addw	r11,#0x9f
 	andw	r11,#0x3fff
@@ -1343,9 +1341,9 @@ _1155:
 	movw	[r15+#0xe4],r11
 _311:
 
-; src/main.c	   506  
-; src/main.c	   507          // read message from orion
-; src/main.c	   508          read_can_msg(&handle_orion_r, &orion_can_frame, &orion_message_received, ORION_CAN_ID, CAN_CHANNEL);
+; src/main.c	   504  
+; src/main.c	   505          // read message from orion
+; src/main.c	   506          read_can_msg(&handle_orion_r, &orion_can_frame, &orion_message_received, ORION_CAN_ID, CAN_CHANNEL);
 	movw	r11,r15
 	addw	r11,#0x9e
 	andw	r11,#0x3fff
@@ -1359,31 +1357,31 @@ _1156:
 	movw	[r15+#0xe6],r11
 _314:
 
-; src/main.c	   509  
-; src/main.c	   510          if (orion_message_received) {
-; src/main.c	   511              // reset the timeout if a message has been received
-; src/main.c	   512              IO_RTC_StartTime(&orion_can_timeout);
-; src/main.c	   513              orion_message_received_once = TRUE;
-; src/main.c	   514          }
-; src/main.c	   515  
-; src/main.c	   516          if (voltage_info_message_received == TRUE) {
-; src/main.c	   517              pack_voltage = ((inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_HI] << 8) | inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_LO]) / 10;
-; src/main.c	   518              pack_voltage_updated_once = TRUE;
-; src/main.c	   519          }
-; src/main.c	   520  
-; src/main.c	   521          d0 = 0;
-; src/main.c	   522          d1 = 0;
-; src/main.c	   523          torque = 0;
-; src/main.c	   524          apps_pct_result = 0;
-; src/main.c	   525          bse_result = 0;
-; src/main.c	   526  
-; src/main.c	   527          // during the first cycle, every sensor input is invalid, so skip it
-; src/main.c	   528          if (first_cycle) {
-; src/main.c	   529              first_cycle = FALSE;
-; src/main.c	   530          } else {
-; src/main.c	   531  
-; src/main.c	   532              if (current_state == NOT_READY) {
-; src/main.c	   533                  get_rtd(&rtd_val);
+; src/main.c	   507  
+; src/main.c	   508          if (orion_message_received) {
+; src/main.c	   509              // reset the timeout if a message has been received
+; src/main.c	   510              IO_RTC_StartTime(&orion_can_timeout);
+; src/main.c	   511              orion_message_received_once = TRUE;
+; src/main.c	   512          }
+; src/main.c	   513  
+; src/main.c	   514          if (voltage_info_message_received == TRUE) {
+; src/main.c	   515              pack_voltage = ((inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_HI] << 8) | inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_LO]) / 10;
+; src/main.c	   516              pack_voltage_updated_once = TRUE;
+; src/main.c	   517          }
+; src/main.c	   518  
+; src/main.c	   519          d0 = 0;
+; src/main.c	   520          d1 = 0;
+; src/main.c	   521          torque = 0;
+; src/main.c	   522          apps_pct_result = 0;
+; src/main.c	   523          bse_result = 0;
+; src/main.c	   524  
+; src/main.c	   525          // during the first cycle, every sensor input is invalid, so skip it
+; src/main.c	   526          if (first_cycle) {
+; src/main.c	   527              first_cycle = FALSE;
+; src/main.c	   528          } else {
+; src/main.c	   529  
+; src/main.c	   530              if (current_state == NOT_READY) {
+; src/main.c	   531                  get_rtd(&rtd_val);
 	movw	r11,r15
 	addw	r11,#0x8a
 	andw	r11,#0x3fff
@@ -1391,7 +1389,7 @@ _314:
 	movw	[r15+#0xc2],r11
 _317:
 
-; src/main.c	   534                  get_bse(&bse_result, &bse_error);
+; src/main.c	   532                  get_bse(&bse_result, &bse_error);
 	movw	r11,r15
 	addw	r11,#0x99
 	andw	r11,#0x3fff
@@ -1405,7 +1403,7 @@ _1157:
 	movw	[r15+#0xc8],r11
 _323:
 
-; src/main.c	   535                  get_sdc(&sdc_val);
+; src/main.c	   533                  get_sdc(&sdc_val);
 	movw	r11,r15
 	addw	r11,#0x98
 	andw	r11,#0x3fff
@@ -1413,7 +1411,7 @@ _323:
 	movw	[r15+#0xc6],r11
 _324:
 
-; src/main.c	   536                  get_apps(&apps_pct_result, &apps_error, &num_errors);
+; src/main.c	   534                  get_apps(&apps_pct_result, &apps_error, &num_errors);
 	movw	r11,r15
 	addw	r11,#0x94
 	andw	r11,#0x3fff
@@ -1433,27 +1431,27 @@ _1159:
 	movw	[r15+#0xd4],r11
 _1160:
 
-; src/main.c	   537  
-; src/main.c	   538                  // transitions
-; src/main.c	   539                  // rtd on and brakes engaged -> play rtd sound
-; src/main.c	   540                  if (rtd_val == RTD_ON && (IGNORE_RTD_BRAKES || (!bse_error && bse_result > BRAKES_ENGAGED_BSE_THRESHOLD)) && !apps_error && !(sdc_val == SDC_OFF)) {
-; src/main.c	   541                      // rtd on -> switch to playing rtd sound
-; src/main.c	   542                      current_state = PLAYING_RTD_SOUND;
-; src/main.c	   543                  } else {
-; src/main.c	   544                      // if you don't transition away from this state, send a 0
-; src/main.c	   545                      // torque message to the motor with 0 torque
-; src/main.c	   546                      for (int i = 0; i < 8; i++) {
-; src/main.c	   547                          controls_can_frame.data[i] = 0;
-; src/main.c	   548                      }
-; src/main.c	   549                      IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
-; src/main.c	   550                      pack_voltage_updated_once = FALSE;
-; src/main.c	   551                  }
+; src/main.c	   535  
+; src/main.c	   536                  // transitions
+; src/main.c	   537                  // rtd on and brakes engaged -> play rtd sound
+; src/main.c	   538                  if (rtd_val == RTD_ON && (IGNORE_RTD_BRAKES || (!bse_error && bse_result > BRAKES_ENGAGED_BSE_THRESHOLD)) && !apps_error && !(sdc_val == SDC_OFF)) {
+; src/main.c	   539                      // rtd on -> switch to playing rtd sound
+; src/main.c	   540                      current_state = PLAYING_RTD_SOUND;
+; src/main.c	   541                  } else {
+; src/main.c	   542                      // if you don't transition away from this state, send a 0
+; src/main.c	   543                      // torque message to the motor with 0 torque
+; src/main.c	   544                      for (int i = 0; i < 8; i++) {
+; src/main.c	   545                          controls_can_frame.data[i] = 0;
+; src/main.c	   546                      }
+; src/main.c	   547                      IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
+; src/main.c	   548                      pack_voltage_updated_once = FALSE;
+; src/main.c	   549                  }
+; src/main.c	   550  
+; src/main.c	   551              } else if (current_state == PLAYING_RTD_SOUND) {
 ; src/main.c	   552  
-; src/main.c	   553              } else if (current_state == PLAYING_RTD_SOUND) {
-; src/main.c	   554  
-; src/main.c	   555                  if (just_entered_sound_state) {
-; src/main.c	   556                      // when this state has just been entered, turn on the buzzer and a timer
-; src/main.c	   557                      IO_RTC_StartTime(&rtd_timestamp);
+; src/main.c	   553                  if (just_entered_sound_state) {
+; src/main.c	   554                      // when this state has just been entered, turn on the buzzer and a timer
+; src/main.c	   555                      IO_RTC_StartTime(&rtd_timestamp);
 	movw	r11,r15
 	addw	r11,#0x8c
 	andw	r11,#0x3fff
@@ -1461,22 +1459,22 @@ _1160:
 	movw	[r15+#0xea],r11
 _1161:
 
-; src/main.c	   558                      just_entered_sound_state = FALSE;
+; src/main.c	   556                      just_entered_sound_state = FALSE;
+; src/main.c	   557  
+; src/main.c	   558                      IO_DO_Set(IO_PIN_BUZZER, TRUE);
 ; src/main.c	   559  
-; src/main.c	   560                      IO_DO_Set(IO_PIN_BUZZER, TRUE);
-; src/main.c	   561  
-; src/main.c	   562  
-; src/main.c	   563                      // clear Inverter faults
-; src/main.c	   564                      inverter_settings_can_frame.data[0] = 20;
-; src/main.c	   565                      inverter_settings_can_frame.data[1] = 0;
-; src/main.c	   566                      inverter_settings_can_frame.data[2] = 1;
-; src/main.c	   567                      inverter_settings_can_frame.data[3] = 0;
-; src/main.c	   568                      inverter_settings_can_frame.data[4] = 0;
-; src/main.c	   569                      inverter_settings_can_frame.data[5] = 0;
-; src/main.c	   570                      inverter_settings_can_frame.data[6] = 0;
-; src/main.c	   571                      inverter_settings_can_frame.data[7] = 0;
-; src/main.c	   572  
-; src/main.c	   573                      IO_CAN_WriteFIFO(handle_fifo_w, &inverter_settings_can_frame, 1);
+; src/main.c	   560  
+; src/main.c	   561                      // clear Inverter faults
+; src/main.c	   562                      inverter_settings_can_frame.data[0] = 20;
+; src/main.c	   563                      inverter_settings_can_frame.data[1] = 0;
+; src/main.c	   564                      inverter_settings_can_frame.data[2] = 1;
+; src/main.c	   565                      inverter_settings_can_frame.data[3] = 0;
+; src/main.c	   566                      inverter_settings_can_frame.data[4] = 0;
+; src/main.c	   567                      inverter_settings_can_frame.data[5] = 0;
+; src/main.c	   568                      inverter_settings_can_frame.data[6] = 0;
+; src/main.c	   569                      inverter_settings_can_frame.data[7] = 0;
+; src/main.c	   570  
+; src/main.c	   571                      IO_CAN_WriteFIFO(handle_fifo_w, &inverter_settings_can_frame, 1);
 	movw	r11,r15
 	addw	r11,#0x1a
 	andw	r11,#0x3fff
@@ -1484,55 +1482,55 @@ _1161:
 	movw	[r15+#0xec],r11
 _1162:
 
-; src/main.c	   574  
-; src/main.c	   575                  } else if (!just_entered_sound_state && IO_RTC_GetTimeUS(rtd_timestamp) > RTD_SOUND_DURATION) {
-; src/main.c	   576                      // once the timer runs out, enter the new state (driving) and turn off the buzzer
-; src/main.c	   577                      current_state = DRIVING;
-; src/main.c	   578                      just_entered_sound_state = TRUE;
-; src/main.c	   579                      IO_DO_Set(IO_PIN_BUZZER, FALSE);
-; src/main.c	   580                  }
-; src/main.c	   581  
-; src/main.c	   582                  // keep sending 0 torque messages to the inverter in this state
-; src/main.c	   583                  for (int i = 0; i < 8; i++) {
-; src/main.c	   584                      controls_can_frame.data[i] = 0;
-; src/main.c	   585                  }
-; src/main.c	   586                  IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
-; src/main.c	   587  
-; src/main.c	   588              } else if (current_state == DRIVING) {
-; src/main.c	   589                  // get the rtd, apps, and bse
-; src/main.c	   590                  get_rtd(&rtd_val);
-; src/main.c	   591                  get_sdc(&sdc_val);
-; src/main.c	   592                  get_apps(&apps_pct_result, &apps_error, &num_errors);
-; src/main.c	   593                  get_bse(&bse_result, &bse_error);
-; src/main.c	   594  
-; src/main.c	   595                  // transitions
-; src/main.c	   596                  if (rtd_val == RTD_OFF) {
-; src/main.c	   597                      // rtd off -> switch to not ready state
-; src/main.c	   598                      current_state = NOT_READY;
-; src/main.c	   599                  } else if (apps_error || bse_error || (sdc_val == SDC_OFF)) {
-; src/main.c	   600                      current_state = ERRORED;
-; src/main.c	   601                  } else if (!(IGNORE_BRAKE_PLAUSIBILITY) && bse_result > BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD && apps_pct_result >= APPS_THRESHHOLD_BRAKE_PLAUSIBILITY) {
-; src/main.c	   602                      current_state = APPS_5PCT_WAIT;
-; src/main.c	   603                  } else {
-; src/main.c	   604                      // no transition into another state -> send controls message
-; src/main.c	   605                      torque = pct_travel_to_torque(apps_pct_result);
-; src/main.c	   606  
-; src/main.c	   607                      if (torque < 0) {
-; src/main.c	   608                          torque = 0;
-; src/main.c	   609                      }
-; src/main.c	   610  
-; src/main.c	   611                      d0 = (torque * 10) % 256;
-; src/main.c	   612                      d1 = (torque * 10) / 256;
-; src/main.c	   613                      controls_can_frame.data[0] = d0;
-; src/main.c	   614                      controls_can_frame.data[1] = d1;
-; src/main.c	   615                      controls_can_frame.data[2] = 0;
-; src/main.c	   616                      controls_can_frame.data[3] = 0;
-; src/main.c	   617                      // forward direction
-; src/main.c	   618                      controls_can_frame.data[4] = 0; // TODO Set to backwards(0) for testing
-; src/main.c	   619                      controls_can_frame.data[5] = 1;
-; src/main.c	   620                      controls_can_frame.data[6] = 0;
-; src/main.c	   621                      controls_can_frame.data[7] = 0;
-; src/main.c	   622                      IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
+; src/main.c	   572  
+; src/main.c	   573                  } else if (!just_entered_sound_state && IO_RTC_GetTimeUS(rtd_timestamp) > RTD_SOUND_DURATION) {
+; src/main.c	   574                      // once the timer runs out, enter the new state (driving) and turn off the buzzer
+; src/main.c	   575                      current_state = DRIVING;
+; src/main.c	   576                      just_entered_sound_state = TRUE;
+; src/main.c	   577                      IO_DO_Set(IO_PIN_BUZZER, FALSE);
+; src/main.c	   578                  }
+; src/main.c	   579  
+; src/main.c	   580                  // keep sending 0 torque messages to the inverter in this state
+; src/main.c	   581                  for (int i = 0; i < 8; i++) {
+; src/main.c	   582                      controls_can_frame.data[i] = 0;
+; src/main.c	   583                  }
+; src/main.c	   584                  IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
+; src/main.c	   585  
+; src/main.c	   586              } else if (current_state == DRIVING) {
+; src/main.c	   587                  // get the rtd, apps, and bse
+; src/main.c	   588                  get_rtd(&rtd_val);
+; src/main.c	   589                  get_sdc(&sdc_val);
+; src/main.c	   590                  get_apps(&apps_pct_result, &apps_error, &num_errors);
+; src/main.c	   591                  get_bse(&bse_result, &bse_error);
+; src/main.c	   592  
+; src/main.c	   593                  // transitions
+; src/main.c	   594                  if (rtd_val == RTD_OFF) {
+; src/main.c	   595                      // rtd off -> switch to not ready state
+; src/main.c	   596                      current_state = NOT_READY;
+; src/main.c	   597                  } else if (apps_error || bse_error || (sdc_val == SDC_OFF)) {
+; src/main.c	   598                      current_state = ERRORED;
+; src/main.c	   599                  } else if (!(IGNORE_BRAKE_PLAUSIBILITY) && bse_result > BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD && apps_pct_result >= APPS_THRESHHOLD_BRAKE_PLAUSIBILITY) {
+; src/main.c	   600                      current_state = APPS_5PCT_WAIT;
+; src/main.c	   601                  } else {
+; src/main.c	   602                      // no transition into another state -> send controls message
+; src/main.c	   603                      torque = pct_travel_to_torque(apps_pct_result);
+; src/main.c	   604  
+; src/main.c	   605                      if (torque < 0) {
+; src/main.c	   606                          torque = 0;
+; src/main.c	   607                      }
+; src/main.c	   608  
+; src/main.c	   609                      d0 = (torque * 10) % 256;
+; src/main.c	   610                      d1 = (torque * 10) / 256;
+; src/main.c	   611                      controls_can_frame.data[0] = d0;
+; src/main.c	   612                      controls_can_frame.data[1] = d1;
+; src/main.c	   613                      controls_can_frame.data[2] = 0;
+; src/main.c	   614                      controls_can_frame.data[3] = 0;
+; src/main.c	   615                      // forward direction
+; src/main.c	   616                      controls_can_frame.data[4] = 0; // TODO Set to backwards(0) for testing
+; src/main.c	   617                      controls_can_frame.data[5] = 1;
+; src/main.c	   618                      controls_can_frame.data[6] = 0;
+; src/main.c	   619                      controls_can_frame.data[7] = 0;
+; src/main.c	   620                      IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
 	movw	r11,#0x4
 	addw	r11,r15
 	andw	r11,#0x3fff
@@ -1540,52 +1538,54 @@ _1162:
 	movw	[r15+#0xc0],r11
 _1163:
 
-; src/main.c	   623                      IO_CAN_WriteFIFO(handle_fifo_w_debug, &controls_can_frame, 1);
-; src/main.c	   624  
-; src/main.c	   625                  }
-; src/main.c	   626              } else if (current_state == ERRORED) {
-; src/main.c	   627                  get_rtd(&rtd_val);
-; src/main.c	   628  
-; src/main.c	   629                  if (rtd_val == RTD_OFF) {
-; src/main.c	   630                      // rtd off -> switch to not ready state
-; src/main.c	   631                      current_state = NOT_READY;
-; src/main.c	   632                  }
-; src/main.c	   633  
-; src/main.c	   634                  // continue sending 0 torque messages to the inverter in this state
-; src/main.c	   635                  for (int i = 0; i < 8; i++) {
-; src/main.c	   636                      controls_can_frame.data[i] = 0;
-; src/main.c	   637                  }
-; src/main.c	   638                  IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
-; src/main.c	   639              } else if (current_state == APPS_5PCT_WAIT) {
-; src/main.c	   640                  // when brakes are engaged and apps > 25%, the car goes into this state
-; src/main.c	   641                  get_rtd(&rtd_val);
-; src/main.c	   642                  get_sdc(&sdc_val);
-; src/main.c	   643                  get_apps(&apps_pct_result, &apps_error, &num_errors);
-; src/main.c	   644                  get_bse(&bse_result, &bse_error);
-; src/main.c	   645  
+; src/main.c	   621                      IO_CAN_WriteFIFO(handle_fifo_w_debug, &controls_can_frame, 1);
+; src/main.c	   622  
+; src/main.c	   623                  }
+; src/main.c	   624              } else if (current_state == ERRORED) {
+; src/main.c	   625                  get_rtd(&rtd_val);
+; src/main.c	   626  
+; src/main.c	   627                  if (rtd_val == RTD_OFF) {
+; src/main.c	   628                      // rtd off -> switch to not ready state
+; src/main.c	   629                      current_state = NOT_READY;
+; src/main.c	   630                  }
+; src/main.c	   631  
+; src/main.c	   632                  // continue sending 0 torque messages to the inverter in this state
+; src/main.c	   633                  for (int i = 0; i < 8; i++) {
+; src/main.c	   634                      controls_can_frame.data[i] = 0;
+; src/main.c	   635                  }
+; src/main.c	   636                  IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
+; src/main.c	   637              } else if (current_state == APPS_5PCT_WAIT) {
+; src/main.c	   638                  // when brakes are engaged and apps > 25%, the car goes into this state
+; src/main.c	   639                  get_rtd(&rtd_val);
+; src/main.c	   640                  get_sdc(&sdc_val);
+; src/main.c	   641                  get_apps(&apps_pct_result, &apps_error, &num_errors);
+; src/main.c	   642                  get_bse(&bse_result, &bse_error);
+; src/main.c	   643  
+; src/main.c	   644                  //*************************************
+; src/main.c	   645                  // bse_error = 0;
 ; src/main.c	   646                  //*************************************
-; src/main.c	   647                  // bse_error = 0;
-; src/main.c	   648                  //*************************************
-; src/main.c	   649  
-; src/main.c	   650                  if (rtd_val == RTD_OFF) {
-; src/main.c	   651                      // rtd off -> switch to not ready state
-; src/main.c	   652                      current_state = NOT_READY;
-; src/main.c	   653  
-; src/main.c	   654                  } else if (apps_error || bse_error || (sdc_val == SDC_OFF)) {
-; src/main.c	   655                      current_state = ERRORED;
-; src/main.c	   656                  } else if (apps_pct_result <= APPS_THRESHHOLD_REESTABLISH_PLAUSIBILITY) {
-; src/main.c	   657                      // go back to driving when apps <= 5%
-; src/main.c	   658                      current_state = DRIVING;
-; src/main.c	   659                  } else {
-; src/main.c	   660                      // no transition into another state -> send 0 torque message
-; src/main.c	   661                      for (int i = 0; i < 8; i++) {
-; src/main.c	   662                          controls_can_frame.data[i] = 0;
-; src/main.c	   663                      }
-; src/main.c	   664                      IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
-; src/main.c	   665                  }
+; src/main.c	   647  
+; src/main.c	   648                  if (rtd_val == RTD_OFF) {
+; src/main.c	   649                      // rtd off -> switch to not ready state
+; src/main.c	   650                      current_state = NOT_READY;
+; src/main.c	   651  
+; src/main.c	   652                  } else if (apps_error || bse_error || (sdc_val == SDC_OFF)) {
+; src/main.c	   653                      current_state = ERRORED;
+; src/main.c	   654                  } else if (apps_pct_result <= APPS_THRESHHOLD_REESTABLISH_PLAUSIBILITY) {
+; src/main.c	   655                      // go back to driving when apps <= 5%
+; src/main.c	   656                      current_state = DRIVING;
+; src/main.c	   657                  } else {
+; src/main.c	   658                      // no transition into another state -> send 0 torque message
+; src/main.c	   659                      for (int i = 0; i < 8; i++) {
+; src/main.c	   660                          controls_can_frame.data[i] = 0;
+; src/main.c	   661                      }
+; src/main.c	   662                      IO_CAN_WriteFIFO(handle_fifo_w, &controls_can_frame, 1);
+; src/main.c	   663                  }
+; src/main.c	   664  
+; src/main.c	   665              }
 ; src/main.c	   666  
-; src/main.c	   667              }
-; src/main.c	   668  
+; src/main.c	   667              /************ POST FSM ***********/
+; src/main.c	   668              
 ; src/main.c	   669              // echo tms messages
 ; src/main.c	   670              if (tms_summary_1_message_received) {
 ; src/main.c	   671              	IO_CAN_WriteFIFO(handle_fifo_w_debug, &tms_summary_1_can_frame, 1);
@@ -1763,7 +1763,7 @@ _1172:
 	call	_IO_CAN_MsgStatus
 _953:
 
-; src/main.c	   180      if (can_read_error == IO_E_OK) {      (inlined)
+; src/main.c	   178      if (can_read_error == IO_E_OK) {      (inlined)
 	cmpw	r2,#0x0
 	jmp	cc_ne,_14
 _1173:
@@ -1782,13 +1782,13 @@ _1175:
 	movb	[r11],rh4
 _1176:
 
-; src/main.c	   181          IO_CAN_ReadMsg(*handle_r, dst_data_frame);      (inlined)
+; src/main.c	   179          IO_CAN_ReadMsg(*handle_r, dst_data_frame);      (inlined)
 	jmp	_15
 
-; src/main.c	   180      if (can_read_error == IO_E_OK) {      (inlined)
+; src/main.c	   178      if (can_read_error == IO_E_OK) {      (inlined)
 _14:
 
-; src/main.c	   183      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
+; src/main.c	   181      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
 	cmpw	r2,#0x28
 	jmp	cc_ne,_16
 _1177:
@@ -1812,7 +1812,7 @@ _1181:
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
 
-; src/main.c	   183      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
+; src/main.c	   181      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
 _16:
 _15:
 	movw	r11,[r15+#0xc4]
@@ -1827,7 +1827,7 @@ _1183:
 	call	_IO_CAN_MsgStatus
 _956:
 
-; src/main.c	   180      if (can_read_error == IO_E_OK) {      (inlined)
+; src/main.c	   178      if (can_read_error == IO_E_OK) {      (inlined)
 	cmpw	r2,#0x0
 	jmp	cc_ne,_17
 _1184:
@@ -1846,13 +1846,13 @@ _1186:
 	movb	[r11],rh4
 _1187:
 
-; src/main.c	   181          IO_CAN_ReadMsg(*handle_r, dst_data_frame);      (inlined)
+; src/main.c	   179          IO_CAN_ReadMsg(*handle_r, dst_data_frame);      (inlined)
 	jmp	_18
 
-; src/main.c	   180      if (can_read_error == IO_E_OK) {      (inlined)
+; src/main.c	   178      if (can_read_error == IO_E_OK) {      (inlined)
 _17:
 
-; src/main.c	   183      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
+; src/main.c	   181      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
 	cmpw	r2,#0x28
 	jmp	cc_ne,_19
 _1188:
@@ -1876,7 +1876,7 @@ _1192:
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
 
-; src/main.c	   183      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
+; src/main.c	   181      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
 _19:
 _18:
 	movw	r11,[r15+#0xcc]
@@ -1891,7 +1891,7 @@ _1194:
 	call	_IO_CAN_MsgStatus
 _959:
 
-; src/main.c	   180      if (can_read_error == IO_E_OK) {      (inlined)
+; src/main.c	   178      if (can_read_error == IO_E_OK) {      (inlined)
 	cmpw	r2,#0x0
 	jmp	cc_ne,_20
 _1195:
@@ -1910,13 +1910,13 @@ _1197:
 	movb	[r11],rh4
 _1198:
 
-; src/main.c	   181          IO_CAN_ReadMsg(*handle_r, dst_data_frame);      (inlined)
+; src/main.c	   179          IO_CAN_ReadMsg(*handle_r, dst_data_frame);      (inlined)
 	jmp	_21
 
-; src/main.c	   180      if (can_read_error == IO_E_OK) {      (inlined)
+; src/main.c	   178      if (can_read_error == IO_E_OK) {      (inlined)
 _20:
 
-; src/main.c	   183      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
+; src/main.c	   181      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
 	cmpw	r2,#0x28
 	jmp	cc_ne,_22
 _1199:
@@ -1940,7 +1940,7 @@ _1203:
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
 
-; src/main.c	   183      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
+; src/main.c	   181      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
 _22:
 _21:
 	movw	r11,[r15+#0xce]
@@ -1956,7 +1956,7 @@ _1205:
 	call	_IO_CAN_MsgStatus
 _962:
 
-; src/main.c	   180      if (can_read_error == IO_E_OK) {      (inlined)
+; src/main.c	   178      if (can_read_error == IO_E_OK) {      (inlined)
 	cmpw	r2,#0x0
 	jmp	cc_ne,_23
 _1206:
@@ -1976,13 +1976,13 @@ _1208:
 	movb	[r11],rh4
 _1209:
 
-; src/main.c	   181          IO_CAN_ReadMsg(*handle_r, dst_data_frame);      (inlined)
+; src/main.c	   179          IO_CAN_ReadMsg(*handle_r, dst_data_frame);      (inlined)
 	jmp	_24
 
-; src/main.c	   180      if (can_read_error == IO_E_OK) {      (inlined)
+; src/main.c	   178      if (can_read_error == IO_E_OK) {      (inlined)
 _23:
 
-; src/main.c	   183      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
+; src/main.c	   181      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
 	cmpw	r2,#0x28
 	jmp	cc_ne,_25
 _1210:
@@ -2007,7 +2007,7 @@ _1214:
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
 
-; src/main.c	   183      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
+; src/main.c	   181      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
 _25:
 _24:
 	movb	rh4,[r15+#0x9a]
@@ -2035,7 +2035,7 @@ _1219:
 	call	_IO_CAN_MsgStatus
 _967:
 
-; src/main.c	   180      if (can_read_error == IO_E_OK) {      (inlined)
+; src/main.c	   178      if (can_read_error == IO_E_OK) {      (inlined)
 	cmpw	r2,#0x0
 	jmp	cc_ne,_27
 _1220:
@@ -2055,13 +2055,13 @@ _1222:
 	movb	[r11],rh4
 _1223:
 
-; src/main.c	   181          IO_CAN_ReadMsg(*handle_r, dst_data_frame);      (inlined)
+; src/main.c	   179          IO_CAN_ReadMsg(*handle_r, dst_data_frame);      (inlined)
 	jmp	_28
 
-; src/main.c	   180      if (can_read_error == IO_E_OK) {      (inlined)
+; src/main.c	   178      if (can_read_error == IO_E_OK) {      (inlined)
 _27:
 
-; src/main.c	   183      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
+; src/main.c	   181      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
 	cmpw	r2,#0x28
 	jmp	cc_ne,_29
 _1224:
@@ -2086,7 +2086,7 @@ _1228:
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
 
-; src/main.c	   183      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
+; src/main.c	   181      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
 _29:
 _28:
 	movw	r11,[r15+#0xd2]
@@ -2102,7 +2102,7 @@ _1230:
 	call	_IO_CAN_MsgStatus
 _970:
 
-; src/main.c	   180      if (can_read_error == IO_E_OK) {      (inlined)
+; src/main.c	   178      if (can_read_error == IO_E_OK) {      (inlined)
 	cmpw	r2,#0x0
 	jmp	cc_ne,_30
 _1231:
@@ -2122,13 +2122,13 @@ _1233:
 	movb	[r11],rh4
 _1234:
 
-; src/main.c	   181          IO_CAN_ReadMsg(*handle_r, dst_data_frame);      (inlined)
+; src/main.c	   179          IO_CAN_ReadMsg(*handle_r, dst_data_frame);      (inlined)
 	jmp	_31
 
-; src/main.c	   180      if (can_read_error == IO_E_OK) {      (inlined)
+; src/main.c	   178      if (can_read_error == IO_E_OK) {      (inlined)
 _30:
 
-; src/main.c	   183      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
+; src/main.c	   181      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
 	cmpw	r2,#0x28
 	jmp	cc_ne,_32
 _1235:
@@ -2153,7 +2153,7 @@ _1239:
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
 
-; src/main.c	   183      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
+; src/main.c	   181      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
 _32:
 _31:
 	movb	rh4,[r15+#0x9e]
@@ -2382,7 +2382,7 @@ _1293:
 	movw	r3,#0x0
 _344:
 
-; src/main.c	   206      if (pct_travel >= PCT_TRAVEL_FOR_MAX_TORQUE) {      (inlined)
+; src/main.c	   204      if (pct_travel >= PCT_TRAVEL_FOR_MAX_TORQUE) {      (inlined)
 	movw	r11,r3
 	cmpw	r2,#0x50
 	subcw	r11,#0x0
@@ -2390,10 +2390,10 @@ _344:
 _1294:
 	movw	r2,#0xc8
 
-; src/main.c	   207           return CONTINUOUS_TORQUE_MAX;      (inlined)
+; src/main.c	   205           return CONTINUOUS_TORQUE_MAX;      (inlined)
 	jmp	_55
 
-; src/main.c	   206      if (pct_travel >= PCT_TRAVEL_FOR_MAX_TORQUE) {      (inlined)
+; src/main.c	   204      if (pct_travel >= PCT_TRAVEL_FOR_MAX_TORQUE) {      (inlined)
 _54:
 	call	__ul2spf
 _1295:
@@ -2409,7 +2409,7 @@ _1298:
 _1299:
 	call	__spf2ul
 
-; src/main.c	   211  }      (inlined)
+; src/main.c	   209  }      (inlined)
 _55:
 	movw	r11,#0xa
 _1300:
@@ -2877,7 +2877,7 @@ _appl_db	.label	word
 	.db	0x0
 	.db	0x0
 	.db	0x0
-	.dl	0x6a8f37e9
+	.dl	0x45b137e9
 	.db	0x0
 	.db	0x0
 	.db	0x0
@@ -3082,19 +3082,19 @@ _220:
 	.dl	147
 _192:
 	.db	4
-	.db	'get_rtd',0,1,1,157,1,6,6,1,1
+	.db	'get_rtd',0,1,1,155,1,6,6,1,1
 _193:
 	.db	5
-	.db	'rtd_val',0,1,157,1,20,2
+	.db	'rtd_val',0,1,155,1,20,2
 	.dl	164
 _319:
 	.db	6,0
 _195:
 	.db	4
-	.db	'get_sdc',0,1,1,165,1,6,6,1,1
+	.db	'get_sdc',0,1,1,163,1,6,6,1,1
 _196:
 	.db	5
-	.db	'sdc_val',0,1,165,1,20,2
+	.db	'sdc_val',0,1,163,1,20,2
 	.dl	164
 _326:
 	.db	6,0,3,5
@@ -3126,42 +3126,42 @@ _212:
 	.db	'unsigned int',0,2,7
 _198:
 	.db	4
-	.db	'read_can_msg',0,1,1,173,1,6,6,1,1
+	.db	'read_can_msg',0,1,1,171,1,6,6,1,1
 _199:
 	.db	5
-	.db	'handle_r',0,1,173,1,27,2
+	.db	'handle_r',0,1,171,1,27,2
 	.dl	244
 _201:
 	.db	5
-	.db	'dst_data_frame',0,1,173,1,56,2
+	.db	'dst_data_frame',0,1,171,1,56,2
 	.dl	367
 _203:
 	.db	5
-	.db	'msg_received',0,1,173,1,78,2
+	.db	'msg_received',0,1,171,1,78,2
 	.dl	164
 _205:
 	.db	5
-	.db	'id',0,1,173,1,99,2
+	.db	'id',0,1,171,1,99,2
 	.dl	259
 _207:
 	.db	5
-	.db	'channel',0,1,173,1,110,2
+	.db	'channel',0,1,171,1,110,2
 	.dl	147
 _298:
 	.db	11
 _209:
 	.db	12
-	.db	'can_read_error',0,1,174,1,18,2
+	.db	'can_read_error',0,1,172,1,18,2
 	.dl	373
 	.db	0,0
 _214:
 	.db	13
-	.db	'pct_travel_to_torque',0,1,1,205,1,8,6
+	.db	'pct_travel_to_torque',0,1,1,203,1,8,6
 	.dl	259
 	.db	1,1
 _215:
 	.db	5
-	.db	'pct_travel',0,1,205,1,37,2
+	.db	'pct_travel',0,1,203,1,37,2
 	.dl	259
 _346:
 	.db	6,0,14
@@ -3786,7 +3786,7 @@ _1011:
 _1012:
 	.db	5,6,7,0,5,2
 	.dl	_85
-	.db	3,156,1,1,5,19,9
+	.db	3,154,1,1,5,19,9
 	.dw	_354-_85
 	.db	3,4,1,5,31,9
 	.dw	_353-_354
@@ -3844,7 +3844,7 @@ _1015:
 _1016:
 	.db	5,20,7,0,5,2
 	.dl	_97
-	.db	3,166,1,1,5,18,9
+	.db	3,164,1,1,5,18,9
 	.dw	_1017-_97
 	.db	1,5,1,9
 	.dw	_1018-_1017
@@ -3910,7 +3910,7 @@ _1021:
 _1022:
 	.db	5,6,7,0,5,2
 	.dl	_109
-	.db	3,172,1,1,5,21,9
+	.db	3,170,1,1,5,21,9
 	.dw	_1023-_109
 	.db	3,3,1,5,19,9
 	.dw	_692-_1023
@@ -3962,12 +3962,12 @@ _175:
 	.db	2
 	.dl	_156
 	.db	3
-	.db	'voltage_to_torque_limit',0,1,196,1,8,6
+	.db	'voltage_to_torque_limit',0,1,194,1,8,6
 	.dl	_211
 	.db	1,1,1
 	.dl	_121,_179,_120
 	.db	12,19,146,176,2,0,64,36,146,161,2,0,33,4
-	.db	'pack_voltage',0,1,196,1,40,2
+	.db	'pack_voltage',0,1,194,1,40,2
 	.dl	_212,_213
 	.db	5
 	.dl	_121,_179
@@ -3993,7 +3993,7 @@ _1034:
 _1035:
 	.db	5,8,7,0,5,2
 	.dl	_121
-	.db	3,195,1,1,5,5,9
+	.db	3,193,1,1,5,5,9
 	.dw	_724-_121
 	.db	3,1,1,5,16,9
 	.dw	_1036-_724
@@ -4071,7 +4071,7 @@ _1043:
 _1044:
 	.db	5,8,7,0,5,2
 	.dl	_133
-	.db	3,204,1,1,5,5,9
+	.db	3,202,1,1,5,5,9
 	.dw	_841-_133
 	.db	3,1,1,5,17,9
 	.dw	_1045-_841
@@ -4115,172 +4115,172 @@ _185:
 	.db	2
 	.dl	_156
 	.db	3
-	.db	'VCU_State',0,1,218,1,10,1,4
+	.db	'VCU_State',0,1,216,1,10,1,4
 	.db	'NOT_READY',0,0,4
 	.db	'PLAYING_RTD_SOUND',0,1,4
 	.db	'DRIVING',0,2,4
 	.db	'ERRORED',0,3,4
 	.db	'APPS_5PCT_WAIT',0,4,0,5
-	.db	'main',0,1,214,1,6,6,1,1,1
+	.db	'main',0,1,212,1,6,6,1,1,1
 	.dl	_145,_189,_144
 	.db	12,19,146,176,2,0,64,36,146,161,2,0,33,6
 	.dl	_145,_189
 	.db	7
-	.db	'timestamp',0,1,216,1,12,2
+	.db	'timestamp',0,1,214,1,12,2
 	.dl	_217,_218
 	.db	6
 	.dl	_219,_189
 	.db	7
-	.db	'handle_fifo_w',0,1,237,1,12,2
+	.db	'handle_fifo_w',0,1,235,1,12,2
 	.dl	_220,_221
 	.db	7
-	.db	'handle_fifo_w_debug',0,1,238,1,12,2
+	.db	'handle_fifo_w_debug',0,1,236,1,12,2
 	.dl	_220,_222
 	.db	7
-	.db	'handle_tms_summary_1_r',0,1,241,1,12,2
+	.db	'handle_tms_summary_1_r',0,1,239,1,12,2
 	.dl	_220,_223
 	.db	7
-	.db	'handle_tms_summary_2_r',0,1,242,1,12,2
+	.db	'handle_tms_summary_2_r',0,1,240,1,12,2
 	.dl	_220,_224
 	.db	7
-	.db	'handle_inverter_motor_info_r',0,1,243,1,12,2
+	.db	'handle_inverter_motor_info_r',0,1,241,1,12,2
 	.dl	_220,_225
 	.db	7
-	.db	'handle_inverter_voltage_info_r',0,1,244,1,12,2
+	.db	'handle_inverter_voltage_info_r',0,1,242,1,12,2
 	.dl	_220,_226
 	.db	7
-	.db	'handle_inverter_current_info_r',0,1,245,1,12,2
+	.db	'handle_inverter_current_info_r',0,1,243,1,12,2
 	.dl	_220,_227
 	.db	7
-	.db	'handle_orion_r',0,1,246,1,12,2
+	.db	'handle_orion_r',0,1,244,1,12,2
 	.dl	_220,_228
 	.db	7
-	.db	'controls_can_frame',0,1,249,1,23,2
+	.db	'controls_can_frame',0,1,247,1,23,2
 	.dl	_229,_230
 	.db	8
 	.dl	_231
 	.db	7
-	.db	'inverter_settings_can_frame',0,1,254,1,23,2
+	.db	'inverter_settings_can_frame',0,1,252,1,23,2
 	.dl	_229,_237
 	.db	8
 	.dl	_238
 	.db	7
-	.db	'i',0,1,130,2,14,2
+	.db	'i',0,1,128,2,14,2
 	.dl	_243,_244
 	.db	0,6
 	.dl	_242,_189
 	.db	7
-	.db	'tms_summary_1_can_frame',0,1,135,2,23,2
+	.db	'tms_summary_1_can_frame',0,1,133,2,23,2
 	.dl	_229,_245
 	.db	7
-	.db	'tms_summary_2_can_frame',0,1,136,2,23,2
+	.db	'tms_summary_2_can_frame',0,1,134,2,23,2
 	.dl	_229,_246
 	.db	7
-	.db	'inverter_motor_info_can_frame',0,1,140,2,23,2
+	.db	'inverter_motor_info_can_frame',0,1,138,2,23,2
 	.dl	_229,_247
 	.db	7
-	.db	'inverter_voltage_info_can_frame',0,1,141,2,23,2
+	.db	'inverter_voltage_info_can_frame',0,1,139,2,23,2
 	.dl	_229,_248
 	.db	7
-	.db	'inverter_current_info_can_frame',0,1,142,2,23,2
+	.db	'inverter_current_info_can_frame',0,1,140,2,23,2
 	.dl	_229,_249
 	.db	7
-	.db	'orion_can_frame',0,1,146,2,23,2
+	.db	'orion_can_frame',0,1,144,2,23,2
 	.dl	_229,_250
 	.db	7
-	.db	'debug_can_frame',0,1,149,2,23,2
+	.db	'debug_can_frame',0,1,147,2,23,2
 	.dl	_229,_251
 	.db	8
 	.dl	_252
 	.db	7
-	.db	'i',0,1,153,2,14,2
+	.db	'i',0,1,151,2,14,2
 	.dl	_243,_259
 	.db	0,6
 	.dl	_260,_189
 	.db	7
-	.db	'rtd_val',0,1,231,2,10,2
+	.db	'rtd_val',0,1,229,2,10,2
 	.dl	_220,_261
 	.db	6
 	.dl	_262,_189
 	.db	7
-	.db	'rtd_timestamp',0,1,237,2,12,2
+	.db	'rtd_timestamp',0,1,235,2,12,2
 	.dl	_217,_263
 	.db	7
-	.db	'just_entered_sound_state',0,1,238,2,10,2
+	.db	'just_entered_sound_state',0,1,236,2,10,2
 	.dl	_220,_264
 	.db	6
 	.dl	_265,_189
 	.db	7
-	.db	'apps_pct_result',0,1,130,3,12,2
+	.db	'apps_pct_result',0,1,128,3,12,2
 	.dl	_212,_266
 	.db	7
-	.db	'apps_error',0,1,131,3,10,2
+	.db	'apps_error',0,1,129,3,10,2
 	.dl	_220,_267
 	.db	7
-	.db	'num_errors',0,1,132,3,12,2
+	.db	'num_errors',0,1,130,3,12,2
 	.dl	_220,_268
 	.db	6
 	.dl	_269,_189
 	.db	7
-	.db	'bse_result',0,1,141,3,12,2
+	.db	'bse_result',0,1,139,3,12,2
 	.dl	_212,_270
 	.db	7
-	.db	'bse_error',0,1,142,3,10,2
+	.db	'bse_error',0,1,140,3,10,2
 	.dl	_220,_271
 	.db	7
-	.db	'sdc_val',0,1,145,3,10,2
+	.db	'sdc_val',0,1,143,3,10,2
 	.dl	_220,_272
 	.db	6
 	.dl	_273,_189
 	.db	9
-	.db	'current_state',0,1,153,3,20,2
+	.db	'current_state',0,1,151,3,20,2
 	.dl	156,_274
 	.db	7
-	.db	'first_cycle',0,1,156,3,10,2
+	.db	'first_cycle',0,1,154,3,10,2
 	.dl	_220,_275
 	.db	7
-	.db	'tms_summary_1_message_received',0,1,160,3,10,2
+	.db	'tms_summary_1_message_received',0,1,158,3,10,2
 	.dl	_220,_276
 	.db	7
-	.db	'tms_summary_2_message_received',0,1,161,3,10,2
+	.db	'tms_summary_2_message_received',0,1,159,3,10,2
 	.dl	_220,_277
 	.db	7
-	.db	'd0',0,1,166,3,12,2
+	.db	'd0',0,1,164,3,12,2
 	.dl	_217,_278
 	.db	7
-	.db	'd1',0,1,167,3,12,2
+	.db	'd1',0,1,165,3,12,2
 	.dl	_217,_279
 	.db	7
-	.db	'motor_info_message_received',0,1,171,3,10,2
+	.db	'motor_info_message_received',0,1,169,3,10,2
 	.dl	_220,_280
 	.db	7
-	.db	'last_speed_d0',0,1,173,3,12,2
+	.db	'last_speed_d0',0,1,171,3,12,2
 	.dl	_220,_281
 	.db	7
-	.db	'last_speed_d1',0,1,174,3,12,2
+	.db	'last_speed_d1',0,1,172,3,12,2
 	.dl	_220,_282
 	.db	7
-	.db	'voltage_info_message_received',0,1,180,3,10,2
+	.db	'voltage_info_message_received',0,1,178,3,10,2
 	.dl	_220,_283
 	.db	7
-	.db	'current_info_message_received',0,1,187,3,10,2
+	.db	'current_info_message_received',0,1,185,3,10,2
 	.dl	_220,_284
 	.db	7
-	.db	'orion_message_received',0,1,190,3,10,2
+	.db	'orion_message_received',0,1,188,3,10,2
 	.dl	_220,_285
 	.db	7
-	.db	'orion_message_received_once',0,1,191,3,10,2
+	.db	'orion_message_received_once',0,1,189,3,10,2
 	.dl	_220,_286
 	.db	6
 	.dl	_287,_189
 	.db	7
-	.db	'been_ignore_period_since_start',0,1,201,3,10,2
+	.db	'been_ignore_period_since_start',0,1,199,3,10,2
 	.dl	_220,_288
 	.db	7
-	.db	'time_since_start',0,1,202,3,12,2
+	.db	'time_since_start',0,1,200,3,12,2
 	.dl	_217,_289
 	.db	7
-	.db	'orion_can_timeout',0,1,203,3,12,2
+	.db	'orion_can_timeout',0,1,201,3,12,2
 	.dl	_217,_290
 	.db	10
 	.dl	_198,_291,_292
@@ -4487,12 +4487,12 @@ _185:
 	.db	0,6
 	.dl	_37,_337
 	.db	7
-	.db	'i',0,1,162,4,30,2
+	.db	'i',0,1,160,4,30,2
 	.dl	_243,_338
 	.db	0,6
 	.dl	_45,_339
 	.db	7
-	.db	'i',0,1,199,4,26,2
+	.db	'i',0,1,197,4,26,2
 	.dl	_243,_340
 	.db	0,10
 	.dl	_192,_341,_342
@@ -4521,7 +4521,7 @@ _185:
 	.db	0,6
 	.dl	_57,_348
 	.db	7
-	.db	'i',0,1,251,4,26,2
+	.db	'i',0,1,249,4,26,2
 	.dl	_243,_349
 	.db	0,10
 	.dl	_195,_350,_351
@@ -4553,7 +4553,7 @@ _1053:
 _1054:
 	.db	5,6,7,0,5,2
 	.dl	_145
-	.db	3,213,1,1,5,20,9
+	.db	3,211,1,1,5,20,9
 	.dw	_916-_145
 	.db	3,11,1,5,19,9
 	.dw	_1055-_916
@@ -4855,7 +4855,7 @@ _1054:
 	.dw	_1162-_1161
 	.db	3,49,1,5,53,9
 	.dw	_1163-_1162
-	.db	3,49,1,5,56,9
+	.db	3,51,1,5,56,9
 	.dw	_1164-_1163
 	.db	3,3,1,9
 	.dw	_1165-_1164
@@ -4871,7 +4871,7 @@ _1054:
 	.dw	_1169-_331
 	.db	1,5,27,9
 	.dw	_13-_1169
-	.db	3,217,125,1,5,28,9
+	.db	3,215,125,1,5,28,9
 	.dw	_1170-_13
 	.db	3,5,1,5,21,9
 	.dw	_300-_1170
@@ -5305,7 +5305,7 @@ _1054:
 	.dw	_56-_42
 	.db	1,5,17,9
 	.dw	_40-_56
-	.db	3,6,1,5,13,9
+	.db	3,8,1,5,13,9
 	.dw	_1327-_40
 	.db	1,5,31,7,9
 	.dw	_1328-_1327
@@ -5361,11 +5361,11 @@ _1054:
 	.dw	_1345-_994
 	.db	3,3,1,5,20,9
 	.dw	_350-_1345
-	.db	3,228,123,1,5,18,9
+	.db	3,226,123,1,5,18,9
 	.dw	_996-_350
 	.db	1,5,49,9
 	.dw	_351-_996
-	.db	3,161,4,1,5,29,9
+	.db	3,163,4,1,5,29,9
 	.dw	_1346-_351
 	.db	1,5,49,7,9
 	.dw	_1347-_1346
@@ -5503,9 +5503,9 @@ _1054:
 	.dw	_1401-_83
 	.db	1,5,13,9
 	.dw	_1402-_1401
-	.db	3,166,125,1,5,1,9
+	.db	3,164,125,1,5,1,9
 	.dw	_189-_1402
-	.db	3,220,2,0,1,1
+	.db	3,222,2,0,1,1
 _1052:
 	; End of section
 
@@ -5557,7 +5557,7 @@ _190:
 	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev2-controls\\',0,12,1,2
 	.dl	_156
 	.db	3
-	.db	'appl_db',0,1,126,6,5
+	.db	'appl_db',0,1,124,6,5
 	.dl	_352
 	.db	1,5,3
 	.dl	_appl_db
@@ -5710,14 +5710,6 @@ _335:
 	.dw	3
 	.db	145,162,127
 	.dl	0,0
-_316:
-	.dl	-1,_145,_970-_145,_971-_145
-	.dw	1
-	.db	82
-	.dl	_30-_145,_972-_145
-	.dw	1
-	.db	82
-	.dl	0,0
 _307:
 	.dl	-1,_145,_959-_145,_960-_145
 	.dw	1
@@ -5734,6 +5726,14 @@ _310:
 	.dw	1
 	.db	82
 	.dl	0,0
+_301:
+	.dl	-1,_145,_953-_145,_954-_145
+	.dw	1
+	.db	82
+	.dl	_14-_145,_955-_145
+	.dw	1
+	.db	82
+	.dl	0,0
 _304:
 	.dl	-1,_145,_956-_145,_957-_145
 	.dw	1
@@ -5742,11 +5742,11 @@ _304:
 	.dw	1
 	.db	82
 	.dl	0,0
-_301:
-	.dl	-1,_145,_953-_145,_954-_145
+_316:
+	.dl	-1,_145,_970-_145,_971-_145
 	.dw	1
 	.db	82
-	.dl	_14-_145,_955-_145
+	.dl	_30-_145,_972-_145
 	.dw	1
 	.db	82
 	.dl	0,0
