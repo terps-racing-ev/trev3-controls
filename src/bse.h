@@ -23,7 +23,8 @@
 #define BRAKES_ENGAGED_BSE_THRESHOLD 550
 #define BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD 1800
 
-
+#define BSE_NO_ERROR 0
+#define BSE_OUT_OF_RANGE_ERROR 1
 
 void get_bse(ubyte2 *bse_result, bool *error);
 

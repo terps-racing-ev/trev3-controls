@@ -56,6 +56,7 @@
 // APPS percent travel deadzone below 0%
 #define APPS_DEADZONE 2
 
+#define APPS_NO_ERROR 0
 #define APPS_IMPLAUSIBILITY_ERROR 1
 #define APPS_OUT_OF_RANGE_ERROR 2
 

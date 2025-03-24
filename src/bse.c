@@ -12,7 +12,7 @@
 bool moving_average_struct_initialized = FALSE;
 struct moving_average_info bse_moving_average_info;
 
-void get_bse(ubyte2 *bse_result, bool *error) {
+void get_bse(ubyte2 *bse_result, ubyte1 *error) {
     if (!moving_average_struct_initialized) {
         initialize_moving_average_struct(&bse_moving_average_info);
         moving_average_struct_initialized = TRUE;
@@ -34,9 +34,9 @@ void get_bse(ubyte2 *bse_result, bool *error) {
     //error out if it isn't
     if (bse_within_threshhold) {
         *bse_result = bse_val;
-        *error = FALSE;
+        *error = BSE_NO_ERROR;
     } else {
         *bse_result = 0;
-        *error = !(IGNORE_BSE_ERROR);
+        *error = IGNORE_BSE_ERROR ? BSE_NO_ERROR : BSE_OUT_OF_RANGE_ERROR;
     }
 }

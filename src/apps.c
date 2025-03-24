@@ -79,7 +79,7 @@ ubyte2 get_filtered_apps2_voltage() {
 
 // gets apps values, puts average pct travel into apps_pct_result
 // if an error is detected, turns error to TRUE
-void get_apps(ubyte2 *apps_pct_result, bool *error, ubyte1 *num_errors) {
+void get_apps(ubyte2 *apps_pct_result, ubyte1 *error, ubyte1 *num_errors) {
     if (!moving_average_structs_initialized) {
         initialize_moving_average_struct(&apps_1_moving_average_info);
         initialize_moving_average_struct(&apps_2_moving_average_info);
@@ -159,7 +159,7 @@ void get_apps(ubyte2 *apps_pct_result, bool *error, ubyte1 *num_errors) {
                         if (*apps_pct_result <= APPS_DEADZONE) {
                             *apps_pct_result = 0;
                         }
-                        *error = FALSE;
+                        *error = APPS_NO_ERROR;
                         *num_errors = 0;
                         return;
                     }
@@ -184,7 +184,7 @@ void get_apps(ubyte2 *apps_pct_result, bool *error, ubyte1 *num_errors) {
             *apps_pct_result = 0;
         }
         *num_errors = 0;
-        *error = FALSE;
+        *error = APPS_NO_ERROR;
     } else {
         // only error out if APPS_REPEATED_ERROR_MAX errors have been encountered in a row
         (*num_errors)++;
