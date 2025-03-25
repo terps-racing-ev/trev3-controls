@@ -54,3 +54,4 @@ dkms.conf
 
 # stupid build folder go build it yourself
 /build/
+/src/AddAPDB.html
