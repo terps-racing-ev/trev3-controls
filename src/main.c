@@ -740,6 +740,7 @@ void main (void)
             }
 
 
+
             // send debug message
             debug_1_can_frame.data[0] = apps_pct_result;
 
