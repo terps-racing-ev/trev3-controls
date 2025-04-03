@@ -467,6 +467,9 @@ void main (void)
     ubyte4 time_since_start;
     ubyte4 orion_can_timeout;
 
+    // whether a red car incident has happened (i.e. whether tsil is blinking red)
+    bool red_car = FALSE;
+
     IO_RTC_StartTime(&time_since_start);
     IO_RTC_StartTime(&orion_can_timeout);
 
@@ -546,7 +549,8 @@ void main (void)
                 if (rtd_val == RTD_ON && 
                     (IGNORE_RTD_BRAKES || (bse_error == BSE_NO_ERROR && bse_result > BRAKES_ENGAGED_BSE_THRESHOLD)) && 
                     apps_error == APPS_NO_ERROR && 
-                    sdc_val != SDC_OFF) {
+                    sdc_val != SDC_OFF && 
+                    !(red_car)) {
                     // rtd on -> switch to playing rtd sound
                     current_state = PLAYING_RTD_SOUND;
                 } else {
@@ -601,7 +605,7 @@ void main (void)
                 if (rtd_val == RTD_OFF) {
                     // rtd off -> switch to not ready state
                     current_state = NOT_READY;
-                } else if (apps_error != APPS_NO_ERROR || bse_error != BSE_NO_ERROR || (sdc_val == SDC_OFF)) {
+                } else if (apps_error != APPS_NO_ERROR || bse_error != BSE_NO_ERROR || (sdc_val == SDC_OFF) || red_car) {
                     current_state = ERRORED;
                 } else if (!(IGNORE_BRAKE_PLAUSIBILITY) && bse_result > BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD && apps_pct_result >= APPS_THRESHHOLD_BRAKE_PLAUSIBILITY) {
                     current_state = APPS_5PCT_WAIT;
@@ -649,7 +653,7 @@ void main (void)
                     // rtd off -> switch to not ready state
                     current_state = NOT_READY;
 
-                } else if (apps_error != APPS_NO_ERROR || bse_error != BSE_NO_ERROR || (sdc_val == SDC_OFF)) {
+                } else if (apps_error != APPS_NO_ERROR || bse_error != BSE_NO_ERROR || (sdc_val == SDC_OFF) || red_car) {
                     current_state = ERRORED;
                 } else if (apps_pct_result <= APPS_THRESHHOLD_REESTABLISH_PLAUSIBILITY) {
                     // go back to driving when apps <= 5%
@@ -701,6 +705,8 @@ void main (void)
                 // if CAN timeout, set light to blinking red
                 if (IO_RTC_GetTimeUS(orion_can_timeout) > ORION_CAN_TIMEOUT_US) {
                     set_light_to(BLINKING_RED);
+                    // whenever the light is blinking red set red_car to true
+                    red_car = TRUE;
                 } else {
                     if (orion_message_received_once == TRUE) {
                         get_sdc(&sdc_val);
@@ -711,12 +717,16 @@ void main (void)
                             orion_can_frame.data[ORION_IMD_STATUS_INDEX] && 
                             (sdc_val != SDC_OFF)) {
                                 set_light_to(SOLID_GREEN);
+                                // whenever the light is green set red_car to false
+                                red_car = FALSE;
                         
                         // if either IMD or BMS is bad set lights to red
                         // (we don't check SDC)
                         } else if (!orion_can_frame.data[ORION_BMS_STATUS_INDEX] || 
                                    !orion_can_frame.data[ORION_IMD_STATUS_INDEX]) {
                                 set_light_to(BLINKING_RED);
+                                // whenever the light is blinking red set red_car to true
+                                red_car = TRUE;
                         }
                     }
                 }
