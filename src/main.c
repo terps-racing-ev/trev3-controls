@@ -70,7 +70,7 @@
 
 #define TELEMETRY_CAN_CHANNEL IO_CAN_CHANNEL_1
 
-#define BAUD_RATE 500 // TODO Likely needs to be changed to match charging board
+#define BAUD_RATE 250
 
 /* The system sends CAN messages from a FIFO buffer, this constant defines
  * its size. If a message is added to the full buffer, it is ignored.
@@ -96,7 +96,8 @@
 #define INVERTER_MOTOR_SPEED_LO 2
 #define INVERTER_MOTOR_SPEED_HI 3
 
-#define ORION_CAN_ID 0x6B2
+#define ORION_1_CAN_ID 0x6B2
+#define ORION_2_CAN_ID 0x6B3
 #define ORION_IMD_STATUS_INDEX 0
 #define ORION_BMS_STATUS_INDEX 1
 
@@ -250,7 +251,8 @@ void main (void)
     ubyte1 handle_inverter_motor_info_r;
     ubyte1 handle_inverter_voltage_info_r;
     ubyte1 handle_inverter_current_info_r;
-    ubyte1 handle_orion_r;
+    ubyte1 handle_orion_1_r;
+    ubyte1 handle_orion_2_r;
 
     /* can frame used to send torque requests to the inverter */
     IO_CAN_DATA_FRAME controls_can_frame;
@@ -275,7 +277,8 @@ void main (void)
 
 
     // CAN frame for orion
-    IO_CAN_DATA_FRAME orion_can_frame;
+    IO_CAN_DATA_FRAME orion_1_can_frame;
+    IO_CAN_DATA_FRAME orion_2_can_frame;
 
     /* can frames used for debugging */
     IO_CAN_DATA_FRAME debug_1_can_frame;
@@ -354,11 +357,18 @@ void main (void)
                  , CURRENT_INFO_CAN_ID
                  , 0x1FFFFFFF);
 
-    IO_CAN_ConfigMsg( &handle_orion_r
+    IO_CAN_ConfigMsg( &handle_orion_1_r
                  , CONTROLS_CAN_CHANNEL
                  , IO_CAN_MSG_READ
                  , IO_CAN_STD_FRAME
-                 , ORION_CAN_ID
+                 , ORION_1_CAN_ID
+                 , 0x1FFFFFFF);
+
+    IO_CAN_ConfigMsg( &handle_orion_2_r
+                 , CONTROLS_CAN_CHANNEL
+                 , IO_CAN_MSG_READ
+                 , IO_CAN_STD_FRAME
+                 , ORION_2_CAN_ID
                  , 0x1FFFFFFF);
 
 
@@ -459,9 +469,12 @@ void main (void)
     bool current_info_message_received = FALSE;
 
     // orion message received
-    bool orion_message_received = FALSE;
-    bool orion_message_received_once = FALSE;
+    bool orion_1_message_received = FALSE;
+    bool orion_1_message_received_once = FALSE;
     bool orion_good = TRUE;
+
+    bool orion_2_message_received = FALSE;
+    bool orion_2_message_received_once = FALSE;
 
     bool been_ignore_period_since_start = FALSE;
     ubyte4 time_since_start;
@@ -514,12 +527,13 @@ void main (void)
         read_can_msg(&handle_inverter_voltage_info_r, &inverter_voltage_info_can_frame, &voltage_info_message_received, VOLTAGE_INFO_CAN_ID, CONTROLS_CAN_CHANNEL);
 
         // read message from orion
-        read_can_msg(&handle_orion_r, &orion_can_frame, &orion_message_received, ORION_CAN_ID, CONTROLS_CAN_CHANNEL);
+        read_can_msg(&handle_orion_1_r, &orion_1_can_frame, &orion_1_message_received, ORION_1_CAN_ID, CONTROLS_CAN_CHANNEL);
+        read_can_msg(&handle_orion_2_r, &orion_2_can_frame, &orion_2_message_received, ORION_2_CAN_ID, CONTROLS_CAN_CHANNEL);
 
-        if (orion_message_received) {
+        if (orion_1_message_received) {
             // reset the timeout if a message has been received
             IO_RTC_StartTime(&orion_can_timeout);
-            orion_message_received_once = TRUE;
+            orion_1_message_received_once = TRUE;
         }
 
         if (voltage_info_message_received == TRUE) {
@@ -628,8 +642,6 @@ void main (void)
                     controls_can_frame.data[6] = 0;
                     controls_can_frame.data[7] = 0;
                     IO_CAN_WriteFIFO(handle_controls_fifo_w, &controls_can_frame, 1);
-                    IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &controls_can_frame, 1);
-
                 }
             } else if (current_state == ERRORED) {
                 get_rtd(&rtd_val);
@@ -667,7 +679,7 @@ void main (void)
             }
 
             /************ POST FSM ***********/
-            
+
             // echo tms messages
             if (tms_summary_1_message_received) {
             	IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &tms_summary_1_can_frame, 1);
@@ -690,6 +702,14 @@ void main (void)
                 IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &inverter_current_info_can_frame, 1);
             }
 
+            // echo orion messages
+            if (orion_1_message_received) {
+                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &orion_1_can_frame, 1);
+            }
+            if (orion_2_message_received) {
+                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &orion_2_can_frame, 1);
+            }
+
 
             // code to control tsil lights 
 
@@ -708,13 +728,13 @@ void main (void)
                     // whenever the light is blinking red set red_car to true
                     red_car = TRUE;
                 } else {
-                    if (orion_message_received_once == TRUE) {
+                    if (orion_1_message_received_once == TRUE) {
                         get_sdc(&sdc_val);
 
                         // if SDC is good and BMS is good and IMD is good
                         // set lights to green
-                        if (orion_can_frame.data[ORION_BMS_STATUS_INDEX] &&
-                            orion_can_frame.data[ORION_IMD_STATUS_INDEX] && 
+                        if (orion_1_can_frame.data[ORION_BMS_STATUS_INDEX] &&
+                            orion_1_can_frame.data[ORION_IMD_STATUS_INDEX] && 
                             (sdc_val != SDC_OFF)) {
                                 set_light_to(SOLID_GREEN);
                                 // whenever the light is green set red_car to false
@@ -722,8 +742,8 @@ void main (void)
                         
                         // if either IMD or BMS is bad set lights to red
                         // (we don't check SDC)
-                        } else if (!orion_can_frame.data[ORION_BMS_STATUS_INDEX] || 
-                                   !orion_can_frame.data[ORION_IMD_STATUS_INDEX]) {
+                        } else if (!orion_1_can_frame.data[ORION_BMS_STATUS_INDEX] || 
+                                   !orion_1_can_frame.data[ORION_IMD_STATUS_INDEX]) {
                                 set_light_to(BLINKING_RED);
                                 // whenever the light is blinking red set red_car to true
                                 red_car = TRUE;
@@ -811,8 +831,8 @@ void main (void)
 
         /* NOTE:
          * If the code between the TaskBegin and TaskEnd doesn't take
-         * 10 milliseconds, this code delays the end of the cycle so it lasts
-         * 10 milliseconds
+         * 5 milliseconds, this code delays the end of the cycle so it lasts
+         * 5 milliseconds
          */
         while (IO_RTC_GetTimeUS(timestamp) < CYCLE_TIME);
     }
