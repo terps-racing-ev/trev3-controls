@@ -79,12 +79,9 @@
 
 #define VCU_CONTROLS_CAN_ID 0xC0
 #define VCU_INVERTER_SETTINGS_CAN_ID 0xC1
-#define VCU_DEBUG_1_CAN_ID 0xDB
-#define VCU_DEBUG_2_CAN_ID 0xDC
 
-#define TMS_SUMMARY_1_CAN_ID 0x1
-#define TMS_SUMMARY_2_CAN_ID 0x2
-
+#define VCU_SUMMARY_CAN_ID 0xC5
+#define VCU_DEBUG_CAN_ID 0xDB
 
 #define MOTOR_INFO_CAN_ID 0xA5
 #define VOLTAGE_INFO_CAN_ID 0xA7
@@ -96,8 +93,10 @@
 #define INVERTER_MOTOR_SPEED_LO 2
 #define INVERTER_MOTOR_SPEED_HI 3
 
-#define ORION_1_CAN_ID 0x6B2
-#define ORION_2_CAN_ID 0x6B3
+#define ORION_1_CAN_ID 0x6B2 // this is the critical one, others won't trigger fault if not received rn
+#define ORION_2_CAN_ID 0x6B3 // TODO MAKE ALL NECESSARY
+#define ORION_THERM_EXP_CAN_ID 0x1838F380
+
 #define ORION_IMD_STATUS_INDEX 0
 #define ORION_BMS_STATUS_INDEX 1
 
@@ -246,13 +245,12 @@ void main (void)
     ubyte1 handle_telemetry_fifo_w;
 
     // receiving
-    ubyte1 handle_tms_summary_1_r;
-    ubyte1 handle_tms_summary_2_r;
     ubyte1 handle_inverter_motor_info_r;
     ubyte1 handle_inverter_voltage_info_r;
     ubyte1 handle_inverter_current_info_r;
     ubyte1 handle_orion_1_r;
     ubyte1 handle_orion_2_r;
+    ubyte1 handle_orion_therm_exp_r;
 
     /* can frame used to send torque requests to the inverter */
     IO_CAN_DATA_FRAME controls_can_frame;
@@ -266,32 +264,29 @@ void main (void)
     inverter_settings_can_frame.length = 8;
     clear_can_frame(&inverter_settings_can_frame);
 
-    // CAN frames for reading from tms
-    IO_CAN_DATA_FRAME tms_summary_1_can_frame;
-    IO_CAN_DATA_FRAME tms_summary_2_can_frame;
-
-    // CAN frame for reading from inverter
+    /* CAN frame for reading from inverter */
     IO_CAN_DATA_FRAME inverter_motor_info_can_frame;
     IO_CAN_DATA_FRAME inverter_voltage_info_can_frame;
     IO_CAN_DATA_FRAME inverter_current_info_can_frame;
 
-
-    // CAN frame for orion
+    /* CAN frame for orion */
     IO_CAN_DATA_FRAME orion_1_can_frame;
     IO_CAN_DATA_FRAME orion_2_can_frame;
+    IO_CAN_DATA_FRAME orion_therm_exp_can_frame;
 
-    /* can frames used for debugging */
-    IO_CAN_DATA_FRAME debug_1_can_frame;
-    debug_1_can_frame.id = VCU_DEBUG_1_CAN_ID;
-    debug_1_can_frame.id_format = IO_CAN_STD_FRAME;
-    debug_1_can_frame.length = 8;
-    clear_can_frame(&debug_1_can_frame);
+    /* CAN frame for controls summary*/
+    IO_CAN_DATA_FRAME vcu_summary_can_frame;
+    vcu_summary_can_frame.id = VCU_SUMMARY_CAN_ID;
+    vcu_summary_can_frame.id_format = IO_CAN_STD_FRAME;
+    vcu_summary_can_frame.length = 8;
+    clear_can_frame(&vcu_summary_can_frame);
 
-    IO_CAN_DATA_FRAME debug_2_can_frame;
-    debug_2_can_frame.id = VCU_DEBUG_2_CAN_ID;
-    debug_2_can_frame.id_format = IO_CAN_STD_FRAME;
-    debug_2_can_frame.length = 8;
-    clear_can_frame(&debug_2_can_frame);
+    /* CAN frames used for debugging */
+    IO_CAN_DATA_FRAME debug_can_frame;
+    debug_can_frame.id = VCU_DEBUG_CAN_ID;
+    debug_can_frame.id_format = IO_CAN_STD_FRAME;
+    debug_can_frame.length = 8;
+    clear_can_frame(&debug_can_frame);
 
     /* initialize can channel and fifo buffer */
     IO_CAN_Init( CONTROLS_CAN_CHANNEL
@@ -321,20 +316,6 @@ void main (void)
                     , IO_CAN_STD_FRAME
                     , VCU_CONTROLS_CAN_ID
                     , 0);
-    
-    IO_CAN_ConfigMsg( &handle_tms_summary_1_r
-                     , CONTROLS_CAN_CHANNEL
-                     , IO_CAN_MSG_READ
-                     , IO_CAN_STD_FRAME
-                     , TMS_SUMMARY_1_CAN_ID
-                     , 0x1FFFFFFF);
-
-    IO_CAN_ConfigMsg( &handle_tms_summary_2_r
-                     , CONTROLS_CAN_CHANNEL
-                     , IO_CAN_MSG_READ
-                     , IO_CAN_STD_FRAME
-                     , TMS_SUMMARY_2_CAN_ID
-                     , 0x1FFFFFFF);
 
     IO_CAN_ConfigMsg( &handle_inverter_motor_info_r
                  , CONTROLS_CAN_CHANNEL
@@ -370,7 +351,13 @@ void main (void)
                  , IO_CAN_STD_FRAME
                  , ORION_2_CAN_ID
                  , 0x1FFFFFFF);
-
+    
+    IO_CAN_ConfigMsg( &handle_orion_therm_exp_r
+                 , CONTROLS_CAN_CHANNEL
+                 , IO_CAN_MSG_READ
+                 , IO_CAN_STD_FRAME
+                 , ORION_THERM_EXP_CAN_ID
+                 , 0x1FFFFFFF);
 
     /* rtd with 10k pull-up resistor*/
     bool rtd_val;
@@ -438,10 +425,6 @@ void main (void)
     // sensor input is invalid during the first cycle
     bool first_cycle = TRUE;
 
-    /* Voltage checking functionality */
-    bool tms_summary_1_message_received = FALSE;
-    bool tms_summary_2_message_received = FALSE;
-
     // variables to hold torque
     ubyte4 torque = 0;
     ubyte4 limited_torque = 0;
@@ -476,6 +459,8 @@ void main (void)
     bool orion_2_message_received = FALSE;
     bool orion_2_message_received_once = FALSE;
 
+    bool orion_therm_exp_message_received = FALSE;
+
     bool been_ignore_period_since_start = FALSE;
     ubyte4 time_since_start;
     ubyte4 orion_can_timeout;
@@ -505,10 +490,6 @@ void main (void)
          */
         IO_Driver_TaskBegin();
 
-        // read tms messages
-        read_can_msg(&handle_tms_summary_1_r, &tms_summary_1_can_frame, &tms_summary_1_message_received, TMS_SUMMARY_1_CAN_ID, CONTROLS_CAN_CHANNEL);
-        read_can_msg(&handle_tms_summary_2_r, &tms_summary_2_can_frame, &tms_summary_2_message_received, TMS_SUMMARY_2_CAN_ID, CONTROLS_CAN_CHANNEL);
-
         // read current info from inverter
         read_can_msg(&handle_inverter_current_info_r, &inverter_current_info_can_frame, &current_info_message_received, CURRENT_INFO_CAN_ID, CONTROLS_CAN_CHANNEL);
 
@@ -529,6 +510,7 @@ void main (void)
         // read message from orion
         read_can_msg(&handle_orion_1_r, &orion_1_can_frame, &orion_1_message_received, ORION_1_CAN_ID, CONTROLS_CAN_CHANNEL);
         read_can_msg(&handle_orion_2_r, &orion_2_can_frame, &orion_2_message_received, ORION_2_CAN_ID, CONTROLS_CAN_CHANNEL);
+        read_can_msg(&handle_orion_therm_exp_r, &orion_therm_exp_can_frame, &orion_therm_exp_message_received, ORION_THERM_EXP_CAN_ID, CONTROLS_CAN_CHANNEL);
 
         if (orion_1_message_received) {
             // reset the timeout if a message has been received
@@ -680,37 +662,6 @@ void main (void)
 
             /************ POST FSM ***********/
 
-            // echo tms messages
-            if (tms_summary_1_message_received) {
-            	IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &tms_summary_1_can_frame, 1);
-            }
-            if (tms_summary_2_message_received) {
-                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &tms_summary_2_can_frame, 1);
-            }
-
-            // echo motor info message
-            if (motor_info_message_received) {
-                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &inverter_motor_info_can_frame, 1);
-            }
-
-            if (voltage_info_message_received) {
-                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &inverter_voltage_info_can_frame, 1);
-            }
-
-
-            if (current_info_message_received) {
-                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &inverter_current_info_can_frame, 1);
-            }
-
-            // echo orion messages
-            if (orion_1_message_received) {
-                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &orion_1_can_frame, 1);
-            }
-            if (orion_2_message_received) {
-                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &orion_2_can_frame, 1);
-            }
-
-
             // code to control tsil lights 
 
             // check if it's been "ignore period" seconds since start
@@ -759,7 +710,6 @@ void main (void)
             // run the lights (function call needed for lights to blink)
             do_lights_action();
 
-
             // code for brake light
             get_bse(&bse_result, &bse_error);
 
@@ -770,24 +720,50 @@ void main (void)
             }
 
 
+            /* SENDING MESSAGES */
 
-            // send debug message
-            debug_1_can_frame.data[0] = apps_pct_result;
+            // echo motor info message
+            if (motor_info_message_received) {
+                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &inverter_motor_info_can_frame, 1);
+            }
 
-            debug_1_can_frame.data[1] = torque_d0;
-            debug_1_can_frame.data[2] = torque_d1;
+            if (voltage_info_message_received) {
+                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &inverter_voltage_info_can_frame, 1);
+            }
+
+
+            if (current_info_message_received) {
+                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &inverter_current_info_can_frame, 1);
+            }
+
+            // echo orion messages
+            if (orion_1_message_received) {
+                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &orion_1_can_frame, 1);
+            }
+            if (orion_2_message_received) {
+                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &orion_2_can_frame, 1);
+            }
+            if (orion_therm_exp_message_received) {
+                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &orion_therm_exp_can_frame, 1);
+            }
+
+            // send vcu summary message
+            vcu_summary_can_frame.data[0] = apps_pct_result;
+
+            vcu_summary_can_frame.data[1] = torque_d0;
+            vcu_summary_can_frame.data[2] = torque_d1;
 
             // if the moving average filter is being used then this is filtered
-            debug_1_can_frame.data[3] = bse_result & 0xFF;
-            debug_1_can_frame.data[4] = bse_result >> 8;
+            vcu_summary_can_frame.data[3] = bse_result & 0xFF;
+            vcu_summary_can_frame.data[4] = bse_result >> 8;
 
-            debug_1_can_frame.data[5] = current_state;
+            vcu_summary_can_frame.data[5] = current_state;
 
-            debug_1_can_frame.data[6] = last_speed_d0;
-            debug_1_can_frame.data[7] = last_speed_d1;
+            vcu_summary_can_frame.data[6] = last_speed_d0;
+            vcu_summary_can_frame.data[7] = last_speed_d1;
 
-            IO_CAN_WriteFIFO(handle_controls_fifo_w, &debug_1_can_frame, 1);
-            IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &debug_1_can_frame, 1);
+            IO_CAN_WriteFIFO(handle_controls_fifo_w, &vcu_summary_can_frame, 1);
+            IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &vcu_summary_can_frame, 1);
 
             ubyte2 apps_1_val;
             bool apps_1_fresh;
@@ -797,28 +773,27 @@ void main (void)
             ubyte2 bse_val;
             bool bse_fresh;
 
-            // send another debug message
-            // get voltage values
+            // send debug message
             IO_ADC_Get(IO_PIN_BSE, &bse_val, &bse_fresh);
 
-            debug_2_can_frame.data[0] = apps_error;
-            debug_2_can_frame.data[1] = bse_error;
+            debug_can_frame.data[0] = apps_error;
+            debug_can_frame.data[1] = bse_error;
 
             apps_1_val = get_filtered_apps1_voltage();
             apps_2_val = get_filtered_apps2_voltage();
-            debug_2_can_frame.data[2] = apps_1_val & 0xFF;
-            debug_2_can_frame.data[3] = apps_1_val >> 8;
+            debug_can_frame.data[2] = apps_1_val & 0xFF;
+            debug_can_frame.data[3] = apps_1_val >> 8;
 
-            debug_2_can_frame.data[4] = apps_2_val & 0xFF;
-            debug_2_can_frame.data[5] = apps_2_val >> 8;
+            debug_can_frame.data[4] = apps_2_val & 0xFF;
+            debug_can_frame.data[5] = apps_2_val >> 8;
 
             // unfiltered bse
-            debug_2_can_frame.data[6] = bse_val & 0xFF;
-            debug_2_can_frame.data[7] = bse_val >> 8;
+            debug_can_frame.data[6] = bse_val & 0xFF;
+            debug_can_frame.data[7] = bse_val >> 8;
             
 
-            IO_CAN_WriteFIFO(handle_controls_fifo_w, &debug_2_can_frame, 1);
-            IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &debug_2_can_frame, 1);
+            IO_CAN_WriteFIFO(handle_controls_fifo_w, &debug_can_frame, 1);
+            IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &debug_can_frame, 1);
 
         }
 
