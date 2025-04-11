@@ -149,7 +149,7 @@ APDB appl_db =
           , {0, 2}                 /* BL_T_CAN_ID canUploadID   */
           , 0                      /* ubyte4 legacyHeaderCRC    */
           , 0                      /* ubyte4 version            */
-          , 500                    /* ubyte2 canBaudrate        */
+          , BAUD_RATE              /* ubyte2 canBaudrate        */
           , 0                      /* ubyte1 canChannel         */
           , {0}                    /* ubyte1 reserved[8*4]      */
           , 0                      /* ubyte4 headerCRC          */

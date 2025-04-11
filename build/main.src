@@ -1,5 +1,5 @@
 	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09007774
-	; Options: -f cc22132a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=4 -DRTS_TTC_FLASH_DATE_DAY=9 -DRTS_TTC_FLASH_DATE_HOUR=18 -DRTS_TTC_FLASH_DATE_MINUTE=7 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\main.src
+	; Options: -f cc41160a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=4 -DRTS_TTC_FLASH_DATE_DAY=11 -DRTS_TTC_FLASH_DATE_HOUR=0 -DRTS_TTC_FLASH_DATE_MINUTE=16 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\main.src
 	; Module start
 	.source	'src/main.c'
 code_clear_can_frame	.section	code, cluster 'clear_can_frame', new
@@ -156,7 +156,7 @@ code_clear_can_frame	.section	code, cluster 'clear_can_frame', new
 ; src/main.c	   149            , {0, 2}                 /* BL_T_CAN_ID canUploadID   */
 ; src/main.c	   150            , 0                      /* ubyte4 legacyHeaderCRC    */
 ; src/main.c	   151            , 0                      /* ubyte4 version            */
-; src/main.c	   152            , 500                    /* ubyte2 canBaudrate        */
+; src/main.c	   152            , BAUD_RATE              /* ubyte2 canBaudrate        */
 ; src/main.c	   153            , 0                      /* ubyte1 canChannel         */
 ; src/main.c	   154            , {0}                    /* ubyte1 reserved[8*4]      */
 ; src/main.c	   155            , 0                      /* ubyte4 headerCRC          */
@@ -177,10 +177,10 @@ _389:
 _390:
 	exts	r3,#0x1
 	movb	[r2],rh4
-_1055:
+_1058:
 	addw	r2,#0x1
 	addcw	r3,#0x0
-_1056:
+_1059:
 	cmpi1	r11,#0x7
 	jmp+	cc_ult,_2
 _212:
@@ -228,17 +228,19 @@ code_get_sdc	.section	code, cluster 'get_sdc', new
 ; Function _get_sdc
 _109:
 _get_sdc	.proc	far
+	movw	r4,r2
+	movw	r5,r3
+_395:
 
 ; src/main.c	   173      if (IGNORE_SDC_OFF) {
 ; src/main.c	   174          *sdc_val = SDC_ON;
-	movb	rh4,#0x1
-_1065:
-	exts	r3,#0x1
-	movb	[r2],rh4
-_1066:
-
 ; src/main.c	   175      } else {
 ; src/main.c	   176          IO_DI_Get(IO_PIN_SDC, sdc_val);
+	movb	rl2,#0x27
+_394:
+	call	_IO_DI_Get
+_396:
+
 ; src/main.c	   177      }
 ; src/main.c	   178  }
 	ret
@@ -255,92 +257,92 @@ code_read_can_msg	.section	code, cluster 'read_can_msg', new
 _121:
 _read_can_msg	.proc	far
 	movw	[-r15],r0
-_394:
+_397:
 	movw	[-r15],r1
-_405:
+_408:
 	movw	[-r15],r6
-_416:
+_419:
 	movw	[-r15],r7
-_427:
+_430:
 	movw	[-r15],r8
-_438:
+_441:
 	movw	[-r15],r9
-_449:
+_452:
 	movw	[-r15],r10
-_460:
+_463:
 	movw	r6,r2
 	movw	r7,r3
-_733:
+_736:
 	movw	r8,r4
 	movw	r9,r5
-_734:
+_737:
 	movw	r10,r11
 	movw	r0,r12
-_735:
+_738:
 	movw	[-r15],r13
-_471:
+_474:
 	movw	r1,r14
-_1071:
+_1072:
 
 ; src/main.c	   181      IO_ErrorType can_read_error;
 ; src/main.c	   182  
 ; src/main.c	   183      *msg_received = FALSE;
 	movb	rh4,#0x0
-_730:
+_733:
 	exts	r0,#0x1
 	movb	[r10],rh4
-_1072:
+_1073:
 
 ; src/main.c	   184  
 ; src/main.c	   185      can_read_error = IO_CAN_MsgStatus(*handle_r);
 	exts	r7,#0x1
 	movb	rl2,[r6]
-_731:
+_734:
 	call	_IO_CAN_MsgStatus
-_732:
+_735:
 
 ; src/main.c	   186  
 ; src/main.c	   187      if (can_read_error == IO_E_OK) {
 	cmpw	r2,#0x0
 	jmp+	cc_ne,_3
-_1073:
+_1074:
 
 ; src/main.c	   188          IO_CAN_ReadMsg(*handle_r, dst_data_frame);
 	exts	r7,#0x1
 	movb	rl2,[r6]
-_736:
+_739:
 	movw	r4,r8
 	movw	r5,r9
 	call	_IO_CAN_ReadMsg
-_1074:
+_1075:
 
 ; src/main.c	   189          *msg_received = TRUE;
 	movb	rh4,#0x1
-_1075:
+_1076:
 	exts	r0,#0x1
 	movb	[r10],rh4
-_1076:
+_1077:
 	jmp	_4
 _3:
 
 ; src/main.c	   190      } else if (can_read_error == IO_E_CAN_OVERFLOW) {
 	cmpw	r2,#0x28
 	jmp+	cc_ne,_5
-_1077:
+_1078:
 
 ; src/main.c	   191          IO_CAN_DeInitHandle(*handle_r);
 	exts	r7,#0x1
 	movb	rl2,[r6]
-_737:
+_740:
 	call	_IO_CAN_DeInitHandle
-_1078:
+_1079:
 
 ; src/main.c	   192  
 ; src/main.c	   193          IO_CAN_ConfigMsg( handle_r
 ; src/main.c	   194                  , channel
 ; src/main.c	   195                  , IO_CAN_MSG_READ
 	movb	rh4,#0x0
-_1079:
+_1080:
 
 ; src/main.c	   196                  , IO_CAN_STD_FRAME
 ; src/main.c	   197                  , id
@@ -350,10 +352,10 @@ _1079:
 	movw	r2,r6
 	movw	r3,r7
 	movb	rl4,[r15+#0x10]
-_738:
+_741:
 	movb	rl5,rh4
 	movw	r11,[r15+#0x0]
-_739:
+_742:
 	movw	r12,r1
 	call	_IO_CAN_ConfigMsg
 _5:
@@ -363,21 +365,21 @@ _4:
 ; src/main.c	   200  
 ; src/main.c	   201  }
 	addw	r15,#0x2
-_482:
+_485:
 	movw	r10,[r15+]
-_493:
+_496:
 	movw	r9,[r15+]
-_504:
+_507:
 	movw	r8,[r15+]
-_515:
+_518:
 	movw	r7,[r15+]
-_526:
+_529:
 	movw	r6,[r15+]
-_537:
+_540:
 	movw	r1,[r15+]
-_548:
+_551:
 	movw	r0,[r15+]
-_559:
+_562:
 	ret
 _191:
 	; End of function
@@ -392,43 +394,43 @@ code_voltage_to_torque_limit	.section	code, cluster 'voltage_to_torque_limit', n
 _133:
 _voltage_to_torque_limit	.proc	far
 	movw	[-r15],r0
-_740:
+_743:
 	movw	[-r15],r1
-_751:
+_754:
 	movw	[-r15],r10
-_762:
+_765:
 
 ; src/main.c	   204      if (pack_voltage < PRECHARGE_VOLTAGE_THRESHHOLD) {
 	cmpw	r2,#0x10c
 	jmp+	cc_uge,_6
-_1084:
+_1085:
 
 ; src/main.c	   205          return 0;
 	movw	r2,#0x0
-_866:
+_869:
 	movw	r3,r2
 	movw	r4,r2
 	movw	r5,r2
-_1085:
+_1086:
 	jmp	_7
 _6:
 
 ; src/main.c	   206      } else {
 ; src/main.c	   207          return ((double) (pack_voltage)) * -0.3255 + 231.25;
 	call	__us2dpf
-_867:
+_870:
 	movw	r11,#0x45a2
 	movw	r12,#0xf3b6
 	movw	r13,#0xd4fd
 	movw	r14,#0xbfd4
-_1086:
-	call	__mul_dpf
 _1087:
+	call	__mul_dpf
+_1088:
 	movw	r11,#0x0
 	movw	r12,r11
 	movw	r13,#0xe800
 	movw	r14,#0x406c
-_1088:
+_1089:
 	call	__add_dpf
 
 ; src/main.c	   208      }
@@ -436,11 +438,11 @@ _1088:
 ; src/main.c	   210  }
 _7:
 	movw	r10,[r15+]
-_773:
+_776:
 	movw	r1,[r15+]
-_784:
+_787:
 	movw	r0,[r15+]
-_795:
+_798:
 	ret
 _196:
 	; End of function
@@ -455,22 +457,22 @@ code_pct_travel_to_torque	.section	code, cluster 'pct_travel_to_torque', new
 _145:
 _pct_travel_to_torque	.proc	far
 	movw	[-r15],r1
-_868:
+_871:
 	movw	[-r15],r6
-_879:
+_882:
 
 ; src/main.c	   213      if (pct_travel >= PCT_TRAVEL_FOR_MAX_TORQUE) {
 	movw	r11,r3
 	cmpw	r2,#0x50
 	subcw	r11,#0x0
 	jmp+	cc_ult,_9
-_1093:
+_1094:
 
 ; src/main.c	   214           return CONTINUOUS_TORQUE_MAX;
 	movw	r2,#0xc8
-_952:
+_955:
 	movw	r3,#0x0
-_1094:
+_1095:
 	jmp	_10
 _9:
 
@@ -478,25 +480,25 @@ _9:
 ; src/main.c	   216  
 ; src/main.c	   217      return ((ubyte4)(((float)(pct_travel) / PCT_TRAVEL_FOR_MAX_TORQUE) * ((float) CONTINUOUS_TORQUE_MAX)));
 	call	__ul2spf
-_953:
+_956:
 	movw	r4,#0x0
 	movw	r5,#0x42a0
-_1095:
-	call	__div_spf
 _1096:
+	call	__div_spf
+_1097:
 	movw	r4,#0x0
 	movw	r5,#0x4348
-_1097:
-	call	__mul_spf
 _1098:
+	call	__mul_spf
+_1099:
 	call	__spf2ul
 
 ; src/main.c	   218  }
 _10:
 	movw	r6,[r15+]
-_890:
+_893:
 	movw	r1,[r15+]
-_901:
+_904:
 	ret
 _201:
 	; End of function
@@ -512,7 +514,7 @@ code_main	.section	code, cluster 'main', new
 _157:
 _main	.proc	far
 	subw	r15,#0x118
-_954:
+_957:
 
 ; src/main.c	   222  {
 ; src/main.c	   223      ubyte4 timestamp;
@@ -528,7 +530,7 @@ _954:
 	movw	r2,#0x0
 	movw	r3,r2
 	call	_IO_Driver_Init
-_1103:
+_1104:
 
 ; src/main.c	   233  
 ; src/main.c	   234      /* Add your initialization code here            */
@@ -538,14 +540,14 @@ _1103:
 ; src/main.c	   238      /* NOTE: turns 5v sensor supply 1 on */
 ; src/main.c	   239      IO_POWER_Set (IO_ADC_SENSOR_SUPPLY_0, IO_POWER_ON);
 	movb	rl2,#0x24
-_1104:
+_1105:
 	movb	rh2,#0x1
 	call	_IO_POWER_Set
-_1105:
+_1106:
 
 ; src/main.c	   240      IO_POWER_Set (IO_ADC_SENSOR_SUPPLY_1, IO_POWER_ON);
 	movb	rl2,#0x25
-_1106:
+_1107:
 	movb	rh2,#0x1
 	call	_IO_POWER_Set
 _242:
@@ -578,13 +580,13 @@ _258:
 
 ; src/main.c	   258      controls_can_frame.id_format = IO_CAN_STD_FRAME;
 	movb	rh4,#0x0
-_1107:
-	movb	[r15+#0xd],rh4
 _1108:
+	movb	[r15+#0xd],rh4
+_1109:
 
 ; src/main.c	   259      controls_can_frame.length = 8;
 	movb	rl4,#0x8
-_1109:
+_1110:
 	movb	[r15+#0xc],rl4
 _259:
 
@@ -592,7 +594,7 @@ _259:
 ; src/main.c	   261      IO_CAN_DATA_FRAME inverter_settings_can_frame;
 ; src/main.c	   262      inverter_settings_can_frame.id = VCU_INVERTER_SETTINGS_CAN_ID;
 	movw	r11,#0xc1
-_1110:
+_1111:
 	movw	[r15+#0x24],r11
 _264:
 	movw	[r15+#0x26],r12
@@ -600,7 +602,7 @@ _265:
 
 ; src/main.c	   263      inverter_settings_can_frame.id_format = IO_CAN_STD_FRAME;
 	movb	[r15+#0x23],rh4
-_1111:
+_1112:
 
 ; src/main.c	   264      inverter_settings_can_frame.length = 8;
 	movb	[r15+#0x22],rl4
@@ -614,13 +616,13 @@ _266:
 ; src/main.c	   159      for (int i = 0; i < 8; i++) {      (inlined)
 _12:
 	movb	rh4,#0x0
-_1112:
+_1113:
 	exts	r13,#0x1
 	movb	[r11],rh4
-_1113:
+_1114:
 	addw	r11,#0x1
 	addcw	r13,#0x0
-_1114:
+_1115:
 
 ; src/main.c	   159      for (int i = 0; i < 8; i++) {      (inlined)
 	cmpi1	r12,#0x7
@@ -653,11 +655,11 @@ _282:
 
 ; src/main.c	   280      vcu_summary_can_frame.id_format = IO_CAN_STD_FRAME;
 	movb	[r15+#0x31],rh4
-_1115:
+_1116:
 
 ; src/main.c	   281      vcu_summary_can_frame.length = 8;
 	movb	rh4,#0x8
-_1116:
+_1117:
 	movb	[r15+#0x30],rh4
 _283:
 	movw	r11,r15
@@ -669,13 +671,13 @@ _283:
 ; src/main.c	   159      for (int i = 0; i < 8; i++) {      (inlined)
 _13:
 	movb	rh4,#0x0
-_1117:
+_1118:
 	exts	r13,#0x1
 	movb	[r11],rh4
-_1118:
+_1119:
 	addw	r11,#0x1
 	addcw	r13,#0x0
-_1119:
+_1120:
 
 ; src/main.c	   159      for (int i = 0; i < 8; i++) {      (inlined)
 	cmpi1	r12,#0x7
@@ -698,11 +700,11 @@ _292:
 
 ; src/main.c	   287      debug_can_frame.id_format = IO_CAN_STD_FRAME;
 	movb	[r15+#0x93],rh4
-_1120:
+_1121:
 
 ; src/main.c	   288      debug_can_frame.length = 8;
 	movb	rh4,#0x8
-_1121:
+_1122:
 	movb	[r15+#0x92],rh4
 _293:
 	movw	r11,r15
@@ -714,13 +716,13 @@ _293:
 ; src/main.c	   159      for (int i = 0; i < 8; i++) {      (inlined)
 _14:
 	movb	rh2,#0x0
-_1122:
+_1123:
 	exts	r13,#0x1
 	movb	[r11],rh2
-_1123:
+_1124:
 	addw	r11,#0x1
 	addcw	r13,#0x0
-_1124:
+_1125:
 
 ; src/main.c	   159      for (int i = 0; i < 8; i++) {      (inlined)
 	cmpi1	r12,#0x7
@@ -732,43 +734,43 @@ _294:
 ; src/main.c	   291      /* initialize can channel and fifo buffer */
 ; src/main.c	   292      IO_CAN_Init( CONTROLS_CAN_CHANNEL
 	movb	rl2,#0x3a
-_1125:
+_1126:
 
 ; src/main.c	   293                 , BAUD_RATE
 	movw	r3,#0xfa
-_1126:
+_1127:
 
 ; src/main.c	   294                 , 0
 ; src/main.c	   295                 , 0
 	movb	rl4,rh2
-_1127:
+_1128:
 
 ; src/main.c	   296                 , 0);
 	movb	rh4,rh2
 	call	_IO_CAN_Init
-_975:
+_978:
 
 ; src/main.c	   297  
 ; src/main.c	   298      IO_CAN_Init( TELEMETRY_CAN_CHANNEL
 	movb	rl2,#0x3b
-_1128:
+_1129:
 
 ; src/main.c	   299                 , BAUD_RATE
 	movw	r3,#0xfa
-_1129:
+_1130:
 
 ; src/main.c	   300                 , 0
 	movb	rh2,#0x0
-_1130:
+_1131:
 
 ; src/main.c	   301                 , 0
 	movb	rl4,rh2
-_1131:
+_1132:
 
 ; src/main.c	   302                 , 0);
 	movb	rh4,rh2
 	call	_IO_CAN_Init
-_1132:
+_1133:
 
 ; src/main.c	   303  
 ; src/main.c	   304      IO_CAN_ConfigFIFO( &handle_controls_fifo_w
@@ -776,35 +778,35 @@ _1132:
 	addw	r2,#0x13
 	andw	r2,#0x3fff
 	orw	r2,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-_1133:
+_1134:
 
 ; src/main.c	   305      				 , CONTROLS_CAN_CHANNEL
 	movb	rl4,#0x3a
-_1134:
+_1135:
 
 ; src/main.c	   306      				 , FIFO_BUFFER_SIZE
 	movb	rh4,#0x14
-_1135:
+_1136:
 
 ; src/main.c	   307      				 , IO_CAN_MSG_WRITE
 	movb	rl5,#0x1
-_1136:
+_1137:
 
 ; src/main.c	   308      				 , IO_CAN_STD_FRAME
 	movb	rh5,#0x0
-_1137:
+_1138:
 
 ; src/main.c	   309      				 , VCU_CONTROLS_CAN_ID
 	movw	r11,#0xc0
 	movw	r13,#0x0
-_1138:
+_1139:
 
 ; src/main.c	   310      				 , 0);
 	movw	r3,#@seg(__lc_ub_user_stack+0xffff)
 	movw	r12,r13
 	movw	r14,r13
 	call	_IO_CAN_ConfigFIFO
-_1139:
+_1140:
 
 ; src/main.c	   311  
 ; src/main.c	   312      IO_CAN_ConfigFIFO( &handle_telemetry_fifo_w
@@ -812,35 +814,35 @@ _1139:
 	addw	r2,#0x12
 	andw	r2,#0x3fff
 	orw	r2,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-_1140:
+_1141:
 
 ; src/main.c	   313                      , TELEMETRY_CAN_CHANNEL
 	movb	rl4,#0x3b
-_1141:
+_1142:
 
 ; src/main.c	   314                      , FIFO_BUFFER_SIZE
 	movb	rh4,#0x14
-_1142:
+_1143:
 
 ; src/main.c	   315                      , IO_CAN_MSG_WRITE
 	movb	rl5,#0x1
-_1143:
+_1144:
 
 ; src/main.c	   316                      , IO_CAN_STD_FRAME
 	movb	rh5,#0x0
-_1144:
+_1145:
 
 ; src/main.c	   317                      , VCU_CONTROLS_CAN_ID
 	movw	r11,#0xc0
 	movw	r13,#0x0
-_1145:
+_1146:
 
 ; src/main.c	   318                      , 0);
 	movw	r3,#@seg(__lc_ub_user_stack+0xffff)
 	movw	r12,r13
 	movw	r14,r13
 	call	_IO_CAN_ConfigFIFO
-_1146:
+_1147:
 
 ; src/main.c	   319  
 ; src/main.c	   320      IO_CAN_ConfigMsg( &handle_inverter_motor_info_r
@@ -850,21 +852,21 @@ _1146:
 	orw	r0,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r11,#@seg(__lc_ub_user_stack+0xffff)
 	movw	[r15+#0xc0],r11
-_1147:
+_1148:
 
 ; src/main.c	   321                   , CONTROLS_CAN_CHANNEL
 	movb	rl4,#0x3a
-_1148:
+_1149:
 
 ; src/main.c	   322                   , IO_CAN_MSG_READ
 	movb	rh4,#0x0
-_1149:
+_1150:
 
 ; src/main.c	   323                   , IO_CAN_STD_FRAME
 ; src/main.c	   324                   , MOTOR_INFO_CAN_ID
 	movw	r11,#0xa5
 	movw	r12,#0x0
-_1150:
+_1151:
 
 ; src/main.c	   325                   , 0x1FFFFFFF);
 	movw	r13,#0xffff
@@ -873,7 +875,7 @@ _1150:
 	movw	r3,[r15+#0xc0]
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
-_1151:
+_1152:
 
 ; src/main.c	   326  
 ; src/main.c	   327      IO_CAN_ConfigMsg( &handle_inverter_voltage_info_r
@@ -884,21 +886,21 @@ _1151:
 	movw	[r15+#0xba],r11
 	movw	r11,#@seg(__lc_ub_user_stack+0xffff)
 	movw	[r15+#0xc6],r11
-_1152:
+_1153:
 
 ; src/main.c	   328                   , CONTROLS_CAN_CHANNEL
 	movb	rl4,#0x3a
-_1153:
+_1154:
 
 ; src/main.c	   329                   , IO_CAN_MSG_READ
 	movb	rh4,#0x0
-_1154:
+_1155:
 
 ; src/main.c	   330                   , IO_CAN_STD_FRAME
 ; src/main.c	   331                   , VOLTAGE_INFO_CAN_ID
 	movw	r11,#0xa7
 	movw	r12,#0x0
-_1155:
+_1156:
 
 ; src/main.c	   332                   , 0x1FFFFFFF);
 	movw	r13,#0xffff
@@ -907,7 +909,7 @@ _1155:
 	movw	r3,[r15+#0xc6]
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
-_1156:
+_1157:
 
 ; src/main.c	   333  
 ; src/main.c	   334      IO_CAN_ConfigMsg( &handle_inverter_current_info_r
@@ -917,21 +919,21 @@ _1156:
 	orw	r9,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r11,#@seg(__lc_ub_user_stack+0xffff)
 	movw	[r15+#0xbc],r11
-_1157:
+_1158:
 
 ; src/main.c	   335                   , CONTROLS_CAN_CHANNEL
 	movb	rl4,#0x3a
-_1158:
+_1159:
 
 ; src/main.c	   336                   , IO_CAN_MSG_READ
 	movb	rh4,#0x0
-_1159:
+_1160:
 
 ; src/main.c	   337                   , IO_CAN_STD_FRAME
 ; src/main.c	   338                   , CURRENT_INFO_CAN_ID
 	movw	r11,#0xa6
 	movw	r12,#0x0
-_1160:
+_1161:
 
 ; src/main.c	   339                   , 0x1FFFFFFF);
 	movw	r13,#0xffff
@@ -940,7 +942,7 @@ _1160:
 	movw	r3,[r15+#0xbc]
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
-_1161:
+_1162:
 
 ; src/main.c	   340  
 ; src/main.c	   341      IO_CAN_ConfigMsg( &handle_orion_1_r
@@ -950,21 +952,21 @@ _1161:
 	orw	r10,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r11,#@seg(__lc_ub_user_stack+0xffff)
 	movw	[r15+#0xbe],r11
-_1162:
+_1163:
 
 ; src/main.c	   342                   , CONTROLS_CAN_CHANNEL
 	movb	rl4,#0x3a
-_1163:
+_1164:
 
 ; src/main.c	   343                   , IO_CAN_MSG_READ
 	movb	rh4,#0x0
-_1164:
+_1165:
 
 ; src/main.c	   344                   , IO_CAN_STD_FRAME
 ; src/main.c	   345                   , ORION_1_CAN_ID
 	movw	r11,#0x6b2
 	movw	r12,#0x0
-_1165:
+_1166:
 
 ; src/main.c	   346                   , 0x1FFFFFFF);
 	movw	r13,#0xffff
@@ -973,7 +975,7 @@ _1165:
 	movw	r3,[r15+#0xbe]
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
-_1166:
+_1167:
 
 ; src/main.c	   347  
 ; src/main.c	   348      IO_CAN_ConfigMsg( &handle_orion_2_r
@@ -983,21 +985,21 @@ _1166:
 	orw	r7,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r11,#@seg(__lc_ub_user_stack+0xffff)
 	movw	[r15+#0xc2],r11
-_1167:
+_1168:
 
 ; src/main.c	   349                   , CONTROLS_CAN_CHANNEL
 	movb	rl4,#0x3a
-_1168:
+_1169:
 
 ; src/main.c	   350                   , IO_CAN_MSG_READ
 	movb	rh4,#0x0
-_1169:
+_1170:
 
 ; src/main.c	   351                   , IO_CAN_STD_FRAME
 ; src/main.c	   352                   , ORION_2_CAN_ID
 	movw	r11,#0x6b3
 	movw	r12,#0x0
-_1170:
+_1171:
 
 ; src/main.c	   353                   , 0x1FFFFFFF);
 	movw	r13,#0xffff
@@ -1006,7 +1008,7 @@ _1170:
 	movw	r3,[r15+#0xc2]
 	movb	rl5,rh4
 	call	_IO_CAN_ConfigMsg
-_1171:
+_1172:
 
 ; src/main.c	   354      
 ; src/main.c	   355      IO_CAN_ConfigMsg( &handle_orion_therm_exp_r
@@ -1017,21 +1019,21 @@ _1171:
 	movw	[r15+#0xb8],r11
 	movw	r11,#@seg(__lc_ub_user_stack+0xffff)
 	movw	[r15+#0xc4],r11
-_1172:
+_1173:
 
 ; src/main.c	   356                   , CONTROLS_CAN_CHANNEL
 	movb	rl4,#0x3a
-_1173:
+_1174:
 
 ; src/main.c	   357                   , IO_CAN_MSG_READ
 	movb	rh4,#0x0
-_1174:
+_1175:
 
 ; src/main.c	   358                   , IO_CAN_STD_FRAME
 ; src/main.c	   359                   , ORION_THERM_EXP_CAN_ID
 	movw	r11,#0xf380
 	movw	r12,#0x1838
-_1175:
+_1176:
 
 ; src/main.c	   360                   , 0x1FFFFFFF);
 	movw	r13,#0xffff
@@ -1047,7 +1049,7 @@ _297:
 ; src/main.c	   363      bool rtd_val;
 ; src/main.c	   364      IO_DI_Init( IO_PIN_RTD,
 	movb	rl2,#0x26
-_1176:
+_1177:
 
 ; src/main.c	   365                  IO_DI_PU_10K );
 	movb	rh2,#0x1
@@ -1060,55 +1062,55 @@ _299:
 ; src/main.c	   369      ubyte4 rtd_timestamp;
 ; src/main.c	   370      bool just_entered_sound_state = TRUE;
 	movb	rh4,#0x1
-_976:
+_979:
 	movb	[r15+#0x112],rh4
-_978:
+_981:
 
 ; src/main.c	   371  
 ; src/main.c	   372  
 ; src/main.c	   373      /* APPS 1 pulled down */
 ; src/main.c	   374      IO_ADC_ChannelInit( IO_PIN_APPS_1,
 	movb	rl2,#0x8
-_1177:
+_1178:
 
 ; src/main.c	   375                          IO_ADC_RATIOMETRIC,
 	movb	rh2,[r15+#0x112]
-_977:
+_980:
 
 ; src/main.c	   376                          0,
 	movb	rl3,#0x0
-_1178:
+_1179:
 
 ; src/main.c	   377                          0,
 ; src/main.c	   378                          IO_APPS_1_SUPPLY,
 	movb	rl4,#0x24
-_1179:
+_1180:
 
 ; src/main.c	   379                          NULL );
 	movw	r11,#0x0
 	movb	rh3,rl3
 	movw	r12,r11
 	call	_IO_ADC_ChannelInit
-_979:
+_982:
 
 ; src/main.c	   380  
 ; src/main.c	   381      /* APPS 2 pulled down */
 ; src/main.c	   382      IO_ADC_ChannelInit( IO_PIN_APPS_2,
 	movb	rl2,#0x9
-_1180:
+_1181:
 
 ; src/main.c	   383                          IO_ADC_RATIOMETRIC,
 	movb	rh2,#0x1
-_1181:
+_1182:
 
 ; src/main.c	   384                          0,
 	movb	rl3,#0x0
-_1182:
+_1183:
 
 ; src/main.c	   385                          0,
 ; src/main.c	   386                          IO_APPS_2_SUPPLY,
 	movb	rl4,#0x24
-_1183:
+_1184:
 
 ; src/main.c	   387                          NULL );
 	movw	r11,#0x0
@@ -1121,35 +1123,35 @@ _302:
 ; src/main.c	   389      /* APPS in general */
 ; src/main.c	   390      ubyte2 apps_pct_result = 0;
 	movw	r12,#0x0
-_1184:
-	movw	[r15+#0x9e],r12
 _1185:
+	movw	[r15+#0x9e],r12
+_1186:
 
 ; src/main.c	   391      ubyte1 apps_error = APPS_NO_ERROR;
 	movb	rh3,#0x0
-_1186:
-	movb	[r15+#0xa0],rh3
 _1187:
+	movb	[r15+#0xa0],rh3
+_1188:
 
 ; src/main.c	   392      ubyte1 num_errors = 0;
 	movb	[r15+#0xa1],rh3
-_1188:
+_1189:
 
 ; src/main.c	   393  
 ; src/main.c	   394      /* BSE pulled down */
 ; src/main.c	   395      IO_ADC_ChannelInit( IO_PIN_BSE,
 	movb	rl2,#0xf
-_1189:
+_1190:
 
 ; src/main.c	   396                          IO_ADC_RATIOMETRIC,
 	movb	rh2,#0x1
-_1190:
+_1191:
 
 ; src/main.c	   397                          0,
 ; src/main.c	   398                          0,
 ; src/main.c	   399                          IO_BSE_SUPPLY,
 	movb	rl4,#0x25
-_1191:
+_1192:
 
 ; src/main.c	   400                          NULL );
 	movb	rl3,rh3
@@ -1159,52 +1161,52 @@ _306:
 
 ; src/main.c	   401      ubyte2 bse_result = 0;
 	movw	r11,#0x0
-_1192:
-	movw	[r15+#0xa2],r11
 _1193:
+	movw	[r15+#0xa2],r11
+_1194:
 
 ; src/main.c	   402      ubyte1 bse_error = BSE_NO_ERROR;
 	movb	rh2,#0x0
-_1194:
-	movb	[r15+#0xa4],rh2
 _1195:
+	movb	[r15+#0xa4],rh2
+_1196:
 
 ; src/main.c	   403  
 ; src/main.c	   404      /* sdc with 10k pull-down resistor*/
 ; src/main.c	   405      bool sdc_val;
 ; src/main.c	   406      IO_DI_Init( IO_PIN_SDC,
 	movb	rl2,#0x27
-_1196:
+_1197:
 
 ; src/main.c	   407                  IO_DI_PD_10K );
 	call	_IO_DI_Init
-_1197:
+_1198:
 
 ; src/main.c	   408  
 ; src/main.c	   409      /* buzzer */
 ; src/main.c	   410      IO_DO_Init( IO_PIN_BUZZER );
 	movb	rl2,#0x0
 	call	_IO_DO_Init
-_1198:
+_1199:
 
 ; src/main.c	   411  
 ; src/main.c	   412      /* brake lights */
 ; src/main.c	   413      IO_DO_Init( BRAKE_LIGHT_PIN );
 	movb	rl2,#0x1a
 	call	_IO_DO_Init
-_1199:
+_1200:
 
 ; src/main.c	   414  
 ; src/main.c	   415      /* TSSI lights */
 ; src/main.c	   416      IO_DO_Init( TSIL_GREEN_PIN );
 	movb	rl2,#0x19
 	call	_IO_DO_Init
-_1200:
+_1201:
 
 ; src/main.c	   417      IO_DO_Init( TSIL_RED_PIN );
 	movb	rl2,#0x18
 	call	_IO_DO_Init
-_1201:
+_1202:
 
 ; src/main.c	   418  
 ; src/main.c	   419      // make sure light is green
@@ -1217,17 +1219,17 @@ _310:
 ; src/main.c	   422      /* VCU State */
 ; src/main.c	   423      enum VCU_State current_state = NOT_READY;
 	movb	rh4,#0x0
-_980:
+_983:
 	movb	[r15+#0x110],rh4
-_982:
+_985:
 
 ; src/main.c	   424  
 ; src/main.c	   425      // sensor input is invalid during the first cycle
 ; src/main.c	   426      bool first_cycle = TRUE;
 	movb	rl4,#0x1
-_983:
+_986:
 	movb	[r15+#0x114],rl4
-_984:
+_987:
 
 ; src/main.c	   427  
 ; src/main.c	   428      // variables to hold torque
@@ -1240,16 +1242,16 @@ _984:
 ; src/main.c	   435      // whether a new motor info message has been received since the last time
 ; src/main.c	   436      bool motor_info_message_received = FALSE;
 	movb	[r15+#0xa7],rh4
-_1202:
+_1203:
 
 ; src/main.c	   437      // last received motor speed
 ; src/main.c	   438      ubyte1 last_speed_d0 = 0;
 	movb	[r15+#0x117],rh4
-_985:
+_988:
 
 ; src/main.c	   439      ubyte1 last_speed_d1 = 0;
 	movb	[r15+#0x116],rh4
-_986:
+_989:
 
 ; src/main.c	   440      ubyte2 last_speed = 0;
 ; src/main.c	   441      // whether any motor info message has been received
@@ -1258,7 +1260,7 @@ _986:
 ; src/main.c	   444      // whether a new voltage info message has been received since the last time
 ; src/main.c	   445      bool voltage_info_message_received = FALSE;
 	movb	[r15+#0xa8],rh4
-_1203:
+_1204:
 
 ; src/main.c	   446      // last received pack voltage
 ; src/main.c	   447      ubyte2 pack_voltage = 0;
@@ -1268,38 +1270,38 @@ _1203:
 ; src/main.c	   451      //inverter current info received
 ; src/main.c	   452      bool current_info_message_received = FALSE;
 	movb	rh4,[r15+#0x110]
-_1204:
-	movb	[r15+#0xab],rh4
 _1205:
+	movb	[r15+#0xab],rh4
+_1206:
 
 ; src/main.c	   453  
 ; src/main.c	   454      // orion message received
 ; src/main.c	   455      bool orion_1_message_received = FALSE;
 	movb	[r15+#0xa6],rh4
-_1206:
+_1207:
 
 ; src/main.c	   456      bool orion_1_message_received_once = FALSE;
 	movb	[r15+#0x115],rh4
-_987:
+_990:
 
 ; src/main.c	   457      bool orion_good = TRUE;
 ; src/main.c	   458  
 ; src/main.c	   459      bool orion_2_message_received = FALSE;
 	movb	[r15+#0xaa],rh4
-_1207:
+_1208:
 
 ; src/main.c	   460      bool orion_2_message_received_once = FALSE;
 ; src/main.c	   461  
 ; src/main.c	   462      bool orion_therm_exp_message_received = FALSE;
 	movb	rh4,[r15+#0x110]
-_1208:
-	movb	[r15+#0xa9],rh4
 _1209:
+	movb	[r15+#0xa9],rh4
+_1210:
 
 ; src/main.c	   463  
 ; src/main.c	   464      bool been_ignore_period_since_start = FALSE;
 	movb	[r15+#0x113],rh4
-_988:
+_991:
 
 ; src/main.c	   465      ubyte4 time_since_start;
 ; src/main.c	   466      ubyte4 orion_can_timeout;
@@ -1307,7 +1309,7 @@ _988:
 ; src/main.c	   468      // whether a red car incident has happened (i.e. whether tsil is blinking red)
 ; src/main.c	   469      bool red_car = FALSE;
 	movb	[r15+#0x111],rh4
-_989:
+_992:
 
 ; src/main.c	   470  
 ; src/main.c	   471      IO_RTC_StartTime(&time_since_start);
@@ -1317,7 +1319,7 @@ _989:
 	orw	r2,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r3,#@seg(__lc_ub_user_stack+0xffff)
 	call	_IO_RTC_StartTime
-_981:
+_984:
 
 ; src/main.c	   472      IO_RTC_StartTime(&orion_can_timeout);
 	movw	r2,r15
@@ -1329,7 +1331,7 @@ _981:
 	movw	[r15+#0x10e],r11
 	movw	r3,[r15+#0x10e]
 	call	_IO_RTC_StartTime
-_1210:
+_1211:
 
 ; src/main.c	   473  
 ; src/main.c	   474  
@@ -1365,7 +1367,7 @@ _328:
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	[r15+#0xca],r11
-_1211:
+_1212:
 	movw	r11,r15
 	addw	r11,#0x6e
 	andw	r11,#0x3fff
@@ -1381,7 +1383,7 @@ _329:
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	[r15+#0xd2],r11
-_1212:
+_1213:
 	movw	r11,r15
 	addw	r11,#0x44
 	andw	r11,#0x3fff
@@ -1405,7 +1407,7 @@ _339:
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	[r15+#0xd4],r11
-_1213:
+_1214:
 	movw	r11,r15
 	addw	r11,#0x7c
 	andw	r11,#0x3fff
@@ -1421,7 +1423,7 @@ _342:
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	[r15+#0xd6],r11
-_1214:
+_1215:
 	movw	r11,r15
 	addw	r11,#0x36
 	andw	r11,#0x3fff
@@ -1435,7 +1437,7 @@ _345:
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	[r15+#0xd8],r11
-_1215:
+_1216:
 	movw	r11,r15
 	addw	r11,#0x52
 	andw	r11,#0x3fff
@@ -1449,7 +1451,7 @@ _348:
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	[r15+#0xda],r11
-_1216:
+_1217:
 	movw	r11,r15
 	addw	r11,#0x60
 	andw	r11,#0x3fff
@@ -1495,7 +1497,7 @@ _354:
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	[r15+#0xd0],r11
-_1217:
+_1218:
 	movw	r11,r15
 	addw	r11,#0xa2
 	andw	r11,#0x3fff
@@ -1517,19 +1519,19 @@ _361:
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	[r15+#0xe0],r11
-_1218:
+_1219:
 	movw	r11,r15
 	addw	r11,#0xa0
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	[r15+#0xde],r11
-_1219:
+_1220:
 	movw	r11,r15
 	addw	r11,#0x9e
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	[r15+#0xdc],r11
-_1220:
+_1221:
 
 ; src/main.c	   542  
 ; src/main.c	   543                  // transitions
@@ -1559,7 +1561,7 @@ _1220:
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	[r15+#0xf6],r11
-_1221:
+_1222:
 
 ; src/main.c	   565                      just_entered_sound_state = FALSE;
 ; src/main.c	   566  
@@ -1587,7 +1589,7 @@ _367:
 	addw	r11,r15
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0x10c],r11
+	movw	[r15+#0x10a],r11
 _368:
 
 ; src/main.c	   581  
@@ -1672,8 +1674,8 @@ _368:
 	addw	r11,r15
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	[r15+#0x10a],r11
-_1222:
+	movw	[r15+#0x10c],r11
+_1223:
 
 ; src/main.c	   659                  }
 ; src/main.c	   660  
@@ -1749,7 +1751,7 @@ _1222:
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	[r15+#0x108],r11
-_1223:
+_1224:
 
 ; src/main.c	   728              }
 ; src/main.c	   729  
@@ -1760,7 +1762,7 @@ _1223:
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	[r15+#0x106],r11
-_1224:
+_1225:
 
 ; src/main.c	   732              }
 ; src/main.c	   733  
@@ -1772,7 +1774,7 @@ _1224:
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	[r15+#0x104],r11
-_1225:
+_1226:
 
 ; src/main.c	   737              }
 ; src/main.c	   738  
@@ -1784,7 +1786,7 @@ _1225:
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	[r15+#0x102],r11
-_1226:
+_1227:
 
 ; src/main.c	   742              }
 ; src/main.c	   743              if (orion_2_message_received) {
@@ -1794,7 +1796,7 @@ _1226:
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	[r15+#0x100],r11
-_1227:
+_1228:
 
 ; src/main.c	   745              }
 ; src/main.c	   746              if (orion_therm_exp_message_received) {
@@ -1804,7 +1806,7 @@ _1227:
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	[r15+#0xfe],r11
-_1228:
+_1229:
 
 ; src/main.c	   748              }
 ; src/main.c	   749  
@@ -1848,13 +1850,13 @@ _373:
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	[r15+#0xfc],r11
-_1229:
+_1230:
 	movw	r11,r15
 	addw	r11,#0xb4
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	[r15+#0xfa],r11
-_1230:
+_1231:
 
 ; src/main.c	   778  
 ; src/main.c	   779              debug_can_frame.data[0] = apps_error;
@@ -1883,39 +1885,39 @@ _15:
 	movw	r2,[r15+#0xe6]
 	movw	r3,r8
 	call	_IO_RTC_StartTime
-_1231:
+_1232:
 	call	_IO_Driver_TaskBegin
 _337:
 	movw	r11,[r15+#0xca]
 	movb	rh4,#0x0
-_1232:
+_1233:
 	exts	r8,#0x1
 	movb	[r11],rh4
-_1233:
-	movw	r11,[r15+#0xbc]
-	exts	r11,#0x1
-	movb	rl2,[r9]
-	call	_IO_CAN_MsgStatus
-_990:
-
-; src/main.c	   187      if (can_read_error == IO_E_OK) {      (inlined)
-	cmpw	r2,#0x0
-	jmp	cc_ne,_16
 _1234:
 	movw	r11,[r15+#0xbc]
 	exts	r11,#0x1
 	movb	rl2,[r9]
-_991:
+	call	_IO_CAN_MsgStatus
+_993:
+
+; src/main.c	   187      if (can_read_error == IO_E_OK) {      (inlined)
+	cmpw	r2,#0x0
+	jmp	cc_ne,_16
+_1235:
+	movw	r11,[r15+#0xbc]
+	exts	r11,#0x1
+	movb	rl2,[r9]
+_994:
 	movw	r4,[r15+#0xe8]
 	movw	r5,r8
 	call	_IO_CAN_ReadMsg
-_1235:
+_1236:
 	movw	r11,[r15+#0xca]
 	movb	rh4,#0x1
-_1236:
+_1237:
 	exts	r8,#0x1
 	movb	[r11],rh4
-_1237:
+_1238:
 
 ; src/main.c	   188          IO_CAN_ReadMsg(*handle_r, dst_data_frame);      (inlined)
 	jmp	_17
@@ -1926,20 +1928,20 @@ _16:
 ; src/main.c	   190      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
 	cmpw	r2,#0x28
 	jmp	cc_ne,_18
-_1238:
+_1239:
 	movw	r11,[r15+#0xbc]
 	exts	r11,#0x1
 	movb	rl2,[r9]
-_992:
+_995:
 	call	_IO_CAN_DeInitHandle
-_1239:
-	movb	rl4,#0x3a
 _1240:
-	movb	rh4,#0x0
+	movb	rl4,#0x3a
 _1241:
+	movb	rh4,#0x0
+_1242:
 	movw	r11,#0xa6
 	movw	r12,#0x0
-_1242:
+_1243:
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
 	movw	r2,r9
@@ -1952,34 +1954,34 @@ _18:
 _17:
 	movw	r11,[r15+#0xd2]
 	movb	rh4,#0x0
-_1243:
+_1244:
 	exts	r8,#0x1
 	movb	[r11],rh4
-_1244:
-	movw	r11,[r15+#0xc0]
-	exts	r11,#0x1
-	movb	rl2,[r0]
-	call	_IO_CAN_MsgStatus
-_993:
-
-; src/main.c	   187      if (can_read_error == IO_E_OK) {      (inlined)
-	cmpw	r2,#0x0
-	jmp	cc_ne,_19
 _1245:
 	movw	r11,[r15+#0xc0]
 	exts	r11,#0x1
 	movb	rl2,[r0]
-_994:
+	call	_IO_CAN_MsgStatus
+_996:
+
+; src/main.c	   187      if (can_read_error == IO_E_OK) {      (inlined)
+	cmpw	r2,#0x0
+	jmp	cc_ne,_19
+_1246:
+	movw	r11,[r15+#0xc0]
+	exts	r11,#0x1
+	movb	rl2,[r0]
+_997:
 	movw	r4,[r15+#0xea]
 	movw	r5,r8
 	call	_IO_CAN_ReadMsg
-_1246:
+_1247:
 	movw	r11,[r15+#0xd2]
 	movb	rh4,#0x1
-_1247:
+_1248:
 	exts	r8,#0x1
 	movb	[r11],rh4
-_1248:
+_1249:
 
 ; src/main.c	   188          IO_CAN_ReadMsg(*handle_r, dst_data_frame);      (inlined)
 	jmp	_20
@@ -1990,20 +1992,20 @@ _19:
 ; src/main.c	   190      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
 	cmpw	r2,#0x28
 	jmp	cc_ne,_21
-_1249:
+_1250:
 	movw	r11,[r15+#0xc0]
 	exts	r11,#0x1
 	movb	rl2,[r0]
-_995:
+_998:
 	call	_IO_CAN_DeInitHandle
-_1250:
-	movb	rl4,#0x3a
 _1251:
-	movb	rh4,#0x0
+	movb	rl4,#0x3a
 _1252:
+	movb	rh4,#0x0
+_1253:
 	movw	r11,#0xa5
 	movw	r12,#0x0
-_1253:
+_1254:
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
 	movw	r2,r0
@@ -2015,49 +2017,49 @@ _1253:
 _21:
 _20:
 	movb	rh4,[r15+#0xa7]
-_1254:
-	jmp	cc_eq,_22
 _1255:
-	movb	rh4,[r15+#0x46]
-_996:
-	movb	[r15+#0x117],rh4
+	jmp	cc_eq,_22
 _1256:
+	movb	rh4,[r15+#0x46]
+_999:
+	movb	[r15+#0x117],rh4
+_1257:
 	movb	rh4,[r15+#0x47]
-_997:
+_1000:
 	movb	[r15+#0x116],rh4
 _22:
 	movw	r11,[r15+#0xd4]
 	movb	rh4,#0x0
-_1257:
+_1258:
 	exts	r8,#0x1
 	movb	[r11],rh4
-_1258:
-	movw	r11,[r15+#0xba]
-	movw	r12,[r15+#0xc6]
-	exts	r12,#0x1
-	movb	rl2,[r11]
-	call	_IO_CAN_MsgStatus
-_998:
-
-; src/main.c	   187      if (can_read_error == IO_E_OK) {      (inlined)
-	cmpw	r2,#0x0
-	jmp	cc_ne,_23
 _1259:
 	movw	r11,[r15+#0xba]
 	movw	r12,[r15+#0xc6]
 	exts	r12,#0x1
 	movb	rl2,[r11]
-_999:
+	call	_IO_CAN_MsgStatus
+_1001:
+
+; src/main.c	   187      if (can_read_error == IO_E_OK) {      (inlined)
+	cmpw	r2,#0x0
+	jmp	cc_ne,_23
+_1260:
+	movw	r11,[r15+#0xba]
+	movw	r12,[r15+#0xc6]
+	exts	r12,#0x1
+	movb	rl2,[r11]
+_1002:
 	movw	r4,[r15+#0xec]
 	movw	r5,r8
 	call	_IO_CAN_ReadMsg
-_1260:
+_1261:
 	movw	r11,[r15+#0xd4]
 	movb	rh4,#0x1
-_1261:
+_1262:
 	exts	r8,#0x1
 	movb	[r11],rh4
-_1262:
+_1263:
 
 ; src/main.c	   188          IO_CAN_ReadMsg(*handle_r, dst_data_frame);      (inlined)
 	jmp	_24
@@ -2068,21 +2070,21 @@ _23:
 ; src/main.c	   190      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
 	cmpw	r2,#0x28
 	jmp	cc_ne,_25
-_1263:
+_1264:
 	movw	r11,[r15+#0xba]
 	movw	r12,[r15+#0xc6]
 	exts	r12,#0x1
 	movb	rl2,[r11]
-_1000:
+_1003:
 	call	_IO_CAN_DeInitHandle
-_1264:
-	movb	rl4,#0x3a
 _1265:
-	movb	rh4,#0x0
+	movb	rl4,#0x3a
 _1266:
+	movb	rh4,#0x0
+_1267:
 	movw	r11,#0xa7
 	movw	r12,#0x0
-_1267:
+_1268:
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
 	movw	r2,[r15+#0xba]
@@ -2095,34 +2097,34 @@ _25:
 _24:
 	movw	r11,[r15+#0xd6]
 	movb	rh4,#0x0
-_1268:
+_1269:
 	exts	r8,#0x1
 	movb	[r11],rh4
-_1269:
-	movw	r11,[r15+#0xbe]
-	exts	r11,#0x1
-	movb	rl2,[r10]
-	call	_IO_CAN_MsgStatus
-_1001:
-
-; src/main.c	   187      if (can_read_error == IO_E_OK) {      (inlined)
-	cmpw	r2,#0x0
-	jmp	cc_ne,_26
 _1270:
 	movw	r11,[r15+#0xbe]
 	exts	r11,#0x1
 	movb	rl2,[r10]
-_1002:
+	call	_IO_CAN_MsgStatus
+_1004:
+
+; src/main.c	   187      if (can_read_error == IO_E_OK) {      (inlined)
+	cmpw	r2,#0x0
+	jmp	cc_ne,_26
+_1271:
+	movw	r11,[r15+#0xbe]
+	exts	r11,#0x1
+	movb	rl2,[r10]
+_1005:
 	movw	r4,[r15+#0xee]
 	movw	r5,r8
 	call	_IO_CAN_ReadMsg
-_1271:
+_1272:
 	movw	r11,[r15+#0xd6]
 	movb	rh4,#0x1
-_1272:
+_1273:
 	exts	r8,#0x1
 	movb	[r11],rh4
-_1273:
+_1274:
 
 ; src/main.c	   188          IO_CAN_ReadMsg(*handle_r, dst_data_frame);      (inlined)
 	jmp	_27
@@ -2133,20 +2135,20 @@ _26:
 ; src/main.c	   190      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
 	cmpw	r2,#0x28
 	jmp	cc_ne,_28
-_1274:
+_1275:
 	movw	r11,[r15+#0xbe]
 	exts	r11,#0x1
 	movb	rl2,[r10]
-_1003:
+_1006:
 	call	_IO_CAN_DeInitHandle
-_1275:
-	movb	rl4,#0x3a
 _1276:
-	movb	rh4,#0x0
+	movb	rl4,#0x3a
 _1277:
+	movb	rh4,#0x0
+_1278:
 	movw	r11,#0x6b2
 	movw	r12,#0x0
-_1278:
+_1279:
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
 	movw	r2,r10
@@ -2159,34 +2161,34 @@ _28:
 _27:
 	movw	r11,[r15+#0xd8]
 	movb	rh4,#0x0
-_1279:
+_1280:
 	exts	r8,#0x1
 	movb	[r11],rh4
-_1280:
-	movw	r11,[r15+#0xc2]
-	exts	r11,#0x1
-	movb	rl2,[r7]
-	call	_IO_CAN_MsgStatus
-_1004:
-
-; src/main.c	   187      if (can_read_error == IO_E_OK) {      (inlined)
-	cmpw	r2,#0x0
-	jmp	cc_ne,_29
 _1281:
 	movw	r11,[r15+#0xc2]
 	exts	r11,#0x1
 	movb	rl2,[r7]
-_1005:
+	call	_IO_CAN_MsgStatus
+_1007:
+
+; src/main.c	   187      if (can_read_error == IO_E_OK) {      (inlined)
+	cmpw	r2,#0x0
+	jmp	cc_ne,_29
+_1282:
+	movw	r11,[r15+#0xc2]
+	exts	r11,#0x1
+	movb	rl2,[r7]
+_1008:
 	movw	r4,[r15+#0xf0]
 	movw	r5,r8
 	call	_IO_CAN_ReadMsg
-_1282:
+_1283:
 	movw	r11,[r15+#0xd8]
 	movb	rh4,#0x1
-_1283:
+_1284:
 	exts	r8,#0x1
 	movb	[r11],rh4
-_1284:
+_1285:
 
 ; src/main.c	   188          IO_CAN_ReadMsg(*handle_r, dst_data_frame);      (inlined)
 	jmp	_30
@@ -2197,20 +2199,20 @@ _29:
 ; src/main.c	   190      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
 	cmpw	r2,#0x28
 	jmp	cc_ne,_31
-_1285:
+_1286:
 	movw	r11,[r15+#0xc2]
 	exts	r11,#0x1
 	movb	rl2,[r7]
-_1006:
+_1009:
 	call	_IO_CAN_DeInitHandle
-_1286:
-	movb	rl4,#0x3a
 _1287:
-	movb	rh4,#0x0
+	movb	rl4,#0x3a
 _1288:
+	movb	rh4,#0x0
+_1289:
 	movw	r11,#0x6b3
 	movw	r12,#0x0
-_1289:
+_1290:
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
 	movw	r2,r7
@@ -2223,36 +2225,36 @@ _31:
 _30:
 	movw	r11,[r15+#0xda]
 	movb	rh4,#0x0
-_1290:
+_1291:
 	exts	r8,#0x1
 	movb	[r11],rh4
-_1291:
-	movw	r11,[r15+#0xb8]
-	movw	r12,[r15+#0xc4]
-	exts	r12,#0x1
-	movb	rl2,[r11]
-	call	_IO_CAN_MsgStatus
-_1007:
-
-; src/main.c	   187      if (can_read_error == IO_E_OK) {      (inlined)
-	cmpw	r2,#0x0
-	jmp	cc_ne,_32
 _1292:
 	movw	r11,[r15+#0xb8]
 	movw	r12,[r15+#0xc4]
 	exts	r12,#0x1
 	movb	rl2,[r11]
-_1008:
+	call	_IO_CAN_MsgStatus
+_1010:
+
+; src/main.c	   187      if (can_read_error == IO_E_OK) {      (inlined)
+	cmpw	r2,#0x0
+	jmp	cc_ne,_32
+_1293:
+	movw	r11,[r15+#0xb8]
+	movw	r12,[r15+#0xc4]
+	exts	r12,#0x1
+	movb	rl2,[r11]
+_1011:
 	movw	r4,[r15+#0xf2]
 	movw	r5,r8
 	call	_IO_CAN_ReadMsg
-_1293:
+_1294:
 	movw	r11,[r15+#0xda]
 	movb	rh4,#0x1
-_1294:
+_1295:
 	exts	r8,#0x1
 	movb	[r11],rh4
-_1295:
+_1296:
 
 ; src/main.c	   188          IO_CAN_ReadMsg(*handle_r, dst_data_frame);      (inlined)
 	jmp	_33
@@ -2263,21 +2265,21 @@ _32:
 ; src/main.c	   190      } else if (can_read_error == IO_E_CAN_OVERFLOW) {      (inlined)
 	cmpw	r2,#0x28
 	jmp	cc_ne,_34
-_1296:
+_1297:
 	movw	r11,[r15+#0xb8]
 	movw	r12,[r15+#0xc4]
 	exts	r12,#0x1
 	movb	rl2,[r11]
-_1009:
+_1012:
 	call	_IO_CAN_DeInitHandle
-_1297:
-	movb	rl4,#0x3a
 _1298:
-	movb	rh4,#0x0
+	movb	rl4,#0x3a
 _1299:
+	movb	rh4,#0x0
+_1300:
 	movw	r11,#0xf380
 	movw	r12,#0x1838
-_1300:
+_1301:
 	movw	r13,#0xffff
 	movw	r14,#0x1fff
 	movw	r2,[r15+#0xb8]
@@ -2289,42 +2291,42 @@ _1300:
 _34:
 _33:
 	movb	rh4,[r15+#0xa6]
-_1301:
-	jmp	cc_eq,_35
 _1302:
+	jmp	cc_eq,_35
+_1303:
 	movw	r2,[r15+#0xf4]
 	movw	r3,[r15+#0x10e]
 	call	_IO_RTC_StartTime
-_1303:
+_1304:
 	movb	rh4,#0x1
-_1010:
+_1013:
 	movb	[r15+#0x115],rh4
 _35:
 	movw	r6,#0x0
-_1304:
-	movw	r1,r6
 _1305:
-	movw	[r15+#0x9e],r6
+	movw	r1,r6
 _1306:
-	movw	[r15+#0xa2],r6
+	movw	[r15+#0x9e],r6
 _1307:
-	movb	rh4,[r15+#0x114]
-_1011:
-	jmp	cc_eq,_36
+	movw	[r15+#0xa2],r6
 _1308:
+	movb	rh4,[r15+#0x114]
+_1014:
+	jmp	cc_eq,_36
+_1309:
 	movb	rh4,#0x0
 	movb	[r15+#0x114],rh4
-_1309:
+_1310:
 	jmp	_37
 _36:
 	movb	rh4,[r15+#0x110]
-_1012:
+_1015:
 	jmp	cc_ne,_38
 _358:
 	movb	rl2,#0x26
-_1310:
+_1311:
 	movw	r4,[r15+#0xc8]
-_1013:
+_1016:
 	movw	r5,r8
 	call	_IO_DI_Get
 _359:
@@ -2334,11 +2336,11 @@ _359:
 	movw	r5,r8
 	call	_get_bse
 _365:
-	movw	r11,[r15+#0xcc]
-	movb	rh4,#0x1
-_1311:
-	exts	r8,#0x1
-	movb	[r11],rh4
+	movb	rl2,#0x27
+_1312:
+	movw	r4,[r15+#0xcc]
+	movw	r5,r8
+	call	_IO_DI_Get
 _366:
 	movw	r2,[r15+#0xdc]
 	movw	r3,r8
@@ -2347,115 +2349,115 @@ _366:
 	movw	r11,[r15+#0xe0]
 	movw	r12,r8
 	call	_get_apps
-_1312:
+_1313:
 	movb	rh4,[r15+#0x98]
 	jmp	cc_ne,_39
-_1313:
-	movb	rh4,[r15+#0xa0]
 _1314:
-	jmp	cc_ne,_40
+	movb	rh4,[r15+#0xa0]
 _1315:
-	movb	rh4,[r15+#0xa5]
+	jmp	cc_ne,_40
 _1316:
-	jmp	cc_eq,_41
+	movb	rh4,[r15+#0xa5]
 _1317:
-	movb	rh4,[r15+#0x111]
-_1014:
-	jmp	cc_ne,_42
+	jmp	cc_eq,_41
 _1318:
-	movb	rh4,#0x1
-_1015:
-	movb	[r15+#0x110],rh4
+	movb	rh4,[r15+#0x111]
+_1017:
+	jmp	cc_ne,_42
 _1319:
+	movb	rh4,#0x1
+_1018:
+	movb	[r15+#0x110],rh4
+_1320:
 	jmp	_43
 _38:
 	cmpb	rh4,#0x1
 	jmp	cc_ne,_44
-_1320:
-	movb	rh4,[r15+#0x112]
-_1016:
-	jmp	cc_eq,_45
 _1321:
+	movb	rh4,[r15+#0x112]
+_1019:
+	jmp	cc_eq,_45
+_1322:
 	movw	r2,[r15+#0xf6]
 	movw	r3,r8
 	call	_IO_RTC_StartTime
-_1017:
+_1020:
 	movb	rl2,#0x0
-_1018:
+_1021:
 	movb	[r15+#0x112],rl2
-_1322:
+_1323:
 	movb	rh2,#0x1
 	call	_IO_DO_Set
-_1019:
+_1022:
 	movb	rh4,#0x14
-_1323:
-	movb	[r15+#0x1a],rh4
 _1324:
-	movb	rh4,#0x0
+	movb	[r15+#0x1a],rh4
 _1325:
-	movb	[r15+#0x1b],rh4
+	movb	rh4,#0x0
 _1326:
-	movb	rh2,#0x1
+	movb	[r15+#0x1b],rh4
 _1327:
-	movb	[r15+#0x1c],rh2
+	movb	rh2,#0x1
 _1328:
-	movb	[r15+#0x1d],rh4
+	movb	[r15+#0x1c],rh2
 _1329:
-	movb	[r15+#0x1e],rh4
+	movb	[r15+#0x1d],rh4
 _1330:
-	movw	r5,r8
+	movb	[r15+#0x1e],rh4
 _1331:
-	movb	[r15+#0x1f],rh4
+	movw	r5,r8
 _1332:
-	movb	[r15+#0x20],rh4
+	movb	[r15+#0x1f],rh4
 _1333:
-	movb	[r15+#0x21],rh4
+	movb	[r15+#0x20],rh4
 _1334:
-	movb	rl2,[r15+#0x13]
+	movb	[r15+#0x21],rh4
 _1335:
+	movb	rl2,[r15+#0x13]
+_1336:
 	movw	r4,[r15+#0xf8]
 	call	_IO_CAN_WriteFIFO
-_1336:
+_1337:
 	jmp	_46
 _45:
 	movw	r3,[r15+#0x9c]
 	movw	r2,[r15+#0x9a]
 	call	_IO_RTC_GetTimeUS
-_1020:
+_1023:
 	cmpw	r2,#0xe360
 	subcw	r3,#0x16
 	jmp	cc_ule,_47
-_1337:
-	movb	rh4,#0x2
-_1021:
-	movb	[r15+#0x110],rh4
 _1338:
-	movb	rh4,#0x1
-_1022:
-	movb	[r15+#0x112],rh4
+	movb	rh4,#0x2
+_1024:
+	movb	[r15+#0x110],rh4
 _1339:
-	movb	rl2,#0x0
+	movb	rh4,#0x1
+_1025:
+	movb	[r15+#0x112],rh4
 _1340:
+	movb	rl2,#0x0
+_1341:
 	movb	rh2,rl2
 	call	_IO_DO_Set
-_1023:
+_1026:
 	jmp	_48
 _44:
 	cmpb	rh4,#0x2
 	jmp	cc_ne,_49
 _379:
 	movb	rl2,#0x26
-_1341:
+_1342:
 	movw	r4,[r15+#0xc8]
-_1024:
+_1027:
 	movw	r5,r8
 	call	_IO_DI_Get
 _380:
-	movw	r11,[r15+#0xcc]
-	movb	rh4,#0x1
-_1342:
-	exts	r8,#0x1
-	movb	[r11],rh4
+	movb	rl2,#0x27
+_1343:
+	movw	r4,[r15+#0xcc]
+	movw	r5,r8
+	call	_IO_DI_Get
 _381:
 	movw	r2,[r15+#0xdc]
 	movw	r3,r8
@@ -2464,33 +2466,33 @@ _381:
 	movw	r11,[r15+#0xe0]
 	movw	r12,r8
 	call	_get_apps
-_1343:
+_1344:
 	movw	r2,[r15+#0xce]
 	movw	r3,r8
 	movw	r4,[r15+#0xd0]
 	movw	r5,r8
 	call	_get_bse
-_1344:
-	movb	rh4,[r15+#0x98]
 _1345:
+	movb	rh4,[r15+#0x98]
+_1346:
 	cmpb	rh4,#0x1
 	jmp	cc_eq,_50
-_1346:
+_1347:
 	movb	rh4,[r15+#0xa0]
 	jmp	cc_ne,_51
-_1347:
-	movb	rh4,[r15+#0xa4]
 _1348:
-	jmp	cc_ne,_52
+	movb	rh4,[r15+#0xa4]
 _1349:
-	movb	rh4,[r15+#0xa5]
+	jmp	cc_ne,_52
 _1350:
-	jmp	cc_eq,_53
+	movb	rh4,[r15+#0xa5]
 _1351:
-	movb	rh4,[r15+#0x111]
-_1025:
-	jmp	cc_ne,_54
+	jmp	cc_eq,_53
 _1352:
+	movb	rh4,[r15+#0x111]
+_1028:
+	jmp	cc_ne,_54
+_1353:
 	movw	r2,[r15+#0x9e]
 	movw	r3,#0x0
 _382:
@@ -2500,7 +2502,7 @@ _382:
 	cmpw	r2,#0x50
 	subcw	r11,#0x0
 	jmp	cc_ult,_55
-_1353:
+_1354:
 	movw	r2,#0xc8
 
 ; src/main.c	   214           return CONTINUOUS_TORQUE_MAX;      (inlined)
@@ -2509,90 +2511,90 @@ _1353:
 ; src/main.c	   213      if (pct_travel >= PCT_TRAVEL_FOR_MAX_TORQUE) {      (inlined)
 _55:
 	call	__ul2spf
-_1354:
-	movw	r4,#0x0
-_1026:
-	movw	r5,#0x42a0
 _1355:
-	call	__div_spf
+	movw	r4,#0x0
+_1029:
+	movw	r5,#0x42a0
 _1356:
+	call	__div_spf
+_1357:
 	movw	r4,#0x0
 	movw	r5,#0x4348
-_1357:
-	call	__mul_spf
 _1358:
+	call	__mul_spf
+_1359:
 	call	__spf2ul
 
 ; src/main.c	   218  }      (inlined)
 _56:
 	movw	r11,#0xa
-_1359:
+_1360:
 	CoMULu	r2,r11
 	CoSTORE	r11,MAL
 	CoSTORE	r12,MAH
-_1360:
-	movw	r6,r11
 _1361:
-	andw	r6,#0xff
+	movw	r6,r11
 _1362:
+	andw	r6,#0xff
+_1363:
 	CoLOAD	r11,r12
 	CoSHR	#0x8
-_1363:
-	CoSTORE	r1,MAL
 _1364:
-	movb	[r15+#0x4],rl6
+	CoSTORE	r1,MAL
 _1365:
-	movb	[r15+#0x5],rl1
+	movb	[r15+#0x4],rl6
 _1366:
-	movb	rl4,#0x0
+	movb	[r15+#0x5],rl1
 _1367:
-	movb	[r15+#0x6],rl4
+	movb	rl4,#0x0
 _1368:
-	movb	[r15+#0x7],rl4
+	movb	[r15+#0x6],rl4
 _1369:
-	movb	[r15+#0x8],rl4
+	movb	[r15+#0x7],rl4
 _1370:
-	movb	rh4,#0x1
+	movb	[r15+#0x8],rl4
 _1371:
-	movb	[r15+#0x9],rh4
+	movb	rh4,#0x1
 _1372:
-	movb	[r15+#0xa],rl4
+	movb	[r15+#0x9],rh4
 _1373:
-	movb	[r15+#0xb],rl4
+	movb	[r15+#0xa],rl4
 _1374:
+	movb	[r15+#0xb],rl4
+_1375:
 	jmp	_57
 _49:
 	movb	rl2,#0x26
-_1375:
+_1376:
 	movw	r4,[r15+#0xc8]
-_1027:
+_1030:
 	movw	r5,r8
 	call	_IO_DI_Get
 _385:
 	movb	rh4,[r15+#0x98]
-_1376:
+_1377:
 	cmpb	rh4,#0x1
 	jmp	cc_ne,_58
-_1377:
-	movb	rh4,#0x0
-_1028:
-	movb	[r15+#0x110],rh4
 _1378:
+	movb	rh4,#0x0
+_1031:
+	movb	[r15+#0x110],rh4
+_1379:
 	jmp	_59
 _50:
 	movb	rh4,#0x0
-_1029:
+_1032:
 	movb	[r15+#0x110],rh4
-_1379:
+_1380:
 	jmp	_60
 _54:
 _53:
 _52:
 _51:
 	movb	rh4,#0x3
-_1030:
+_1033:
 	movb	[r15+#0x110],rh4
-_1380:
+_1381:
 	jmp	_61
 _59:
 _58:
@@ -2603,105 +2605,106 @@ _42:
 _41:
 _40:
 _39:
-	movw	r11,[r15+#0x10c]
+	movw	r11,[r15+#0x10a]
 	movw	r12,r8
-_1381:
+_1382:
 
 ; src/main.c	   159      for (int i = 0; i < 8; i++) {      (inlined)
 	movw	r13,#0x0
 _62:
 	movb	rh4,#0x0
-_1382:
+_1383:
 	exts	r12,#0x1
 	movb	[r11],rh4
-_1383:
+_1384:
 	addw	r11,#0x1
 	addcw	r12,#0x0
-_1384:
+_1385:
 
 ; src/main.c	   159      for (int i = 0; i < 8; i++) {      (inlined)
 	cmpi1	r13,#0x7
 	jmp+	cc_ult,_62
 _57:
 	movb	rl2,[r15+#0x13]
-_1385:
+_1386:
 	movb	rh2,#0x1
-	movw	r4,[r15+#0x10a]
+	movw	r4,[r15+#0x10c]
 	movw	r5,r8
 	call	_IO_CAN_WriteFIFO
 _61:
 _60:
 _43:
 	movb	rh4,[r15+#0x113]
-_1031:
+_1034:
 	jmp	cc_ne,_63
-_1386:
+_1387:
 	movw	r3,[r15+#0xb2]
 	movw	r2,[r15+#0xb0]
 	call	_IO_RTC_GetTimeUS
-_1032:
+_1035:
 	cmpw	r2,#0xc6c0
 	subcw	r3,#0x2d
 	jmp	cc_ule,_64
-_1387:
+_1388:
 	movb	rh4,#0x1
-_1033:
+_1036:
 	movb	[r15+#0x113],rh4
 _64:
 _63:
 	movb	rh4,[r15+#0x113]
-_1034:
+_1037:
 	jmp	cc_eq,_65
-_1388:
+_1389:
 	movw	r3,[r15+#0xae]
 	movw	r2,[r15+#0xac]
 	call	_IO_RTC_GetTimeUS
-_1035:
+_1038:
 	cmpw	r2,#0x9680
 	subcw	r3,#0x98
 	jmp	cc_ugt,_66
-_1389:
+_1390:
 	movb	rh4,[r15+#0x115]
-_1036:
+_1039:
 	jmp	cc_eq,_67
 _386:
-	movw	r11,[r15+#0xcc]
-	movb	rh4,#0x1
-_1037:
-	exts	r8,#0x1
-	movb	[r11],rh4
+	movb	rl2,#0x27
+_1391:
+	movw	r4,[r15+#0xcc]
+_1040:
+	movw	r5,r8
+	call	_IO_DI_Get
 _387:
 	movb	rh4,[r15+#0x37]
-_1390:
+_1392:
 	jmp	cc_eq,_68
-_1391:
+_1393:
 	movb	rl4,[r15+#0x36]
 	jmp	cc_eq,_69
-_1392:
-	movb	rl4,[r15+#0xa5]
-_1393:
-	jmp	cc_eq,_70
 _1394:
+	movb	rl4,[r15+#0xa5]
+_1395:
+	jmp	cc_eq,_70
+_1396:
 	movb	rl2,#0x0
 	call	_set_light_to
-_1395:
+_1397:
 	movb	rh4,#0x0
-_1038:
+_1041:
 	jmp	_71
 _70:
 _69:
 _68:
 	cmpb	rh4,#0x0
 	jmp	cc_eq,_72
-_1396:
+_1398:
 	movb	rh4,[r15+#0x36]
-_1397:
+_1399:
 	jmp	cc_ne,_73
 _72:
 _66:
 	movb	rl2,#0x1
 	call	_set_light_to
-_1398:
+_1400:
 	movb	rh4,#0x1
 _71:
 	movb	[r15+#0x111],rh4
@@ -2709,198 +2712,198 @@ _73:
 _67:
 _65:
 	call	_do_lights_action
-_1399:
+_1401:
 	movw	r2,[r15+#0xce]
 	movw	r3,r8
 	movw	r4,[r15+#0xd0]
 	movw	r5,r8
 	call	_get_bse
-_1400:
+_1402:
 	movb	rh4,[r15+#0xa4]
 	jmp	cc_ne,_74
-_1401:
+_1403:
 	movw	r11,[r15+#0xa2]
-_1402:
+_1404:
 	cmpw	r11,#0x226
 	jmp	cc_ule,_75
-_1403:
-	movb	rl2,#0x1a
-_1404:
-	movb	rh2,#0x1
 _1405:
+	movb	rl2,#0x1a
+_1406:
+	movb	rh2,#0x1
+_1407:
 	jmp	_76
 _75:
 _74:
 	movb	rl2,#0x1a
-_1406:
+_1408:
 	movb	rh2,#0x0
 _76:
 	call	_IO_DO_Set
-_1407:
-	movb	rh4,[r15+#0xa7]
-_1408:
-	jmp	cc_eq,_77
 _1409:
-	movb	rl2,[r15+#0x12]
+	movb	rh4,[r15+#0xa7]
 _1410:
+	jmp	cc_eq,_77
+_1411:
+	movb	rl2,[r15+#0x12]
+_1412:
 	movb	rh2,#0x1
 	movw	r4,[r15+#0x108]
 	movw	r5,r8
 	call	_IO_CAN_WriteFIFO
 _77:
 	movb	rh4,[r15+#0xa8]
-_1411:
-	jmp	cc_eq,_78
-_1412:
-	movb	rl2,[r15+#0x12]
 _1413:
+	jmp	cc_eq,_78
+_1414:
+	movb	rl2,[r15+#0x12]
+_1415:
 	movb	rh2,#0x1
 	movw	r4,[r15+#0x106]
 	movw	r5,r8
 	call	_IO_CAN_WriteFIFO
 _78:
 	movb	rh4,[r15+#0xab]
-_1414:
-	jmp	cc_eq,_79
-_1415:
-	movb	rl2,[r15+#0x12]
 _1416:
+	jmp	cc_eq,_79
+_1417:
+	movb	rl2,[r15+#0x12]
+_1418:
 	movb	rh2,#0x1
 	movw	r4,[r15+#0x104]
 	movw	r5,r8
 	call	_IO_CAN_WriteFIFO
 _79:
 	movb	rh4,[r15+#0xa6]
-_1417:
-	jmp	cc_eq,_80
-_1418:
-	movb	rl2,[r15+#0x12]
 _1419:
+	jmp	cc_eq,_80
+_1420:
+	movb	rl2,[r15+#0x12]
+_1421:
 	movb	rh2,#0x1
 	movw	r4,[r15+#0x102]
 	movw	r5,r8
 	call	_IO_CAN_WriteFIFO
 _80:
 	movb	rh4,[r15+#0xaa]
-_1420:
-	jmp	cc_eq,_81
-_1421:
-	movb	rl2,[r15+#0x12]
 _1422:
+	jmp	cc_eq,_81
+_1423:
+	movb	rl2,[r15+#0x12]
+_1424:
 	movb	rh2,#0x1
 	movw	r4,[r15+#0x100]
 	movw	r5,r8
 	call	_IO_CAN_WriteFIFO
 _81:
 	movb	rh4,[r15+#0xa9]
-_1423:
-	jmp	cc_eq,_82
-_1424:
-	movb	rl2,[r15+#0x12]
 _1425:
+	jmp	cc_eq,_82
+_1426:
+	movb	rl2,[r15+#0x12]
+_1427:
 	movb	rh2,#0x1
 	movw	r4,[r15+#0xfe]
 	movw	r5,r8
 	call	_IO_CAN_WriteFIFO
 _82:
 	movw	r4,[r15+#0x9e]
-_1426:
-	movb	[r15+#0x28],rl4
-_1427:
-	movb	[r15+#0x29],rl6
 _1428:
-	movb	[r15+#0x2a],rl1
+	movb	[r15+#0x28],rl4
 _1429:
-	movw	r4,[r15+#0xa2]
+	movb	[r15+#0x29],rl6
 _1430:
-	movb	[r15+#0x2b],rl4
+	movb	[r15+#0x2a],rl1
 _1431:
 	movw	r4,[r15+#0xa2]
-	shr	r4,#0x8
 _1432:
-	movb	[r15+#0x2c],rl4
+	movb	[r15+#0x2b],rl4
 _1433:
-	movb	rh4,[r15+#0x110]
-_1039:
-	movb	[r15+#0x2d],rh4
+	movw	r4,[r15+#0xa2]
+	shr	r4,#0x8
 _1434:
-	movb	rh4,[r15+#0x117]
-_1040:
-	movb	[r15+#0x2e],rh4
+	movb	[r15+#0x2c],rl4
 _1435:
-	movb	rh4,[r15+#0x116]
-_1041:
-	movb	[r15+#0x2f],rh4
+	movb	rh4,[r15+#0x110]
+_1042:
+	movb	[r15+#0x2d],rh4
 _1436:
-	movb	rl2,[r15+#0x13]
+	movb	rh4,[r15+#0x117]
+_1043:
+	movb	[r15+#0x2e],rh4
 _1437:
+	movb	rh4,[r15+#0x116]
+_1044:
+	movb	[r15+#0x2f],rh4
+_1438:
+	movb	rl2,[r15+#0x13]
+_1439:
 	movb	rh2,#0x1
 	movw	r4,[r15+#0xe4]
-_1042:
+_1045:
 	movw	r5,r8
 	call	_IO_CAN_WriteFIFO
-_1438:
+_1440:
 	movb	rl2,[r15+#0x12]
-_1439:
+_1441:
 	movb	rh2,#0x1
 	movw	r4,[r15+#0xe4]
 	movw	r5,r8
 	call	_IO_CAN_WriteFIFO
 _374:
 	movb	rl2,#0xf
-_1440:
+_1442:
 	movw	r4,[r15+#0xfa]
 	movw	r5,r8
 	movw	r11,[r15+#0xfc]
 	movw	r12,r8
 	call	_IO_ADC_Get
-_1441:
-	movb	rh4,[r15+#0xa0]
-_1442:
-	movb	[r15+#0x8a],rh4
 _1443:
-	movb	rh4,[r15+#0xa4]
+	movb	rh4,[r15+#0xa0]
 _1444:
-	movb	[r15+#0x8b],rh4
+	movb	[r15+#0x8a],rh4
 _1445:
-	call	_get_filtered_apps1_voltage
-_1043:
-	movw	r6,r2
-_1045:
-	call	_get_filtered_apps2_voltage
-_1044:
-	movb	[r15+#0x8c],rl6
+	movb	rh4,[r15+#0xa4]
 _1446:
-	shr	r6,#0x8
+	movb	[r15+#0x8b],rh4
 _1447:
-	movb	[r15+#0x8d],rl6
-_1448:
-	movb	[r15+#0x8e],rl2
-_1449:
-	shr	r2,#0x8
+	call	_get_filtered_apps1_voltage
 _1046:
-	movb	[r15+#0x8f],rl2
+	movw	r6,r2
+_1048:
+	call	_get_filtered_apps2_voltage
+_1047:
+	movb	[r15+#0x8c],rl6
+_1448:
+	shr	r6,#0x8
+_1449:
+	movb	[r15+#0x8d],rl6
 _1450:
-	movw	r4,[r15+#0xb4]
+	movb	[r15+#0x8e],rl2
 _1451:
-	movb	[r15+#0x90],rl4
+	shr	r2,#0x8
+_1049:
+	movb	[r15+#0x8f],rl2
 _1452:
 	movw	r4,[r15+#0xb4]
-	shr	r4,#0x8
 _1453:
-	movb	[r15+#0x91],rl4
+	movb	[r15+#0x90],rl4
 _1454:
-	movb	rl2,[r15+#0x13]
+	movw	r4,[r15+#0xb4]
+	shr	r4,#0x8
 _1455:
+	movb	[r15+#0x91],rl4
+_1456:
+	movb	rl2,[r15+#0x13]
+_1457:
 	movb	rh2,#0x1
 	movw	r4,[r15+#0xe2]
 	movw	r5,r8
 	call	_IO_CAN_WriteFIFO
-_1456:
+_1458:
 
 ; src/main.c	   796              IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &debug_can_frame, 1);
 	movb	rl2,[r15+#0x12]
-_1457:
+_1459:
 	movb	rh2,#0x1
 	movw	r4,[r15+#0xe2]
 	movw	r5,r8
@@ -2929,11 +2932,11 @@ _83:
 	movw	r3,[r15+#0x2]
 	movw	r2,[r15+#0x0]
 	call	_IO_RTC_GetTimeUS
-_1458:
+_1460:
 	cmpw	r2,#0x1388
 	subcw	r3,#0x0
 	jmp+	cc_ult,_83
-_1459:
+_1461:
 	jmp	_15
 _206:
 	; End of function
@@ -2950,7 +2953,7 @@ _appl_db	.label	word
 	.db	0x0
 	.db	0x0
 	.db	0x0
-	.dl	0x1e4947e9
+	.dl	0x400b47e9
 	.db	0x0
 	.db	0x0
 	.db	0x0
@@ -3011,7 +3014,7 @@ _appl_db	.label	word
 	.db	0x0
 	.db	0x0
 	.db	0x0
-	.dl	0x1f4
+	.dl	0xfa
 	.db	0x0
 	.db	0x0
 	.db	0x0
@@ -3067,6 +3070,7 @@ _appl_db	.label	word
 	.calls	'_main','__spf2ul',8,0
 	.calls	'__INDIRECT__','__cstart'
 	.calls	'_get_rtd','_IO_DI_Get'
+	.calls	'_get_sdc','_IO_DI_Get'
 	.calls	'_read_can_msg','_IO_CAN_MsgStatus'
 	.calls	'_read_can_msg','_IO_CAN_ReadMsg'
 	.calls	'_read_can_msg','_IO_CAN_DeInitHandle'
@@ -3751,11 +3755,11 @@ _170:
 
 	.debug		.debug_line
 _171:
-	.dl	_1048-_1047
-_1047:
+	.dl	_1051-_1050
+_1050:
 	.dw	3
-	.dl	_1050-_1049
-_1049:
+	.dl	_1053-_1052
+_1052:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1
 	.db	'..\\..\\..\\Environment\\inc',0,0
 	.db	'src/main.c',0,0,0,0
@@ -3771,8 +3775,8 @@ _1049:
 	.db	'ptypes_xe167.h',0,1,0,0
 	.db	'IO_Constants.h',0,1,0,0
 	.db	'APDB.h',0,1,0,0,0
-_1050:
-_1048:
+_1053:
+_1051:
 	; End of section
 
 	.debug		.debug_pubnames
@@ -3868,14 +3872,14 @@ _173:
 
 	.debug		.debug_line, cluster 'clear_can_frame'
 _174:
-	.dl	_1052-_1051
-_1051:
+	.dl	_1055-_1054
+_1054:
 	.dw	3
-	.dl	_1054-_1053
-_1053:
+	.dl	_1057-_1056
+_1056:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
 	.db	'src/main.c',0,0,0,0,0
-_1054:
+_1057:
 	.db	5,26,7,0,5,2
 	.dl	_85
 	.db	3,158,1,1,9
@@ -3883,15 +3887,15 @@ _1054:
 	.db	3,1,1,5,24,9
 	.dw	_389-_2
 	.db	1,5,29,9
-	.dw	_1055-_389
+	.dw	_1058-_389
 	.db	3,127,1,5,26,9
-	.dw	_1056-_1055
+	.dw	_1059-_1058
 	.db	1,5,1,9
-	.dw	_212-_1056
+	.dw	_212-_1059
 	.db	3,3,1,7,9
 	.dw	_176-_212
 	.db	0,1,1
-_1052:
+_1055:
 	; End of section
 
 	.debug		.debug_ranges, cluster 'clear_can_frame'
@@ -3930,14 +3934,14 @@ _178:
 
 	.debug		.debug_line, cluster 'get_rtd'
 _179:
-	.dl	_1058-_1057
-_1057:
+	.dl	_1061-_1060
+_1060:
 	.dw	3
-	.dl	_1060-_1059
-_1059:
+	.dl	_1063-_1062
+_1062:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
 	.db	'src/main.c',0,0,0,0,0
-_1060:
+_1063:
 	.db	5,6,7,0,5,2
 	.dl	_97
 	.db	3,163,1,1,5,19,9
@@ -3949,7 +3953,7 @@ _1060:
 	.db	3,2,1,7,9
 	.dw	_181-_393
 	.db	0,1,1
-_1058:
+_1061:
 	; End of section
 
 	.debug		.debug_ranges, cluster 'get_rtd'
@@ -3988,24 +3992,26 @@ _183:
 
 	.debug		.debug_line, cluster 'get_sdc'
 _184:
-	.dl	_1062-_1061
-_1061:
+	.dl	_1065-_1064
+_1064:
 	.dw	3
-	.dl	_1064-_1063
-_1063:
+	.dl	_1067-_1066
+_1066:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
 	.db	'src/main.c',0,0,0,0,0
-_1064:
-	.db	5,20,7,0,5,2
+_1067:
+	.db	5,6,7,0,5,2
 	.dl	_109
-	.db	3,173,1,1,5,18,9
-	.dw	_1065-_109
+	.db	3,171,1,1,5,19,9
+	.dw	_395-_109
+	.db	3,4,1,5,31,9
+	.dw	_394-_395
 	.db	1,5,1,9
-	.dw	_1066-_1065
-	.db	3,4,1,7,9
-	.dw	_186-_1066
+	.dw	_396-_394
+	.db	3,2,1,7,9
+	.dw	_186-_396
 	.db	0,1,1
-_1062:
+_1065:
 	; End of section
 
 	.debug		.debug_ranges, cluster 'get_sdc'
@@ -4054,48 +4060,48 @@ _188:
 
 	.debug		.debug_line, cluster 'read_can_msg'
 _189:
-	.dl	_1068-_1067
-_1067:
+	.dl	_1069-_1068
+_1068:
 	.dw	3
-	.dl	_1070-_1069
-_1069:
+	.dl	_1071-_1070
+_1070:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
 	.db	'src/main.c',0,0,0,0,0
-_1070:
+_1071:
 	.db	5,6,7,0,5,2
 	.dl	_121
 	.db	3,179,1,1,5,21,9
-	.dw	_1071-_121
+	.dw	_1072-_121
 	.db	3,3,1,5,19,9
-	.dw	_730-_1071
+	.dw	_733-_1072
 	.db	1,5,39,9
-	.dw	_1072-_730
+	.dw	_1073-_733
 	.db	3,2,1,5,5,9
-	.dw	_732-_1072
+	.dw	_735-_1073
 	.db	3,2,1,5,24,9
-	.dw	_1073-_732
+	.dw	_1074-_735
 	.db	3,1,1,5,35,9
-	.dw	_736-_1073
+	.dw	_739-_1074
 	.db	1,5,25,9
-	.dw	_1074-_736
+	.dw	_1075-_739
 	.db	3,1,1,5,23,9
-	.dw	_1075-_1074
-	.db	1,5,50,9
 	.dw	_1076-_1075
+	.db	1,5,50,9
+	.dw	_1077-_1076
 	.db	3,127,1,5,12,9
-	.dw	_3-_1076
+	.dw	_3-_1077
 	.db	3,2,1,5,29,9
-	.dw	_1077-_3
+	.dw	_1078-_3
 	.db	3,1,1,5,19,9
-	.dw	_1078-_1077
-	.db	3,4,1,9
 	.dw	_1079-_1078
+	.db	3,4,1,9
+	.dw	_1080-_1079
 	.db	3,3,1,5,1,9
-	.dw	_4-_1079
+	.dw	_4-_1080
 	.db	3,3,1,9
 	.dw	_191-_4
 	.db	0,1,1
-_1068:
+_1069:
 	; End of section
 
 	.debug		.debug_ranges, cluster 'read_can_msg'
@@ -4137,38 +4143,38 @@ _193:
 
 	.debug		.debug_line, cluster 'voltage_to_torque_limit'
 _194:
-	.dl	_1081-_1080
-_1080:
+	.dl	_1082-_1081
+_1081:
 	.dw	3
-	.dl	_1083-_1082
-_1082:
+	.dl	_1084-_1083
+_1083:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
 	.db	'src/main.c',0,0,0,0,0
-_1083:
+_1084:
 	.db	5,8,7,0,5,2
 	.dl	_133
 	.db	3,202,1,1,5,5,9
-	.dw	_762-_133
+	.dw	_765-_133
 	.db	3,1,1,5,16,9
-	.dw	_1084-_762
+	.dw	_1085-_765
 	.db	3,1,1,5,9,9
-	.dw	_1085-_1084
+	.dw	_1086-_1085
 	.db	1,5,17,9
-	.dw	_6-_1085
+	.dw	_6-_1086
 	.db	3,2,1,5,44,9
-	.dw	_867-_6
+	.dw	_870-_6
 	.db	1,5,42,9
-	.dw	_1086-_867
+	.dw	_1087-_870
 	.db	1,5,54,9
-	.dw	_1087-_1086
-	.db	1,5,52,9
 	.dw	_1088-_1087
+	.db	1,5,52,9
+	.dw	_1089-_1088
 	.db	1,5,1,9
-	.dw	_7-_1088
+	.dw	_7-_1089
 	.db	3,3,1,9
 	.dw	_196-_7
 	.db	0,1,1
-_1081:
+_1082:
 	; End of section
 
 	.debug		.debug_ranges, cluster 'voltage_to_torque_limit'
@@ -4215,40 +4221,40 @@ _198:
 
 	.debug		.debug_line, cluster 'pct_travel_to_torque'
 _199:
-	.dl	_1090-_1089
-_1089:
+	.dl	_1091-_1090
+_1090:
 	.dw	3
-	.dl	_1092-_1091
-_1091:
+	.dl	_1093-_1092
+_1092:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
 	.db	'src/main.c',0,0,0,0,0
-_1092:
+_1093:
 	.db	5,8,7,0,5,2
 	.dl	_145
 	.db	3,211,1,1,5,5,9
-	.dw	_879-_145
+	.dw	_882-_145
 	.db	3,1,1,5,17,9
-	.dw	_1093-_879
+	.dw	_1094-_882
 	.db	3,1,1,5,10,9
-	.dw	_1094-_1093
+	.dw	_1095-_1094
 	.db	1,5,23,9
-	.dw	_9-_1094
+	.dw	_9-_1095
 	.db	3,3,1,5,45,9
-	.dw	_953-_9
+	.dw	_956-_9
 	.db	1,5,43,9
-	.dw	_1095-_953
+	.dw	_1096-_956
 	.db	1,5,75,9
-	.dw	_1096-_1095
-	.db	1,5,72,9
 	.dw	_1097-_1096
-	.db	1,5,13,9
+	.db	1,5,72,9
 	.dw	_1098-_1097
+	.db	1,5,13,9
+	.dw	_1099-_1098
 	.db	1,5,1,9
-	.dw	_10-_1098
+	.dw	_10-_1099
 	.db	3,1,1,9
 	.dw	_201-_10
 	.db	0,1,1
-_1090:
+_1091:
 	; End of section
 
 	.debug		.debug_ranges, cluster 'pct_travel_to_torque'
@@ -4750,119 +4756,117 @@ _203:
 
 	.debug		.debug_line, cluster 'main'
 _204:
-	.dl	_1100-_1099
-_1099:
+	.dl	_1101-_1100
+_1100:
 	.dw	3
-	.dl	_1102-_1101
-_1101:
+	.dl	_1103-_1102
+_1102:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
 	.db	'src/main.c',0,0,0,0,0
-_1102:
+_1103:
 	.db	5,6,7,0,5,2
 	.dl	_157
 	.db	3,220,1,1,5,20,9
-	.dw	_954-_157
+	.dw	_957-_157
 	.db	3,11,1,5,19,9
-	.dw	_1103-_954
+	.dw	_1104-_957
 	.db	3,7,1,5,43,9
-	.dw	_1104-_1103
-	.db	1,5,19,9
 	.dw	_1105-_1104
-	.db	3,1,1,5,43,9
+	.db	1,5,19,9
 	.dw	_1106-_1105
+	.db	3,1,1,5,43,9
+	.dw	_1107-_1106
 	.db	1,5,29,9
-	.dw	_242-_1106
+	.dw	_242-_1107
 	.db	3,17,1,5,27,9
 	.dw	_256-_242
 	.db	1,5,36,9
 	.dw	_258-_256
 	.db	3,1,1,5,34,9
-	.dw	_1107-_258
+	.dw	_1108-_258
 	.db	1,5,33,9
-	.dw	_1108-_1107
-	.db	3,1,1,5,31,9
 	.dw	_1109-_1108
+	.db	3,1,1,5,31,9
+	.dw	_1110-_1109
 	.db	1,5,38,9
-	.dw	_259-_1109
+	.dw	_259-_1110
 	.db	3,3,1,5,36,9
-	.dw	_1110-_259
+	.dw	_1111-_259
 	.db	1,5,43,9
-	.dw	_265-_1110
+	.dw	_265-_1111
 	.db	3,1,1,5,40,9
-	.dw	_1111-_265
+	.dw	_1112-_265
 	.db	3,1,1,5,14,9
-	.dw	_266-_1111
+	.dw	_266-_1112
 	.db	3,152,127,1,5,26,9
 	.dw	_12-_266
 	.db	1,5,24,9
-	.dw	_1112-_12
+	.dw	_1113-_12
 	.db	1,5,29,9
-	.dw	_1113-_1112
-	.db	3,127,1,5,26,9
 	.dw	_1114-_1113
+	.db	3,127,1,5,26,9
+	.dw	_1115-_1114
 	.db	1,5,32,9
-	.dw	_267-_1114
+	.dw	_267-_1115
 	.db	3,248,0,1,5,30,9
 	.dw	_279-_267
 	.db	1,5,37,9
 	.dw	_282-_279
 	.db	3,1,1,5,36,9
-	.dw	_1115-_282
+	.dw	_1116-_282
 	.db	3,1,1,5,34,9
-	.dw	_1116-_1115
+	.dw	_1117-_1116
 	.db	1,5,14,9
-	.dw	_283-_1116
+	.dw	_283-_1117
 	.db	3,135,127,1,5,26,9
 	.dw	_13-_283
 	.db	1,5,24,9
-	.dw	_1117-_13
+	.dw	_1118-_13
 	.db	1,5,29,9
-	.dw	_1118-_1117
-	.db	3,127,1,5,26,9
 	.dw	_1119-_1118
+	.db	3,127,1,5,26,9
+	.dw	_1120-_1119
 	.db	1,9
-	.dw	_284-_1119
+	.dw	_284-_1120
 	.db	3,255,0,1,5,24,9
 	.dw	_289-_284
 	.db	1,5,31,9
 	.dw	_292-_289
 	.db	3,1,1,5,30,9
-	.dw	_1120-_292
+	.dw	_1121-_292
 	.db	3,1,1,5,28,9
-	.dw	_1121-_1120
+	.dw	_1122-_1121
 	.db	1,5,14,9
-	.dw	_293-_1121
+	.dw	_293-_1122
 	.db	3,128,127,1,5,26,9
 	.dw	_14-_293
 	.db	1,5,24,9
-	.dw	_1122-_14
+	.dw	_1123-_14
 	.db	1,5,29,9
-	.dw	_1123-_1122
-	.db	3,127,1,5,26,9
 	.dw	_1124-_1123
+	.db	3,127,1,5,26,9
+	.dw	_1125-_1124
 	.db	1,5,18,9
-	.dw	_294-_1124
+	.dw	_294-_1125
 	.db	3,133,1,1,9
-	.dw	_1125-_294
+	.dw	_1126-_294
 	.db	3,1,1,9
-	.dw	_1126-_1125
-	.db	3,2,1,9
 	.dw	_1127-_1126
-	.db	3,1,1,9
-	.dw	_975-_1127
 	.db	3,2,1,9
-	.dw	_1128-_975
+	.dw	_1128-_1127
 	.db	3,1,1,9
-	.dw	_1129-_1128
+	.dw	_978-_1128
+	.db	3,2,1,9
+	.dw	_1129-_978
 	.db	3,1,1,9
 	.dw	_1130-_1129
 	.db	3,1,1,9
 	.dw	_1131-_1130
-	.db	3,1,1,5,25,9
-	.dw	_1132-_1131
-	.db	3,2,1,5,12,9
-	.dw	_1133-_1132
 	.db	3,1,1,9
+	.dw	_1132-_1131
+	.db	3,1,1,5,25,9
+	.dw	_1133-_1132
+	.db	3,2,1,5,12,9
 	.dw	_1134-_1133
 	.db	3,1,1,9
 	.dw	_1135-_1134
@@ -4872,11 +4876,11 @@ _1102:
 	.dw	_1137-_1136
 	.db	3,1,1,9
 	.dw	_1138-_1137
-	.db	3,1,1,5,25,9
-	.dw	_1139-_1138
-	.db	3,2,1,5,23,9
-	.dw	_1140-_1139
 	.db	3,1,1,9
+	.dw	_1139-_1138
+	.db	3,1,1,5,25,9
+	.dw	_1140-_1139
+	.db	3,2,1,5,23,9
 	.dw	_1141-_1140
 	.db	3,1,1,9
 	.dw	_1142-_1141
@@ -4886,852 +4890,854 @@ _1102:
 	.dw	_1144-_1143
 	.db	3,1,1,9
 	.dw	_1145-_1144
-	.db	3,1,1,5,24,9
-	.dw	_1146-_1145
-	.db	3,2,1,5,20,9
-	.dw	_1147-_1146
 	.db	3,1,1,9
+	.dw	_1146-_1145
+	.db	3,1,1,5,24,9
+	.dw	_1147-_1146
+	.db	3,2,1,5,20,9
 	.dw	_1148-_1147
 	.db	3,1,1,9
 	.dw	_1149-_1148
-	.db	3,2,1,9
-	.dw	_1150-_1149
-	.db	3,1,1,5,24,9
-	.dw	_1151-_1150
-	.db	3,2,1,5,20,9
-	.dw	_1152-_1151
 	.db	3,1,1,9
+	.dw	_1150-_1149
+	.db	3,2,1,9
+	.dw	_1151-_1150
+	.db	3,1,1,5,24,9
+	.dw	_1152-_1151
+	.db	3,2,1,5,20,9
 	.dw	_1153-_1152
 	.db	3,1,1,9
 	.dw	_1154-_1153
-	.db	3,2,1,9
-	.dw	_1155-_1154
-	.db	3,1,1,5,24,9
-	.dw	_1156-_1155
-	.db	3,2,1,5,20,9
-	.dw	_1157-_1156
 	.db	3,1,1,9
+	.dw	_1155-_1154
+	.db	3,2,1,9
+	.dw	_1156-_1155
+	.db	3,1,1,5,24,9
+	.dw	_1157-_1156
+	.db	3,2,1,5,20,9
 	.dw	_1158-_1157
 	.db	3,1,1,9
 	.dw	_1159-_1158
-	.db	3,2,1,9
-	.dw	_1160-_1159
-	.db	3,1,1,5,24,9
-	.dw	_1161-_1160
-	.db	3,2,1,5,20,9
-	.dw	_1162-_1161
 	.db	3,1,1,9
+	.dw	_1160-_1159
+	.db	3,2,1,9
+	.dw	_1161-_1160
+	.db	3,1,1,5,24,9
+	.dw	_1162-_1161
+	.db	3,2,1,5,20,9
 	.dw	_1163-_1162
 	.db	3,1,1,9
 	.dw	_1164-_1163
-	.db	3,2,1,9
-	.dw	_1165-_1164
-	.db	3,1,1,5,24,9
-	.dw	_1166-_1165
-	.db	3,2,1,5,20,9
-	.dw	_1167-_1166
 	.db	3,1,1,9
+	.dw	_1165-_1164
+	.db	3,2,1,9
+	.dw	_1166-_1165
+	.db	3,1,1,5,24,9
+	.dw	_1167-_1166
+	.db	3,2,1,5,20,9
 	.dw	_1168-_1167
 	.db	3,1,1,9
 	.dw	_1169-_1168
-	.db	3,2,1,9
-	.dw	_1170-_1169
-	.db	3,1,1,5,24,9
-	.dw	_1171-_1170
-	.db	3,2,1,5,20,9
-	.dw	_1172-_1171
 	.db	3,1,1,9
+	.dw	_1170-_1169
+	.db	3,2,1,9
+	.dw	_1171-_1170
+	.db	3,1,1,5,24,9
+	.dw	_1172-_1171
+	.db	3,2,1,5,20,9
 	.dw	_1173-_1172
 	.db	3,1,1,9
 	.dw	_1174-_1173
-	.db	3,2,1,9
+	.db	3,1,1,9
 	.dw	_1175-_1174
-	.db	3,1,1,5,17,9
-	.dw	_297-_1175
-	.db	3,4,1,9
-	.dw	_1176-_297
-	.db	3,1,1,5,35,9
-	.dw	_299-_1176
-	.db	3,5,1,5,25,9
-	.dw	_978-_299
-	.db	3,4,1,9
-	.dw	_1177-_978
-	.db	3,1,1,9
-	.dw	_977-_1177
-	.db	3,1,1,9
-	.dw	_1178-_977
 	.db	3,2,1,9
-	.dw	_1179-_1178
+	.dw	_1176-_1175
+	.db	3,1,1,5,17,9
+	.dw	_297-_1176
+	.db	3,4,1,9
+	.dw	_1177-_297
+	.db	3,1,1,5,35,9
+	.dw	_299-_1177
+	.db	3,5,1,5,25,9
+	.dw	_981-_299
+	.db	3,4,1,9
+	.dw	_1178-_981
 	.db	3,1,1,9
-	.dw	_979-_1179
+	.dw	_980-_1178
+	.db	3,1,1,9
+	.dw	_1179-_980
+	.db	3,2,1,9
+	.dw	_1180-_1179
+	.db	3,1,1,9
+	.dw	_982-_1180
 	.db	3,3,1,9
-	.dw	_1180-_979
-	.db	3,1,1,9
-	.dw	_1181-_1180
+	.dw	_1181-_982
 	.db	3,1,1,9
 	.dw	_1182-_1181
-	.db	3,2,1,9
+	.db	3,1,1,9
 	.dw	_1183-_1182
+	.db	3,2,1,9
+	.dw	_1184-_1183
 	.db	3,1,1,5,30,9
-	.dw	_302-_1183
+	.dw	_302-_1184
 	.db	3,3,1,5,28,9
-	.dw	_1184-_302
+	.dw	_1185-_302
 	.db	1,5,25,9
-	.dw	_1185-_1184
-	.db	3,1,1,5,23,9
 	.dw	_1186-_1185
-	.db	1,9
-	.dw	_1187-_1186
-	.db	3,1,1,5,25,9
-	.dw	_1188-_1187
-	.db	3,3,1,9
-	.dw	_1189-_1188
-	.db	3,1,1,9
-	.dw	_1190-_1189
-	.db	3,3,1,9
-	.dw	_1191-_1190
-	.db	3,1,1,9
-	.dw	_306-_1191
 	.db	3,1,1,5,23,9
-	.dw	_1192-_306
-	.db	1,5,24,9
-	.dw	_1193-_1192
-	.db	3,1,1,5,22,9
-	.dw	_1194-_1193
-	.db	1,5,17,9
-	.dw	_1195-_1194
-	.db	3,4,1,9
-	.dw	_1196-_1195
-	.db	3,1,1,9
-	.dw	_1197-_1196
+	.dw	_1187-_1186
+	.db	1,9
+	.dw	_1188-_1187
+	.db	3,1,1,5,25,9
+	.dw	_1189-_1188
 	.db	3,3,1,9
+	.dw	_1190-_1189
+	.db	3,1,1,9
+	.dw	_1191-_1190
+	.db	3,3,1,9
+	.dw	_1192-_1191
+	.db	3,1,1,9
+	.dw	_306-_1192
+	.db	3,1,1,5,23,9
+	.dw	_1193-_306
+	.db	1,5,24,9
+	.dw	_1194-_1193
+	.db	3,1,1,5,22,9
+	.dw	_1195-_1194
+	.db	1,5,17,9
+	.dw	_1196-_1195
+	.db	3,4,1,9
+	.dw	_1197-_1196
+	.db	3,1,1,9
 	.dw	_1198-_1197
 	.db	3,3,1,9
 	.dw	_1199-_1198
 	.db	3,3,1,9
 	.dw	_1200-_1199
-	.db	3,1,1,5,18,9
+	.db	3,3,1,9
 	.dw	_1201-_1200
+	.db	3,1,1,5,18,9
+	.dw	_1202-_1201
 	.db	3,3,1,5,34,9
-	.dw	_310-_1201
+	.dw	_310-_1202
 	.db	3,3,1,5,22,9
-	.dw	_982-_310
+	.dw	_985-_310
 	.db	3,3,1,5,38,9
-	.dw	_984-_982
+	.dw	_987-_985
 	.db	3,10,1,5,26,9
-	.dw	_1202-_984
+	.dw	_1203-_987
 	.db	3,2,1,9
-	.dw	_985-_1202
+	.dw	_988-_1203
 	.db	3,1,1,5,40,9
-	.dw	_986-_985
-	.db	3,6,1,5,42,9
-	.dw	_1203-_986
-	.db	3,7,1,5,40,9
-	.dw	_1204-_1203
-	.db	1,5,35,9
-	.dw	_1205-_1204
-	.db	3,3,1,5,40,9
-	.dw	_1206-_1205
-	.db	3,1,1,5,35,9
-	.dw	_987-_1206
-	.db	3,3,1,5,45,9
-	.dw	_1207-_987
-	.db	3,3,1,5,43,9
-	.dw	_1208-_1207
-	.db	1,5,41,9
-	.dw	_1209-_1208
-	.db	3,2,1,5,18,9
-	.dw	_988-_1209
-	.db	3,5,1,5,23,9
 	.dw	_989-_988
+	.db	3,6,1,5,42,9
+	.dw	_1204-_989
+	.db	3,7,1,5,40,9
+	.dw	_1205-_1204
+	.db	1,5,35,9
+	.dw	_1206-_1205
+	.db	3,3,1,5,40,9
+	.dw	_1207-_1206
+	.db	3,1,1,5,35,9
+	.dw	_990-_1207
+	.db	3,3,1,5,45,9
+	.dw	_1208-_990
+	.db	3,3,1,5,43,9
+	.dw	_1209-_1208
+	.db	1,5,41,9
+	.dw	_1210-_1209
+	.db	3,2,1,5,18,9
+	.dw	_991-_1210
+	.db	3,5,1,5,23,9
+	.dw	_992-_991
 	.db	3,2,1,9
-	.dw	_981-_989
+	.dw	_984-_992
 	.db	3,1,1,5,27,9
-	.dw	_1210-_981
+	.dw	_1211-_984
 	.db	3,14,1,5,90,9
-	.dw	_328-_1210
+	.dw	_328-_1211
 	.db	3,8,1,5,56,9
-	.dw	_1211-_328
+	.dw	_1212-_328
 	.db	1,5,86,9
-	.dw	_329-_1211
+	.dw	_329-_1212
 	.db	3,3,1,5,54,9
-	.dw	_1212-_329
+	.dw	_1213-_329
 	.db	1,5,90,9
-	.dw	_339-_1212
+	.dw	_339-_1213
 	.db	3,11,1,5,56,9
-	.dw	_1213-_339
+	.dw	_1214-_339
 	.db	1,5,62,9
-	.dw	_342-_1213
+	.dw	_342-_1214
 	.db	3,3,1,5,42,9
-	.dw	_1214-_342
+	.dw	_1215-_342
 	.db	1,5,62,9
-	.dw	_345-_1214
+	.dw	_345-_1215
 	.db	3,1,1,5,42,9
-	.dw	_1215-_345
+	.dw	_1216-_345
 	.db	1,5,78,9
-	.dw	_348-_1215
+	.dw	_348-_1216
 	.db	3,1,1,5,50,9
-	.dw	_1216-_348
+	.dw	_1217-_348
 	.db	1,5,26,9
-	.dw	_351-_1216
+	.dw	_351-_1217
 	.db	3,25,1,5,39,9
 	.dw	_354-_351
 	.db	3,1,1,5,26,9
-	.dw	_1217-_354
+	.dw	_1218-_354
 	.db	1,9
-	.dw	_360-_1217
+	.dw	_360-_1218
 	.db	3,1,1,5,58,9
 	.dw	_361-_360
 	.db	3,1,1,5,45,9
-	.dw	_1218-_361
+	.dw	_1219-_361
 	.db	1,5,27,9
-	.dw	_1219-_1218
-	.db	1,5,39,9
 	.dw	_1220-_1219
-	.db	3,23,1,5,63,9
+	.db	1,5,39,9
 	.dw	_1221-_1220
+	.db	3,23,1,5,63,9
+	.dw	_1222-_1221
 	.db	3,16,1,5,14,9
-	.dw	_367-_1221
+	.dw	_367-_1222
 	.db	3,220,124,1,5,63,9
 	.dw	_368-_367
 	.db	3,242,3,1,5,60,9
-	.dw	_1222-_368
+	.dw	_1223-_368
 	.db	3,197,0,1,9
-	.dw	_1223-_1222
-	.db	3,4,1,9
 	.dw	_1224-_1223
-	.db	3,5,1,9
+	.db	3,4,1,9
 	.dw	_1225-_1224
 	.db	3,5,1,9
 	.dw	_1226-_1225
-	.db	3,3,1,9
+	.db	3,5,1,9
 	.dw	_1227-_1226
-	.db	3,3,1,5,55,9
+	.db	3,3,1,9
 	.dw	_1228-_1227
+	.db	3,3,1,5,55,9
+	.dw	_1229-_1228
 	.db	3,18,1,5,47,9
-	.dw	_373-_1228
+	.dw	_373-_1229
 	.db	3,12,1,5,37,9
-	.dw	_1229-_373
+	.dw	_1230-_373
 	.db	1,5,55,9
-	.dw	_1230-_1229
+	.dw	_1231-_1230
 	.db	3,18,1,5,27,9
-	.dw	_15-_1230
+	.dw	_15-_1231
 	.db	3,203,125,1,5,28,9
-	.dw	_1231-_15
+	.dw	_1232-_15
 	.db	3,5,1,5,21,9
-	.dw	_337-_1231
+	.dw	_337-_1232
 	.db	3,204,125,1,5,19,9
-	.dw	_1232-_337
+	.dw	_1233-_337
 	.db	1,5,39,9
-	.dw	_1233-_1232
+	.dw	_1234-_1233
 	.db	3,2,1,5,5,9
-	.dw	_990-_1233
+	.dw	_993-_1234
 	.db	3,2,1,5,24,9
-	.dw	_1234-_990
+	.dw	_1235-_993
 	.db	3,1,1,5,56,9
-	.dw	_991-_1234
+	.dw	_994-_1235
 	.db	3,178,2,1,5,25,9
-	.dw	_1235-_991
+	.dw	_1236-_994
 	.db	3,207,125,1,5,23,9
-	.dw	_1236-_1235
-	.db	1,5,50,9
 	.dw	_1237-_1236
+	.db	1,5,50,9
+	.dw	_1238-_1237
 	.db	3,127,1,5,12,9
-	.dw	_16-_1237
+	.dw	_16-_1238
 	.db	3,2,1,5,29,9
-	.dw	_1238-_16
+	.dw	_1239-_16
 	.db	3,1,1,5,19,9
-	.dw	_1239-_1238
-	.db	3,3,1,9
 	.dw	_1240-_1239
-	.db	3,1,1,9
+	.db	3,3,1,9
 	.dw	_1241-_1240
-	.db	3,2,1,9
+	.db	3,1,1,9
 	.dw	_1242-_1241
+	.db	3,2,1,9
+	.dw	_1243-_1242
 	.db	3,1,1,5,21,9
-	.dw	_17-_1242
+	.dw	_17-_1243
 	.db	3,113,1,5,19,9
-	.dw	_1243-_17
+	.dw	_1244-_17
 	.db	1,5,39,9
-	.dw	_1244-_1243
+	.dw	_1245-_1244
 	.db	3,2,1,5,5,9
-	.dw	_993-_1244
+	.dw	_996-_1245
 	.db	3,2,1,5,24,9
-	.dw	_1245-_993
+	.dw	_1246-_996
 	.db	3,1,1,5,54,9
-	.dw	_994-_1245
+	.dw	_997-_1246
 	.db	3,181,2,1,5,25,9
-	.dw	_1246-_994
+	.dw	_1247-_997
 	.db	3,204,125,1,5,23,9
-	.dw	_1247-_1246
-	.db	1,5,50,9
 	.dw	_1248-_1247
+	.db	1,5,50,9
+	.dw	_1249-_1248
 	.db	3,127,1,5,12,9
-	.dw	_19-_1248
+	.dw	_19-_1249
 	.db	3,2,1,5,29,9
-	.dw	_1249-_19
+	.dw	_1250-_19
 	.db	3,1,1,5,19,9
-	.dw	_1250-_1249
-	.db	3,3,1,9
 	.dw	_1251-_1250
-	.db	3,1,1,9
+	.db	3,3,1,9
 	.dw	_1252-_1251
-	.db	3,2,1,9
+	.db	3,1,1,9
 	.dw	_1253-_1252
+	.db	3,2,1,9
+	.dw	_1254-_1253
 	.db	3,1,1,5,13,9
-	.dw	_20-_1253
+	.dw	_20-_1254
 	.db	3,172,2,1,5,9,9
-	.dw	_1254-_20
+	.dw	_1255-_20
 	.db	1,5,27,7,9
-	.dw	_1255-_1254
-	.db	3,2,1,9
 	.dw	_1256-_1255
+	.db	3,2,1,9
+	.dw	_1257-_1256
 	.db	3,1,1,5,21,9
-	.dw	_22-_1256
+	.dw	_22-_1257
 	.db	3,194,125,1,5,19,9
-	.dw	_1257-_22
+	.dw	_1258-_22
 	.db	1,5,39,9
-	.dw	_1258-_1257
+	.dw	_1259-_1258
 	.db	3,2,1,5,5,9
-	.dw	_998-_1258
+	.dw	_1001-_1259
 	.db	3,2,1,5,24,9
-	.dw	_1259-_998
+	.dw	_1260-_1001
 	.db	3,1,1,5,56,9
-	.dw	_999-_1259
+	.dw	_1002-_1260
 	.db	3,192,2,1,5,25,9
-	.dw	_1260-_999
+	.dw	_1261-_1002
 	.db	3,193,125,1,5,23,9
-	.dw	_1261-_1260
-	.db	1,5,50,9
 	.dw	_1262-_1261
+	.db	1,5,50,9
+	.dw	_1263-_1262
 	.db	3,127,1,5,12,9
-	.dw	_23-_1262
+	.dw	_23-_1263
 	.db	3,2,1,5,29,9
-	.dw	_1263-_23
+	.dw	_1264-_23
 	.db	3,1,1,5,19,9
-	.dw	_1264-_1263
-	.db	3,3,1,9
 	.dw	_1265-_1264
-	.db	3,1,1,9
+	.db	3,3,1,9
 	.dw	_1266-_1265
-	.db	3,2,1,9
+	.db	3,1,1,9
 	.dw	_1267-_1266
+	.db	3,2,1,9
+	.dw	_1268-_1267
 	.db	3,1,1,5,21,9
-	.dw	_24-_1267
+	.dw	_24-_1268
 	.db	3,113,1,5,19,9
-	.dw	_1268-_24
+	.dw	_1269-_24
 	.db	1,5,39,9
-	.dw	_1269-_1268
+	.dw	_1270-_1269
 	.db	3,2,1,5,5,9
-	.dw	_1001-_1269
+	.dw	_1004-_1270
 	.db	3,2,1,5,24,9
-	.dw	_1270-_1001
+	.dw	_1271-_1004
 	.db	3,1,1,5,42,9
-	.dw	_1002-_1270
+	.dw	_1005-_1271
 	.db	3,195,2,1,5,25,9
-	.dw	_1271-_1002
+	.dw	_1272-_1005
 	.db	3,190,125,1,5,23,9
-	.dw	_1272-_1271
-	.db	1,5,50,9
 	.dw	_1273-_1272
+	.db	1,5,50,9
+	.dw	_1274-_1273
 	.db	3,127,1,5,12,9
-	.dw	_26-_1273
+	.dw	_26-_1274
 	.db	3,2,1,5,29,9
-	.dw	_1274-_26
+	.dw	_1275-_26
 	.db	3,1,1,5,19,9
-	.dw	_1275-_1274
-	.db	3,3,1,9
 	.dw	_1276-_1275
-	.db	3,1,1,9
+	.db	3,3,1,9
 	.dw	_1277-_1276
-	.db	3,2,1,9
+	.db	3,1,1,9
 	.dw	_1278-_1277
+	.db	3,2,1,9
+	.dw	_1279-_1278
 	.db	3,1,1,5,21,9
-	.dw	_27-_1278
+	.dw	_27-_1279
 	.db	3,113,1,5,19,9
-	.dw	_1279-_27
+	.dw	_1280-_27
 	.db	1,5,39,9
-	.dw	_1280-_1279
+	.dw	_1281-_1280
 	.db	3,2,1,5,5,9
-	.dw	_1004-_1280
+	.dw	_1007-_1281
 	.db	3,2,1,5,24,9
-	.dw	_1281-_1004
+	.dw	_1282-_1007
 	.db	3,1,1,5,42,9
-	.dw	_1005-_1281
+	.dw	_1008-_1282
 	.db	3,196,2,1,5,25,9
-	.dw	_1282-_1005
+	.dw	_1283-_1008
 	.db	3,189,125,1,5,23,9
-	.dw	_1283-_1282
-	.db	1,5,50,9
 	.dw	_1284-_1283
-	.db	3,127,1,5,12,9
-	.dw	_29-_1284
-	.db	3,2,1,5,29,9
-	.dw	_1285-_29
-	.db	3,1,1,5,19,9
-	.dw	_1286-_1285
-	.db	3,3,1,9
-	.dw	_1287-_1286
-	.db	3,1,1,9
-	.dw	_1288-_1287
-	.db	3,2,1,9
-	.dw	_1289-_1288
-	.db	3,1,1,5,21,9
-	.dw	_30-_1289
-	.db	3,113,1,5,19,9
-	.dw	_1290-_30
-	.db	1,5,39,9
-	.dw	_1291-_1290
-	.db	3,2,1,5,5,9
-	.dw	_1007-_1291
-	.db	3,2,1,5,24,9
-	.dw	_1292-_1007
-	.db	3,1,1,5,50,9
-	.dw	_1008-_1292
-	.db	3,197,2,1,5,25,9
-	.dw	_1293-_1008
-	.db	3,188,125,1,5,23,9
-	.dw	_1294-_1293
 	.db	1,5,50,9
-	.dw	_1295-_1294
+	.dw	_1285-_1284
 	.db	3,127,1,5,12,9
-	.dw	_32-_1295
+	.dw	_29-_1285
 	.db	3,2,1,5,29,9
-	.dw	_1296-_32
+	.dw	_1286-_29
 	.db	3,1,1,5,19,9
-	.dw	_1297-_1296
+	.dw	_1287-_1286
 	.db	3,3,1,9
-	.dw	_1298-_1297
+	.dw	_1288-_1287
 	.db	3,1,1,9
-	.dw	_1299-_1298
+	.dw	_1289-_1288
 	.db	3,2,1,9
-	.dw	_1300-_1299
-	.db	3,1,1,5,13,9
-	.dw	_33-_1300
-	.db	3,189,2,1,5,9,9
-	.dw	_1301-_33
-	.db	1,5,31,7,9
-	.dw	_1302-_1301
-	.db	3,2,1,5,43,9
-	.dw	_1303-_1302
+	.dw	_1290-_1289
+	.db	3,1,1,5,21,9
+	.dw	_30-_1290
+	.db	3,113,1,5,19,9
+	.dw	_1291-_30
+	.db	1,5,39,9
+	.dw	_1292-_1291
+	.db	3,2,1,5,5,9
+	.dw	_1010-_1292
+	.db	3,2,1,5,24,9
+	.dw	_1293-_1010
+	.db	3,1,1,5,50,9
+	.dw	_1011-_1293
+	.db	3,197,2,1,5,25,9
+	.dw	_1294-_1011
+	.db	3,188,125,1,5,23,9
+	.dw	_1295-_1294
+	.db	1,5,50,9
+	.dw	_1296-_1295
+	.db	3,127,1,5,12,9
+	.dw	_32-_1296
+	.db	3,2,1,5,29,9
+	.dw	_1297-_32
 	.db	3,1,1,5,19,9
-	.dw	_35-_1303
+	.dw	_1298-_1297
+	.db	3,3,1,9
+	.dw	_1299-_1298
+	.db	3,1,1,9
+	.dw	_1300-_1299
+	.db	3,2,1,9
+	.dw	_1301-_1300
+	.db	3,1,1,5,13,9
+	.dw	_33-_1301
+	.db	3,189,2,1,5,9,9
+	.dw	_1302-_33
+	.db	1,5,31,7,9
+	.dw	_1303-_1302
+	.db	3,2,1,5,43,9
+	.dw	_1304-_1303
+	.db	3,1,1,5,19,9
+	.dw	_35-_1304
 	.db	3,8,1,9
-	.dw	_1304-_35
+	.dw	_1305-_35
 	.db	3,1,1,5,25,9
-	.dw	_1305-_1304
-	.db	3,2,1,5,20,9
 	.dw	_1306-_1305
-	.db	3,1,1,5,9,9
+	.db	3,2,1,5,20,9
 	.dw	_1307-_1306
-	.db	3,3,1,5,25,9
+	.db	3,1,1,5,9,9
 	.dw	_1308-_1307
-	.db	3,1,1,5,32,9
+	.db	3,3,1,5,25,9
 	.dw	_1309-_1308
+	.db	3,1,1,5,32,9
+	.dw	_1310-_1309
 	.db	1,5,13,9
-	.dw	_36-_1309
+	.dw	_36-_1310
 	.db	3,3,1,5,19,9
 	.dw	_358-_36
 	.db	3,143,125,1,5,26,9
-	.dw	_1310-_358
+	.dw	_1311-_358
 	.db	3,242,2,1,5,39,9
-	.dw	_359-_1310
-	.db	3,1,1,5,20,9
+	.dw	_359-_1311
+	.db	3,1,1,5,19,9
 	.dw	_365-_359
-	.db	3,147,125,1,5,18,9
-	.dw	_1311-_365
-	.db	1,5,58,9
-	.dw	_366-_1311
-	.db	3,239,2,1,5,21,9
-	.dw	_1312-_366
+	.db	3,149,125,1,5,26,9
+	.dw	_1312-_365
+	.db	3,236,2,1,5,58,9
+	.dw	_366-_1312
+	.db	3,1,1,5,21,9
+	.dw	_1313-_366
 	.db	3,4,1,9
-	.dw	_1313-_1312
-	.db	3,2,1,5,32,9
 	.dw	_1314-_1313
-	.db	1,5,21,7,9
+	.db	3,2,1,5,32,9
 	.dw	_1315-_1314
-	.db	3,1,1,5,29,9
+	.db	1,5,21,7,9
 	.dw	_1316-_1315
-	.db	1,5,22,7,9
+	.db	3,1,1,5,29,9
 	.dw	_1317-_1316
-	.db	3,1,1,5,35,9
+	.db	1,5,22,7,9
 	.dw	_1318-_1317
-	.db	3,2,1,5,54,9
+	.db	3,1,1,5,35,9
 	.dw	_1319-_1318
+	.db	3,2,1,5,54,9
+	.dw	_1320-_1319
 	.db	1,5,20,9
-	.dw	_38-_1319
+	.dw	_38-_1320
 	.db	3,9,1,5,17,9
-	.dw	_1320-_38
+	.dw	_1321-_38
 	.db	3,2,1,5,39,9
-	.dw	_1321-_1320
+	.dw	_1322-_1321
 	.db	3,2,1,5,46,9
-	.dw	_1017-_1321
+	.dw	_1020-_1322
 	.db	3,1,1,9
-	.dw	_1322-_1017
+	.dw	_1323-_1020
 	.db	3,2,1,5,59,9
-	.dw	_1019-_1322
+	.dw	_1022-_1323
 	.db	3,4,1,5,57,9
-	.dw	_1323-_1019
+	.dw	_1324-_1022
 	.db	1,5,59,9
-	.dw	_1324-_1323
-	.db	3,1,1,5,57,9
 	.dw	_1325-_1324
-	.db	1,5,59,9
-	.dw	_1326-_1325
 	.db	3,1,1,5,57,9
+	.dw	_1326-_1325
+	.db	1,5,59,9
 	.dw	_1327-_1326
-	.db	1,9
+	.db	3,1,1,5,57,9
 	.dw	_1328-_1327
-	.db	3,1,1,9
+	.db	1,9
 	.dw	_1329-_1328
-	.db	3,1,1,5,92,9
-	.dw	_1330-_1329
-	.db	3,5,1,5,57,9
-	.dw	_1331-_1330
-	.db	3,124,1,9
-	.dw	_1332-_1331
 	.db	3,1,1,9
+	.dw	_1330-_1329
+	.db	3,1,1,5,92,9
+	.dw	_1331-_1330
+	.db	3,5,1,5,57,9
+	.dw	_1332-_1331
+	.db	3,124,1,9
 	.dw	_1333-_1332
-	.db	3,1,1,5,38,9
+	.db	3,1,1,9
 	.dw	_1334-_1333
-	.db	3,2,1,5,92,9
+	.db	3,1,1,5,38,9
 	.dw	_1335-_1334
-	.db	1,5,53,9
+	.db	3,2,1,5,92,9
 	.dw	_1336-_1335
-	.db	3,112,1,5,74,9
-	.dw	_45-_1336
-	.db	3,18,1,5,89,9
-	.dw	_1020-_45
-	.db	1,5,35,9
-	.dw	_1337-_1020
-	.db	3,2,1,5,46,9
-	.dw	_1338-_1337
-	.db	3,1,1,5,31,9
-	.dw	_1339-_1338
-	.db	3,1,1,5,46,9
-	.dw	_1340-_1339
 	.db	1,5,53,9
-	.dw	_1023-_1340
+	.dw	_1337-_1336
+	.db	3,112,1,5,74,9
+	.dw	_45-_1337
+	.db	3,18,1,5,89,9
+	.dw	_1023-_45
+	.db	1,5,35,9
+	.dw	_1338-_1023
+	.db	3,2,1,5,46,9
+	.dw	_1339-_1338
+	.db	3,1,1,5,31,9
+	.dw	_1340-_1339
+	.db	3,1,1,5,46,9
+	.dw	_1341-_1340
+	.db	1,5,53,9
+	.dw	_1026-_1341
 	.db	3,4,1,5,20,9
-	.dw	_44-_1023
+	.dw	_44-_1026
 	.db	3,3,1,5,19,9
 	.dw	_379-_44
 	.db	3,215,124,1,5,26,9
-	.dw	_1341-_379
-	.db	3,171,3,1,5,20,9
-	.dw	_380-_1341
-	.db	3,219,124,1,5,18,9
-	.dw	_1342-_380
-	.db	1,5,58,9
-	.dw	_381-_1342
-	.db	3,167,3,1,5,39,9
-	.dw	_1343-_381
+	.dw	_1342-_379
+	.db	3,171,3,1,5,19,9
+	.dw	_380-_1342
+	.db	3,221,124,1,5,26,9
+	.dw	_1343-_380
+	.db	3,164,3,1,5,58,9
+	.dw	_381-_1343
+	.db	3,1,1,5,39,9
+	.dw	_1344-_381
 	.db	3,1,1,5,21,9
-	.dw	_1344-_1343
-	.db	3,3,1,5,17,9
 	.dw	_1345-_1344
-	.db	1,5,28,9
-	.dw	_1346-_1345
-	.db	3,3,1,5,59,9
-	.dw	_1347-_1346
-	.db	1,5,69,9
-	.dw	_1348-_1347
-	.db	1,5,89,7,9
-	.dw	_1349-_1348
-	.db	1,5,97,9
-	.dw	_1350-_1349
-	.db	1,5,112,7,9
-	.dw	_1351-_1350
-	.db	1,5,51,9
-	.dw	_1352-_1351
-	.db	3,6,1,5,5,9
-	.dw	_382-_1352
-	.db	3,243,124,1,5,10,9
-	.dw	_1353-_382
-	.db	3,1,1,5,23,9
-	.dw	_55-_1353
-	.db	3,3,1,5,45,9
-	.dw	_1354-_55
-	.db	1,5,43,9
-	.dw	_1355-_1354
-	.db	1,5,75,9
-	.dw	_1356-_1355
-	.db	1,5,72,9
-	.dw	_1357-_1356
-	.db	1,5,13,9
-	.dw	_1358-_1357
-	.db	1,5,43,9
-	.dw	_56-_1358
-	.db	3,143,3,1,5,41,9
-	.dw	_1359-_56
-	.db	1,5,49,9
-	.dw	_1360-_1359
-	.db	1,5,41,9
-	.dw	_1361-_1360
-	.db	1,9
-	.dw	_1362-_1361
-	.db	3,1,1,5,31,9
-	.dw	_1363-_1362
-	.db	1,5,48,9
-	.dw	_1364-_1363
-	.db	3,1,1,9
-	.dw	_1365-_1364
-	.db	3,1,1,5,50,9
-	.dw	_1366-_1365
-	.db	3,1,1,5,48,9
-	.dw	_1367-_1366
-	.db	1,9
-	.dw	_1368-_1367
-	.db	3,1,1,9
-	.dw	_1369-_1368
-	.db	3,1,1,5,50,9
-	.dw	_1370-_1369
-	.db	3,1,1,5,48,9
-	.dw	_1371-_1370
-	.db	1,9
-	.dw	_1372-_1371
-	.db	3,1,1,9
-	.dw	_1373-_1372
-	.db	3,1,1,5,19,9
-	.dw	_1374-_1373
-	.db	3,107,1,9
-	.dw	_49-_1374
-	.db	3,204,124,1,5,26,9
-	.dw	_1375-_49
-	.db	3,205,3,1,5,21,9
-	.dw	_385-_1375
-	.db	3,2,1,5,17,9
-	.dw	_1376-_385
-	.db	1,5,35,9
-	.dw	_1377-_1376
-	.db	3,2,1,5,53,9
-	.dw	_1378-_1377
-	.db	3,4,1,5,35,9
-	.dw	_50-_1378
-	.db	3,11,1,5,46,9
-	.dw	_1379-_50
-	.db	1,5,35,9
-	.dw	_51-_1379
-	.db	3,3,1,5,44,9
-	.dw	_1380-_51
-	.db	1,5,31,9
-	.dw	_39-_1380
-	.db	3,148,124,1,5,26,9
-	.dw	_1381-_39
-	.db	1,9
-	.dw	_62-_1381
-	.db	3,1,1,5,24,9
-	.dw	_1382-_62
-	.db	1,5,29,9
-	.dw	_1383-_1382
-	.db	3,127,1,5,26,9
-	.dw	_1384-_1383
-	.db	1,5,38,9
-	.dw	_57-_1384
-	.db	3,243,3,1,5,83,9
-	.dw	_1385-_57
-	.db	1,5,13,9
-	.dw	_43-_1385
-	.db	3,10,1,5,38,9
-	.dw	_1386-_43
-	.db	3,1,1,5,17,9
-	.dw	_1032-_1386
-	.db	1,5,52,9
-	.dw	_1387-_1032
-	.db	3,1,1,5,13,9
-	.dw	_63-_1387
-	.db	3,5,1,5,38,9
-	.dw	_1388-_63
-	.db	3,2,1,5,17,9
-	.dw	_1035-_1388
-	.db	1,5,21,9
-	.dw	_1389-_1035
-	.db	3,5,1,5,20,9
-	.dw	_386-_1389
-	.db	3,132,124,1,5,18,9
-	.dw	_1037-_386
-	.db	1,5,51,9
-	.dw	_387-_1037
-	.db	3,129,4,1,5,29,9
-	.dw	_1390-_387
-	.db	1,5,51,7,9
-	.dw	_1391-_1390
-	.db	3,1,1,5,30,9
-	.dw	_1392-_1391
-	.db	3,1,1,5,38,9
-	.dw	_1393-_1392
-	.db	1,5,46,7,9
-	.dw	_1394-_1393
-	.db	3,1,1,5,41,9
-	.dw	_1395-_1394
-	.db	3,2,1,5,58,9
-	.dw	_1038-_1395
-	.db	3,126,1,5,37,9
-	.dw	_68-_1038
-	.db	3,6,1,5,59,9
-	.dw	_1396-_68
-	.db	3,1,1,5,37,9
-	.dw	_1397-_1396
-	.db	1,5,46,7,9
-	.dw	_66-_1397
-	.db	3,1,1,5,41,9
-	.dw	_1398-_66
-	.db	3,2,1,5,29,9
-	.dw	_65-_1398
-	.db	3,11,1,5,35,9
-	.dw	_1399-_65
 	.db	3,3,1,5,17,9
-	.dw	_1400-_1399
-	.db	3,2,1,5,47,9
-	.dw	_1401-_1400
-	.db	1,5,58,9
-	.dw	_1402-_1401
-	.db	1,5,27,9
-	.dw	_1403-_1402
-	.db	3,1,1,5,44,9
-	.dw	_1404-_1403
+	.dw	_1346-_1345
+	.db	1,5,28,9
+	.dw	_1347-_1346
+	.db	3,3,1,5,59,9
+	.dw	_1348-_1347
+	.db	1,5,69,9
+	.dw	_1349-_1348
+	.db	1,5,89,7,9
+	.dw	_1350-_1349
+	.db	1,5,97,9
+	.dw	_1351-_1350
+	.db	1,5,112,7,9
+	.dw	_1352-_1351
+	.db	1,5,51,9
+	.dw	_1353-_1352
+	.db	3,6,1,5,5,9
+	.dw	_382-_1353
+	.db	3,243,124,1,5,10,9
+	.dw	_1354-_382
+	.db	3,1,1,5,23,9
+	.dw	_55-_1354
+	.db	3,3,1,5,45,9
+	.dw	_1355-_55
+	.db	1,5,43,9
+	.dw	_1356-_1355
+	.db	1,5,75,9
+	.dw	_1357-_1356
+	.db	1,5,72,9
+	.dw	_1358-_1357
+	.db	1,5,13,9
+	.dw	_1359-_1358
+	.db	1,5,43,9
+	.dw	_56-_1359
+	.db	3,143,3,1,5,41,9
+	.dw	_1360-_56
 	.db	1,5,49,9
-	.dw	_1405-_1404
-	.db	1,5,27,9
-	.dw	_74-_1405
-	.db	3,2,1,5,44,9
-	.dw	_1406-_74
-	.db	1,5,17,9
-	.dw	_1407-_1406
-	.db	3,7,1,5,13,9
-	.dw	_1408-_1407
-	.db	1,5,34,7,9
-	.dw	_1409-_1408
-	.db	3,1,1,5,91,9
-	.dw	_1410-_1409
-	.db	1,5,17,9
-	.dw	_77-_1410
-	.db	3,3,1,5,13,9
-	.dw	_1411-_77
-	.db	1,5,34,7,9
-	.dw	_1412-_1411
-	.db	3,1,1,5,93,9
-	.dw	_1413-_1412
-	.db	1,5,17,9
-	.dw	_78-_1413
-	.db	3,4,1,5,13,9
-	.dw	_1414-_78
-	.db	1,5,34,7,9
-	.dw	_1415-_1414
-	.db	3,1,1,5,93,9
-	.dw	_1416-_1415
-	.db	1,5,17,9
-	.dw	_79-_1416
-	.db	3,4,1,5,13,9
-	.dw	_1417-_79
-	.db	1,5,34,7,9
-	.dw	_1418-_1417
-	.db	3,1,1,5,79,9
-	.dw	_1419-_1418
-	.db	1,5,17,9
-	.dw	_80-_1419
-	.db	3,2,1,5,13,9
-	.dw	_1420-_80
-	.db	1,5,34,7,9
-	.dw	_1421-_1420
-	.db	3,1,1,5,79,9
-	.dw	_1422-_1421
-	.db	1,5,17,9
-	.dw	_81-_1422
-	.db	3,2,1,5,13,9
-	.dw	_1423-_81
-	.db	1,5,34,7,9
-	.dw	_1424-_1423
-	.db	3,1,1,5,87,9
-	.dw	_1425-_1424
-	.db	1,5,45,9
-	.dw	_82-_1425
-	.db	3,4,1,5,43,9
-	.dw	_1426-_82
+	.dw	_1361-_1360
+	.db	1,5,41,9
+	.dw	_1362-_1361
 	.db	1,9
-	.dw	_1427-_1426
-	.db	3,2,1,9
-	.dw	_1428-_1427
-	.db	3,1,1,5,45,9
-	.dw	_1429-_1428
-	.db	3,3,1,5,43,9
-	.dw	_1430-_1429
-	.db	1,5,56,9
-	.dw	_1431-_1430
-	.db	3,1,1,5,43,9
-	.dw	_1432-_1431
+	.dw	_1363-_1362
+	.db	3,1,1,5,31,9
+	.dw	_1364-_1363
+	.db	1,5,48,9
+	.dw	_1365-_1364
+	.db	3,1,1,9
+	.dw	_1366-_1365
+	.db	3,1,1,5,50,9
+	.dw	_1367-_1366
+	.db	3,1,1,5,48,9
+	.dw	_1368-_1367
 	.db	1,9
-	.dw	_1433-_1432
-	.db	3,2,1,9
-	.dw	_1434-_1433
-	.db	3,2,1,9
-	.dw	_1435-_1434
+	.dw	_1369-_1368
+	.db	3,1,1,9
+	.dw	_1370-_1369
+	.db	3,1,1,5,50,9
+	.dw	_1371-_1370
+	.db	3,1,1,5,48,9
+	.dw	_1372-_1371
+	.db	1,9
+	.dw	_1373-_1372
+	.db	3,1,1,9
+	.dw	_1374-_1373
+	.db	3,1,1,5,19,9
+	.dw	_1375-_1374
+	.db	3,107,1,9
+	.dw	_49-_1375
+	.db	3,204,124,1,5,26,9
+	.dw	_1376-_49
+	.db	3,205,3,1,5,21,9
+	.dw	_385-_1376
+	.db	3,2,1,5,17,9
+	.dw	_1377-_385
+	.db	1,5,35,9
+	.dw	_1378-_1377
+	.db	3,2,1,5,53,9
+	.dw	_1379-_1378
+	.db	3,4,1,5,35,9
+	.dw	_50-_1379
+	.db	3,11,1,5,46,9
+	.dw	_1380-_50
+	.db	1,5,35,9
+	.dw	_51-_1380
+	.db	3,3,1,5,44,9
+	.dw	_1381-_51
+	.db	1,5,31,9
+	.dw	_39-_1381
+	.db	3,148,124,1,5,26,9
+	.dw	_1382-_39
+	.db	1,9
+	.dw	_62-_1382
+	.db	3,1,1,5,24,9
+	.dw	_1383-_62
+	.db	1,5,29,9
+	.dw	_1384-_1383
+	.db	3,127,1,5,26,9
+	.dw	_1385-_1384
+	.db	1,5,38,9
+	.dw	_57-_1385
+	.db	3,243,3,1,5,83,9
+	.dw	_1386-_57
+	.db	1,5,13,9
+	.dw	_43-_1386
+	.db	3,10,1,5,38,9
+	.dw	_1387-_43
+	.db	3,1,1,5,17,9
+	.dw	_1035-_1387
+	.db	1,5,52,9
+	.dw	_1388-_1035
+	.db	3,1,1,5,13,9
+	.dw	_63-_1388
+	.db	3,5,1,5,38,9
+	.dw	_1389-_63
+	.db	3,2,1,5,17,9
+	.dw	_1038-_1389
+	.db	1,5,21,9
+	.dw	_1390-_1038
+	.db	3,5,1,5,19,9
+	.dw	_386-_1390
+	.db	3,134,124,1,5,34,9
+	.dw	_1391-_386
+	.db	3,251,3,1,5,51,9
+	.dw	_387-_1391
+	.db	3,4,1,5,29,9
+	.dw	_1392-_387
+	.db	1,5,51,7,9
+	.dw	_1393-_1392
 	.db	3,1,1,5,30,9
-	.dw	_1436-_1435
-	.db	3,2,1,5,78,9
-	.dw	_1437-_1436
-	.db	1,5,30,9
-	.dw	_1438-_1437
+	.dw	_1394-_1393
+	.db	3,1,1,5,38,9
+	.dw	_1395-_1394
+	.db	1,5,46,7,9
+	.dw	_1396-_1395
+	.db	3,1,1,5,41,9
+	.dw	_1397-_1396
+	.db	3,2,1,5,58,9
+	.dw	_1041-_1397
+	.db	3,126,1,5,37,9
+	.dw	_68-_1041
+	.db	3,6,1,5,59,9
+	.dw	_1398-_68
+	.db	3,1,1,5,37,9
+	.dw	_1399-_1398
+	.db	1,5,46,7,9
+	.dw	_66-_1399
+	.db	3,1,1,5,41,9
+	.dw	_1400-_66
+	.db	3,2,1,5,29,9
+	.dw	_65-_1400
+	.db	3,11,1,5,35,9
+	.dw	_1401-_65
+	.db	3,3,1,5,17,9
+	.dw	_1402-_1401
+	.db	3,2,1,5,47,9
+	.dw	_1403-_1402
+	.db	1,5,58,9
+	.dw	_1404-_1403
+	.db	1,5,27,9
+	.dw	_1405-_1404
+	.db	3,1,1,5,44,9
+	.dw	_1406-_1405
+	.db	1,5,49,9
+	.dw	_1407-_1406
+	.db	1,5,27,9
+	.dw	_74-_1407
+	.db	3,2,1,5,44,9
+	.dw	_1408-_74
+	.db	1,5,17,9
+	.dw	_1409-_1408
+	.db	3,7,1,5,13,9
+	.dw	_1410-_1409
+	.db	1,5,34,7,9
+	.dw	_1411-_1410
+	.db	3,1,1,5,91,9
+	.dw	_1412-_1411
+	.db	1,5,17,9
+	.dw	_77-_1412
+	.db	3,3,1,5,13,9
+	.dw	_1413-_77
+	.db	1,5,34,7,9
+	.dw	_1414-_1413
+	.db	3,1,1,5,93,9
+	.dw	_1415-_1414
+	.db	1,5,17,9
+	.dw	_78-_1415
+	.db	3,4,1,5,13,9
+	.dw	_1416-_78
+	.db	1,5,34,7,9
+	.dw	_1417-_1416
+	.db	3,1,1,5,93,9
+	.dw	_1418-_1417
+	.db	1,5,17,9
+	.dw	_79-_1418
+	.db	3,4,1,5,13,9
+	.dw	_1419-_79
+	.db	1,5,34,7,9
+	.dw	_1420-_1419
 	.db	3,1,1,5,79,9
+	.dw	_1421-_1420
+	.db	1,5,17,9
+	.dw	_80-_1421
+	.db	3,2,1,5,13,9
+	.dw	_1422-_80
+	.db	1,5,34,7,9
+	.dw	_1423-_1422
+	.db	3,1,1,5,79,9
+	.dw	_1424-_1423
+	.db	1,5,17,9
+	.dw	_81-_1424
+	.db	3,2,1,5,13,9
+	.dw	_1425-_81
+	.db	1,5,34,7,9
+	.dw	_1426-_1425
+	.db	3,1,1,5,87,9
+	.dw	_1427-_1426
+	.db	1,5,45,9
+	.dw	_82-_1427
+	.db	3,4,1,5,43,9
+	.dw	_1428-_82
+	.db	1,9
+	.dw	_1429-_1428
+	.db	3,2,1,9
+	.dw	_1430-_1429
+	.db	3,1,1,5,45,9
+	.dw	_1431-_1430
+	.db	3,3,1,5,43,9
+	.dw	_1432-_1431
+	.db	1,5,56,9
+	.dw	_1433-_1432
+	.db	3,1,1,5,43,9
+	.dw	_1434-_1433
+	.db	1,9
+	.dw	_1435-_1434
+	.db	3,2,1,9
+	.dw	_1436-_1435
+	.db	3,2,1,9
+	.dw	_1437-_1436
+	.db	3,1,1,5,30,9
+	.dw	_1438-_1437
+	.db	3,2,1,5,78,9
 	.dw	_1439-_1438
-	.db	1,5,24,9
-	.dw	_374-_1439
-	.db	3,11,1,5,47,9
-	.dw	_1440-_374
-	.db	1,5,39,9
+	.db	1,5,30,9
+	.dw	_1440-_1439
+	.db	3,1,1,5,79,9
 	.dw	_1441-_1440
-	.db	3,2,1,5,37,9
-	.dw	_1442-_1441
+	.db	1,5,24,9
+	.dw	_374-_1441
+	.db	3,11,1,5,47,9
+	.dw	_1442-_374
 	.db	1,5,39,9
 	.dw	_1443-_1442
-	.db	3,1,1,5,37,9
+	.db	3,2,1,5,37,9
 	.dw	_1444-_1443
-	.db	1,5,52,9
-	.dw	_1445-_1444
-	.db	3,2,1,5,24,9
-	.dw	_1043-_1445
-	.db	1,5,52,9
-	.dw	_1045-_1043
-	.db	3,1,1,5,37,9
-	.dw	_1044-_1045
-	.db	3,1,1,5,50,9
-	.dw	_1446-_1044
-	.db	3,1,1,5,37,9
-	.dw	_1447-_1446
-	.db	1,9
-	.dw	_1448-_1447
-	.db	3,2,1,5,50,9
-	.dw	_1449-_1448
-	.db	3,1,1,5,37,9
-	.dw	_1046-_1449
 	.db	1,5,39,9
-	.dw	_1450-_1046
-	.db	3,3,1,5,37,9
-	.dw	_1451-_1450
-	.db	1,5,47,9
-	.dw	_1452-_1451
+	.dw	_1445-_1444
 	.db	3,1,1,5,37,9
+	.dw	_1446-_1445
+	.db	1,5,52,9
+	.dw	_1447-_1446
+	.db	3,2,1,5,24,9
+	.dw	_1046-_1447
+	.db	1,5,52,9
+	.dw	_1048-_1046
+	.db	3,1,1,5,37,9
+	.dw	_1047-_1048
+	.db	3,1,1,5,50,9
+	.dw	_1448-_1047
+	.db	3,1,1,5,37,9
+	.dw	_1449-_1448
+	.db	1,9
+	.dw	_1450-_1449
+	.db	3,2,1,5,50,9
+	.dw	_1451-_1450
+	.db	3,1,1,5,37,9
+	.dw	_1049-_1451
+	.db	1,5,39,9
+	.dw	_1452-_1049
+	.db	3,3,1,5,37,9
 	.dw	_1453-_1452
-	.db	1,5,30,9
+	.db	1,5,47,9
 	.dw	_1454-_1453
-	.db	3,3,1,5,72,9
+	.db	3,1,1,5,37,9
 	.dw	_1455-_1454
 	.db	1,5,30,9
 	.dw	_1456-_1455
-	.db	3,1,1,5,73,9
+	.db	3,3,1,5,72,9
 	.dw	_1457-_1456
+	.db	1,5,30,9
+	.dw	_1458-_1457
+	.db	3,1,1,5,73,9
+	.dw	_1459-_1458
 	.db	1,5,26,9
-	.dw	_37-_1457
+	.dw	_37-_1459
 	.db	3,8,1,5,33,9
 	.dw	_83-_37
 	.db	3,8,1,5,56,9
-	.dw	_1458-_83
+	.dw	_1460-_83
 	.db	1,5,13,9
-	.dw	_1459-_1458
+	.dw	_1461-_1460
 	.db	3,183,125,1,5,1,9
-	.dw	_206-_1459
+	.dw	_206-_1461
 	.db	3,203,2,0,1,1
-_1100:
+_1101:
 	; End of section
 
 	.debug		.debug_ranges, cluster 'main'
@@ -5926,23 +5932,26 @@ _113:
 	.db	22,19,62,36,33
 	.dl	0,0
 _220:
-	.dl	-1,_109,0,_186-_109
+	.dl	-1,_109,0,_394-_109
 	.dw	6
 	.db	82,147,2,83,147,2
+	.dl	_395-_109,_396-_109
+	.dw	6
+	.db	84,147,2,85,147,2
 	.dl	0,0
 	; End of section
 
 	.debug		.debug_loc, cluster 'main'
 _375:
-	.dl	-1,_157,_1043-_157,_1044-_157
+	.dl	-1,_157,_1046-_157,_1047-_157
 	.dw	1
 	.db	82
-	.dl	_1045-_157,_37-_157
+	.dl	_1048-_157,_37-_157
 	.dw	1
 	.db	86
 	.dl	0,0
 _376:
-	.dl	-1,_157,_1044-_157,_1046-_157
+	.dl	-1,_157,_1047-_157,_1049-_157
 	.dw	1
 	.db	82
 	.dl	0,0
@@ -5957,16 +5966,16 @@ _303:
 	.db	145,134,127
 	.dl	0,0
 _324:
-	.dl	-1,_157,_988-_157,_206-_157
+	.dl	-1,_157,_991-_157,_206-_157
 	.dw	2
 	.db	145,123
-	.dl	_1031-_157,_1032-_157
-	.dw	4
-	.db	84,157,8,8
-	.dl	_1033-_157,_63-_157
-	.dw	4
-	.db	84,157,8,8
 	.dl	_1034-_157,_1035-_157
+	.dw	4
+	.db	84,157,8,8
+	.dl	_1036-_157,_63-_157
+	.dw	4
+	.db	84,157,8,8
+	.dl	_1037-_157,_1038-_157
 	.dw	4
 	.db	84,157,8,8
 	.dl	0,0
@@ -5990,51 +5999,51 @@ _377:
 	.dw	3
 	.db	145,156,127
 	.dl	0,0
-_344:
-	.dl	-1,_157,_998-_157,_999-_157
+_347:
+	.dl	-1,_157,_1004-_157,_1005-_157
 	.dw	1
 	.db	82
-	.dl	_23-_157,_1000-_157
-	.dw	1
-	.db	82
-	.dl	0,0
-_353:
-	.dl	-1,_157,_1007-_157,_1008-_157
-	.dw	1
-	.db	82
-	.dl	_32-_157,_1009-_157
+	.dl	_26-_157,_1006-_157
 	.dw	1
 	.db	82
 	.dl	0,0
 _350:
-	.dl	-1,_157,_1004-_157,_1005-_157
+	.dl	-1,_157,_1007-_157,_1008-_157
 	.dw	1
 	.db	82
-	.dl	_29-_157,_1006-_157
-	.dw	1
-	.db	82
-	.dl	0,0
-_347:
-	.dl	-1,_157,_1001-_157,_1002-_157
-	.dw	1
-	.db	82
-	.dl	_26-_157,_1003-_157
+	.dl	_29-_157,_1009-_157
 	.dw	1
 	.db	82
 	.dl	0,0
 _341:
-	.dl	-1,_157,_993-_157,_994-_157
+	.dl	-1,_157,_996-_157,_997-_157
 	.dw	1
 	.db	82
-	.dl	_19-_157,_995-_157
+	.dl	_19-_157,_998-_157
+	.dw	1
+	.db	82
+	.dl	0,0
+_353:
+	.dl	-1,_157,_1010-_157,_1011-_157
+	.dw	1
+	.db	82
+	.dl	_32-_157,_1012-_157
 	.dw	1
 	.db	82
 	.dl	0,0
 _338:
-	.dl	-1,_157,_990-_157,_991-_157
+	.dl	-1,_157,_993-_157,_994-_157
 	.dw	1
 	.db	82
-	.dl	_16-_157,_992-_157
+	.dl	_16-_157,_995-_157
+	.dw	1
+	.db	82
+	.dl	0,0
+_344:
+	.dl	-1,_157,_1001-_157,_1002-_157
+	.dw	1
+	.db	82
+	.dl	_23-_157,_1003-_157
 	.dw	1
 	.db	82
 	.dl	0,0
@@ -6051,37 +6060,37 @@ _319:
 	.db	145,147,127
 	.dl	0,0
 _311:
-	.dl	-1,_157,_980-_157,_981-_157
+	.dl	-1,_157,_983-_157,_984-_157
 	.dw	4
 	.db	84,157,8,8
-	.dl	_982-_157,_206-_157
+	.dl	_985-_157,_206-_157
 	.dw	2
 	.db	145,120
-	.dl	_1012-_157,_1013-_157
-	.dw	4
-	.db	84,157,8,8
 	.dl	_1015-_157,_1016-_157
 	.dw	4
 	.db	84,157,8,8
-	.dl	_1021-_157,_1022-_157
+	.dl	_1018-_157,_1019-_157
 	.dw	4
 	.db	84,157,8,8
-	.dl	_44-_157,_1024-_157
+	.dl	_1024-_157,_1025-_157
 	.dw	4
 	.db	84,157,8,8
-	.dl	_49-_157,_1027-_157
+	.dl	_44-_157,_1027-_157
 	.dw	4
 	.db	84,157,8,8
-	.dl	_1028-_157,_50-_157
+	.dl	_49-_157,_1030-_157
 	.dw	4
 	.db	84,157,8,8
-	.dl	_1029-_157,_51-_157
+	.dl	_1031-_157,_50-_157
 	.dw	4
 	.db	84,157,8,8
-	.dl	_1030-_157,_39-_157
+	.dl	_1032-_157,_51-_157
 	.dw	4
 	.db	84,157,8,8
-	.dl	_1039-_157,_1040-_157
+	.dl	_1033-_157,_39-_157
+	.dw	4
+	.db	84,157,8,8
+	.dl	_1042-_157,_1043-_157
 	.dw	4
 	.db	84,157,8,8
 	.dl	0,0
@@ -6093,13 +6102,13 @@ _287:
 _331:
 	.dl	0,0
 _312:
-	.dl	-1,_157,_983-_157,_981-_157
+	.dl	-1,_157,_986-_157,_984-_157
 	.dw	4
 	.db	84,157,8,0
-	.dl	_984-_157,_206-_157
+	.dl	_987-_157,_206-_157
 	.dw	2
 	.db	145,124
-	.dl	_1011-_157,_1012-_157
+	.dl	_1014-_157,_1015-_157
 	.dw	4
 	.db	84,157,8,8
 	.dl	0,0
@@ -6147,13 +6156,8 @@ _245:
 	.dw	3
 	.db	145,250,125
 	.dl	0,0
-_270:
-	.dl	-1,_157,_256-_157,_279-_157
-	.dw	1
-	.db	92
-	.dl	0,0
-_296:
-	.dl	-1,_157,_289-_157,_975-_157
+_286:
+	.dl	-1,_157,_279-_157,_289-_157
 	.dw	1
 	.db	92
 	.dl	0,0
@@ -6162,8 +6166,13 @@ _371:
 	.dw	1
 	.db	93
 	.dl	0,0
-_286:
-	.dl	-1,_157,_279-_157,_289-_157
+_296:
+	.dl	-1,_157,_289-_157,_978-_157
+	.dw	1
+	.db	92
+	.dl	0,0
+_270:
+	.dl	-1,_157,_256-_157,_279-_157
 	.dw	1
 	.db	92
 	.dl	0,0
@@ -6190,52 +6199,52 @@ _272:
 	.db	145,228,126
 	.dl	0,0
 _301:
-	.dl	-1,_157,_976-_157,_977-_157
+	.dl	-1,_157,_979-_157,_980-_157
 	.dw	4
 	.db	84,157,8,8
-	.dl	_978-_157,_206-_157
+	.dl	_981-_157,_206-_157
 	.dw	2
 	.db	145,122
-	.dl	_977-_157,_979-_157
+	.dl	_980-_157,_982-_157
 	.dw	4
 	.db	82,157,8,8
-	.dl	_1016-_157,_1017-_157
+	.dl	_1019-_157,_1020-_157
 	.dw	4
 	.db	84,157,8,8
-	.dl	_1018-_157,_1019-_157
+	.dl	_1021-_157,_1022-_157
 	.dw	4
 	.db	82,157,8,0
-	.dl	_45-_157,_1020-_157
+	.dl	_45-_157,_1023-_157
 	.dw	4
 	.db	84,157,8,8
-	.dl	_1022-_157,_1023-_157
+	.dl	_1025-_157,_1026-_157
 	.dw	4
 	.db	84,157,8,8
 	.dl	0,0
 _316:
-	.dl	-1,_157,_985-_157,_206-_157
+	.dl	-1,_157,_988-_157,_206-_157
 	.dw	2
 	.db	145,127
-	.dl	_996-_157,_997-_157
+	.dl	_999-_157,_1000-_157
 	.dw	4
 	.db	84,157,8,8
-	.dl	_1040-_157,_1041-_157
+	.dl	_1043-_157,_1044-_157
 	.dw	4
 	.db	84,157,8,8
 	.dl	0,0
 _317:
-	.dl	-1,_157,_986-_157,_206-_157
+	.dl	-1,_157,_989-_157,_206-_157
 	.dw	2
 	.db	145,126
-	.dl	_997-_157,_22-_157
+	.dl	_1000-_157,_22-_157
 	.dw	4
 	.db	84,157,8,8
-	.dl	_1041-_157,_1042-_157
+	.dl	_1044-_157,_1045-_157
 	.dw	4
 	.db	84,157,8,8
 	.dl	0,0
 _156:
-	.dl	-1,_157,0,_954-_157
+	.dl	-1,_157,0,_957-_157
 	.dw	58
 	.db	127,0,18,10
 	.dw	16383
@@ -6263,33 +6272,33 @@ _160:
 	.db	146,180,2,0
 _161:
 	.db	22,19,62,36,33
-	.dl	_954-_157,_206-_157
+	.dl	_957-_157,_206-_157
 	.dw	62
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_955-_959
-_959:
-	.db	146,177,2,0,47
-	.dw	_958-_960
-_960:
-_955:
-	.db	18,49,46,40
-	.dw	_956-_961
-_961:
-	.db	146,178,2,0,47
 	.dw	_958-_962
 _962:
-_956:
-	.db	18,50,46,40
-	.dw	_957-_963
+	.db	146,177,2,0,47
+	.dw	_961-_963
 _963:
-	.db	146,179,2,0,47
-	.dw	_958-_964
-_964:
-_957:
-	.db	146,180,2,0
 _958:
+	.db	18,49,46,40
+	.dw	_959-_964
+_964:
+	.db	146,178,2,0,47
+	.dw	_961-_965
+_965:
+_959:
+	.db	18,50,46,40
+	.dw	_960-_966
+_966:
+	.db	146,179,2,0,47
+	.dw	_961-_967
+_967:
+_960:
+	.db	146,180,2,0
+_961:
 	.db	22,19,62,36,33,11
 	.dw	280
 	.db	34
@@ -6317,13 +6326,13 @@ _320:
 	.db	145,142,127
 	.dl	0,0
 _321:
-	.dl	-1,_157,_987-_157,_206-_157
+	.dl	-1,_157,_990-_157,_206-_157
 	.dw	2
 	.db	145,125
-	.dl	_1010-_157,_35-_157
+	.dl	_1013-_157,_35-_157
 	.dw	4
 	.db	84,157,8,8
-	.dl	_1036-_157,_1037-_157
+	.dl	_1039-_157,_1040-_157
 	.dw	4
 	.db	84,157,8,8
 	.dl	0,0
@@ -6355,16 +6364,16 @@ _323:
 _383:
 	.dl	0,0
 _327:
-	.dl	-1,_157,_989-_157,_206-_157
+	.dl	-1,_157,_992-_157,_206-_157
 	.dw	2
 	.db	145,121
-	.dl	_1014-_157,_1015-_157
+	.dl	_1017-_157,_1018-_157
 	.dw	4
 	.db	84,157,8,8
-	.dl	_1025-_157,_1026-_157
+	.dl	_1028-_157,_1029-_157
 	.dw	4
 	.db	84,157,8,8
-	.dl	_1038-_157,_68-_157
+	.dl	_1041-_157,_68-_157
 	.dw	4
 	.db	84,157,8,8
 	.dl	_71-_157,_65-_157
@@ -6418,15 +6427,15 @@ _318:
 
 	.debug		.debug_loc, cluster 'pct_travel_to_torque'
 _239:
-	.dl	-1,_145,0,_952-_145
+	.dl	-1,_145,0,_955-_145
 	.dw	6
 	.db	82,147,2,83,147,2
-	.dl	_9-_145,_953-_145
+	.dl	_9-_145,_956-_145
 	.dw	6
 	.db	82,147,2,83,147,2
 	.dl	0,0
 _144:
-	.dl	-1,_145,0,_868-_145
+	.dl	-1,_145,0,_871-_145
 	.dw	58
 	.db	127,0,18,10
 	.dw	16383
@@ -6454,127 +6463,127 @@ _148:
 	.db	146,180,2,0
 _149:
 	.db	22,19,62,36,33
-	.dl	_868-_145,_879-_145
+	.dl	_871-_145,_882-_145
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_869-_873
-_873:
-	.db	146,177,2,0,47
-	.dw	_872-_874
-_874:
-_869:
-	.db	18,49,46,40
-	.dw	_870-_875
-_875:
-	.db	146,178,2,0,47
 	.dw	_872-_876
 _876:
-_870:
-	.db	18,50,46,40
-	.dw	_871-_877
+	.db	146,177,2,0,47
+	.dw	_875-_877
 _877:
-	.db	146,179,2,0,47
-	.dw	_872-_878
-_878:
-_871:
-	.db	146,180,2,0
 _872:
+	.db	18,49,46,40
+	.dw	_873-_878
+_878:
+	.db	146,178,2,0,47
+	.dw	_875-_879
+_879:
+_873:
+	.db	18,50,46,40
+	.dw	_874-_880
+_880:
+	.db	146,179,2,0,47
+	.dw	_875-_881
+_881:
+_874:
+	.db	146,180,2,0
+_875:
 	.db	22,19,62,36,33,50,34
-	.dl	_879-_145,_890-_145
+	.dl	_882-_145,_893-_145
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_880-_884
-_884:
-	.db	146,177,2,0,47
-	.dw	_883-_885
-_885:
-_880:
-	.db	18,49,46,40
-	.dw	_881-_886
-_886:
-	.db	146,178,2,0,47
 	.dw	_883-_887
 _887:
-_881:
-	.db	18,50,46,40
-	.dw	_882-_888
+	.db	146,177,2,0,47
+	.dw	_886-_888
 _888:
-	.db	146,179,2,0,47
-	.dw	_883-_889
-_889:
-_882:
-	.db	146,180,2,0
 _883:
+	.db	18,49,46,40
+	.dw	_884-_889
+_889:
+	.db	146,178,2,0,47
+	.dw	_886-_890
+_890:
+_884:
+	.db	18,50,46,40
+	.dw	_885-_891
+_891:
+	.db	146,179,2,0,47
+	.dw	_886-_892
+_892:
+_885:
+	.db	146,180,2,0
+_886:
 	.db	22,19,62,36,33,52,34
-	.dl	_890-_145,_901-_145
+	.dl	_893-_145,_904-_145
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_891-_895
-_895:
-	.db	146,177,2,0,47
-	.dw	_894-_896
-_896:
-_891:
-	.db	18,49,46,40
-	.dw	_892-_897
-_897:
-	.db	146,178,2,0,47
 	.dw	_894-_898
 _898:
-_892:
-	.db	18,50,46,40
-	.dw	_893-_899
+	.db	146,177,2,0,47
+	.dw	_897-_899
 _899:
-	.db	146,179,2,0,47
-	.dw	_894-_900
-_900:
-_893:
-	.db	146,180,2,0
 _894:
+	.db	18,49,46,40
+	.dw	_895-_900
+_900:
+	.db	146,178,2,0,47
+	.dw	_897-_901
+_901:
+_895:
+	.db	18,50,46,40
+	.dw	_896-_902
+_902:
+	.db	146,179,2,0,47
+	.dw	_897-_903
+_903:
+_896:
+	.db	146,180,2,0
+_897:
 	.db	22,19,62,36,33,50,34
-	.dl	_901-_145,_201-_145
+	.dl	_904-_145,_201-_145
 	.dw	58
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_902-_906
-_906:
-	.db	146,177,2,0,47
-	.dw	_905-_907
-_907:
-_902:
-	.db	18,49,46,40
-	.dw	_903-_908
-_908:
-	.db	146,178,2,0,47
 	.dw	_905-_909
 _909:
-_903:
-	.db	18,50,46,40
-	.dw	_904-_910
+	.db	146,177,2,0,47
+	.dw	_908-_910
 _910:
-	.db	146,179,2,0,47
-	.dw	_905-_911
-_911:
-_904:
-	.db	146,180,2,0
 _905:
+	.db	18,49,46,40
+	.dw	_906-_911
+_911:
+	.db	146,178,2,0,47
+	.dw	_908-_912
+_912:
+_906:
+	.db	18,50,46,40
+	.dw	_907-_913
+_913:
+	.db	146,179,2,0,47
+	.dw	_908-_914
+_914:
+_907:
+	.db	146,180,2,0
+_908:
 	.db	22,19,62,36,33
 	.dl	0,0
 	; End of section
 
 	.debug		.debug_loc, cluster 'read_can_msg'
 _233:
-	.dl	-1,_121,_732-_121,_736-_121
+	.dl	-1,_121,_735-_121,_739-_121
 	.dw	1
 	.db	82
-	.dl	_3-_121,_737-_121
+	.dl	_3-_121,_740-_121
 	.dw	1
 	.db	82
 	.dl	0,0
@@ -6582,44 +6591,44 @@ _231:
 	.dl	-1,_121,0,_191-_121
 	.dw	2
 	.db	145,0
-	.dl	_738-_121,_4-_121
+	.dl	_741-_121,_4-_121
 	.dw	4
 	.db	84,157,8,0
 	.dl	0,0
 _225:
-	.dl	-1,_121,0,_730-_121
+	.dl	-1,_121,0,_733-_121
 	.dw	6
 	.db	84,147,2,85,147,2
-	.dl	_734-_121,_504-_121
+	.dl	_737-_121,_507-_121
 	.dw	6
 	.db	88,147,2,89,147,2
 	.dl	0,0
 _223:
-	.dl	-1,_121,0,_731-_121
+	.dl	-1,_121,0,_734-_121
 	.dw	6
 	.db	82,147,2,83,147,2
-	.dl	_733-_121,_526-_121
+	.dl	_736-_121,_529-_121
 	.dw	6
 	.db	86,147,2,87,147,2
 	.dl	0,0
 _229:
-	.dl	-1,_121,0,_732-_121
+	.dl	-1,_121,0,_735-_121
 	.dw	6
 	.db	93,147,2,94,147,2
-	.dl	_739-_121,_4-_121
+	.dl	_742-_121,_4-_121
 	.dw	6
 	.db	91,147,2,81,147,2
 	.dl	0,0
 _227:
-	.dl	-1,_121,0,_732-_121
+	.dl	-1,_121,0,_735-_121
 	.dw	6
 	.db	91,147,2,92,147,2
-	.dl	_735-_121,_493-_121
+	.dl	_738-_121,_496-_121
 	.dw	6
 	.db	90,147,2,80,147,2
 	.dl	0,0
 _120:
-	.dl	-1,_121,0,_394-_121
+	.dl	-1,_121,0,_397-_121
 	.dw	58
 	.db	127,0,18,10
 	.dw	16383
@@ -6647,468 +6656,468 @@ _124:
 	.db	146,180,2,0
 _125:
 	.db	22,19,62,36,33
-	.dl	_394-_121,_405-_121
+	.dl	_397-_121,_408-_121
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_395-_399
-_399:
-	.db	146,177,2,0,47
-	.dw	_398-_400
-_400:
-_395:
-	.db	18,49,46,40
-	.dw	_396-_401
-_401:
-	.db	146,178,2,0,47
 	.dw	_398-_402
 _402:
-_396:
-	.db	18,50,46,40
-	.dw	_397-_403
+	.db	146,177,2,0,47
+	.dw	_401-_403
 _403:
-	.db	146,179,2,0,47
-	.dw	_398-_404
-_404:
-_397:
-	.db	146,180,2,0
 _398:
+	.db	18,49,46,40
+	.dw	_399-_404
+_404:
+	.db	146,178,2,0,47
+	.dw	_401-_405
+_405:
+_399:
+	.db	18,50,46,40
+	.dw	_400-_406
+_406:
+	.db	146,179,2,0,47
+	.dw	_401-_407
+_407:
+_400:
+	.db	146,180,2,0
+_401:
 	.db	22,19,62,36,33,50,34
-	.dl	_405-_121,_416-_121
+	.dl	_408-_121,_419-_121
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_406-_410
-_410:
-	.db	146,177,2,0,47
-	.dw	_409-_411
-_411:
-_406:
-	.db	18,49,46,40
-	.dw	_407-_412
-_412:
-	.db	146,178,2,0,47
 	.dw	_409-_413
 _413:
-_407:
-	.db	18,50,46,40
-	.dw	_408-_414
+	.db	146,177,2,0,47
+	.dw	_412-_414
 _414:
-	.db	146,179,2,0,47
-	.dw	_409-_415
-_415:
-_408:
-	.db	146,180,2,0
 _409:
+	.db	18,49,46,40
+	.dw	_410-_415
+_415:
+	.db	146,178,2,0,47
+	.dw	_412-_416
+_416:
+_410:
+	.db	18,50,46,40
+	.dw	_411-_417
+_417:
+	.db	146,179,2,0,47
+	.dw	_412-_418
+_418:
+_411:
+	.db	146,180,2,0
+_412:
 	.db	22,19,62,36,33,52,34
-	.dl	_416-_121,_427-_121
+	.dl	_419-_121,_430-_121
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_417-_421
-_421:
-	.db	146,177,2,0,47
-	.dw	_420-_422
-_422:
-_417:
-	.db	18,49,46,40
-	.dw	_418-_423
-_423:
-	.db	146,178,2,0,47
 	.dw	_420-_424
 _424:
-_418:
-	.db	18,50,46,40
-	.dw	_419-_425
+	.db	146,177,2,0,47
+	.dw	_423-_425
 _425:
-	.db	146,179,2,0,47
-	.dw	_420-_426
-_426:
-_419:
-	.db	146,180,2,0
 _420:
+	.db	18,49,46,40
+	.dw	_421-_426
+_426:
+	.db	146,178,2,0,47
+	.dw	_423-_427
+_427:
+_421:
+	.db	18,50,46,40
+	.dw	_422-_428
+_428:
+	.db	146,179,2,0,47
+	.dw	_423-_429
+_429:
+_422:
+	.db	146,180,2,0
+_423:
 	.db	22,19,62,36,33,54,34
-	.dl	_427-_121,_438-_121
+	.dl	_430-_121,_441-_121
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_428-_432
-_432:
-	.db	146,177,2,0,47
-	.dw	_431-_433
-_433:
-_428:
-	.db	18,49,46,40
-	.dw	_429-_434
-_434:
-	.db	146,178,2,0,47
 	.dw	_431-_435
 _435:
-_429:
-	.db	18,50,46,40
-	.dw	_430-_436
+	.db	146,177,2,0,47
+	.dw	_434-_436
 _436:
-	.db	146,179,2,0,47
-	.dw	_431-_437
-_437:
-_430:
-	.db	146,180,2,0
 _431:
+	.db	18,49,46,40
+	.dw	_432-_437
+_437:
+	.db	146,178,2,0,47
+	.dw	_434-_438
+_438:
+_432:
+	.db	18,50,46,40
+	.dw	_433-_439
+_439:
+	.db	146,179,2,0,47
+	.dw	_434-_440
+_440:
+_433:
+	.db	146,180,2,0
+_434:
 	.db	22,19,62,36,33,56,34
-	.dl	_438-_121,_449-_121
+	.dl	_441-_121,_452-_121
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_439-_443
-_443:
-	.db	146,177,2,0,47
-	.dw	_442-_444
-_444:
-_439:
-	.db	18,49,46,40
-	.dw	_440-_445
-_445:
-	.db	146,178,2,0,47
 	.dw	_442-_446
 _446:
-_440:
-	.db	18,50,46,40
-	.dw	_441-_447
+	.db	146,177,2,0,47
+	.dw	_445-_447
 _447:
-	.db	146,179,2,0,47
-	.dw	_442-_448
-_448:
-_441:
-	.db	146,180,2,0
 _442:
+	.db	18,49,46,40
+	.dw	_443-_448
+_448:
+	.db	146,178,2,0,47
+	.dw	_445-_449
+_449:
+_443:
+	.db	18,50,46,40
+	.dw	_444-_450
+_450:
+	.db	146,179,2,0,47
+	.dw	_445-_451
+_451:
+_444:
+	.db	146,180,2,0
+_445:
 	.db	22,19,62,36,33,58,34
-	.dl	_449-_121,_460-_121
+	.dl	_452-_121,_463-_121
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_450-_454
-_454:
-	.db	146,177,2,0,47
-	.dw	_453-_455
-_455:
-_450:
-	.db	18,49,46,40
-	.dw	_451-_456
-_456:
-	.db	146,178,2,0,47
 	.dw	_453-_457
 _457:
-_451:
-	.db	18,50,46,40
-	.dw	_452-_458
+	.db	146,177,2,0,47
+	.dw	_456-_458
 _458:
-	.db	146,179,2,0,47
-	.dw	_453-_459
-_459:
-_452:
-	.db	146,180,2,0
 _453:
+	.db	18,49,46,40
+	.dw	_454-_459
+_459:
+	.db	146,178,2,0,47
+	.dw	_456-_460
+_460:
+_454:
+	.db	18,50,46,40
+	.dw	_455-_461
+_461:
+	.db	146,179,2,0,47
+	.dw	_456-_462
+_462:
+_455:
+	.db	146,180,2,0
+_456:
 	.db	22,19,62,36,33,60,34
-	.dl	_460-_121,_471-_121
+	.dl	_463-_121,_474-_121
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_461-_465
-_465:
-	.db	146,177,2,0,47
-	.dw	_464-_466
-_466:
-_461:
-	.db	18,49,46,40
-	.dw	_462-_467
-_467:
-	.db	146,178,2,0,47
 	.dw	_464-_468
 _468:
-_462:
-	.db	18,50,46,40
-	.dw	_463-_469
+	.db	146,177,2,0,47
+	.dw	_467-_469
 _469:
-	.db	146,179,2,0,47
-	.dw	_464-_470
-_470:
-_463:
-	.db	146,180,2,0
 _464:
+	.db	18,49,46,40
+	.dw	_465-_470
+_470:
+	.db	146,178,2,0,47
+	.dw	_467-_471
+_471:
+_465:
+	.db	18,50,46,40
+	.dw	_466-_472
+_472:
+	.db	146,179,2,0,47
+	.dw	_467-_473
+_473:
+_466:
+	.db	146,180,2,0
+_467:
 	.db	22,19,62,36,33,62,34
-	.dl	_471-_121,_482-_121
+	.dl	_474-_121,_485-_121
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_472-_476
-_476:
-	.db	146,177,2,0,47
-	.dw	_475-_477
-_477:
-_472:
-	.db	18,49,46,40
-	.dw	_473-_478
-_478:
-	.db	146,178,2,0,47
 	.dw	_475-_479
 _479:
-_473:
-	.db	18,50,46,40
-	.dw	_474-_480
+	.db	146,177,2,0,47
+	.dw	_478-_480
 _480:
-	.db	146,179,2,0,47
-	.dw	_475-_481
-_481:
-_474:
-	.db	146,180,2,0
 _475:
+	.db	18,49,46,40
+	.dw	_476-_481
+_481:
+	.db	146,178,2,0,47
+	.dw	_478-_482
+_482:
+_476:
+	.db	18,50,46,40
+	.dw	_477-_483
+_483:
+	.db	146,179,2,0,47
+	.dw	_478-_484
+_484:
+_477:
+	.db	146,180,2,0
+_478:
 	.db	22,19,62,36,33,64,34
-	.dl	_482-_121,_493-_121
+	.dl	_485-_121,_496-_121
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_483-_487
-_487:
-	.db	146,177,2,0,47
-	.dw	_486-_488
-_488:
-_483:
-	.db	18,49,46,40
-	.dw	_484-_489
-_489:
-	.db	146,178,2,0,47
 	.dw	_486-_490
 _490:
-_484:
-	.db	18,50,46,40
-	.dw	_485-_491
+	.db	146,177,2,0,47
+	.dw	_489-_491
 _491:
-	.db	146,179,2,0,47
-	.dw	_486-_492
-_492:
-_485:
-	.db	146,180,2,0
 _486:
+	.db	18,49,46,40
+	.dw	_487-_492
+_492:
+	.db	146,178,2,0,47
+	.dw	_489-_493
+_493:
+_487:
+	.db	18,50,46,40
+	.dw	_488-_494
+_494:
+	.db	146,179,2,0,47
+	.dw	_489-_495
+_495:
+_488:
+	.db	146,180,2,0
+_489:
 	.db	22,19,62,36,33,62,34
-	.dl	_493-_121,_504-_121
+	.dl	_496-_121,_507-_121
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_494-_498
-_498:
-	.db	146,177,2,0,47
-	.dw	_497-_499
-_499:
-_494:
-	.db	18,49,46,40
-	.dw	_495-_500
-_500:
-	.db	146,178,2,0,47
 	.dw	_497-_501
 _501:
-_495:
-	.db	18,50,46,40
-	.dw	_496-_502
+	.db	146,177,2,0,47
+	.dw	_500-_502
 _502:
-	.db	146,179,2,0,47
-	.dw	_497-_503
-_503:
-_496:
-	.db	146,180,2,0
 _497:
+	.db	18,49,46,40
+	.dw	_498-_503
+_503:
+	.db	146,178,2,0,47
+	.dw	_500-_504
+_504:
+_498:
+	.db	18,50,46,40
+	.dw	_499-_505
+_505:
+	.db	146,179,2,0,47
+	.dw	_500-_506
+_506:
+_499:
+	.db	146,180,2,0
+_500:
 	.db	22,19,62,36,33,60,34
-	.dl	_504-_121,_515-_121
+	.dl	_507-_121,_518-_121
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_505-_509
-_509:
-	.db	146,177,2,0,47
-	.dw	_508-_510
-_510:
-_505:
-	.db	18,49,46,40
-	.dw	_506-_511
-_511:
-	.db	146,178,2,0,47
 	.dw	_508-_512
 _512:
-_506:
-	.db	18,50,46,40
-	.dw	_507-_513
+	.db	146,177,2,0,47
+	.dw	_511-_513
 _513:
-	.db	146,179,2,0,47
-	.dw	_508-_514
-_514:
-_507:
-	.db	146,180,2,0
 _508:
+	.db	18,49,46,40
+	.dw	_509-_514
+_514:
+	.db	146,178,2,0,47
+	.dw	_511-_515
+_515:
+_509:
+	.db	18,50,46,40
+	.dw	_510-_516
+_516:
+	.db	146,179,2,0,47
+	.dw	_511-_517
+_517:
+_510:
+	.db	146,180,2,0
+_511:
 	.db	22,19,62,36,33,58,34
-	.dl	_515-_121,_526-_121
+	.dl	_518-_121,_529-_121
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_516-_520
-_520:
-	.db	146,177,2,0,47
-	.dw	_519-_521
-_521:
-_516:
-	.db	18,49,46,40
-	.dw	_517-_522
-_522:
-	.db	146,178,2,0,47
 	.dw	_519-_523
 _523:
-_517:
-	.db	18,50,46,40
-	.dw	_518-_524
+	.db	146,177,2,0,47
+	.dw	_522-_524
 _524:
-	.db	146,179,2,0,47
-	.dw	_519-_525
-_525:
-_518:
-	.db	146,180,2,0
 _519:
+	.db	18,49,46,40
+	.dw	_520-_525
+_525:
+	.db	146,178,2,0,47
+	.dw	_522-_526
+_526:
+_520:
+	.db	18,50,46,40
+	.dw	_521-_527
+_527:
+	.db	146,179,2,0,47
+	.dw	_522-_528
+_528:
+_521:
+	.db	146,180,2,0
+_522:
 	.db	22,19,62,36,33,56,34
-	.dl	_526-_121,_537-_121
+	.dl	_529-_121,_540-_121
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_527-_531
-_531:
-	.db	146,177,2,0,47
-	.dw	_530-_532
-_532:
-_527:
-	.db	18,49,46,40
-	.dw	_528-_533
-_533:
-	.db	146,178,2,0,47
 	.dw	_530-_534
 _534:
-_528:
-	.db	18,50,46,40
-	.dw	_529-_535
+	.db	146,177,2,0,47
+	.dw	_533-_535
 _535:
-	.db	146,179,2,0,47
-	.dw	_530-_536
-_536:
-_529:
-	.db	146,180,2,0
 _530:
+	.db	18,49,46,40
+	.dw	_531-_536
+_536:
+	.db	146,178,2,0,47
+	.dw	_533-_537
+_537:
+_531:
+	.db	18,50,46,40
+	.dw	_532-_538
+_538:
+	.db	146,179,2,0,47
+	.dw	_533-_539
+_539:
+_532:
+	.db	146,180,2,0
+_533:
 	.db	22,19,62,36,33,54,34
-	.dl	_537-_121,_548-_121
+	.dl	_540-_121,_551-_121
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_538-_542
-_542:
-	.db	146,177,2,0,47
-	.dw	_541-_543
-_543:
-_538:
-	.db	18,49,46,40
-	.dw	_539-_544
-_544:
-	.db	146,178,2,0,47
 	.dw	_541-_545
 _545:
-_539:
-	.db	18,50,46,40
-	.dw	_540-_546
+	.db	146,177,2,0,47
+	.dw	_544-_546
 _546:
-	.db	146,179,2,0,47
-	.dw	_541-_547
-_547:
-_540:
-	.db	146,180,2,0
 _541:
+	.db	18,49,46,40
+	.dw	_542-_547
+_547:
+	.db	146,178,2,0,47
+	.dw	_544-_548
+_548:
+_542:
+	.db	18,50,46,40
+	.dw	_543-_549
+_549:
+	.db	146,179,2,0,47
+	.dw	_544-_550
+_550:
+_543:
+	.db	146,180,2,0
+_544:
 	.db	22,19,62,36,33,52,34
-	.dl	_548-_121,_559-_121
+	.dl	_551-_121,_562-_121
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_549-_553
-_553:
-	.db	146,177,2,0,47
-	.dw	_552-_554
-_554:
-_549:
-	.db	18,49,46,40
-	.dw	_550-_555
-_555:
-	.db	146,178,2,0,47
 	.dw	_552-_556
 _556:
-_550:
-	.db	18,50,46,40
-	.dw	_551-_557
+	.db	146,177,2,0,47
+	.dw	_555-_557
 _557:
-	.db	146,179,2,0,47
-	.dw	_552-_558
-_558:
-_551:
-	.db	146,180,2,0
 _552:
+	.db	18,49,46,40
+	.dw	_553-_558
+_558:
+	.db	146,178,2,0,47
+	.dw	_555-_559
+_559:
+_553:
+	.db	18,50,46,40
+	.dw	_554-_560
+_560:
+	.db	146,179,2,0,47
+	.dw	_555-_561
+_561:
+_554:
+	.db	146,180,2,0
+_555:
 	.db	22,19,62,36,33,50,34
-	.dl	_559-_121,_191-_121
+	.dl	_562-_121,_191-_121
 	.dw	58
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_560-_564
-_564:
-	.db	146,177,2,0,47
-	.dw	_563-_565
-_565:
-_560:
-	.db	18,49,46,40
-	.dw	_561-_566
-_566:
-	.db	146,178,2,0,47
 	.dw	_563-_567
 _567:
-_561:
-	.db	18,50,46,40
-	.dw	_562-_568
+	.db	146,177,2,0,47
+	.dw	_566-_568
 _568:
-	.db	146,179,2,0,47
-	.dw	_563-_569
-_569:
-_562:
-	.db	146,180,2,0
 _563:
+	.db	18,49,46,40
+	.dw	_564-_569
+_569:
+	.db	146,178,2,0,47
+	.dw	_566-_570
+_570:
+_564:
+	.db	18,50,46,40
+	.dw	_565-_571
+_571:
+	.db	146,179,2,0,47
+	.dw	_566-_572
+_572:
+_565:
+	.db	146,180,2,0
+_566:
 	.db	22,19,62,36,33
 	.dl	0,0
 	; End of section
 
 	.debug		.debug_loc, cluster 'voltage_to_torque_limit'
 _236:
-	.dl	-1,_133,0,_866-_133
+	.dl	-1,_133,0,_869-_133
 	.dw	1
 	.db	82
-	.dl	_6-_133,_867-_133
+	.dl	_6-_133,_870-_133
 	.dw	1
 	.db	82
 	.dl	0,0
 _132:
-	.dl	-1,_133,0,_740-_133
+	.dl	-1,_133,0,_743-_133
 	.dw	58
 	.db	127,0,18,10
 	.dw	16383
@@ -7136,206 +7145,206 @@ _136:
 	.db	146,180,2,0
 _137:
 	.db	22,19,62,36,33
-	.dl	_740-_133,_751-_133
+	.dl	_743-_133,_754-_133
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_741-_745
-_745:
-	.db	146,177,2,0,47
-	.dw	_744-_746
-_746:
-_741:
-	.db	18,49,46,40
-	.dw	_742-_747
-_747:
-	.db	146,178,2,0,47
 	.dw	_744-_748
 _748:
-_742:
-	.db	18,50,46,40
-	.dw	_743-_749
+	.db	146,177,2,0,47
+	.dw	_747-_749
 _749:
-	.db	146,179,2,0,47
-	.dw	_744-_750
-_750:
-_743:
-	.db	146,180,2,0
 _744:
+	.db	18,49,46,40
+	.dw	_745-_750
+_750:
+	.db	146,178,2,0,47
+	.dw	_747-_751
+_751:
+_745:
+	.db	18,50,46,40
+	.dw	_746-_752
+_752:
+	.db	146,179,2,0,47
+	.dw	_747-_753
+_753:
+_746:
+	.db	146,180,2,0
+_747:
 	.db	22,19,62,36,33,50,34
-	.dl	_751-_133,_762-_133
+	.dl	_754-_133,_765-_133
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_752-_756
-_756:
-	.db	146,177,2,0,47
-	.dw	_755-_757
-_757:
-_752:
-	.db	18,49,46,40
-	.dw	_753-_758
-_758:
-	.db	146,178,2,0,47
 	.dw	_755-_759
 _759:
-_753:
-	.db	18,50,46,40
-	.dw	_754-_760
+	.db	146,177,2,0,47
+	.dw	_758-_760
 _760:
-	.db	146,179,2,0,47
-	.dw	_755-_761
-_761:
-_754:
-	.db	146,180,2,0
 _755:
+	.db	18,49,46,40
+	.dw	_756-_761
+_761:
+	.db	146,178,2,0,47
+	.dw	_758-_762
+_762:
+_756:
+	.db	18,50,46,40
+	.dw	_757-_763
+_763:
+	.db	146,179,2,0,47
+	.dw	_758-_764
+_764:
+_757:
+	.db	146,180,2,0
+_758:
 	.db	22,19,62,36,33,52,34
-	.dl	_762-_133,_773-_133
+	.dl	_765-_133,_776-_133
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_763-_767
-_767:
-	.db	146,177,2,0,47
-	.dw	_766-_768
-_768:
-_763:
-	.db	18,49,46,40
-	.dw	_764-_769
-_769:
-	.db	146,178,2,0,47
 	.dw	_766-_770
 _770:
-_764:
-	.db	18,50,46,40
-	.dw	_765-_771
+	.db	146,177,2,0,47
+	.dw	_769-_771
 _771:
-	.db	146,179,2,0,47
-	.dw	_766-_772
-_772:
-_765:
-	.db	146,180,2,0
 _766:
+	.db	18,49,46,40
+	.dw	_767-_772
+_772:
+	.db	146,178,2,0,47
+	.dw	_769-_773
+_773:
+_767:
+	.db	18,50,46,40
+	.dw	_768-_774
+_774:
+	.db	146,179,2,0,47
+	.dw	_769-_775
+_775:
+_768:
+	.db	146,180,2,0
+_769:
 	.db	22,19,62,36,33,54,34
-	.dl	_773-_133,_784-_133
+	.dl	_776-_133,_787-_133
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_774-_778
-_778:
-	.db	146,177,2,0,47
-	.dw	_777-_779
-_779:
-_774:
-	.db	18,49,46,40
-	.dw	_775-_780
-_780:
-	.db	146,178,2,0,47
 	.dw	_777-_781
 _781:
-_775:
-	.db	18,50,46,40
-	.dw	_776-_782
+	.db	146,177,2,0,47
+	.dw	_780-_782
 _782:
-	.db	146,179,2,0,47
-	.dw	_777-_783
-_783:
-_776:
-	.db	146,180,2,0
 _777:
+	.db	18,49,46,40
+	.dw	_778-_783
+_783:
+	.db	146,178,2,0,47
+	.dw	_780-_784
+_784:
+_778:
+	.db	18,50,46,40
+	.dw	_779-_785
+_785:
+	.db	146,179,2,0,47
+	.dw	_780-_786
+_786:
+_779:
+	.db	146,180,2,0
+_780:
 	.db	22,19,62,36,33,52,34
-	.dl	_784-_133,_795-_133
+	.dl	_787-_133,_798-_133
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_785-_789
-_789:
-	.db	146,177,2,0,47
-	.dw	_788-_790
-_790:
-_785:
-	.db	18,49,46,40
-	.dw	_786-_791
-_791:
-	.db	146,178,2,0,47
 	.dw	_788-_792
 _792:
-_786:
-	.db	18,50,46,40
-	.dw	_787-_793
+	.db	146,177,2,0,47
+	.dw	_791-_793
 _793:
-	.db	146,179,2,0,47
-	.dw	_788-_794
-_794:
-_787:
-	.db	146,180,2,0
 _788:
+	.db	18,49,46,40
+	.dw	_789-_794
+_794:
+	.db	146,178,2,0,47
+	.dw	_791-_795
+_795:
+_789:
+	.db	18,50,46,40
+	.dw	_790-_796
+_796:
+	.db	146,179,2,0,47
+	.dw	_791-_797
+_797:
+_790:
+	.db	146,180,2,0
+_791:
 	.db	22,19,62,36,33,50,34
-	.dl	_795-_133,_196-_133
+	.dl	_798-_133,_196-_133
 	.dw	58
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_796-_800
-_800:
-	.db	146,177,2,0,47
-	.dw	_799-_801
-_801:
-_796:
-	.db	18,49,46,40
-	.dw	_797-_802
-_802:
-	.db	146,178,2,0,47
 	.dw	_799-_803
 _803:
-_797:
-	.db	18,50,46,40
-	.dw	_798-_804
+	.db	146,177,2,0,47
+	.dw	_802-_804
 _804:
-	.db	146,179,2,0,47
-	.dw	_799-_805
-_805:
-_798:
-	.db	146,180,2,0
 _799:
+	.db	18,49,46,40
+	.dw	_800-_805
+_805:
+	.db	146,178,2,0,47
+	.dw	_802-_806
+_806:
+_800:
+	.db	18,50,46,40
+	.dw	_801-_807
+_807:
+	.db	146,179,2,0,47
+	.dw	_802-_808
+_808:
+_801:
+	.db	146,180,2,0
+_802:
 	.db	22,19,62,36,33
 	.dl	0,0
 	; End of section
 
 	.debug		.debug_frame
-_1460:
+_1462:
 	.dl	184
 	.dl	-1
 	.db	3,0,2,2,173,2,15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_1461-_1465
-_1465:
-	.db	146,177,2,0,47
-	.dw	_1464-_1466
-_1466:
-_1461:
-	.db	18,49,46,40
-	.dw	_1462-_1467
+	.dw	_1463-_1467
 _1467:
-	.db	146,178,2,0,47
-	.dw	_1464-_1468
+	.db	146,177,2,0,47
+	.dw	_1466-_1468
 _1468:
-_1462:
-	.db	18,50,46,40
-	.dw	_1463-_1469
-_1469:
-	.db	146,179,2,0,47
-	.dw	_1464-_1470
-_1470:
 _1463:
-	.db	146,180,2,0
+	.db	18,49,46,40
+	.dw	_1464-_1469
+_1469:
+	.db	146,178,2,0,47
+	.dw	_1466-_1470
+_1470:
 _1464:
+	.db	18,50,46,40
+	.dw	_1465-_1471
+_1471:
+	.db	146,179,2,0,47
+	.dw	_1466-_1472
+_1472:
+_1465:
+	.db	146,180,2,0
+_1466:
 	.db	22,19,62,36,33,48,34,16,173,2,12,19,146,176,2,0,64,36,146,161,2,0,33,8,15,22,161,2,5,19,146,161,2,4,8
 	.db	162,2,8,166,2,8,177,2,8,178,2,8,179,2,8,180,2,8,0,8,1,8,6,8,7,8,8,8,9,8,10,8,167,2,8,168,2,8,169,2,8,170
 	.db	2,8,171,2,8,172,2,16,174,2,12,19,146,176,2,0,64,36,146,161,2,0,33,16,175,2,12,19,146,176,2,0,64,36,146
@@ -7344,770 +7353,769 @@ _1464:
 
 	.debug		.debug_frame, cluster 'clear_can_frame'
 	.dl	24
-	.dl	_1460,_85,_176-_85
+	.dl	_1462,_85,_176-_85
 	.db	8,160,2,8,5,8,12,8,13,8,14,0
 	; End of section
 
 	.debug		.debug_frame, cluster 'get_rtd'
 	.dl	12
-	.dl	_1460,_97,_181-_97
+	.dl	_1462,_97,_181-_97
 	; End of section
 
 	.debug		.debug_frame, cluster 'get_sdc'
-	.dl	28
-	.dl	_1460,_109,_186-_109
-	.db	8,160,2,8,5,8,11,8,12,8,13,8,14,0,0,0
+	.dl	12
+	.dl	_1462,_109,_186-_109
 	; End of section
 
 	.debug		.debug_frame, cluster 'read_can_msg'
 	.dl	1204
-	.dl	_1460,_121,_191-_121
+	.dl	_1462,_121,_191-_121
 	.db	4
-	.dl	(_394-_121)/2
+	.dl	(_397-_121)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_570-_574
-_574:
-	.db	146,177,2,0,47
-	.dw	_573-_575
-_575:
-_570:
-	.db	18,49,46,40
-	.dw	_571-_576
-_576:
-	.db	146,178,2,0,47
 	.dw	_573-_577
 _577:
-_571:
-	.db	18,50,46,40
-	.dw	_572-_578
+	.db	146,177,2,0,47
+	.dw	_576-_578
 _578:
-	.db	146,179,2,0,47
-	.dw	_573-_579
-_579:
-_572:
-	.db	146,180,2,0
 _573:
+	.db	18,49,46,40
+	.dw	_574-_579
+_579:
+	.db	146,178,2,0,47
+	.dw	_576-_580
+_580:
+_574:
+	.db	18,50,46,40
+	.dw	_575-_581
+_581:
+	.db	146,179,2,0,47
+	.dw	_576-_582
+_582:
+_575:
+	.db	146,180,2,0
+_576:
 	.db	22,19,62,36,33,50,34,22,15,3,19,127,2,17,0,127,4
-	.dl	(_405-_394)/2
+	.dl	(_408-_397)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_580-_584
-_584:
-	.db	146,177,2,0,47
-	.dw	_583-_585
-_585:
-_580:
-	.db	18,49,46,40
-	.dw	_581-_586
-_586:
-	.db	146,178,2,0,47
 	.dw	_583-_587
 _587:
-_581:
-	.db	18,50,46,40
-	.dw	_582-_588
+	.db	146,177,2,0,47
+	.dw	_586-_588
 _588:
-	.db	146,179,2,0,47
-	.dw	_583-_589
-_589:
-_582:
-	.db	146,180,2,0
 _583:
+	.db	18,49,46,40
+	.dw	_584-_589
+_589:
+	.db	146,178,2,0,47
+	.dw	_586-_590
+_590:
+_584:
+	.db	18,50,46,40
+	.dw	_585-_591
+_591:
+	.db	146,179,2,0,47
+	.dw	_586-_592
+_592:
+_585:
+	.db	146,180,2,0
+_586:
 	.db	22,19,62,36,33,52,34,22,15,3,19,127,4,17,1,126,4
-	.dl	(_416-_405)/2
+	.dl	(_419-_408)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_590-_594
-_594:
-	.db	146,177,2,0,47
-	.dw	_593-_595
-_595:
-_590:
-	.db	18,49,46,40
-	.dw	_591-_596
-_596:
-	.db	146,178,2,0,47
 	.dw	_593-_597
 _597:
-_591:
-	.db	18,50,46,40
-	.dw	_592-_598
+	.db	146,177,2,0,47
+	.dw	_596-_598
 _598:
-	.db	146,179,2,0,47
-	.dw	_593-_599
-_599:
-_592:
-	.db	146,180,2,0
 _593:
+	.db	18,49,46,40
+	.dw	_594-_599
+_599:
+	.db	146,178,2,0,47
+	.dw	_596-_600
+_600:
+_594:
+	.db	18,50,46,40
+	.dw	_595-_601
+_601:
+	.db	146,179,2,0,47
+	.dw	_596-_602
+_602:
+_595:
+	.db	146,180,2,0
+_596:
 	.db	22,19,62,36,33,54,34,22,15,3,19,127,6,17,6,125,4
-	.dl	(_427-_416)/2
+	.dl	(_430-_419)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_600-_604
-_604:
-	.db	146,177,2,0,47
-	.dw	_603-_605
-_605:
-_600:
-	.db	18,49,46,40
-	.dw	_601-_606
-_606:
-	.db	146,178,2,0,47
 	.dw	_603-_607
 _607:
-_601:
-	.db	18,50,46,40
-	.dw	_602-_608
+	.db	146,177,2,0,47
+	.dw	_606-_608
 _608:
-	.db	146,179,2,0,47
-	.dw	_603-_609
-_609:
-_602:
-	.db	146,180,2,0
 _603:
+	.db	18,49,46,40
+	.dw	_604-_609
+_609:
+	.db	146,178,2,0,47
+	.dw	_606-_610
+_610:
+_604:
+	.db	18,50,46,40
+	.dw	_605-_611
+_611:
+	.db	146,179,2,0,47
+	.dw	_606-_612
+_612:
+_605:
+	.db	146,180,2,0
+_606:
 	.db	22,19,62,36,33,56,34,22,15,3,19,127,8,17,7,124,4
-	.dl	(_438-_427)/2
+	.dl	(_441-_430)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_610-_614
-_614:
-	.db	146,177,2,0,47
-	.dw	_613-_615
-_615:
-_610:
-	.db	18,49,46,40
-	.dw	_611-_616
-_616:
-	.db	146,178,2,0,47
 	.dw	_613-_617
 _617:
-_611:
-	.db	18,50,46,40
-	.dw	_612-_618
+	.db	146,177,2,0,47
+	.dw	_616-_618
 _618:
-	.db	146,179,2,0,47
-	.dw	_613-_619
-_619:
-_612:
-	.db	146,180,2,0
 _613:
+	.db	18,49,46,40
+	.dw	_614-_619
+_619:
+	.db	146,178,2,0,47
+	.dw	_616-_620
+_620:
+_614:
+	.db	18,50,46,40
+	.dw	_615-_621
+_621:
+	.db	146,179,2,0,47
+	.dw	_616-_622
+_622:
+_615:
+	.db	146,180,2,0
+_616:
 	.db	22,19,62,36,33,58,34,22,15,3,19,127,10,17,8,123,4
-	.dl	(_449-_438)/2
+	.dl	(_452-_441)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_620-_624
-_624:
-	.db	146,177,2,0,47
-	.dw	_623-_625
-_625:
-_620:
-	.db	18,49,46,40
-	.dw	_621-_626
-_626:
-	.db	146,178,2,0,47
 	.dw	_623-_627
 _627:
-_621:
-	.db	18,50,46,40
-	.dw	_622-_628
+	.db	146,177,2,0,47
+	.dw	_626-_628
 _628:
-	.db	146,179,2,0,47
-	.dw	_623-_629
-_629:
-_622:
-	.db	146,180,2,0
 _623:
+	.db	18,49,46,40
+	.dw	_624-_629
+_629:
+	.db	146,178,2,0,47
+	.dw	_626-_630
+_630:
+_624:
+	.db	18,50,46,40
+	.dw	_625-_631
+_631:
+	.db	146,179,2,0,47
+	.dw	_626-_632
+_632:
+_625:
+	.db	146,180,2,0
+_626:
 	.db	22,19,62,36,33,60,34,22,15,3,19,127,12,17,9,122,4
-	.dl	(_460-_449)/2
+	.dl	(_463-_452)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_630-_634
-_634:
-	.db	146,177,2,0,47
-	.dw	_633-_635
-_635:
-_630:
-	.db	18,49,46,40
-	.dw	_631-_636
-_636:
-	.db	146,178,2,0,47
 	.dw	_633-_637
 _637:
-_631:
-	.db	18,50,46,40
-	.dw	_632-_638
+	.db	146,177,2,0,47
+	.dw	_636-_638
 _638:
-	.db	146,179,2,0,47
-	.dw	_633-_639
-_639:
-_632:
-	.db	146,180,2,0
 _633:
+	.db	18,49,46,40
+	.dw	_634-_639
+_639:
+	.db	146,178,2,0,47
+	.dw	_636-_640
+_640:
+_634:
+	.db	18,50,46,40
+	.dw	_635-_641
+_641:
+	.db	146,179,2,0,47
+	.dw	_636-_642
+_642:
+_635:
+	.db	146,180,2,0
+_636:
 	.db	22,19,62,36,33,62,34,22,15,3,19,127,14,17,10,121,4
-	.dl	(_471-_460)/2
+	.dl	(_474-_463)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_640-_644
-_644:
-	.db	146,177,2,0,47
-	.dw	_643-_645
-_645:
-_640:
-	.db	18,49,46,40
-	.dw	_641-_646
-_646:
-	.db	146,178,2,0,47
 	.dw	_643-_647
 _647:
-_641:
-	.db	18,50,46,40
-	.dw	_642-_648
+	.db	146,177,2,0,47
+	.dw	_646-_648
 _648:
-	.db	146,179,2,0,47
-	.dw	_643-_649
-_649:
-_642:
-	.db	146,180,2,0
 _643:
+	.db	18,49,46,40
+	.dw	_644-_649
+_649:
+	.db	146,178,2,0,47
+	.dw	_646-_650
+_650:
+_644:
+	.db	18,50,46,40
+	.dw	_645-_651
+_651:
+	.db	146,179,2,0,47
+	.dw	_646-_652
+_652:
+_645:
+	.db	146,180,2,0
+_646:
 	.db	22,19,62,36,33,64,34,22,15,3,19,127,16,4
-	.dl	(_482-_471)/2
+	.dl	(_485-_474)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_650-_654
-_654:
-	.db	146,177,2,0,47
-	.dw	_653-_655
-_655:
-_650:
-	.db	18,49,46,40
-	.dw	_651-_656
-_656:
-	.db	146,178,2,0,47
 	.dw	_653-_657
 _657:
-_651:
-	.db	18,50,46,40
-	.dw	_652-_658
+	.db	146,177,2,0,47
+	.dw	_656-_658
 _658:
-	.db	146,179,2,0,47
-	.dw	_653-_659
-_659:
-_652:
-	.db	146,180,2,0
 _653:
+	.db	18,49,46,40
+	.dw	_654-_659
+_659:
+	.db	146,178,2,0,47
+	.dw	_656-_660
+_660:
+_654:
+	.db	18,50,46,40
+	.dw	_655-_661
+_661:
+	.db	146,179,2,0,47
+	.dw	_656-_662
+_662:
+_655:
+	.db	146,180,2,0
+_656:
 	.db	22,19,62,36,33,62,34,22,15,3,19,127,14,4
-	.dl	(_493-_482)/2
+	.dl	(_496-_485)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_660-_664
-_664:
-	.db	146,177,2,0,47
-	.dw	_663-_665
-_665:
-_660:
-	.db	18,49,46,40
-	.dw	_661-_666
-_666:
-	.db	146,178,2,0,47
 	.dw	_663-_667
 _667:
-_661:
-	.db	18,50,46,40
-	.dw	_662-_668
+	.db	146,177,2,0,47
+	.dw	_666-_668
 _668:
-	.db	146,179,2,0,47
-	.dw	_663-_669
-_669:
-_662:
-	.db	146,180,2,0
 _663:
+	.db	18,49,46,40
+	.dw	_664-_669
+_669:
+	.db	146,178,2,0,47
+	.dw	_666-_670
+_670:
+_664:
+	.db	18,50,46,40
+	.dw	_665-_671
+_671:
+	.db	146,179,2,0,47
+	.dw	_666-_672
+_672:
+_665:
+	.db	146,180,2,0
+_666:
 	.db	22,19,62,36,33,60,34,22,15,3,19,127,12,202,4
-	.dl	(_504-_493)/2
+	.dl	(_507-_496)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_670-_674
-_674:
-	.db	146,177,2,0,47
-	.dw	_673-_675
-_675:
-_670:
-	.db	18,49,46,40
-	.dw	_671-_676
-_676:
-	.db	146,178,2,0,47
 	.dw	_673-_677
 _677:
-_671:
-	.db	18,50,46,40
-	.dw	_672-_678
+	.db	146,177,2,0,47
+	.dw	_676-_678
 _678:
-	.db	146,179,2,0,47
-	.dw	_673-_679
-_679:
-_672:
-	.db	146,180,2,0
 _673:
+	.db	18,49,46,40
+	.dw	_674-_679
+_679:
+	.db	146,178,2,0,47
+	.dw	_676-_680
+_680:
+_674:
+	.db	18,50,46,40
+	.dw	_675-_681
+_681:
+	.db	146,179,2,0,47
+	.dw	_676-_682
+_682:
+_675:
+	.db	146,180,2,0
+_676:
 	.db	22,19,62,36,33,58,34,22,15,3,19,127,10,201,4
-	.dl	(_515-_504)/2
+	.dl	(_518-_507)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_680-_684
-_684:
-	.db	146,177,2,0,47
-	.dw	_683-_685
-_685:
-_680:
-	.db	18,49,46,40
-	.dw	_681-_686
-_686:
-	.db	146,178,2,0,47
 	.dw	_683-_687
 _687:
-_681:
-	.db	18,50,46,40
-	.dw	_682-_688
+	.db	146,177,2,0,47
+	.dw	_686-_688
 _688:
-	.db	146,179,2,0,47
-	.dw	_683-_689
-_689:
-_682:
-	.db	146,180,2,0
 _683:
+	.db	18,49,46,40
+	.dw	_684-_689
+_689:
+	.db	146,178,2,0,47
+	.dw	_686-_690
+_690:
+_684:
+	.db	18,50,46,40
+	.dw	_685-_691
+_691:
+	.db	146,179,2,0,47
+	.dw	_686-_692
+_692:
+_685:
+	.db	146,180,2,0
+_686:
 	.db	22,19,62,36,33,56,34,22,15,3,19,127,8,200,4
-	.dl	(_526-_515)/2
+	.dl	(_529-_518)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_690-_694
-_694:
-	.db	146,177,2,0,47
-	.dw	_693-_695
-_695:
-_690:
-	.db	18,49,46,40
-	.dw	_691-_696
-_696:
-	.db	146,178,2,0,47
 	.dw	_693-_697
 _697:
-_691:
-	.db	18,50,46,40
-	.dw	_692-_698
+	.db	146,177,2,0,47
+	.dw	_696-_698
 _698:
-	.db	146,179,2,0,47
-	.dw	_693-_699
-_699:
-_692:
-	.db	146,180,2,0
 _693:
+	.db	18,49,46,40
+	.dw	_694-_699
+_699:
+	.db	146,178,2,0,47
+	.dw	_696-_700
+_700:
+_694:
+	.db	18,50,46,40
+	.dw	_695-_701
+_701:
+	.db	146,179,2,0,47
+	.dw	_696-_702
+_702:
+_695:
+	.db	146,180,2,0
+_696:
 	.db	22,19,62,36,33,54,34,22,15,3,19,127,6,199,4
-	.dl	(_537-_526)/2
+	.dl	(_540-_529)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_700-_704
-_704:
-	.db	146,177,2,0,47
-	.dw	_703-_705
-_705:
-_700:
-	.db	18,49,46,40
-	.dw	_701-_706
-_706:
-	.db	146,178,2,0,47
 	.dw	_703-_707
 _707:
-_701:
-	.db	18,50,46,40
-	.dw	_702-_708
+	.db	146,177,2,0,47
+	.dw	_706-_708
 _708:
-	.db	146,179,2,0,47
-	.dw	_703-_709
-_709:
-_702:
-	.db	146,180,2,0
 _703:
+	.db	18,49,46,40
+	.dw	_704-_709
+_709:
+	.db	146,178,2,0,47
+	.dw	_706-_710
+_710:
+_704:
+	.db	18,50,46,40
+	.dw	_705-_711
+_711:
+	.db	146,179,2,0,47
+	.dw	_706-_712
+_712:
+_705:
+	.db	146,180,2,0
+_706:
 	.db	22,19,62,36,33,52,34,22,15,3,19,127,4,198,4
-	.dl	(_548-_537)/2
+	.dl	(_551-_540)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_710-_714
-_714:
-	.db	146,177,2,0,47
-	.dw	_713-_715
-_715:
-_710:
-	.db	18,49,46,40
-	.dw	_711-_716
-_716:
-	.db	146,178,2,0,47
 	.dw	_713-_717
 _717:
-_711:
-	.db	18,50,46,40
-	.dw	_712-_718
+	.db	146,177,2,0,47
+	.dw	_716-_718
 _718:
-	.db	146,179,2,0,47
-	.dw	_713-_719
-_719:
-_712:
-	.db	146,180,2,0
 _713:
+	.db	18,49,46,40
+	.dw	_714-_719
+_719:
+	.db	146,178,2,0,47
+	.dw	_716-_720
+_720:
+_714:
+	.db	18,50,46,40
+	.dw	_715-_721
+_721:
+	.db	146,179,2,0,47
+	.dw	_716-_722
+_722:
+_715:
+	.db	146,180,2,0
+_716:
 	.db	22,19,62,36,33,50,34,22,15,3,19,127,2,193,4
-	.dl	(_559-_548)/2
+	.dl	(_562-_551)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_720-_724
-_724:
-	.db	146,177,2,0,47
-	.dw	_723-_725
-_725:
-_720:
-	.db	18,49,46,40
-	.dw	_721-_726
-_726:
-	.db	146,178,2,0,47
 	.dw	_723-_727
 _727:
-_721:
-	.db	18,50,46,40
-	.dw	_722-_728
+	.db	146,177,2,0,47
+	.dw	_726-_728
 _728:
-	.db	146,179,2,0,47
-	.dw	_723-_729
-_729:
-_722:
-	.db	146,180,2,0
 _723:
+	.db	18,49,46,40
+	.dw	_724-_729
+_729:
+	.db	146,178,2,0,47
+	.dw	_726-_730
+_730:
+_724:
+	.db	18,50,46,40
+	.dw	_725-_731
+_731:
+	.db	146,179,2,0,47
+	.dw	_726-_732
+_732:
+_725:
+	.db	146,180,2,0
+_726:
 	.db	22,19,62,36,33,48,34,8,15,192
 	; End of section
 
 	.debug		.debug_frame, cluster 'voltage_to_torque_limit'
 	.dl	464
-	.dl	_1460,_133,_196-_133
+	.dl	_1462,_133,_196-_133
 	.db	8,160,2,4
-	.dl	(_740-_133)/2
+	.dl	(_743-_133)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_806-_810
-_810:
-	.db	146,177,2,0,47
-	.dw	_809-_811
-_811:
-_806:
-	.db	18,49,46,40
-	.dw	_807-_812
-_812:
-	.db	146,178,2,0,47
 	.dw	_809-_813
 _813:
-_807:
-	.db	18,50,46,40
-	.dw	_808-_814
+	.db	146,177,2,0,47
+	.dw	_812-_814
 _814:
-	.db	146,179,2,0,47
-	.dw	_809-_815
-_815:
-_808:
-	.db	146,180,2,0
 _809:
+	.db	18,49,46,40
+	.dw	_810-_815
+_815:
+	.db	146,178,2,0,47
+	.dw	_812-_816
+_816:
+_810:
+	.db	18,50,46,40
+	.dw	_811-_817
+_817:
+	.db	146,179,2,0,47
+	.dw	_812-_818
+_818:
+_811:
+	.db	146,180,2,0
+_812:
 	.db	22,19,62,36,33,50,34,22,15,3,19,127,2,17,0,127,4
-	.dl	(_751-_740)/2
+	.dl	(_754-_743)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_816-_820
-_820:
-	.db	146,177,2,0,47
-	.dw	_819-_821
-_821:
-_816:
-	.db	18,49,46,40
-	.dw	_817-_822
-_822:
-	.db	146,178,2,0,47
 	.dw	_819-_823
 _823:
-_817:
-	.db	18,50,46,40
-	.dw	_818-_824
+	.db	146,177,2,0,47
+	.dw	_822-_824
 _824:
-	.db	146,179,2,0,47
-	.dw	_819-_825
-_825:
-_818:
-	.db	146,180,2,0
 _819:
+	.db	18,49,46,40
+	.dw	_820-_825
+_825:
+	.db	146,178,2,0,47
+	.dw	_822-_826
+_826:
+_820:
+	.db	18,50,46,40
+	.dw	_821-_827
+_827:
+	.db	146,179,2,0,47
+	.dw	_822-_828
+_828:
+_821:
+	.db	146,180,2,0
+_822:
 	.db	22,19,62,36,33,52,34,22,15,3,19,127,4,17,1,126,4
-	.dl	(_762-_751)/2
+	.dl	(_765-_754)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_826-_830
-_830:
-	.db	146,177,2,0,47
-	.dw	_829-_831
-_831:
-_826:
-	.db	18,49,46,40
-	.dw	_827-_832
-_832:
-	.db	146,178,2,0,47
 	.dw	_829-_833
 _833:
-_827:
-	.db	18,50,46,40
-	.dw	_828-_834
+	.db	146,177,2,0,47
+	.dw	_832-_834
 _834:
-	.db	146,179,2,0,47
-	.dw	_829-_835
-_835:
-_828:
-	.db	146,180,2,0
 _829:
+	.db	18,49,46,40
+	.dw	_830-_835
+_835:
+	.db	146,178,2,0,47
+	.dw	_832-_836
+_836:
+_830:
+	.db	18,50,46,40
+	.dw	_831-_837
+_837:
+	.db	146,179,2,0,47
+	.dw	_832-_838
+_838:
+_831:
+	.db	146,180,2,0
+_832:
 	.db	22,19,62,36,33,54,34,22,15,3,19,127,6,17,10,125,4
-	.dl	(_773-_762)/2
+	.dl	(_776-_765)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_836-_840
-_840:
-	.db	146,177,2,0,47
-	.dw	_839-_841
-_841:
-_836:
-	.db	18,49,46,40
-	.dw	_837-_842
-_842:
-	.db	146,178,2,0,47
 	.dw	_839-_843
 _843:
-_837:
-	.db	18,50,46,40
-	.dw	_838-_844
+	.db	146,177,2,0,47
+	.dw	_842-_844
 _844:
-	.db	146,179,2,0,47
-	.dw	_839-_845
-_845:
-_838:
-	.db	146,180,2,0
 _839:
+	.db	18,49,46,40
+	.dw	_840-_845
+_845:
+	.db	146,178,2,0,47
+	.dw	_842-_846
+_846:
+_840:
+	.db	18,50,46,40
+	.dw	_841-_847
+_847:
+	.db	146,179,2,0,47
+	.dw	_842-_848
+_848:
+_841:
+	.db	146,180,2,0
+_842:
 	.db	22,19,62,36,33,52,34,22,15,3,19,127,4,202,4
-	.dl	(_784-_773)/2
+	.dl	(_787-_776)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_846-_850
-_850:
-	.db	146,177,2,0,47
-	.dw	_849-_851
-_851:
-_846:
-	.db	18,49,46,40
-	.dw	_847-_852
-_852:
-	.db	146,178,2,0,47
 	.dw	_849-_853
 _853:
-_847:
-	.db	18,50,46,40
-	.dw	_848-_854
+	.db	146,177,2,0,47
+	.dw	_852-_854
 _854:
-	.db	146,179,2,0,47
-	.dw	_849-_855
-_855:
-_848:
-	.db	146,180,2,0
 _849:
+	.db	18,49,46,40
+	.dw	_850-_855
+_855:
+	.db	146,178,2,0,47
+	.dw	_852-_856
+_856:
+_850:
+	.db	18,50,46,40
+	.dw	_851-_857
+_857:
+	.db	146,179,2,0,47
+	.dw	_852-_858
+_858:
+_851:
+	.db	146,180,2,0
+_852:
 	.db	22,19,62,36,33,50,34,22,15,3,19,127,2,193,4
-	.dl	(_795-_784)/2
+	.dl	(_798-_787)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_856-_860
-_860:
-	.db	146,177,2,0,47
-	.dw	_859-_861
-_861:
-_856:
-	.db	18,49,46,40
-	.dw	_857-_862
-_862:
-	.db	146,178,2,0,47
 	.dw	_859-_863
 _863:
-_857:
-	.db	18,50,46,40
-	.dw	_858-_864
+	.db	146,177,2,0,47
+	.dw	_862-_864
 _864:
-	.db	146,179,2,0,47
-	.dw	_859-_865
-_865:
-_858:
-	.db	146,180,2,0
 _859:
+	.db	18,49,46,40
+	.dw	_860-_865
+_865:
+	.db	146,178,2,0,47
+	.dw	_862-_866
+_866:
+_860:
+	.db	18,50,46,40
+	.dw	_861-_867
+_867:
+	.db	146,179,2,0,47
+	.dw	_862-_868
+_868:
+_861:
+	.db	146,180,2,0
+_862:
 	.db	22,19,62,36,33,48,34,8,15,192,0,0,0
 	; End of section
 
 	.debug		.debug_frame, cluster 'pct_travel_to_torque'
 	.dl	316
-	.dl	_1460,_145,_201-_145
+	.dl	_1462,_145,_201-_145
 	.db	8,160,2,8,12,8,13,4
-	.dl	(_868-_145)/2
+	.dl	(_871-_145)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_912-_916
-_916:
-	.db	146,177,2,0,47
-	.dw	_915-_917
-_917:
-_912:
-	.db	18,49,46,40
-	.dw	_913-_918
-_918:
-	.db	146,178,2,0,47
 	.dw	_915-_919
 _919:
-_913:
-	.db	18,50,46,40
-	.dw	_914-_920
+	.db	146,177,2,0,47
+	.dw	_918-_920
 _920:
-	.db	146,179,2,0,47
-	.dw	_915-_921
-_921:
-_914:
-	.db	146,180,2,0
 _915:
+	.db	18,49,46,40
+	.dw	_916-_921
+_921:
+	.db	146,178,2,0,47
+	.dw	_918-_922
+_922:
+_916:
+	.db	18,50,46,40
+	.dw	_917-_923
+_923:
+	.db	146,179,2,0,47
+	.dw	_918-_924
+_924:
+_917:
+	.db	146,180,2,0
+_918:
 	.db	22,19,62,36,33,50,34,22,15,3,19,127,2,17,1,127,4
-	.dl	(_879-_868)/2
+	.dl	(_882-_871)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_922-_926
-_926:
-	.db	146,177,2,0,47
-	.dw	_925-_927
-_927:
-_922:
-	.db	18,49,46,40
-	.dw	_923-_928
-_928:
-	.db	146,178,2,0,47
 	.dw	_925-_929
 _929:
-_923:
-	.db	18,50,46,40
-	.dw	_924-_930
+	.db	146,177,2,0,47
+	.dw	_928-_930
 _930:
-	.db	146,179,2,0,47
-	.dw	_925-_931
-_931:
-_924:
-	.db	146,180,2,0
 _925:
+	.db	18,49,46,40
+	.dw	_926-_931
+_931:
+	.db	146,178,2,0,47
+	.dw	_928-_932
+_932:
+_926:
+	.db	18,50,46,40
+	.dw	_927-_933
+_933:
+	.db	146,179,2,0,47
+	.dw	_928-_934
+_934:
+_927:
+	.db	146,180,2,0
+_928:
 	.db	22,19,62,36,33,52,34,22,15,3,19,127,4,17,6,126,4
-	.dl	(_890-_879)/2
+	.dl	(_893-_882)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_932-_936
-_936:
-	.db	146,177,2,0,47
-	.dw	_935-_937
-_937:
-_932:
-	.db	18,49,46,40
-	.dw	_933-_938
-_938:
-	.db	146,178,2,0,47
 	.dw	_935-_939
 _939:
-_933:
-	.db	18,50,46,40
-	.dw	_934-_940
+	.db	146,177,2,0,47
+	.dw	_938-_940
 _940:
-	.db	146,179,2,0,47
-	.dw	_935-_941
-_941:
-_934:
-	.db	146,180,2,0
 _935:
+	.db	18,49,46,40
+	.dw	_936-_941
+_941:
+	.db	146,178,2,0,47
+	.dw	_938-_942
+_942:
+_936:
+	.db	18,50,46,40
+	.dw	_937-_943
+_943:
+	.db	146,179,2,0,47
+	.dw	_938-_944
+_944:
+_937:
+	.db	146,180,2,0
+_938:
 	.db	22,19,62,36,33,50,34,22,15,3,19,127,2,198,4
-	.dl	(_901-_890)/2
+	.dl	(_904-_893)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_942-_946
-_946:
-	.db	146,177,2,0,47
-	.dw	_945-_947
-_947:
-_942:
-	.db	18,49,46,40
-	.dw	_943-_948
-_948:
-	.db	146,178,2,0,47
 	.dw	_945-_949
 _949:
-_943:
-	.db	18,50,46,40
-	.dw	_944-_950
+	.db	146,177,2,0,47
+	.dw	_948-_950
 _950:
-	.db	146,179,2,0,47
-	.dw	_945-_951
-_951:
-_944:
-	.db	146,180,2,0
 _945:
+	.db	18,49,46,40
+	.dw	_946-_951
+_951:
+	.db	146,178,2,0,47
+	.dw	_948-_952
+_952:
+_946:
+	.db	18,50,46,40
+	.dw	_947-_953
+_953:
+	.db	146,179,2,0,47
+	.dw	_948-_954
+_954:
+_947:
+	.db	146,180,2,0
+_948:
 	.db	22,19,62,36,33,48,34,8,15,193,0
 	; End of section
 
 	.debug		.debug_frame
-_1471:
+_1473:
 	.dl	148
 	.dl	-1
 	.db	3,0,2,2,173,2,15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_1472-_1476
-_1476:
-	.db	146,177,2,0,47
-	.dw	_1475-_1477
-_1477:
-_1472:
-	.db	18,49,46,40
-	.dw	_1473-_1478
+	.dw	_1474-_1478
 _1478:
-	.db	146,178,2,0,47
-	.dw	_1475-_1479
+	.db	146,177,2,0,47
+	.dw	_1477-_1479
 _1479:
-_1473:
-	.db	18,50,46,40
-	.dw	_1474-_1480
-_1480:
-	.db	146,179,2,0,47
-	.dw	_1475-_1481
-_1481:
 _1474:
-	.db	146,180,2,0
+	.db	18,49,46,40
+	.dw	_1475-_1480
+_1480:
+	.db	146,178,2,0,47
+	.dw	_1477-_1481
+_1481:
 _1475:
+	.db	18,50,46,40
+	.dw	_1476-_1482
+_1482:
+	.db	146,179,2,0,47
+	.dw	_1477-_1483
+_1483:
+_1476:
+	.db	146,180,2,0
+_1477:
 	.db	22,19,62,36,33,48,34,16,173,2,12,19,146,176,2,0,64,36,146,161,2,0,33,8,15,22,161,2,5,19,146,161,2,4,8
 	.db	177,2,8,178,2,8,179,2,8,180,2,16,174,2,12,19,146,176,2,0,64,36,146,161,2,0,33,16,175,2,12,19,146,176,2
 	.db	0,64,36,146,161,2,2,33,8,176,2,0,0
@@ -8115,34 +8123,34 @@ _1475:
 
 	.debug		.debug_frame, cluster 'main'
 	.dl	112
-	.dl	_1471,_157,_206-_157
+	.dl	_1473,_157,_206-_157
 	.db	8,166,2,8,167,2,8,168,2,8,169,2,8,170,2,8,171,2,8,172,2,4
-	.dl	(_954-_157)/2
+	.dl	(_957-_157)/2
 	.db	15,62,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_965-_969
-_969:
-	.db	146,177,2,0,47
-	.dw	_968-_970
-_970:
-_965:
-	.db	18,49,46,40
-	.dw	_966-_971
-_971:
-	.db	146,178,2,0,47
 	.dw	_968-_972
 _972:
-_966:
-	.db	18,50,46,40
-	.dw	_967-_973
+	.db	146,177,2,0,47
+	.dw	_971-_973
 _973:
-	.db	146,179,2,0,47
-	.dw	_968-_974
-_974:
-_967:
-	.db	146,180,2,0
 _968:
+	.db	18,49,46,40
+	.dw	_969-_974
+_974:
+	.db	146,178,2,0,47
+	.dw	_971-_975
+_975:
+_969:
+	.db	18,50,46,40
+	.dw	_970-_976
+_976:
+	.db	146,179,2,0,47
+	.dw	_971-_977
+_977:
+_970:
+	.db	146,180,2,0
+_971:
 	.db	22,19,62,36,33,11
 	.dw	280
 	.db	34,22,15,4,19,127,152,2,0,0,0

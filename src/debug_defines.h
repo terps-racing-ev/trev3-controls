@@ -15,7 +15,7 @@
 // ignore these error conditions
 #define IGNORE_APPS_ERROR FALSE
 #define IGNORE_BSE_ERROR TRUE
-#define IGNORE_SDC_OFF TRUE
+#define IGNORE_SDC_OFF FALSE
 
 // turn off the brake plausibility code
 #define IGNORE_BRAKE_PLAUSIBILITY TRUE
