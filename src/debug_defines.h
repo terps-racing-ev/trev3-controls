@@ -10,15 +10,15 @@
 // ignore the switch when doing rtd
 #define IGNORE_RTD_SWITCH FALSE
 // ignore the brake pressing threshold when doing rtd
-#define IGNORE_RTD_BRAKES TRUE
+#define IGNORE_RTD_BRAKES FALSE
 
 // ignore these error conditions
 #define IGNORE_APPS_ERROR FALSE
-#define IGNORE_BSE_ERROR TRUE
+#define IGNORE_BSE_ERROR FALSE
 #define IGNORE_SDC_OFF FALSE
 
 // turn off the brake plausibility code
-#define IGNORE_BRAKE_PLAUSIBILITY TRUE
+#define IGNORE_BRAKE_PLAUSIBILITY FALSE
 
 
 #endif

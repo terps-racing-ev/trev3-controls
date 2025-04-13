@@ -86,6 +86,7 @@
 #define MOTOR_INFO_CAN_ID 0xA5
 #define VOLTAGE_INFO_CAN_ID 0xA7
 #define CURRENT_INFO_CAN_ID 0xA6
+#define TORQUE_INFO_CAN_ID 0xAC
 
 #define INVERTER_PACK_VOLT_LO 0
 #define INVERTER_PACK_VOLT_HI 1
@@ -248,6 +249,7 @@ void main (void)
     ubyte1 handle_inverter_motor_info_r;
     ubyte1 handle_inverter_voltage_info_r;
     ubyte1 handle_inverter_current_info_r;
+    ubyte1 handle_inverter_torque_info_r;
     ubyte1 handle_orion_1_r;
     ubyte1 handle_orion_2_r;
     ubyte1 handle_orion_therm_exp_r;
@@ -268,6 +270,7 @@ void main (void)
     IO_CAN_DATA_FRAME inverter_motor_info_can_frame;
     IO_CAN_DATA_FRAME inverter_voltage_info_can_frame;
     IO_CAN_DATA_FRAME inverter_current_info_can_frame;
+    IO_CAN_DATA_FRAME inverter_torque_info_can_frame;
 
     /* CAN frame for orion */
     IO_CAN_DATA_FRAME orion_1_can_frame;
@@ -336,6 +339,13 @@ void main (void)
                  , IO_CAN_MSG_READ
                  , IO_CAN_STD_FRAME
                  , CURRENT_INFO_CAN_ID
+                 , 0x1FFFFFFF);
+    
+    IO_CAN_ConfigMsg( &handle_inverter_torque_info_r
+                 , CONTROLS_CAN_CHANNEL
+                 , IO_CAN_MSG_READ
+                 , IO_CAN_STD_FRAME
+                 , TORQUE_INFO_CAN_ID
                  , 0x1FFFFFFF);
 
     IO_CAN_ConfigMsg( &handle_orion_1_r
@@ -451,6 +461,9 @@ void main (void)
     //inverter current info received
     bool current_info_message_received = FALSE;
 
+    //inverter torque info received
+    bool torque_info_message_received = FALSE;
+
     // orion message received
     bool orion_1_message_received = FALSE;
     bool orion_1_message_received_once = FALSE;
@@ -490,8 +503,9 @@ void main (void)
          */
         IO_Driver_TaskBegin();
 
-        // read current info from inverter
+        // read info from inverter
         read_can_msg(&handle_inverter_current_info_r, &inverter_current_info_can_frame, &current_info_message_received, CURRENT_INFO_CAN_ID, CONTROLS_CAN_CHANNEL);
+        read_can_msg(&handle_inverter_torque_info_r, &inverter_torque_info_can_frame, &torque_info_message_received, TORQUE_INFO_CAN_ID, CONTROLS_CAN_CHANNEL);
 
         // read message from inverter with motor speed and update motor speed accordingly
         read_can_msg(&handle_inverter_motor_info_r, &inverter_motor_info_can_frame, &motor_info_message_received, MOTOR_INFO_CAN_ID, CONTROLS_CAN_CHANNEL);
@@ -726,14 +740,14 @@ void main (void)
             if (motor_info_message_received) {
                 IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &inverter_motor_info_can_frame, 1);
             }
-
             if (voltage_info_message_received) {
                 IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &inverter_voltage_info_can_frame, 1);
             }
-
-
             if (current_info_message_received) {
                 IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &inverter_current_info_can_frame, 1);
+            }
+            if (torque_info_message_received) {
+                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &inverter_torque_info_can_frame, 1);
             }
 
             // echo orion messages
@@ -776,7 +790,7 @@ void main (void)
             // send debug message
             IO_ADC_Get(IO_PIN_BSE, &bse_val, &bse_fresh);
 
-            debug_can_frame.data[0] = apps_error;
+            debug_can_frame.data[0] = sdc_val;//apps_error;
             debug_can_frame.data[1] = bse_error;
 
             apps_1_val = get_filtered_apps1_voltage();
