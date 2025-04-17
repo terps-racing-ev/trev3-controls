@@ -81,6 +81,7 @@
 #define VCU_INVERTER_SETTINGS_CAN_ID 0xC1
 
 #define VCU_SUMMARY_CAN_ID 0xC5
+#define VCU_ERRORS_CAN_ID 0xE0
 #define VCU_DEBUG_CAN_ID 0xDB
 
 #define MOTOR_INFO_CAN_ID 0xA5
@@ -284,6 +285,13 @@ void main (void)
     vcu_summary_can_frame.length = 8;
     clear_can_frame(&vcu_summary_can_frame);
 
+    /* CAN frame for errors */
+    IO_CAN_DATA_FRAME vcu_errors_can_frame;
+    vcu_errors_can_frame.id = VCU_ERRORS_CAN_ID;
+    vcu_errors_can_frame.id_format = IO_CAN_STD_FRAME;
+    vcu_errors_can_frame.length = 8;
+    clear_can_frame(&vcu_errors_can_frame);
+
     /* CAN frames used for debugging */
     IO_CAN_DATA_FRAME debug_can_frame;
     debug_can_frame.id = VCU_DEBUG_CAN_ID;
@@ -304,6 +312,7 @@ void main (void)
                , 0
                , 0);
 
+    /* Initialize fifos for txing messages */
     IO_CAN_ConfigFIFO( &handle_controls_fifo_w
     				 , CONTROLS_CAN_CHANNEL
     				 , FIFO_BUFFER_SIZE
@@ -320,6 +329,7 @@ void main (void)
                     , VCU_CONTROLS_CAN_ID
                     , 0);
 
+    /* Initialize objects for rxing messages. Need one for each message expected */
     IO_CAN_ConfigMsg( &handle_inverter_motor_info_r
                  , CONTROLS_CAN_CHANNEL
                  , IO_CAN_MSG_READ
@@ -365,7 +375,7 @@ void main (void)
     IO_CAN_ConfigMsg( &handle_orion_therm_exp_r
                  , CONTROLS_CAN_CHANNEL
                  , IO_CAN_MSG_READ
-                 , IO_CAN_STD_FRAME
+                 , IO_CAN_EXT_FRAME //Extended 29 bit ID
                  , ORION_THERM_EXP_CAN_ID
                  , 0x1FFFFFFF);
 
@@ -478,8 +488,12 @@ void main (void)
     ubyte4 time_since_start;
     ubyte4 orion_can_timeout;
 
-    // whether a red car incident has happened (i.e. whether tsil is blinking red)
-    bool red_car = FALSE;
+    // whether a TSIL fault is latching (BMS/IMD faults)
+    bool tsil_latched = FALSE;
+
+    bool orion_timeout = FALSE;
+    bool bms_fault_occured_once = FALSE;
+    bool imd_fault_occured_once = FALSE;
 
     IO_RTC_StartTime(&time_since_start);
     IO_RTC_StartTime(&orion_can_timeout);
@@ -530,6 +544,7 @@ void main (void)
             // reset the timeout if a message has been received
             IO_RTC_StartTime(&orion_can_timeout);
             orion_1_message_received_once = TRUE;
+            orion_timeout = FALSE;
         }
 
         if (voltage_info_message_received == TRUE) {
@@ -559,8 +574,7 @@ void main (void)
                 if (rtd_val == RTD_ON && 
                     (IGNORE_RTD_BRAKES || (bse_error == BSE_NO_ERROR && bse_result > BRAKES_ENGAGED_BSE_THRESHOLD)) && 
                     apps_error == APPS_NO_ERROR && 
-                    sdc_val != SDC_OFF && 
-                    !(red_car)) {
+                    sdc_val != SDC_OFF) {
                     // rtd on -> switch to playing rtd sound
                     current_state = PLAYING_RTD_SOUND;
                 } else {
@@ -615,7 +629,7 @@ void main (void)
                 if (rtd_val == RTD_OFF) {
                     // rtd off -> switch to not ready state
                     current_state = NOT_READY;
-                } else if (apps_error != APPS_NO_ERROR || bse_error != BSE_NO_ERROR || (sdc_val == SDC_OFF) || red_car) {
+                } else if (apps_error != APPS_NO_ERROR || bse_error != BSE_NO_ERROR || (sdc_val == SDC_OFF)) {
                     current_state = ERRORED;
                 } else if (!(IGNORE_BRAKE_PLAUSIBILITY) && bse_result > BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD && apps_pct_result >= APPS_THRESHHOLD_BRAKE_PLAUSIBILITY) {
                     current_state = APPS_5PCT_WAIT;
@@ -661,7 +675,7 @@ void main (void)
                     // rtd off -> switch to not ready state
                     current_state = NOT_READY;
 
-                } else if (apps_error != APPS_NO_ERROR || bse_error != BSE_NO_ERROR || (sdc_val == SDC_OFF) || red_car) {
+                } else if (apps_error != APPS_NO_ERROR || bse_error != BSE_NO_ERROR || (sdc_val == SDC_OFF)) {
                     current_state = ERRORED;
                 } else if (apps_pct_result <= APPS_THRESHHOLD_REESTABLISH_PLAUSIBILITY) {
                     // go back to driving when apps <= 5%
@@ -689,31 +703,38 @@ void main (void)
             if (been_ignore_period_since_start == TRUE) {
                 // if CAN timeout, set light to blinking red
                 if (IO_RTC_GetTimeUS(orion_can_timeout) > ORION_CAN_TIMEOUT_US) {
+                    orion_timeout = TRUE;
                     set_light_to(BLINKING_RED);
-                    // whenever the light is blinking red set red_car to true
-                    red_car = TRUE;
-                } else {
-                    if (orion_1_message_received_once == TRUE) {
+                } else if (orion_1_message_received_once == TRUE) {
                         get_sdc(&sdc_val);
 
-                        // if SDC is good and BMS is good and IMD is good
-                        // set lights to green
-                        if (orion_1_can_frame.data[ORION_BMS_STATUS_INDEX] &&
-                            orion_1_can_frame.data[ORION_IMD_STATUS_INDEX] && 
-                            (sdc_val != SDC_OFF)) {
-                                set_light_to(SOLID_GREEN);
-                                // whenever the light is green set red_car to false
-                                red_car = FALSE;
-                        
-                        // if either IMD or BMS is bad set lights to red
-                        // (we don't check SDC)
-                        } else if (!orion_1_can_frame.data[ORION_BMS_STATUS_INDEX] || 
-                                   !orion_1_can_frame.data[ORION_IMD_STATUS_INDEX]) {
-                                set_light_to(BLINKING_RED);
-                                // whenever the light is blinking red set red_car to true
-                                red_car = TRUE;
+                        bool bms_ok = orion_1_can_frame.data[ORION_BMS_STATUS_INDEX];
+                        bool imd_ok = orion_1_can_frame.data[ORION_IMD_STATUS_INDEX];
+
+                        // latch BMS and IMD faults
+                        if (!bms_ok || !imd_ok) {
+                            tsil_latched = TRUE;
+                            if (!bms_ok) {
+                                bms_fault_occured_once = TRUE;
+                            }
+                            if (!imd_ok) {
+                                imd_fault_occured_once = TRUE;
+                            }
                         }
-                    }
+
+                        // If no timeout and everything is good AND sdc is good, clear latch
+                        if (tsil_latched) {
+                            if (bms_ok && imd_ok && sdc_val != SDC_OFF) {
+                                tsil_latched = FALSE;  // clear latch if everything is okay
+                            }
+                        }
+
+                        // Set lights based on latch and current status
+                        if (tsil_latched) {
+                            set_light_to(BLINKING_RED);
+                        } else if (bms_ok && imd_ok && sdc_val != SDC_OFF) {
+                            set_light_to(SOLID_GREEN);
+                        }
                 }
             }
 
@@ -779,6 +800,18 @@ void main (void)
             IO_CAN_WriteFIFO(handle_controls_fifo_w, &vcu_summary_can_frame, 1);
             IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &vcu_summary_can_frame, 1);
 
+
+            // send error message
+            vcu_errors_can_frame.data[0] = apps_error;
+            vcu_errors_can_frame.data[1] = bse_error;
+            vcu_errors_can_frame.data[2] = orion_timeout;
+            vcu_errors_can_frame.data[3] = bms_fault_occured_once;
+            vcu_errors_can_frame.data[4] = imd_fault_occured_once;
+            vcu_errors_can_frame.data[5] = 0; // TODO add more errors here
+            vcu_errors_can_frame.data[6] = 0; // TODO add more errors here
+            vcu_errors_can_frame.data[7] = 0; // TODO add more errors here
+
+
             ubyte2 apps_1_val;
             bool apps_1_fresh;
             ubyte2 apps_2_val;
@@ -790,7 +823,7 @@ void main (void)
             // send debug message
             IO_ADC_Get(IO_PIN_BSE, &bse_val, &bse_fresh);
 
-            debug_can_frame.data[0] = sdc_val;//apps_error;
+            debug_can_frame.data[0] = apps_error;
             debug_can_frame.data[1] = bse_error;
 
             apps_1_val = get_filtered_apps1_voltage();
