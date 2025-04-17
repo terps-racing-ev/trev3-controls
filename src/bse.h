@@ -20,12 +20,17 @@
 /* bse */
 #define BSE_MAX_VOLTAGE 4500
 #define BSE_MIN_VOLTAGE 500
-#define BRAKES_ENGAGED_BSE_THRESHOLD 550 // 37.5 PSI
-#define BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD 550 // 975 PSI
+#define BRAKES_ENGAGED_BSE_THRESHOLD 40 //PSI
+#define BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD 40 //PSI
+
+/* voltage range above max and below min that doesn't count as an error */
+#define BSE_VOLTAGE_DEADZONE 100
 
 #define BSE_NO_ERROR 0
 #define BSE_OUT_OF_RANGE_ERROR 1
 
+ubyte2 voltage_to_psi_bse(ubyte2 bse_voltage);
 void get_bse(ubyte2 *bse_result, bool *error);
+
 
 #endif // BSE_H_INCLUDED
