@@ -40,6 +40,9 @@
 /* Brake Light */
 #define BRAKE_LIGHT_PIN IO_DO_02
 
+/* DCDC Relay */
+#define DCDC_RELAY_PIN IO_DO_03
+
 /**************************************************************************
  * RTD Settings
  ***************************************************************************/
@@ -432,6 +435,10 @@ void main (void)
     /* brake lights */
     IO_DO_Init( BRAKE_LIGHT_PIN );
 
+    /* DCDC Relay */
+    IO_DO_Init( DCDC_RELAY_PIN );
+    IO_DO_Set( DCDC_RELAY_PIN, FALSE );
+
     /* TSSI lights */
     IO_DO_Init( TSIL_GREEN_PIN );
     IO_DO_Init( TSIL_RED_PIN );
@@ -577,6 +584,7 @@ void main (void)
                     sdc_val != SDC_OFF) {
                     // rtd on -> switch to playing rtd sound
                     current_state = PLAYING_RTD_SOUND;
+                    IO_DO_Set(DCDC_RELAY_PIN, TRUE);
                 } else {
                     // if you don't transition away from this state, send a 0
                     // torque message to the motor with 0 torque
