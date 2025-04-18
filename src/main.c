@@ -716,7 +716,7 @@ void main (void)
                 } else if (orion_1_message_received_once == TRUE) {
                         get_sdc(&sdc_val);
 
-                        bool bms_ok = orion_1_can_frame.data[ORION_BMS_STATUS_INDEX];
+                        bool bms_ok = !orion_1_can_frame.data[ORION_BMS_STATUS_INDEX]; // TODO This is inverted!
                         bool imd_ok = orion_1_can_frame.data[ORION_IMD_STATUS_INDEX];
 
                         // latch BMS and IMD faults

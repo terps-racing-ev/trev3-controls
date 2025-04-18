@@ -33,7 +33,7 @@ void get_bse(ubyte2 *bse_result, ubyte1 *error) {
 
     ubyte2 bse_val;
     bool bse_fresh;
-    ubyte2 bse_pct_result;
+    ubyte2 bse_psi_result;
 
     // get voltage from pin
     IO_ADC_Get(IO_PIN_BSE, &bse_val, &bse_fresh);
@@ -44,10 +44,10 @@ void get_bse(ubyte2 *bse_result, ubyte1 *error) {
     // check if its in the treshhold
     bool bse_within_threshhold = (bse_val >= BSE_MIN_VOLTAGE - BSE_VOLTAGE_DEADZONE) && (bse_val <= BSE_MAX_VOLTAGE + BSE_VOLTAGE_DEADZONE);
 
-    bse_pct_result = voltage_to_psi_bse(bse_val);
+    bse_psi_result = voltage_to_psi_bse(bse_val);
     //error out if it isn't
     if (bse_within_threshhold) {
-        *bse_result = bse_pct_result;
+        *bse_result = bse_psi_result;
         *error = BSE_NO_ERROR;
     } else {
         *bse_result = 0;

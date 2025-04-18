@@ -1,5 +1,5 @@
 	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09007774
-	; Options: -f cc32348a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=4 -DRTS_TTC_FLASH_DATE_DAY=18 -DRTS_TTC_FLASH_DATE_HOUR=1 -DRTS_TTC_FLASH_DATE_MINUTE=19 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\bse.src
+	; Options: -f cc39968a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=4 -DRTS_TTC_FLASH_DATE_DAY=18 -DRTS_TTC_FLASH_DATE_HOUR=4 -DRTS_TTC_FLASH_DATE_MINUTE=40 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\bse.src
 	; Module start
 	.source	'src/bse.c'
 code_voltage_to_psi_bse	.section	code, cluster 'voltage_to_psi_bse', new
@@ -121,7 +121,7 @@ _7:
 ; src/bse.c	    33  
 ; src/bse.c	    34      ubyte2 bse_val;
 ; src/bse.c	    35      bool bse_fresh;
-; src/bse.c	    36      ubyte2 bse_pct_result;
+; src/bse.c	    36      ubyte2 bse_psi_result;
 ; src/bse.c	    37  
 ; src/bse.c	    38      // get voltage from pin
 ; src/bse.c	    39      IO_ADC_Get(IO_PIN_BSE, &bse_val, &bse_fresh);
@@ -156,7 +156,7 @@ _67:
 ; src/bse.c	    44      // check if its in the treshhold
 ; src/bse.c	    45      bool bse_within_threshhold = (bse_val >= BSE_MIN_VOLTAGE - BSE_VOLTAGE_DEADZONE) && (bse_val <= BSE_MAX_VOLTAGE + BSE_VOLTAGE_DEADZONE);
 ; src/bse.c	    46  
-; src/bse.c	    47      bse_pct_result = voltage_to_psi_bse(bse_val);
+; src/bse.c	    47      bse_psi_result = voltage_to_psi_bse(bse_val);
 	movw	r11,[r15+#0x0]
 _68:
 
@@ -207,25 +207,34 @@ _323:
 ; src/bse.c	    48      //error out if it isn't
 ; src/bse.c	    49      if (bse_within_threshhold) {
 	cmpw	r12,#0x1068
-	jmp	cc_ule,_13
+	jmp	cc_ugt,_12
 _324:
 
-; src/bse.c	    50          *bse_result = bse_pct_result;
-; src/bse.c	    51          *error = BSE_NO_ERROR;
-; src/bse.c	    52      } else {
-; src/bse.c	    53          *bse_result = 0;
-	movw	r11,#0x0
-_13:
+; src/bse.c	    50          *bse_result = bse_psi_result;
 	exts	r9,#0x1
 	movw	[r8],r11
 _325:
 
-; src/bse.c	    54          *error = IGNORE_BSE_ERROR ? BSE_NO_ERROR : BSE_OUT_OF_RANGE_ERROR;
+; src/bse.c	    51          *error = BSE_NO_ERROR;
 	movb	rh4,#0x0
 _326:
+	jmp	_13
+_12:
+
+; src/bse.c	    52      } else {
+; src/bse.c	    53          *bse_result = 0;
+	movw	r11,#0x0
+_327:
+	exts	r9,#0x1
+	movw	[r8],r11
+_328:
+
+; src/bse.c	    54          *error = IGNORE_BSE_ERROR ? BSE_NO_ERROR : BSE_OUT_OF_RANGE_ERROR;
+	movb	rh4,#0x1
+_13:
 	exts	r6,#0x1
 	movb	[r10],rh4
-_327:
+_329:
 
 ; src/bse.c	    55      }
 ; src/bse.c	    55  }
@@ -661,18 +670,24 @@ _307:
 	.dw	_9-_322
 	.db	3,21,1,5,5,9
 	.dw	_323-_9
-	.db	3,4,1,5,23,9
-	.dw	_324-_323
 	.db	3,4,1,5,21,9
-	.dw	_13-_324
-	.db	1,5,35,9
-	.dw	_325-_13
-	.db	3,1,1,5,16,9
+	.dw	_324-_323
+	.db	3,1,1,5,18,9
+	.dw	_325-_324
+	.db	3,1,1,5,37,9
 	.dw	_326-_325
+	.db	3,127,1,5,23,9
+	.dw	_12-_326
+	.db	3,3,1,5,21,9
+	.dw	_327-_12
+	.db	1,5,35,9
+	.dw	_328-_327
+	.db	3,1,1,5,16,9
+	.dw	_13-_328
 	.db	1,5,1,9
-	.dw	_327-_326
+	.dw	_329-_13
 	.db	3,2,1,9
-	.dw	_51-_327
+	.dw	_51-_329
 	.db	0,1,1
 _305:
 	; End of section
@@ -1124,34 +1139,34 @@ _19:
 	; End of section
 
 	.debug		.debug_frame
-_328:
+_330:
 	.dl	184
 	.dl	-1
 	.db	3,0,2,2,173,2,15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_329-_333
-_333:
-	.db	146,177,2,0,47
-	.dw	_332-_334
-_334:
-_329:
-	.db	18,49,46,40
-	.dw	_330-_335
+	.dw	_331-_335
 _335:
-	.db	146,178,2,0,47
-	.dw	_332-_336
+	.db	146,177,2,0,47
+	.dw	_334-_336
 _336:
-_330:
-	.db	18,50,46,40
-	.dw	_331-_337
-_337:
-	.db	146,179,2,0,47
-	.dw	_332-_338
-_338:
 _331:
-	.db	146,180,2,0
+	.db	18,49,46,40
+	.dw	_332-_337
+_337:
+	.db	146,178,2,0,47
+	.dw	_334-_338
+_338:
 _332:
+	.db	18,50,46,40
+	.dw	_333-_339
+_339:
+	.db	146,179,2,0,47
+	.dw	_334-_340
+_340:
+_333:
+	.db	146,180,2,0
+_334:
 	.db	22,19,62,36,33,48,34,16,173,2,12,19,146,176,2,0,64,36,146,161,2,0,33,8,15,22,161,2,5,19,146,161,2,4,8
 	.db	162,2,8,166,2,8,177,2,8,178,2,8,179,2,8,180,2,8,0,8,1,8,6,8,7,8,8,8,9,8,10,8,167,2,8,168,2,8,169,2,8,170
 	.db	2,8,171,2,8,172,2,16,174,2,12,19,146,176,2,0,64,36,146,161,2,0,33,16,175,2,12,19,146,176,2,0,64,36,146
@@ -1160,13 +1175,13 @@ _332:
 
 	.debug		.debug_frame, cluster 'voltage_to_psi_bse'
 	.dl	28
-	.dl	_328,_15,_46-_15
+	.dl	_330,_15,_46-_15
 	.db	8,160,2,8,3,8,4,8,5,8,13,8,14,0,0,0
 	; End of section
 
 	.debug		.debug_frame, cluster 'get_bse'
 	.dl	756
-	.dl	_328,_27,_51-_27
+	.dl	_330,_27,_51-_27
 	.db	4
 	.dl	(_75-_27)/2
 	.db	15,60,127,0,18,10
