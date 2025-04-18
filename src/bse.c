@@ -21,7 +21,7 @@ ubyte2 voltage_to_psi_bse(ubyte2 bse_voltage) {
         return 100;
     }
 
-    return ((bse_voltage - BSE_MIN_VOLTAGE) * 3) / 4;
+    return (ubyte2)((ubyte4)(bse_voltage - BSE_MIN_VOLTAGE) * BSE_MAX_PSI) / (BSE_MAX_VOLTAGE - BSE_MIN_VOLTAGE);
 
 }
 
