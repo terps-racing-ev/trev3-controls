@@ -1,5 +1,5 @@
 	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09007774
-	; Options: -f cc49592a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=3 -DRTS_TTC_FLASH_DATE_DAY=29 -DRTS_TTC_FLASH_DATE_HOUR=4 -DRTS_TTC_FLASH_DATE_MINUTE=13 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\apps.src
+	; Options: -f cc20128a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=4 -DRTS_TTC_FLASH_DATE_DAY=23 -DRTS_TTC_FLASH_DATE_HOUR=1 -DRTS_TTC_FLASH_DATE_MINUTE=10 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\apps.src
 	; Module start
 	.source	'src/apps.c'
 code_voltage_to_pct_travel_apps_1	.section	code, cluster 'voltage_to_pct_travel_apps_1', new
@@ -49,7 +49,7 @@ _211:
 ; src/apps.c	    31  }
 	ret
 _2:
-	cmpw	r2,#0x10c7
+	cmpw	r2,#0x10da
 	jmp+	cc_ule,_4
 _654:
 	movw	r2,#0x64
@@ -448,7 +448,7 @@ _190:
 	subw	r11,#0x38d
 _689:
 	movw	r4,#0x0
-	cmpw	r11,#0xdd0
+	cmpw	r11,#0xde3
 	jmp	cc_ugt,_23
 	movw	r4,#0x1
 _23:
@@ -499,7 +499,7 @@ _694:
 _27:
 
 ; src/apps.c	    25      if (apps_1_voltage > APPS_1_MAX_VOLTAGE) {      (inlined)
-	cmpw	r11,#0x10c7
+	cmpw	r11,#0x10da
 	jmp+	cc_ule,_29
 _695:
 	movw	r11,#0x64
@@ -647,7 +647,7 @@ _713:
 	subw	r11,#0x38d
 _714:
 	movw	r4,#0x0
-	cmpw	r11,#0xdd0
+	cmpw	r11,#0xde3
 	jmp	cc_ugt,_39
 	movw	r4,#0x1
 _39:
@@ -689,7 +689,7 @@ _718:
 _43:
 
 ; src/apps.c	    25      if (apps_1_voltage > APPS_1_MAX_VOLTAGE) {      (inlined)
-	cmpw	r11,#0x10c7
+	cmpw	r11,#0x10da
 	jmp+	cc_ule,_45
 _719:
 	movw	r11,#0x64

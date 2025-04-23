@@ -63,7 +63,7 @@
  ***************************************************************************/
 #define PCT_TRAVEL_FOR_MAX_TORQUE 80
 
-#define CONTINUOUS_TORQUE_MAX 200
+#define CONTINUOUS_TORQUE_MAX 5 // TODO 200
 
 /**************************************************************************
  * CAN Constants
@@ -73,7 +73,7 @@
 
 #define TELEMETRY_CAN_CHANNEL IO_CAN_CHANNEL_1
 
-#define BAUD_RATE 250
+#define BAUD_RATE 500
 
 /* The system sends CAN messages from a FIFO buffer, this constant defines
  * its size. If a message is added to the full buffer, it is ignored.
@@ -84,7 +84,6 @@
 #define VCU_INVERTER_SETTINGS_CAN_ID 0xC1
 
 #define VCU_SUMMARY_CAN_ID 0xC5
-#define VCU_ERRORS_CAN_ID 0xE0
 #define VCU_DEBUG_CAN_ID 0xDB
 
 #define MOTOR_INFO_CAN_ID 0xA5
@@ -99,8 +98,8 @@
 #define INVERTER_MOTOR_SPEED_HI 3
 
 #define ORION_1_CAN_ID 0x6B2 // this is the critical one, others won't trigger fault if not received rn
-#define ORION_2_CAN_ID 0x6B3 // TODO MAKE ALL NECESSARY
-#define ORION_THERM_EXP_CAN_ID 0x1838F380
+#define ORION_2_CAN_ID 0x6B3
+#define ORION_THERM_EXP_CAN_ID 0x1838F380 // TODO 29 bit causing problems?
 
 #define ORION_IMD_STATUS_INDEX 0
 #define ORION_BMS_STATUS_INDEX 1
@@ -119,6 +118,7 @@
 // 5 ms cycle time
 #define CYCLE_TIME MsToUs(5ul)
 
+// TODO Unused
 #define PRECHARGE_VOLTAGE_THRESHHOLD 268
 #define TORQUE_LIMITING_RPM_THRESHHOLD 80
 #define RPM_BASED_TORQUE_LIMIT 15
@@ -289,11 +289,12 @@ void main (void)
     clear_can_frame(&vcu_summary_can_frame);
 
     /* CAN frame for errors */
+    /* Could this be a problem?
     IO_CAN_DATA_FRAME vcu_errors_can_frame;
     vcu_errors_can_frame.id = VCU_ERRORS_CAN_ID;
     vcu_errors_can_frame.id_format = IO_CAN_STD_FRAME;
     vcu_errors_can_frame.length = 8;
-    clear_can_frame(&vcu_errors_can_frame);
+    clear_can_frame(&vcu_errors_can_frame);*/
 
     /* CAN frames used for debugging */
     IO_CAN_DATA_FRAME debug_can_frame;
@@ -374,6 +375,7 @@ void main (void)
                  , IO_CAN_STD_FRAME
                  , ORION_2_CAN_ID
                  , 0x1FFFFFFF);
+    
     
     IO_CAN_ConfigMsg( &handle_orion_therm_exp_r
                  , CONTROLS_CAN_CHANNEL
@@ -499,8 +501,6 @@ void main (void)
     bool tsil_latched = FALSE;
 
     bool orion_timeout = FALSE;
-    bool bms_fault_occured_once = FALSE;
-    bool imd_fault_occured_once = FALSE;
 
     IO_RTC_StartTime(&time_since_start);
     IO_RTC_StartTime(&orion_can_timeout);
@@ -634,7 +634,8 @@ void main (void)
                 get_bse(&bse_result, &bse_error);
 
                 // transitions
-                if (rtd_val == RTD_OFF) {
+                // REALLY SHITTY CODE TO PREVENT RTD OFF WHEN DRIVING
+                if (rtd_val == RTD_OFF && last_speed == 0) {
                     // rtd off -> switch to not ready state
                     current_state = NOT_READY;
                 } else if (apps_error != APPS_NO_ERROR || bse_error != BSE_NO_ERROR || (sdc_val == SDC_OFF)) {
@@ -655,7 +656,7 @@ void main (void)
                     controls_can_frame.data[1] = torque_d1;
                     controls_can_frame.data[2] = 0;
                     controls_can_frame.data[3] = 0;
-                    controls_can_frame.data[4] = MOTOR_BACKWARDS; // TODO Set to backwards(0) for dyno testing
+                    controls_can_frame.data[4] = MOTOR_FORWARDS; // TODO Set to backwards(0) for dyno testing
                     controls_can_frame.data[5] = 1;
                     controls_can_frame.data[6] = 0;
                     controls_can_frame.data[7] = 0;
@@ -712,22 +713,17 @@ void main (void)
                 // if CAN timeout, set light to blinking red
                 if (IO_RTC_GetTimeUS(orion_can_timeout) > ORION_CAN_TIMEOUT_US) {
                     orion_timeout = TRUE;
-                    set_light_to(BLINKING_RED);
+                    // TODO Fake because Orion tweaks and lags 
+                    //set_light_to(BLINKING_RED);
                 } else if (orion_1_message_received_once == TRUE) {
                         get_sdc(&sdc_val);
 
-                        bool bms_ok = !orion_1_can_frame.data[ORION_BMS_STATUS_INDEX]; // TODO This is inverted!
+                        bool bms_ok = orion_1_can_frame.data[ORION_BMS_STATUS_INDEX]; // TODO This is inverted!
                         bool imd_ok = orion_1_can_frame.data[ORION_IMD_STATUS_INDEX];
 
                         // latch BMS and IMD faults
-                        if (!bms_ok || !imd_ok) {
+                        if ((!bms_ok || !imd_ok) && sdc_val == SDC_OFF) {
                             tsil_latched = TRUE;
-                            if (!bms_ok) {
-                                bms_fault_occured_once = TRUE;
-                            }
-                            if (!imd_ok) {
-                                imd_fault_occured_once = TRUE;
-                            }
                         }
 
                         // If no timeout and everything is good AND sdc is good, clear latch
@@ -810,6 +806,7 @@ void main (void)
 
 
             // send error message
+            /*
             vcu_errors_can_frame.data[0] = apps_error;
             vcu_errors_can_frame.data[1] = bse_error;
             vcu_errors_can_frame.data[2] = orion_timeout;
@@ -818,7 +815,7 @@ void main (void)
             vcu_errors_can_frame.data[5] = 0; // TODO add more errors here
             vcu_errors_can_frame.data[6] = 0; // TODO add more errors here
             vcu_errors_can_frame.data[7] = 0; // TODO add more errors here
-
+            */
 
             ubyte2 apps_1_val;
             bool apps_1_fresh;
