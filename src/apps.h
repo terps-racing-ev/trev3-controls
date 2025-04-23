@@ -51,7 +51,7 @@
 #define APPS_VOLTAGE_DEADZONE 150
 
 // max number of errors in a row before torque is cut.
-#define APPS_REPEATED_ERROR_MAX 5
+#define APPS_REPEATED_ERROR_MAX 20
 
 // APPS percent travel deadzone below 0%
 #define APPS_DEADZONE 2

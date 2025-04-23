@@ -90,6 +90,7 @@
 #define VOLTAGE_INFO_CAN_ID 0xA7
 #define CURRENT_INFO_CAN_ID 0xA6
 #define TORQUE_INFO_CAN_ID 0xAC
+#define INVERTER_STATE_CAN_ID 0xAB
 
 #define INVERTER_PACK_VOLT_LO 0
 #define INVERTER_PACK_VOLT_HI 1
@@ -254,6 +255,7 @@ void main (void)
     ubyte1 handle_inverter_voltage_info_r;
     ubyte1 handle_inverter_current_info_r;
     ubyte1 handle_inverter_torque_info_r;
+    ubyte1 handle_inverter_state_r;
     ubyte1 handle_orion_1_r;
     ubyte1 handle_orion_2_r;
     ubyte1 handle_orion_therm_exp_r;
@@ -275,6 +277,7 @@ void main (void)
     IO_CAN_DATA_FRAME inverter_voltage_info_can_frame;
     IO_CAN_DATA_FRAME inverter_current_info_can_frame;
     IO_CAN_DATA_FRAME inverter_torque_info_can_frame;
+    IO_CAN_DATA_FRAME inverter_state_can_frame;
 
     /* CAN frame for orion */
     IO_CAN_DATA_FRAME orion_1_can_frame;
@@ -330,7 +333,7 @@ void main (void)
                     , FIFO_BUFFER_SIZE
                     , IO_CAN_MSG_WRITE
                     , IO_CAN_STD_FRAME
-                    , VCU_CONTROLS_CAN_ID
+                    , VCU_CONTROLS_CAN_ID // TODO does this change anything?
                     , 0);
 
     /* Initialize objects for rxing messages. Need one for each message expected */
@@ -361,6 +364,13 @@ void main (void)
                  , IO_CAN_STD_FRAME
                  , TORQUE_INFO_CAN_ID
                  , 0x1FFFFFFF);
+    
+    IO_CAN_ConfigMsg( &handle_inverter_state_r
+                 , CONTROLS_CAN_CHANNEL
+                 , IO_CAN_MSG_READ
+                 , IO_CAN_STD_FRAME
+                 , INVERTER_STATE_CAN_ID
+                 , 0x1FFFFFFF);           
 
     IO_CAN_ConfigMsg( &handle_orion_1_r
                  , CONTROLS_CAN_CHANNEL
@@ -380,7 +390,7 @@ void main (void)
     IO_CAN_ConfigMsg( &handle_orion_therm_exp_r
                  , CONTROLS_CAN_CHANNEL
                  , IO_CAN_MSG_READ
-                 , IO_CAN_EXT_FRAME //Extended 29 bit ID
+                 , IO_CAN_EXT_FRAME //Extended 29 bit ID. problem?
                  , ORION_THERM_EXP_CAN_ID
                  , 0x1FFFFFFF);
 
@@ -483,6 +493,9 @@ void main (void)
     //inverter torque info received
     bool torque_info_message_received = FALSE;
 
+    //inverter state info received
+    bool inverter_state_message_received = FALSE;
+
     // orion message received
     bool orion_1_message_received = FALSE;
     bool orion_1_message_received_once = FALSE;
@@ -527,6 +540,7 @@ void main (void)
         // read info from inverter
         read_can_msg(&handle_inverter_current_info_r, &inverter_current_info_can_frame, &current_info_message_received, CURRENT_INFO_CAN_ID, CONTROLS_CAN_CHANNEL);
         read_can_msg(&handle_inverter_torque_info_r, &inverter_torque_info_can_frame, &torque_info_message_received, TORQUE_INFO_CAN_ID, CONTROLS_CAN_CHANNEL);
+        read_can_msg(&handle_inverter_state_r, &inverter_state_can_frame, &inverter_state_message_received, INVERTER_STATE_CAN_ID, CONTROLS_CAN_CHANNEL);
 
         // read message from inverter with motor speed and update motor speed accordingly
         read_can_msg(&handle_inverter_motor_info_r, &inverter_motor_info_can_frame, &motor_info_message_received, MOTOR_INFO_CAN_ID, CONTROLS_CAN_CHANNEL);
@@ -635,7 +649,7 @@ void main (void)
 
                 // transitions
                 // REALLY SHITTY CODE TO PREVENT RTD OFF WHEN DRIVING
-                if (rtd_val == RTD_OFF && last_speed == 0) {
+                if (rtd_val == RTD_OFF && last_speed < 10) {
                     // rtd off -> switch to not ready state
                     current_state = NOT_READY;
                 } else if (apps_error != APPS_NO_ERROR || bse_error != BSE_NO_ERROR || (sdc_val == SDC_OFF)) {
@@ -718,10 +732,11 @@ void main (void)
                 } else if (orion_1_message_received_once == TRUE) {
                         get_sdc(&sdc_val);
 
-                        bool bms_ok = orion_1_can_frame.data[ORION_BMS_STATUS_INDEX]; // TODO This is inverted!
+                        bool bms_ok = orion_1_can_frame.data[ORION_BMS_STATUS_INDEX];
                         bool imd_ok = orion_1_can_frame.data[ORION_IMD_STATUS_INDEX];
 
                         // latch BMS and IMD faults
+                        // Added SDC because shhhh
                         if ((!bms_ok || !imd_ok) && sdc_val == SDC_OFF) {
                             tsil_latched = TRUE;
                         }
@@ -773,6 +788,9 @@ void main (void)
             }
             if (torque_info_message_received) {
                 IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &inverter_torque_info_can_frame, 1);
+            }
+            if (inverter_state_message_received) {
+                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &inverter_state_can_frame, 1);
             }
 
             // echo orion messages

@@ -2,7 +2,7 @@
 #define MOVING_AVERAGE_H_INCLUDED
 
 // change this to change how many points are considered in the filter
-#define MOVING_AVERAGE_SIZE 101
+#define MOVING_AVERAGE_SIZE 20
 
 
 // to use this moving average filter, create a "moving_average_info" struct to store the data points\
