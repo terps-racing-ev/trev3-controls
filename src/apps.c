@@ -43,7 +43,7 @@ ubyte2 voltage_to_pct_travel_apps_2(ubyte2 apps_2_voltage) {
 
 }
 
-ubyte2 get_filtered_apps1_voltage() {
+ubyte2 get_filtered_apps1_voltage(void) {
     if (moving_average_structs_initialized) {
         ubyte2 apps_1_val;
         bool apps_1_fresh;
@@ -59,7 +59,8 @@ ubyte2 get_filtered_apps1_voltage() {
     return 0;
 }
 
-ubyte2 get_filtered_apps2_voltage() {
+
+ubyte2 get_filtered_apps2_voltage(void) {
     if (moving_average_structs_initialized) {
         ubyte2 apps_2_val;
         bool apps_2_fresh;
