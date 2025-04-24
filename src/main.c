@@ -890,23 +890,117 @@ void main (void)
 
             // if so, reset
             if (controls_error != IO_E_OK) {
+                // de init all handles
+                IO_CAN_DeInitHandle(handle_controls_fifo_w);
+                IO_CAN_DeInitHandle(handle_inverter_motor_info_r);
+                IO_CAN_DeInitHandle(handle_inverter_voltage_info_r);
+                IO_CAN_DeInitHandle(handle_inverter_current_info_r);
+                IO_CAN_DeInitHandle(handle_inverter_torque_info_r);
+                IO_CAN_DeInitHandle(handle_inverter_state_r);
+                IO_CAN_DeInitHandle(handle_orion_1_r);
+                IO_CAN_DeInitHandle(handle_orion_2_r);
+                IO_CAN_DeInitHandle(handle_orion_therm_exp_r);
+
+                // de init the channel
                 IO_CAN_DeInit(CONTROLS_CAN_CHANNEL);
 
+                // init the channel
                 IO_CAN_Init( CONTROLS_CAN_CHANNEL
                     , BAUD_RATE
                     , 0
                     , 0
                     , 0 );
+
+                /* Initialize fifos for txing messages */
+                IO_CAN_ConfigFIFO( &handle_controls_fifo_w
+                    , CONTROLS_CAN_CHANNEL
+                    , FIFO_BUFFER_SIZE
+                    , IO_CAN_MSG_WRITE
+                    , IO_CAN_STD_FRAME
+                    , VCU_CONTROLS_CAN_ID
+                    , 0);
+
+                /* Initialize objects for rxing messages. Need one for each message expected */
+                IO_CAN_ConfigMsg( &handle_inverter_motor_info_r
+                    , CONTROLS_CAN_CHANNEL
+                    , IO_CAN_MSG_READ
+                    , IO_CAN_STD_FRAME
+                    , MOTOR_INFO_CAN_ID
+                    , 0x1FFFFFFF);
+
+                IO_CAN_ConfigMsg( &handle_inverter_voltage_info_r
+                        , CONTROLS_CAN_CHANNEL
+                        , IO_CAN_MSG_READ
+                        , IO_CAN_STD_FRAME
+                        , VOLTAGE_INFO_CAN_ID
+                        , 0x1FFFFFFF);
+
+                IO_CAN_ConfigMsg( &handle_inverter_current_info_r
+                        , CONTROLS_CAN_CHANNEL
+                        , IO_CAN_MSG_READ
+                        , IO_CAN_STD_FRAME
+                        , CURRENT_INFO_CAN_ID
+                        , 0x1FFFFFFF);
+
+                IO_CAN_ConfigMsg( &handle_inverter_torque_info_r
+                        , CONTROLS_CAN_CHANNEL
+                        , IO_CAN_MSG_READ
+                        , IO_CAN_STD_FRAME
+                        , TORQUE_INFO_CAN_ID
+                        , 0x1FFFFFFF);
+
+                IO_CAN_ConfigMsg( &handle_inverter_state_r
+                        , CONTROLS_CAN_CHANNEL
+                        , IO_CAN_MSG_READ
+                        , IO_CAN_STD_FRAME
+                        , INVERTER_STATE_CAN_ID
+                        , 0x1FFFFFFF);           
+
+                IO_CAN_ConfigMsg( &handle_orion_1_r
+                        , CONTROLS_CAN_CHANNEL
+                        , IO_CAN_MSG_READ
+                        , IO_CAN_STD_FRAME
+                        , ORION_1_CAN_ID
+                        , 0x1FFFFFFF);
+
+                IO_CAN_ConfigMsg( &handle_orion_2_r
+                        , CONTROLS_CAN_CHANNEL
+                        , IO_CAN_MSG_READ
+                        , IO_CAN_STD_FRAME
+                        , ORION_2_CAN_ID
+                        , 0x1FFFFFFF);
+
+
+                IO_CAN_ConfigMsg( &handle_orion_therm_exp_r
+                        , CONTROLS_CAN_CHANNEL
+                        , IO_CAN_MSG_READ
+                        , IO_CAN_EXT_FRAME //Extended 29 bit ID. problem?
+                        , ORION_THERM_EXP_CAN_ID
+                        , 0x1FFFFFFF);
             }
 
             if (telemetry_error != IO_E_OK) {
+                // de init handle
+                IO_CAN_DeInitHandle(handle_telemetry_fifo_w);
+
+                // de init channel
                 IO_CAN_DeInit(TELEMETRY_CAN_CHANNEL);
 
+                // init channel
                 IO_CAN_Init( TELEMETRY_CAN_CHANNEL
                     , BAUD_RATE
                     , 0
                     , 0
                     , 0 );
+
+                // re init handle
+                IO_CAN_ConfigFIFO( &handle_telemetry_fifo_w
+                    , TELEMETRY_CAN_CHANNEL
+                    , FIFO_BUFFER_SIZE
+                    , IO_CAN_MSG_WRITE
+                    , IO_CAN_STD_FRAME
+                    , VCU_CONTROLS_CAN_ID // TODO does this change anything?
+                    , 0);
             }
 
 

@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09467762
-	; Options: -f cc43812a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=4 -DRTS_TTC_FLASH_DATE_DAY=23 -DRTS_TTC_FLASH_DATE_HOUR=20 -DRTS_TTC_FLASH_DATE_MINUTE=50 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\bse.src
-=======
 	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09007774
-	; Options: -f cc27124a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=4 -DRTS_TTC_FLASH_DATE_DAY=23 -DRTS_TTC_FLASH_DATE_HOUR=19 -DRTS_TTC_FLASH_DATE_MINUTE=16 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\bse.src
->>>>>>> origin/can_tx_reinitializing
+	; Options: -f cc32420a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=4 -DRTS_TTC_FLASH_DATE_DAY=23 -DRTS_TTC_FLASH_DATE_HOUR=23 -DRTS_TTC_FLASH_DATE_MINUTE=46 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\bse.src
 	; Module start
 	.source	'src/bse.c'
 code_voltage_to_psi_bse	.section	code, cluster 'voltage_to_psi_bse', new
@@ -293,11 +288,7 @@ _bse_moving_average_info	.label	word
 	.extern	__lc_ub_user_stack : nearbyte
 	.debug		.debug_info
 _39:
-<<<<<<< HEAD
-	.dl	1242
-=======
 	.dl	1321
->>>>>>> origin/can_tx_reinitializing
 	.dw	3
 	.dl	_40
 	.db	4
@@ -345,31 +336,14 @@ _59:
 	.dl	318
 	.db	4
 	.db	'fresh',0,2,134,3,39,2
-<<<<<<< HEAD
-	.dl	250
-	.db	0,9,40
-	.dl	146
-=======
 	.dl	329
 	.db	0,9,40
 	.dl	225
->>>>>>> origin/can_tx_reinitializing
 	.db	10,19,0
 _71:
 	.db	11
 	.db	'moving_average_info',0,3,15,8,44,12
 	.db	'points',0
-<<<<<<< HEAD
-	.dl	339
-	.db	40,2,35,0,12
-	.db	'all_points_filled',0
-	.dl	216
-	.db	1,2,35,40,12
-	.db	'next_point_index',0
-	.dl	146
-	.db	2,2,35,42,0,6,5
-	.dl	348
-=======
 	.dl	418
 	.db	40,2,35,0,12
 	.db	'all_points_filled',0
@@ -379,7 +353,6 @@ _71:
 	.dl	225
 	.db	2,2,35,42,0,6,5
 	.dl	427
->>>>>>> origin/can_tx_reinitializing
 	.db	8
 	.db	'filter_point',0,3,27,8,6
 	.dl	225
@@ -388,35 +361,17 @@ _71:
 	.dl	225
 	.db	4
 	.db	'info_struct',0,3,27,68,2
-<<<<<<< HEAD
-	.dl	443
-	.db	0,13
-	.db	'initialize_moving_average_struct',0,3,29,6,6,1,1,1,1,4
-	.db	'info_struct',0,3,29,67,2
-	.dl	443
-=======
 	.dl	522
 	.db	0,13
 	.db	'initialize_moving_average_struct',0,3,29,6,6,1,1,1,1,4
 	.db	'info_struct',0,3,29,67,2
 	.dl	522
->>>>>>> origin/can_tx_reinitializing
 	.db	0
 _61:
 	.db	6,5
 	.dl	295
 	.db	14
 	.db	'void',0,6,5
-<<<<<<< HEAD
-	.dl	587
-	.db	15
-	.db	'__prof_adm',0,1,1,1
-	.dl	593
-	.db	2
-	.db	'unsigned long int',0,4,7,15
-	.db	'__codeptr',0,1,1,1
-	.dl	618
-=======
 	.dl	666
 	.db	15
 	.db	'__prof_adm',0,1,1,1
@@ -425,7 +380,6 @@ _61:
 	.db	'unsigned long int',0,4,7,15
 	.db	'__codeptr',0,1,1,1
 	.dl	697
->>>>>>> origin/can_tx_reinitializing
 	.db	15
 	.db	'ubyte1',0,4,21,29
 	.dl	295
@@ -434,11 +388,7 @@ _61:
 	.dl	225
 	.db	15
 	.db	'ubyte4',0,4,23,29
-<<<<<<< HEAD
-	.dl	618
-=======
 	.dl	697
->>>>>>> origin/can_tx_reinitializing
 	.db	15
 	.db	'bool',0,4,31,29
 	.dl	295
@@ -453,11 +403,7 @@ _61:
 	.db	'IO_DRIVER_RESET_REASON_SW',0,3,17
 	.db	'IO_DRIVER_RESET_REASON_UNKNOWN',0,4,0,15
 	.db	'IO_DRIVER_RESET_REASON',0,6,169,3,3
-<<<<<<< HEAD
-	.dl	737
-=======
 	.dl	816
->>>>>>> origin/can_tx_reinitializing
 	.db	11
 	.db	'_io_driver_trap_info',0,6,174,3,16,10,12
 	.db	'trap_id',0
@@ -470,29 +416,6 @@ _61:
 	.dl	225
 	.db	2,2,35,4,12
 	.db	'fault_location',0
-<<<<<<< HEAD
-	.dl	618
-	.db	4,2,35,6,0,15
-	.db	'IO_DRIVER_TRAP_INFO',0,6,197,3,3
-	.dl	951
-	.db	11
-	.db	'bl_t_date_',0,7,122,16,4,12
-	.db	'date',0
-	.dl	618
-	.db	4,2,35,0,0,15
-	.db	'BL_T_DATE',0,7,131,1,3
-	.dl	1088
-	.db	11
-	.db	'bl_t_can_id_',0,7,138,1,16,8,12
-	.db	'extended',0
-	.dl	618
-	.db	4,2,35,0,12
-	.db	'ID',0
-	.dl	618
-	.db	4,2,35,4,0,15
-	.db	'BL_T_CAN_ID',0,7,146,1,3
-	.dl	1138
-=======
 	.dl	697
 	.db	4,2,35,6,0,15
 	.db	'IO_DRIVER_TRAP_INFO',0,6,197,3,3
@@ -514,16 +437,11 @@ _61:
 	.db	4,2,35,4,0,15
 	.db	'BL_T_CAN_ID',0,7,146,1,3
 	.dl	1217
->>>>>>> origin/can_tx_reinitializing
 	.db	18
 	.dl	295
 	.db	19,0,20
 	.db	'_lc_ub_user_stack',0,1,1,1,2
-<<<<<<< HEAD
-	.dl	1209
-=======
 	.dl	1288
->>>>>>> origin/can_tx_reinitializing
 	.db	1,1,0
 	; End of section
 
@@ -561,19 +479,11 @@ _290:
 	.debug		.debug_pubnames
 	.dl	83
 	.dw	2
-<<<<<<< HEAD
-	.dl	_39,1246,255
-	.db	'IO_ADC_Get',0
-	.dl	449
-	.db	'filter_point',0
-	.dl	517
-=======
 	.dl	_39,1325,334
 	.db	'IO_ADC_Get',0
 	.dl	528
 	.db	'filter_point',0
 	.dl	596
->>>>>>> origin/can_tx_reinitializing
 	.db	'initialize_moving_average_struct',0
 	.dl	0
 	; End of section
