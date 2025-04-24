@@ -1,5 +1,5 @@
-	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09007774
-	; Options: -f cc22880a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=4 -DRTS_TTC_FLASH_DATE_DAY=23 -DRTS_TTC_FLASH_DATE_HOUR=1 -DRTS_TTC_FLASH_DATE_MINUTE=10 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\bse.src
+	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09467762
+	; Options: -f cc43812a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=4 -DRTS_TTC_FLASH_DATE_DAY=23 -DRTS_TTC_FLASH_DATE_HOUR=20 -DRTS_TTC_FLASH_DATE_MINUTE=50 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\bse.src
 	; Module start
 	.source	'src/bse.c'
 code_voltage_to_psi_bse	.section	code, cluster 'voltage_to_psi_bse', new
@@ -39,9 +39,12 @@ _72:
 ; src/bse.c	    21          return 100;
 ; src/bse.c	    22      }
 ; src/bse.c	    23  
-; src/bse.c	    24      return (ubyte2)((ubyte4)(bse_voltage - BSE_MIN_VOLTAGE) * BSE_MAX_PSI) / (BSE_MAX_VOLTAGE - BSE_MIN_VOLTAGE);
-; src/bse.c	    25  
-; src/bse.c	    26  }
+; src/bse.c	    24      return (ubyte2)(
+; src/bse.c	    25          ((ubyte4)(bse_voltage - BSE_MIN_VOLTAGE) * BSE_MAX_PSI)
+; src/bse.c	    26          / (BSE_MAX_VOLTAGE - BSE_MIN_VOLTAGE)
+; src/bse.c	    27      );
+; src/bse.c	    28  
+; src/bse.c	    29  }
 	ret
 _2:
 	cmpw	r2,#0x1194
@@ -51,18 +54,17 @@ _298:
 _73:
 	ret
 _4:
-	movw	r11,#0xbb8
+	subw	r2,#0x1f4
 _299:
-	mulu	r2,r11
+	movw	r11,#0xbb8
 _300:
-	movw	r12,#0xfa0
+	mulu	r2,r11
 _301:
-	movw	r11,MDL
+	movw	r11,#0xfa0
 _302:
-	subw	r11,#0xe360
-_303:
-	movw	MDL,r11
-	divu	r12
+	movw	MDL,MDL
+	movw	MDH,MDH
+	divlu	r11
 	movw	r2,MDL
 _74:
 	ret
@@ -73,8 +75,8 @@ _46:
 code_get_bse	.section	code, cluster 'get_bse', new
 	.global	_get_bse
 
-; src/bse.c	    27  
-; src/bse.c	    28  void get_bse(ubyte2 *bse_result, ubyte1 *error) {
+; src/bse.c	    30  
+; src/bse.c	    31  void get_bse(ubyte2 *bse_result, ubyte1 *error) {
 ; Function _get_bse
 _27:
 _get_bse	.proc	far
@@ -95,75 +97,75 @@ _287:
 	movw	r6,r5
 _288:
 
-; src/bse.c	    29      if (!moving_average_struct_initialized) {
+; src/bse.c	    32      if (!moving_average_struct_initialized) {
 	movb	rh4,#0x0
 _286:
 	extp	#@pag(_moving_average_struct_initialized),#0x1
 	cmpb	rh4,@pof(_moving_average_struct_initialized)
 	jmp+	cc_ne,_7
-_308:
+_307:
 
-; src/bse.c	    30          initialize_moving_average_struct(&bse_moving_average_info);
+; src/bse.c	    33          initialize_moving_average_struct(&bse_moving_average_info);
 	movw	r2,#@sof(_bse_moving_average_info)
 _285:
 	movw	r3,#@seg(_bse_moving_average_info)
 	call	_initialize_moving_average_struct
-_309:
+_308:
 
-; src/bse.c	    31          moving_average_struct_initialized = TRUE;
+; src/bse.c	    34          moving_average_struct_initialized = TRUE;
 	movb	rh4,#0x1
-_310:
+_309:
 	extp	#@pag(_moving_average_struct_initialized),#0x1
 	movb	@pof(_moving_average_struct_initialized),rh4
 _7:
 
-; src/bse.c	    32      }
-; src/bse.c	    33  
-; src/bse.c	    34      ubyte2 bse_val;
-; src/bse.c	    35      bool bse_fresh;
-; src/bse.c	    36      ubyte2 bse_psi_result;
-; src/bse.c	    37  
-; src/bse.c	    38      // get voltage from pin
-; src/bse.c	    39      IO_ADC_Get(IO_PIN_BSE, &bse_val, &bse_fresh);
+; src/bse.c	    35      }
+; src/bse.c	    36  
+; src/bse.c	    37      ubyte2 bse_val;
+; src/bse.c	    38      bool bse_fresh;
+; src/bse.c	    39      ubyte2 bse_psi_result;
+; src/bse.c	    40  
+; src/bse.c	    41      // get voltage from pin
+; src/bse.c	    42      IO_ADC_Get(IO_PIN_BSE, &bse_val, &bse_fresh);
 	movb	rl2,#0xf
-_311:
+_310:
 	movw	r4,r15
 	andw	r4,#0x3fff
 	orw	r4,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r5,#@seg(__lc_ub_user_stack+0xffff)
-_312:
+_311:
 	movw	r11,#0x2
 	addw	r11,r15
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r12,r5
 	call	_IO_ADC_Get
-_313:
+_312:
 
-; src/bse.c	    40  
-; src/bse.c	    41      // uncomment to use moving average filter
-; src/bse.c	    42      bse_val = filter_point(bse_val, &bse_moving_average_info);
+; src/bse.c	    43  
+; src/bse.c	    44      // uncomment to use moving average filter
+; src/bse.c	    45      bse_val = filter_point(bse_val, &bse_moving_average_info);
 	movw	r2,[r15+#0x0]
-_314:
+_313:
 	movw	r4,#@sof(_bse_moving_average_info)
 	movw	r5,#@seg(_bse_moving_average_info)
 	call	_filter_point
-_315:
+_314:
 	movw	[r15+#0x0],r2
 _67:
 
-; src/bse.c	    43  
-; src/bse.c	    44      // check if its in the treshhold
-; src/bse.c	    45      bool bse_within_threshhold = (bse_val >= BSE_MIN_VOLTAGE - BSE_VOLTAGE_DEADZONE) && (bse_val <= BSE_MAX_VOLTAGE + BSE_VOLTAGE_DEADZONE);
 ; src/bse.c	    46  
-; src/bse.c	    47      bse_psi_result = voltage_to_psi_bse(bse_val);
+; src/bse.c	    47      // check if its in the treshhold
+; src/bse.c	    48      bool bse_within_threshhold = (bse_val >= BSE_MIN_VOLTAGE - BSE_VOLTAGE_DEADZONE) && (bse_val <= BSE_MAX_VOLTAGE + BSE_VOLTAGE_DEADZONE);
+; src/bse.c	    49  
+; src/bse.c	    50      bse_psi_result = voltage_to_psi_bse(bse_val);
 	movw	r11,[r15+#0x0]
 _68:
 
 ; src/bse.c	    16      if (bse_voltage < BSE_MIN_VOLTAGE) {      (inlined)
 	cmpw	r11,#0x1f4
 	jmp+	cc_uge,_8
-_316:
+_315:
 	movw	r11,#0x0
 
 ; src/bse.c	    17          return 0;      (inlined)
@@ -175,7 +177,7 @@ _8:
 ; src/bse.c	    20      if (bse_voltage > BSE_MAX_VOLTAGE) {      (inlined)
 	cmpw	r11,#0x1194
 	jmp+	cc_ule,_10
-_317:
+_316:
 	movw	r11,#0x64
 
 ; src/bse.c	    21          return 100;      (inlined)
@@ -183,61 +185,60 @@ _317:
 
 ; src/bse.c	    20      if (bse_voltage > BSE_MAX_VOLTAGE) {      (inlined)
 _10:
+	subw	r11,#0x1f4
+_317:
 	movw	r12,#0xbb8
 _318:
 	mulu	r11,r12
 _319:
-	movw	r12,#0xfa0
+	movw	r11,#0xfa0
 _320:
-	movw	r11,MDL
-_321:
-	subw	r11,#0xe360
-_322:
-	movw	MDL,r11
-	divu	r12
+	movw	MDL,MDL
+	movw	MDH,MDH
+	divlu	r11
 	movw	r11,MDL
 
-; src/bse.c	    26  }      (inlined)
+; src/bse.c	    29  }      (inlined)
 _11:
 _9:
 	movw	r12,[r15+#0x0]
 	subw	r12,#0x190
-_323:
+_321:
 
-; src/bse.c	    48      //error out if it isn't
-; src/bse.c	    49      if (bse_within_threshhold) {
+; src/bse.c	    51      //error out if it isn't
+; src/bse.c	    52      if (bse_within_threshhold) {
 	cmpw	r12,#0x1068
 	jmp	cc_ugt,_12
-_324:
+_322:
 
-; src/bse.c	    50          *bse_result = bse_psi_result;
+; src/bse.c	    53          *bse_result = bse_psi_result;
 	exts	r9,#0x1
 	movw	[r8],r11
-_325:
+_323:
 
-; src/bse.c	    51          *error = BSE_NO_ERROR;
+; src/bse.c	    54          *error = BSE_NO_ERROR;
 	movb	rh4,#0x0
-_326:
+_324:
 	jmp	_13
 _12:
 
-; src/bse.c	    52      } else {
-; src/bse.c	    53          *bse_result = 0;
+; src/bse.c	    55      } else {
+; src/bse.c	    56          *bse_result = 0;
 	movw	r11,#0x0
-_327:
+_325:
 	exts	r9,#0x1
 	movw	[r8],r11
-_328:
+_326:
 
-; src/bse.c	    54          *error = IGNORE_BSE_ERROR ? BSE_NO_ERROR : BSE_OUT_OF_RANGE_ERROR;
+; src/bse.c	    57          *error = IGNORE_BSE_ERROR ? BSE_NO_ERROR : BSE_OUT_OF_RANGE_ERROR;
 	movb	rh4,#0x1
 _13:
 	exts	r6,#0x1
 	movb	[r10],rh4
-_329:
+_327:
 
-; src/bse.c	    55      }
-; src/bse.c	    55  }
+; src/bse.c	    58      }
+; src/bse.c	    58  }
 
 	addw	r15,#0x4
 _130:
@@ -273,7 +274,7 @@ _moving_average_struct_initialized	.label	byte
 huge_bse_moving_average_info	.section	huge, clear, cluster 'bse_moving_average_info', new
 	.global	_bse_moving_average_info
 _bse_moving_average_info	.label	word
-	.ds	206
+	.ds	44
 	; End of section
 
 	.calls	'_get_bse','_initialize_moving_average_struct'
@@ -287,7 +288,7 @@ _bse_moving_average_info	.label	word
 	.extern	__lc_ub_user_stack : nearbyte
 	.debug		.debug_info
 _39:
-	.dl	1247
+	.dl	1242
 	.dw	3
 	.dl	_40
 	.db	4
@@ -335,22 +336,22 @@ _59:
 	.db	4
 	.db	'fresh',0,2,134,3,39,2
 	.dl	250
-	.db	0,9,202,1
+	.db	0,9,40
 	.dl	146
-	.db	10,100,0
+	.db	10,19,0
 _71:
 	.db	11
-	.db	'moving_average_info',0,3,15,8,206,1,12
+	.db	'moving_average_info',0,3,15,8,44,12
 	.db	'points',0
 	.dl	339
-	.db	202,1,2,35,0,12
+	.db	40,2,35,0,12
 	.db	'all_points_filled',0
 	.dl	216
-	.db	1,3,35,202,1,12
+	.db	1,2,35,40,12
 	.db	'next_point_index',0
 	.dl	146
-	.db	2,3,35,204,1,0,6,5
-	.dl	349
+	.db	2,2,35,42,0,6,5
+	.dl	348
 	.db	8
 	.db	'filter_point',0,3,27,8,6
 	.dl	146
@@ -359,25 +360,25 @@ _71:
 	.dl	146
 	.db	4
 	.db	'info_struct',0,3,27,68,2
-	.dl	448
+	.dl	443
 	.db	0,13
 	.db	'initialize_moving_average_struct',0,3,29,6,6,1,1,1,1,4
 	.db	'info_struct',0,3,29,67,2
-	.dl	448
+	.dl	443
 	.db	0
 _61:
 	.db	6,5
 	.dl	216
 	.db	14
 	.db	'void',0,6,5
-	.dl	592
+	.dl	587
 	.db	15
 	.db	'__prof_adm',0,1,1,1
-	.dl	598
+	.dl	593
 	.db	2
 	.db	'unsigned long int',0,4,7,15
 	.db	'__codeptr',0,1,1,1
-	.dl	623
+	.dl	618
 	.db	15
 	.db	'ubyte1',0,4,21,29
 	.dl	216
@@ -386,7 +387,7 @@ _61:
 	.dl	146
 	.db	15
 	.db	'ubyte4',0,4,23,29
-	.dl	623
+	.dl	618
 	.db	15
 	.db	'bool',0,4,31,29
 	.dl	216
@@ -401,7 +402,7 @@ _61:
 	.db	'IO_DRIVER_RESET_REASON_SW',0,3,17
 	.db	'IO_DRIVER_RESET_REASON_UNKNOWN',0,4,0,15
 	.db	'IO_DRIVER_RESET_REASON',0,6,169,3,3
-	.dl	742
+	.dl	737
 	.db	11
 	.db	'_io_driver_trap_info',0,6,174,3,16,10,12
 	.db	'trap_id',0
@@ -414,32 +415,32 @@ _61:
 	.dl	146
 	.db	2,2,35,4,12
 	.db	'fault_location',0
-	.dl	623
+	.dl	618
 	.db	4,2,35,6,0,15
 	.db	'IO_DRIVER_TRAP_INFO',0,6,197,3,3
-	.dl	956
+	.dl	951
 	.db	11
 	.db	'bl_t_date_',0,7,122,16,4,12
 	.db	'date',0
-	.dl	623
+	.dl	618
 	.db	4,2,35,0,0,15
 	.db	'BL_T_DATE',0,7,131,1,3
-	.dl	1093
+	.dl	1088
 	.db	11
 	.db	'bl_t_can_id_',0,7,138,1,16,8,12
 	.db	'extended',0
-	.dl	623
+	.dl	618
 	.db	4,2,35,0,12
 	.db	'ID',0
-	.dl	623
+	.dl	618
 	.db	4,2,35,4,0,15
 	.db	'BL_T_CAN_ID',0,7,146,1,3
-	.dl	1143
+	.dl	1138
 	.db	18
 	.dl	216
 	.db	19,0,20
 	.db	'_lc_ub_user_stack',0,1,1,1,2
-	.dl	1214
+	.dl	1209
 	.db	1,1,0
 	; End of section
 
@@ -477,11 +478,11 @@ _290:
 	.debug		.debug_pubnames
 	.dl	83
 	.dw	2
-	.dl	_39,1251,255
+	.dl	_39,1246,255
 	.db	'IO_ADC_Get',0
-	.dl	454
+	.dl	449
 	.db	'filter_point',0
-	.dl	522
+	.dl	517
 	.db	'initialize_moving_average_struct',0
 	.dl	0
 	; End of section
@@ -531,27 +532,25 @@ _296:
 	.dw	_297-_15
 	.db	3,1,1,5,1,9
 	.dw	_72-_297
-	.db	3,9,1,5,5,7,9
+	.db	3,12,1,5,5,7,9
 	.dw	_2-_72
-	.db	3,122,1,5,16,9
+	.db	3,119,1,5,16,9
 	.dw	_298-_2
 	.db	3,1,1,5,1,9
 	.dw	_73-_298
-	.db	3,5,1,5,63,7,9
+	.db	3,8,1,5,31,7,9
 	.dw	_4-_73
-	.db	3,126,1,5,61,9
+	.db	3,124,1,5,52,9
 	.dw	_299-_4
-	.db	1,5,95,9
+	.db	1,5,50,9
 	.dw	_300-_299
-	.db	1,5,61,9
+	.db	1,5,28,9
 	.dw	_301-_300
-	.db	1,5,42,9
+	.db	3,1,1,5,9,9
 	.dw	_302-_301
-	.db	1,5,76,9
-	.dw	_303-_302
 	.db	1,5,1,9
-	.dw	_74-_303
-	.db	3,2,1,7,9
+	.dw	_74-_302
+	.db	3,3,1,7,9
 	.dw	_46-_74
 	.db	0,1,1
 _294:
@@ -575,23 +574,23 @@ _47:
 	.db	2
 	.dl	_38
 	.db	3
-	.db	'get_bse',0,1,28,6,6,1,1,1
+	.db	'get_bse',0,1,31,6,6,1,1,1
 	.dl	_27,_51,_26
 	.db	12,19,146,176,2,0,64,36,146,161,2,0,33,4
-	.db	'bse_result',0,1,28,22,2
+	.db	'bse_result',0,1,31,22,2
 	.dl	_59,_60
 	.db	4
-	.db	'error',0,1,28,42,2
+	.db	'error',0,1,31,42,2
 	.dl	_61,_62
 	.db	5
 	.dl	_27,_51
 	.db	5
 	.dl	_7,_51
 	.db	6
-	.db	'bse_val',0,1,34,12,2
+	.db	'bse_val',0,1,37,12,2
 	.dl	_63,_64
 	.db	6
-	.db	'bse_fresh',0,1,35,10,2
+	.db	'bse_fresh',0,1,38,10,2
 	.dl	_65,_66
 	.db	5
 	.dl	_67,_51
@@ -614,82 +613,80 @@ _48:
 
 	.debug		.debug_line, cluster 'get_bse'
 _49:
-	.dl	_305-_304
-_304:
+	.dl	_304-_303
+_303:
 	.dw	3
-	.dl	_307-_306
-_306:
+	.dl	_306-_305
+_305:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
 	.db	'src/bse.c',0,0,0,0,0
-_307:
+_306:
 	.db	5,6,7,0,5,2
 	.dl	_27
-	.db	3,27,1,5,10,9
+	.db	3,30,1,5,10,9
 	.dw	_288-_27
 	.db	3,1,1,5,43,9
-	.dw	_308-_288
+	.dw	_307-_288
 	.db	3,1,1,5,45,9
-	.dw	_309-_308
+	.dw	_308-_307
 	.db	3,1,1,5,43,9
-	.dw	_310-_309
+	.dw	_309-_308
 	.db	1,5,16,9
-	.dw	_7-_310
+	.dw	_7-_309
 	.db	3,8,1,5,29,9
-	.dw	_311-_7
+	.dw	_310-_7
 	.db	1,5,39,9
-	.dw	_312-_311
+	.dw	_311-_310
 	.db	1,5,28,9
-	.dw	_313-_312
+	.dw	_312-_311
 	.db	3,3,1,5,38,9
-	.dw	_314-_313
+	.dw	_313-_312
 	.db	1,5,13,9
-	.dw	_315-_314
+	.dw	_314-_313
 	.db	1,5,41,9
-	.dw	_67-_315
+	.dw	_67-_314
 	.db	3,5,1,5,5,9
 	.dw	_68-_67
-	.db	3,97,1,5,9,9
-	.dw	_316-_68
+	.db	3,94,1,5,9,9
+	.dw	_315-_68
 	.db	3,1,1,5,5,9
-	.dw	_8-_316
+	.dw	_8-_315
 	.db	3,3,1,5,9,9
-	.dw	_317-_8
-	.db	3,1,1,5,63,9
-	.dw	_10-_317
-	.db	3,3,1,5,61,9
-	.dw	_318-_10
-	.db	1,5,95,9
+	.dw	_316-_8
+	.db	3,1,1,5,31,9
+	.dw	_10-_316
+	.db	3,4,1,5,52,9
+	.dw	_317-_10
+	.db	1,5,50,9
+	.dw	_318-_317
+	.db	1,5,28,9
 	.dw	_319-_318
-	.db	1,5,61,9
+	.db	3,1,1,5,9,9
 	.dw	_320-_319
-	.db	1,5,42,9
-	.dw	_321-_320
-	.db	1,5,76,9
-	.dw	_322-_321
 	.db	1,5,90,9
-	.dw	_9-_322
-	.db	3,21,1,5,5,9
-	.dw	_323-_9
+	.dw	_9-_320
+	.db	3,22,1,5,5,9
+	.dw	_321-_9
 	.db	3,4,1,5,21,9
-	.dw	_324-_323
+	.dw	_322-_321
 	.db	3,1,1,5,18,9
-	.dw	_325-_324
+	.dw	_323-_322
 	.db	3,1,1,5,37,9
-	.dw	_326-_325
+	.dw	_324-_323
 	.db	3,127,1,5,23,9
-	.dw	_12-_326
+	.dw	_12-_324
 	.db	3,3,1,5,21,9
-	.dw	_327-_12
+	.dw	_325-_12
 	.db	1,5,35,9
-	.dw	_328-_327
+	.dw	_326-_325
 	.db	3,1,1,5,16,9
-	.dw	_13-_328
+	.dw	_13-_326
 	.db	1,5,1,9
-	.dw	_329-_13
+	.dw	_327-_13
 	.db	3,2,1,9
-	.dw	_51-_329
+	.dw	_51-_327
 	.db	0,1,1
-_305:
+_304:
 	; End of section
 
 	.debug		.debug_ranges, cluster 'get_bse'
@@ -1139,34 +1136,34 @@ _19:
 	; End of section
 
 	.debug		.debug_frame
-_330:
+_328:
 	.dl	184
 	.dl	-1
 	.db	3,0,2,2,173,2,15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_331-_335
-_335:
-	.db	146,177,2,0,47
-	.dw	_334-_336
-_336:
-_331:
-	.db	18,49,46,40
-	.dw	_332-_337
-_337:
-	.db	146,178,2,0,47
-	.dw	_334-_338
-_338:
-_332:
-	.db	18,50,46,40
-	.dw	_333-_339
-_339:
-	.db	146,179,2,0,47
-	.dw	_334-_340
-_340:
+	.dw	_329-_333
 _333:
-	.db	146,180,2,0
+	.db	146,177,2,0,47
+	.dw	_332-_334
 _334:
+_329:
+	.db	18,49,46,40
+	.dw	_330-_335
+_335:
+	.db	146,178,2,0,47
+	.dw	_332-_336
+_336:
+_330:
+	.db	18,50,46,40
+	.dw	_331-_337
+_337:
+	.db	146,179,2,0,47
+	.dw	_332-_338
+_338:
+_331:
+	.db	146,180,2,0
+_332:
 	.db	22,19,62,36,33,48,34,16,173,2,12,19,146,176,2,0,64,36,146,161,2,0,33,8,15,22,161,2,5,19,146,161,2,4,8
 	.db	162,2,8,166,2,8,177,2,8,178,2,8,179,2,8,180,2,8,0,8,1,8,6,8,7,8,8,8,9,8,10,8,167,2,8,168,2,8,169,2,8,170
 	.db	2,8,171,2,8,172,2,16,174,2,12,19,146,176,2,0,64,36,146,161,2,0,33,16,175,2,12,19,146,176,2,0,64,36,146
@@ -1175,13 +1172,13 @@ _334:
 
 	.debug		.debug_frame, cluster 'voltage_to_psi_bse'
 	.dl	28
-	.dl	_330,_15,_46-_15
-	.db	8,160,2,8,3,8,4,8,5,8,13,8,14,0,0,0
+	.dl	_328,_15,_46-_15
+	.db	8,160,2,8,3,8,4,8,5,8,12,8,13,8,14,0
 	; End of section
 
 	.debug		.debug_frame, cluster 'get_bse'
 	.dl	756
-	.dl	_330,_27,_51-_27
+	.dl	_328,_27,_51-_27
 	.db	4
 	.dl	(_75-_27)/2
 	.db	15,60,127,0,18,10

@@ -805,6 +805,8 @@ void main (void)
             }
 
             // send vcu summary message
+
+            get_bse(&bse_result, &bse_error);
             vcu_summary_can_frame.data[0] = apps_pct_result;
 
             vcu_summary_can_frame.data[1] = torque_d0;
