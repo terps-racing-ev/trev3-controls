@@ -206,6 +206,13 @@ void read_can_msg(ubyte1* handle_r, IO_CAN_DATA_FRAME* dst_data_frame, bool *msg
 
 }
 
+void write_can_msg(ubyte1 handle, IO_CAN_DATA_FRAME* src_data_frame) {
+    IO_ErrorType can_write_error = IO_CAN_FIFOStatus(handle);
+
+    IO_CAN_WriteFIFO(handle, src_data_frame, 1);
+}
+
+
 double voltage_to_torque_limit (ubyte2 pack_voltage) {
     if (pack_voltage < PRECHARGE_VOLTAGE_THRESHHOLD) {
         return 0;
@@ -312,12 +319,16 @@ void main (void)
                , 0
                , 0
                , 0);
+    ubyte1 controls_tx_error_ctr;
+    ubyte1 controls_rx_error_ctr;
 
     IO_CAN_Init( TELEMETRY_CAN_CHANNEL
                , BAUD_RATE
                , 0
                , 0
                , 0);
+    ubyte1 telemetry_tx_error_ctr;
+    ubyte1 telemetry_rx_error_ctr;
 
     /* Initialize fifos for txing messages */
     IO_CAN_ConfigFIFO( &handle_controls_fifo_w
@@ -603,7 +614,7 @@ void main (void)
                     // if you don't transition away from this state, send a 0
                     // torque message to the motor with 0 torque
                     clear_can_frame(&controls_can_frame);
-                    IO_CAN_WriteFIFO(handle_controls_fifo_w, &controls_can_frame, 1);
+                    write_can_msg(handle_controls_fifo_w, &controls_can_frame);
                     pack_voltage_updated_once = FALSE;
                 }
 
@@ -627,7 +638,7 @@ void main (void)
                     inverter_settings_can_frame.data[6] = 0;
                     inverter_settings_can_frame.data[7] = 0;
 
-                    IO_CAN_WriteFIFO(handle_controls_fifo_w, &inverter_settings_can_frame, 1);
+                    write_can_msg(handle_controls_fifo_w, &inverter_settings_can_frame);
 
                 } else if (!just_entered_sound_state && IO_RTC_GetTimeUS(rtd_timestamp) > RTD_SOUND_DURATION) {
                     // once the timer runs out, enter the new state (driving) and turn off the buzzer
@@ -638,7 +649,7 @@ void main (void)
 
                 // keep sending 0 torque messages to the inverter in this state
                 clear_can_frame(&controls_can_frame);
-                IO_CAN_WriteFIFO(handle_controls_fifo_w, &controls_can_frame, 1);
+                write_can_msg(handle_controls_fifo_w, &controls_can_frame);
 
             } else if (current_state == DRIVING) {
                 // get the rtd, apps, and bse
@@ -674,7 +685,7 @@ void main (void)
                     controls_can_frame.data[5] = 1;
                     controls_can_frame.data[6] = 0;
                     controls_can_frame.data[7] = 0;
-                    IO_CAN_WriteFIFO(handle_controls_fifo_w, &controls_can_frame, 1);
+                    write_can_msg(handle_controls_fifo_w, &controls_can_frame);
                 }
             } else if (current_state == ERRORED) {
                 get_rtd(&rtd_val);
@@ -686,7 +697,7 @@ void main (void)
 
                 // continue sending 0 torque messages to the inverter in this state
                 clear_can_frame(&controls_can_frame);
-                IO_CAN_WriteFIFO(handle_controls_fifo_w, &controls_can_frame, 1);
+                write_can_msg(handle_controls_fifo_w, &controls_can_frame);
             } else if (current_state == APPS_5PCT_WAIT) {
                 // when brakes are engaged and apps > 25%, the car goes into this state
                 get_rtd(&rtd_val);
@@ -706,7 +717,7 @@ void main (void)
                 } else {
                     // no transition into another state -> send 0 torque message
                     clear_can_frame(&controls_can_frame);
-                    IO_CAN_WriteFIFO(handle_controls_fifo_w, &controls_can_frame, 1);
+                    write_can_msg(handle_controls_fifo_w, &controls_can_frame);
                 }
 
             }
@@ -778,30 +789,30 @@ void main (void)
 
             // echo motor info message
             if (motor_info_message_received) {
-                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &inverter_motor_info_can_frame, 1);
+                write_can_msg(handle_telemetry_fifo_w, &inverter_motor_info_can_frame);
             }
             if (voltage_info_message_received) {
-                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &inverter_voltage_info_can_frame, 1);
+                write_can_msg(handle_telemetry_fifo_w, &inverter_voltage_info_can_frame);
             }
             if (current_info_message_received) {
-                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &inverter_current_info_can_frame, 1);
+                write_can_msg(handle_telemetry_fifo_w, &inverter_current_info_can_frame);
             }
             if (torque_info_message_received) {
-                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &inverter_torque_info_can_frame, 1);
+                write_can_msg(handle_telemetry_fifo_w, &inverter_torque_info_can_frame);
             }
             if (inverter_state_message_received) {
-                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &inverter_state_can_frame, 1);
+                write_can_msg(handle_telemetry_fifo_w, &inverter_state_can_frame);
             }
 
             // echo orion messages
             if (orion_1_message_received) {
-                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &orion_1_can_frame, 1);
+                write_can_msg(handle_telemetry_fifo_w, &orion_1_can_frame);
             }
             if (orion_2_message_received) {
-                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &orion_2_can_frame, 1);
+                write_can_msg(handle_telemetry_fifo_w, &orion_2_can_frame);
             }
             if (orion_therm_exp_message_received) {
-                IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &orion_therm_exp_can_frame, 1);
+                write_can_msg(handle_telemetry_fifo_w, &orion_therm_exp_can_frame);
             }
 
             // send vcu summary message
@@ -819,8 +830,8 @@ void main (void)
             vcu_summary_can_frame.data[6] = last_speed_d0;
             vcu_summary_can_frame.data[7] = last_speed_d1;
 
-            IO_CAN_WriteFIFO(handle_controls_fifo_w, &vcu_summary_can_frame, 1);
-            IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &vcu_summary_can_frame, 1);
+            write_can_msg(handle_controls_fifo_w, &vcu_summary_can_frame);
+            write_can_msg(handle_telemetry_fifo_w, &vcu_summary_can_frame);
 
 
             // send error message
@@ -862,8 +873,42 @@ void main (void)
             debug_can_frame.data[7] = bse_val >> 8;
             
 
-            IO_CAN_WriteFIFO(handle_controls_fifo_w, &debug_can_frame, 1);
-            IO_CAN_WriteFIFO(handle_telemetry_fifo_w, &debug_can_frame, 1);
+            write_can_msg(handle_controls_fifo_w, &debug_can_frame);
+            write_can_msg(handle_telemetry_fifo_w, &debug_can_frame);
+
+
+            // check if either channel has errored
+            IO_ErrorType controls_error = IO_CAN_Status(CONTROLS_CAN_CHANNEL,
+                                                        &controls_rx_error_ctr,
+                                                        &controls_tx_error_ctr);
+            
+            IO_ErrorType telemetry_error = IO_CAN_Status(TELEMETRY_CAN_CHANNEL,
+                                                        &telemetry_rx_error_ctr,
+                                                        &telemetry_tx_error_ctr);
+
+            // if so, reset
+            if (controls_error != IO_E_OK) {
+                IO_CAN_DeInit(CONTROLS_CAN_CHANNEL);
+
+                IO_CAN_Init( CONTROLS_CAN_CHANNEL
+                    , BAUD_RATE
+                    , 0
+                    , 0
+                    , 0 );
+            }
+
+            if (telemetry_error != IO_E_OK) {
+                IO_CAN_DeInit(TELEMETRY_CAN_CHANNEL);
+
+                IO_CAN_Init( TELEMETRY_CAN_CHANNEL
+                    , BAUD_RATE
+                    , 0
+                    , 0
+                    , 0 );
+            }
+
+
+
 
         }
 
