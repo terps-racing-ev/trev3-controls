@@ -63,7 +63,7 @@
  ***************************************************************************/
 #define PCT_TRAVEL_FOR_MAX_TORQUE 80
 
-#define CONTINUOUS_TORQUE_MAX 5 // TODO 200
+#define CONTINUOUS_TORQUE_MAX 200 // TODO 200
 
 /**************************************************************************
  * CAN Constants
@@ -723,6 +723,11 @@ void main (void)
             }
 
             /************ POST FSM ***********/
+
+            if (sdc_val == SDC_OFF){
+                IO_DO_Set(DCDC_RELAY_PIN, FALSE);
+            }
+
 
             // code to control tsil lights 
 
