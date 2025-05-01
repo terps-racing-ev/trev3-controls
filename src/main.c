@@ -353,7 +353,7 @@ void main (void)
                  , IO_CAN_MSG_READ
                  , IO_CAN_STD_FRAME
                  , MOTOR_INFO_CAN_ID
-                 , 0x1FFFFFFF);
+                 , 0x1FFFFFFF); //TODO 
 
     IO_CAN_ConfigMsg( &handle_inverter_voltage_info_r
                  , CONTROLS_CAN_CHANNEL
@@ -895,6 +895,10 @@ void main (void)
 
             // if so, reset
             if (controls_error != IO_E_OK) {
+
+                // Restart CAN bus
+                IO_CAN_MsgStatus(handle_inverter_motor_info_r);
+
                 // de init all handles
                 IO_CAN_DeInitHandle(handle_controls_fifo_w);
                 IO_CAN_DeInitHandle(handle_inverter_motor_info_r);
