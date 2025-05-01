@@ -118,6 +118,7 @@
  ***************************************************************************/
 // 5 ms cycle time
 #define CYCLE_TIME MsToUs(5ul)
+#define CAN_RESTART_TIME MsToUs(100ul)
 
 // TODO Unused
 #define PRECHARGE_VOLTAGE_THRESHHOLD 268
@@ -201,7 +202,7 @@ void read_can_msg(ubyte1* handle_r, IO_CAN_DATA_FRAME* dst_data_frame, bool *msg
                 , IO_CAN_MSG_READ
                 , frame_type
                 , id
-                , 0x1FFFFFFF);
+                , 0x7FF);
     }
 
 }
@@ -265,7 +266,7 @@ void main (void)
     ubyte1 handle_inverter_state_r;
     ubyte1 handle_orion_1_r;
     ubyte1 handle_orion_2_r;
-    ubyte1 handle_orion_therm_exp_r;
+    //ubyte1 handle_orion_therm_exp_r;
 
     /* can frame used to send torque requests to the inverter */
     IO_CAN_DATA_FRAME controls_can_frame;
@@ -289,7 +290,7 @@ void main (void)
     /* CAN frame for orion */
     IO_CAN_DATA_FRAME orion_1_can_frame;
     IO_CAN_DATA_FRAME orion_2_can_frame;
-    IO_CAN_DATA_FRAME orion_therm_exp_can_frame;
+    //IO_CAN_DATA_FRAME orion_therm_exp_can_frame;
 
     /* CAN frame for controls summary*/
     IO_CAN_DATA_FRAME vcu_summary_can_frame;
@@ -353,57 +354,57 @@ void main (void)
                  , IO_CAN_MSG_READ
                  , IO_CAN_STD_FRAME
                  , MOTOR_INFO_CAN_ID
-                 , 0x1FFFFFFF); //TODO 
+                 , 0x7FF); //TODO 
 
     IO_CAN_ConfigMsg( &handle_inverter_voltage_info_r
                  , CONTROLS_CAN_CHANNEL
                  , IO_CAN_MSG_READ
                  , IO_CAN_STD_FRAME
                  , VOLTAGE_INFO_CAN_ID
-                 , 0x1FFFFFFF);
+                 , 0x7FF);
 
     IO_CAN_ConfigMsg( &handle_inverter_current_info_r
                  , CONTROLS_CAN_CHANNEL
                  , IO_CAN_MSG_READ
                  , IO_CAN_STD_FRAME
                  , CURRENT_INFO_CAN_ID
-                 , 0x1FFFFFFF);
+                 , 0x7FF);
     
     IO_CAN_ConfigMsg( &handle_inverter_torque_info_r
                  , CONTROLS_CAN_CHANNEL
                  , IO_CAN_MSG_READ
                  , IO_CAN_STD_FRAME
                  , TORQUE_INFO_CAN_ID
-                 , 0x1FFFFFFF);
+                 , 0x7FF);
     
     IO_CAN_ConfigMsg( &handle_inverter_state_r
                  , CONTROLS_CAN_CHANNEL
                  , IO_CAN_MSG_READ
                  , IO_CAN_STD_FRAME
                  , INVERTER_STATE_CAN_ID
-                 , 0x1FFFFFFF);           
+                 , 0x7FF);           
 
     IO_CAN_ConfigMsg( &handle_orion_1_r
                  , CONTROLS_CAN_CHANNEL
                  , IO_CAN_MSG_READ
                  , IO_CAN_STD_FRAME
                  , ORION_1_CAN_ID
-                 , 0x1FFFFFFF);
+                 , 0x7FF);
 
     IO_CAN_ConfigMsg( &handle_orion_2_r
                  , CONTROLS_CAN_CHANNEL
                  , IO_CAN_MSG_READ
                  , IO_CAN_STD_FRAME
                  , ORION_2_CAN_ID
-                 , 0x1FFFFFFF);
+                 , 0x7FF);
     
     
-    IO_CAN_ConfigMsg( &handle_orion_therm_exp_r
+    /*IO_CAN_ConfigMsg( &handle_orion_therm_exp_r
                  , CONTROLS_CAN_CHANNEL
                  , IO_CAN_MSG_READ
                  , IO_CAN_EXT_FRAME //Extended 29 bit ID. problem?
                  , ORION_THERM_EXP_CAN_ID
-                 , 0x1FFFFFFF);
+                 , 0x7FF);*/
 
     /* rtd with 10k pull-up resistor*/
     bool rtd_val;
@@ -515,7 +516,7 @@ void main (void)
     bool orion_2_message_received = FALSE;
     bool orion_2_message_received_once = FALSE;
 
-    bool orion_therm_exp_message_received = FALSE;
+    //bool orion_therm_exp_message_received = FALSE;
 
     bool been_ignore_period_since_start = FALSE;
     ubyte4 time_since_start;
@@ -570,7 +571,7 @@ void main (void)
         // read message from orion
         read_can_msg(&handle_orion_1_r, &orion_1_can_frame, &orion_1_message_received, ORION_1_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
         read_can_msg(&handle_orion_2_r, &orion_2_can_frame, &orion_2_message_received, ORION_2_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
-        read_can_msg(&handle_orion_therm_exp_r, &orion_therm_exp_can_frame, &orion_therm_exp_message_received, ORION_THERM_EXP_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_EXT_FRAME);
+        //read_can_msg(&handle_orion_therm_exp_r, &orion_therm_exp_can_frame, &orion_therm_exp_message_received, ORION_THERM_EXP_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_EXT_FRAME);
 
         if (orion_1_message_received) {
             // reset the timeout if a message has been received
@@ -816,9 +817,9 @@ void main (void)
             if (orion_2_message_received) {
                 write_can_msg(handle_telemetry_fifo_w, &orion_2_can_frame);
             }
-            if (orion_therm_exp_message_received) {
+            /*if (orion_therm_exp_message_received) {
                 write_can_msg(handle_telemetry_fifo_w, &orion_therm_exp_can_frame);
-            }
+            }*/
 
             // send vcu summary message
 
@@ -908,10 +909,15 @@ void main (void)
                 IO_CAN_DeInitHandle(handle_inverter_state_r);
                 IO_CAN_DeInitHandle(handle_orion_1_r);
                 IO_CAN_DeInitHandle(handle_orion_2_r);
-                IO_CAN_DeInitHandle(handle_orion_therm_exp_r);
+                //IO_CAN_DeInitHandle(handle_orion_therm_exp_r);
 
                 // de init the channel
                 IO_CAN_DeInit(CONTROLS_CAN_CHANNEL);
+
+                // Delay for 100ms
+                ubyte4 can_restart_timestamp;
+                IO_RTC_StartTime(&can_restart_timestamp);
+                while (IO_RTC_GetTimeUS(can_restart_timestamp) < CAN_RESTART_TIME);
 
                 // init the channel
                 IO_CAN_Init( CONTROLS_CAN_CHANNEL
@@ -935,57 +941,57 @@ void main (void)
                     , IO_CAN_MSG_READ
                     , IO_CAN_STD_FRAME
                     , MOTOR_INFO_CAN_ID
-                    , 0x1FFFFFFF);
+                    , 0x7FF);
 
                 IO_CAN_ConfigMsg( &handle_inverter_voltage_info_r
                         , CONTROLS_CAN_CHANNEL
                         , IO_CAN_MSG_READ
                         , IO_CAN_STD_FRAME
                         , VOLTAGE_INFO_CAN_ID
-                        , 0x1FFFFFFF);
+                        , 0x7FF);
 
                 IO_CAN_ConfigMsg( &handle_inverter_current_info_r
                         , CONTROLS_CAN_CHANNEL
                         , IO_CAN_MSG_READ
                         , IO_CAN_STD_FRAME
                         , CURRENT_INFO_CAN_ID
-                        , 0x1FFFFFFF);
+                        , 0x7FF);
 
                 IO_CAN_ConfigMsg( &handle_inverter_torque_info_r
                         , CONTROLS_CAN_CHANNEL
                         , IO_CAN_MSG_READ
                         , IO_CAN_STD_FRAME
                         , TORQUE_INFO_CAN_ID
-                        , 0x1FFFFFFF);
+                        , 0x7FF);
 
                 IO_CAN_ConfigMsg( &handle_inverter_state_r
                         , CONTROLS_CAN_CHANNEL
                         , IO_CAN_MSG_READ
                         , IO_CAN_STD_FRAME
                         , INVERTER_STATE_CAN_ID
-                        , 0x1FFFFFFF);           
+                        , 0x7FF);           
 
                 IO_CAN_ConfigMsg( &handle_orion_1_r
                         , CONTROLS_CAN_CHANNEL
                         , IO_CAN_MSG_READ
                         , IO_CAN_STD_FRAME
                         , ORION_1_CAN_ID
-                        , 0x1FFFFFFF);
+                        , 0x7FF);
 
                 IO_CAN_ConfigMsg( &handle_orion_2_r
                         , CONTROLS_CAN_CHANNEL
                         , IO_CAN_MSG_READ
                         , IO_CAN_STD_FRAME
                         , ORION_2_CAN_ID
-                        , 0x1FFFFFFF);
+                        , 0x7FF);
 
 
-                IO_CAN_ConfigMsg( &handle_orion_therm_exp_r
+                /*IO_CAN_ConfigMsg( &handle_orion_therm_exp_r
                         , CONTROLS_CAN_CHANNEL
                         , IO_CAN_MSG_READ
                         , IO_CAN_EXT_FRAME //Extended 29 bit ID. problem?
                         , ORION_THERM_EXP_CAN_ID
-                        , 0x1FFFFFFF);
+                        , 0x7FF);*/
             }
 
             if (telemetry_error != IO_E_OK) {
@@ -994,6 +1000,11 @@ void main (void)
 
                 // de init channel
                 IO_CAN_DeInit(TELEMETRY_CAN_CHANNEL);
+
+                // Delay for 100ms
+                ubyte4 can_restart_timestamp;
+                IO_RTC_StartTime(&can_restart_timestamp);
+                while (IO_RTC_GetTimeUS(can_restart_timestamp) < CAN_RESTART_TIME);
 
                 // init channel
                 IO_CAN_Init( TELEMETRY_CAN_CHANNEL
