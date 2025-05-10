@@ -59,11 +59,17 @@
 #define SDC_OFF 0
 
 /**************************************************************************
- * Torque Settings
+ * Inverter Settings
  ***************************************************************************/
-#define PCT_TRAVEL_FOR_MAX_TORQUE 80
+#define MOTOR_FORWARDS 1
+#define MOTOR_BACKWARDS 0
 
+#define INVERTER_DISABLE 0
+#define INVERTER_ENABLE 1
+
+#define PCT_TRAVEL_FOR_MAX_TORQUE 80
 #define CONTINUOUS_TORQUE_MAX 100 // TODO 200
+#define MOTOR_DIRECTION MOTOR_FORWARDS // TODO backwards for dyno testing
 
 /**************************************************************************
  * CAN Constants
@@ -84,6 +90,7 @@
 #define VCU_INVERTER_SETTINGS_CAN_ID 0xC1
 
 #define VCU_SUMMARY_CAN_ID 0xC5
+#define VCU_DIAG_CAN_ID 0xCD
 #define VCU_DEBUG_CAN_ID 0xDB
 
 #define MOTOR_INFO_CAN_ID 0xA5
@@ -124,9 +131,6 @@
 #define PRECHARGE_VOLTAGE_THRESHHOLD 268
 #define TORQUE_LIMITING_RPM_THRESHHOLD 80
 #define RPM_BASED_TORQUE_LIMIT 15
-
-#define MOTOR_FORWARDS 1
-#define MOTOR_BACKWARDS 0
 
 /* Application Database,
  * needed for TTC-Downloader
@@ -299,13 +303,12 @@ void main (void)
     vcu_summary_can_frame.length = 8;
     clear_can_frame(&vcu_summary_can_frame);
 
-    /* CAN frame for errors */
-    /* Could this be a problem?
-    IO_CAN_DATA_FRAME vcu_errors_can_frame;
-    vcu_errors_can_frame.id = VCU_ERRORS_CAN_ID;
-    vcu_errors_can_frame.id_format = IO_CAN_STD_FRAME;
-    vcu_errors_can_frame.length = 8;
-    clear_can_frame(&vcu_errors_can_frame);*/
+    /* CAN frame for diagnostics */
+    IO_CAN_DATA_FRAME vcu_diag_can_frame;
+    vcu_diag_can_frame.id = VCU_DIAG_CAN_ID;
+    vcu_diag_can_frame.id_format = IO_CAN_STD_FRAME;
+    vcu_diag_can_frame.length = 8;
+    clear_can_frame(&vcu_diag_can_frame);
 
     /* CAN frames used for debugging */
     IO_CAN_DATA_FRAME debug_can_frame;
@@ -354,7 +357,7 @@ void main (void)
                  , IO_CAN_MSG_READ
                  , IO_CAN_STD_FRAME
                  , MOTOR_INFO_CAN_ID
-                 , 0x7FF); //TODO 
+                 , 0x7FF); //TODO  currently blocking all 29 bit IDs, should be changed to 0x1FFFFFFF
 
     IO_CAN_ConfigMsg( &handle_inverter_voltage_info_r
                  , CONTROLS_CAN_CHANNEL
@@ -476,19 +479,16 @@ void main (void)
     // sensor input is invalid during the first cycle
     bool first_cycle = TRUE;
 
-    // variables to hold torque
+    // variables to control motor
     ubyte4 torque = 0;
-    ubyte4 limited_torque = 0;
-    ubyte4 torque_d0 = 0;
-    ubyte4 torque_d1 = 0;
-    ubyte4 motor_rpm_torque_limit = CONTINUOUS_TORQUE_MAX;
+    ubyte2 inverter_enabled = INVERTER_DISABLE;
 
     // whether a new motor info message has been received since the last time
     bool motor_info_message_received = FALSE;
     // last received motor speed
     ubyte1 last_speed_d0 = 0;
     ubyte1 last_speed_d1 = 0;
-    ubyte2 last_speed = 0;
+    ubyte2 last_speed = 0; // TODO useless for now
     // whether any motor info message has been received
     bool motor_speed_updated_once = FALSE;
 
@@ -585,12 +585,6 @@ void main (void)
             pack_voltage_updated_once = TRUE;
         }
 
-        torque_d0 = 0;
-        torque_d1 = 0;
-        torque = 0;
-        apps_pct_result = 0;
-        bse_result = 0;
-
         // during the first cycle, every sensor input is invalid, so skip it
         if (first_cycle) {
             first_cycle = FALSE;
@@ -616,8 +610,8 @@ void main (void)
                 } else {
                     // if you don't transition away from this state, send a 0
                     // torque message to the motor with 0 torque
-                    clear_can_frame(&controls_can_frame);
-                    write_can_msg(handle_controls_fifo_w, &controls_can_frame);
+                    torque = 0;
+                    inverter_enabled = INVERTER_DISABLE;
                     pack_voltage_updated_once = FALSE;
                 }
 
@@ -629,7 +623,6 @@ void main (void)
                     just_entered_sound_state = FALSE;
 
                     IO_DO_Set(IO_PIN_BUZZER, TRUE);
-
 
                     // clear Inverter faults
                     inverter_settings_can_frame.data[0] = 20;
@@ -651,8 +644,8 @@ void main (void)
                 }
 
                 // keep sending 0 torque messages to the inverter in this state
-                clear_can_frame(&controls_can_frame);
-                write_can_msg(handle_controls_fifo_w, &controls_can_frame);
+                torque = 0;
+                inverter_enabled = INVERTER_DISABLE;
 
             } else if (current_state == DRIVING) {
 
@@ -667,22 +660,7 @@ void main (void)
                 } else {
                     // no transition into another state -> send controls message
                     torque = pct_travel_to_torque(apps_pct_result);
-
-                    if (torque < 0) {
-                        torque = 0;
-                    }
-
-                    torque_d0 = (torque * 10) % 256;
-                    torque_d1 = (torque * 10) / 256;
-                    controls_can_frame.data[0] = torque_d0;
-                    controls_can_frame.data[1] = torque_d1;
-                    controls_can_frame.data[2] = 0;
-                    controls_can_frame.data[3] = 0;
-                    controls_can_frame.data[4] = MOTOR_FORWARDS; // TODO Set to backwards(0) for dyno testing
-                    controls_can_frame.data[5] = 1;
-                    controls_can_frame.data[6] = 0;
-                    controls_can_frame.data[7] = 0;
-                    write_can_msg(handle_controls_fifo_w, &controls_can_frame);
+                    inverter_enabled = INVERTER_ENABLE;
                 }
             } else if (current_state == ERRORED) {
 
@@ -692,8 +670,8 @@ void main (void)
                 }
 
                 // continue sending 0 torque messages to the inverter in this state
-                clear_can_frame(&controls_can_frame);
-                write_can_msg(handle_controls_fifo_w, &controls_can_frame);
+                torque = 0;
+                inverter_enabled = INVERTER_DISABLE;
             } else if (current_state == APPS_5PCT_WAIT) {
                 // when brakes are engaged and apps > 25%, the car goes into this state
 
@@ -707,9 +685,9 @@ void main (void)
                     // go back to driving when apps <= 5%
                     current_state = DRIVING;
                 } else {
-                    // no transition into another state -> send 0 torque message
-                    clear_can_frame(&controls_can_frame);
-                    write_can_msg(handle_controls_fifo_w, &controls_can_frame);
+                    // no transition into another state -> send 0 torque message, no need to disable inverter
+                    torque = 0;
+                    inverter_enabled = INVERTER_ENABLE;
                 }
 
             }
@@ -719,7 +697,6 @@ void main (void)
             if (sdc_val == SDC_OFF){
                 IO_DO_Set(DCDC_RELAY_PIN, FALSE);
             }
-
 
             // code to control tsil lights 
 
@@ -777,6 +754,22 @@ void main (void)
 
             /* SENDING MESSAGES */
 
+            // set the torque in the message to be sent to the inverter
+            if (inverter_enabled == INVERTER_ENABLE) {
+                ubyte4 torque_scaled = torque * 10;
+                controls_can_frame.data[0] = torque_scaled & 0xFF;
+                controls_can_frame.data[1] = torque_scaled >> 8;
+                controls_can_frame.data[2] = 0;
+                controls_can_frame.data[3] = 0;
+                controls_can_frame.data[4] = MOTOR_DIRECTION;
+                controls_can_frame.data[5] = inverter_enabled;
+                controls_can_frame.data[6] = 0;
+                controls_can_frame.data[7] = 0;
+            } else {
+                clear_can_frame(&controls_can_frame);
+            }
+            write_can_msg(handle_controls_fifo_w, &controls_can_frame);
+
             // echo motor info message
             if (motor_info_message_received) {
                 write_can_msg(handle_telemetry_fifo_w, &inverter_motor_info_can_frame);
@@ -806,11 +799,10 @@ void main (void)
             }*/
 
             // send vcu summary message
-
             vcu_summary_can_frame.data[0] = apps_pct_result;
 
-            vcu_summary_can_frame.data[1] = torque_d0;
-            vcu_summary_can_frame.data[2] = torque_d1;
+            vcu_summary_can_frame.data[1] = torque & 0xFF;
+            vcu_summary_can_frame.data[2] = torque >> 8;
 
             // if the moving average filter is being used then this is filtered
             vcu_summary_can_frame.data[3] = bse_result & 0xFF;
@@ -825,17 +817,12 @@ void main (void)
             write_can_msg(handle_telemetry_fifo_w, &vcu_summary_can_frame);
 
 
-            // send error message
-            /*
-            vcu_errors_can_frame.data[0] = apps_error;
-            vcu_errors_can_frame.data[1] = bse_error;
-            vcu_errors_can_frame.data[2] = orion_timeout;
-            vcu_errors_can_frame.data[3] = bms_fault_occured_once;
-            vcu_errors_can_frame.data[4] = imd_fault_occured_once;
-            vcu_errors_can_frame.data[5] = 0; // TODO add more errors here
-            vcu_errors_can_frame.data[6] = 0; // TODO add more errors here
-            vcu_errors_can_frame.data[7] = 0; // TODO add more errors here
-            */
+            // diagnostics message
+            // TODO add diagnostic messages
+
+            write_can_msg(handle_controls_fifo_w, &vcu_diag_can_frame);
+            write_can_msg(handle_telemetry_fifo_w, &vcu_diag_can_frame);
+
 
             ubyte2 apps_1_val;
             bool apps_1_fresh;
