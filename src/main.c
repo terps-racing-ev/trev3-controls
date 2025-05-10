@@ -596,11 +596,13 @@ void main (void)
             first_cycle = FALSE;
         } else {
 
+            // These 4 values solely determine the state of the car!
+            get_rtd(&rtd_val);
+            get_bse(&bse_result, &bse_error);
+            get_sdc(&sdc_val);
+            get_apps(&apps_pct_result, &apps_error, &num_errors);
+
             if (current_state == NOT_READY) {
-                get_rtd(&rtd_val);
-                get_bse(&bse_result, &bse_error);
-                get_sdc(&sdc_val);
-                get_apps(&apps_pct_result, &apps_error, &num_errors);
 
                 // transitions
                 // rtd on and brakes engaged -> play rtd sound
@@ -653,15 +655,9 @@ void main (void)
                 write_can_msg(handle_controls_fifo_w, &controls_can_frame);
 
             } else if (current_state == DRIVING) {
-                // get the rtd, apps, and bse
-                get_rtd(&rtd_val);
-                get_sdc(&sdc_val);
-                get_apps(&apps_pct_result, &apps_error, &num_errors);
-                get_bse(&bse_result, &bse_error);
 
                 // transitions
-                // REALLY SHITTY CODE TO PREVENT RTD OFF WHEN DRIVING
-                if (rtd_val == RTD_OFF && last_speed < 10) {
+                if (rtd_val == RTD_OFF) {
                     // rtd off -> switch to not ready state
                     current_state = NOT_READY;
                 } else if (apps_error != APPS_NO_ERROR || bse_error != BSE_NO_ERROR || (sdc_val == SDC_OFF)) {
@@ -689,7 +685,6 @@ void main (void)
                     write_can_msg(handle_controls_fifo_w, &controls_can_frame);
                 }
             } else if (current_state == ERRORED) {
-                get_rtd(&rtd_val);
 
                 if (rtd_val == RTD_OFF) {
                     // rtd off -> switch to not ready state
@@ -701,10 +696,6 @@ void main (void)
                 write_can_msg(handle_controls_fifo_w, &controls_can_frame);
             } else if (current_state == APPS_5PCT_WAIT) {
                 // when brakes are engaged and apps > 25%, the car goes into this state
-                get_rtd(&rtd_val);
-                get_sdc(&sdc_val);
-                get_apps(&apps_pct_result, &apps_error, &num_errors);
-                get_bse(&bse_result, &bse_error);
 
                 if (rtd_val == RTD_OFF) {
                     // rtd off -> switch to not ready state
@@ -773,17 +764,10 @@ void main (void)
                         }
                 }
             }
-
-            if (rtd_val == RTD_OFF) {
-                current_state == NOT_READY;
-            }
-
             // run the lights (function call needed for lights to blink)
             do_lights_action();
 
             // code for brake light
-            get_bse(&bse_result, &bse_error);
-
             if (bse_error == BSE_NO_ERROR && (bse_result > BRAKES_ENGAGED_BSE_THRESHOLD)) {
                 IO_DO_Set(BRAKE_LIGHT_PIN, TRUE);
             } else {
@@ -823,7 +807,6 @@ void main (void)
 
             // send vcu summary message
 
-            get_bse(&bse_result, &bse_error);
             vcu_summary_can_frame.data[0] = apps_pct_result;
 
             vcu_summary_can_frame.data[1] = torque_d0;
