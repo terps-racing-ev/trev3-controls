@@ -48,7 +48,7 @@
 #define APPS_2_VOLTAGE_RANGE (APPS_2_MAX_VOLTAGE - APPS_2_MIN_VOLTAGE)
 
 /* voltage range above max and below min that doesn't count as an error */
-#define APPS_VOLTAGE_DEADZONE 500
+#define APPS_VOLTAGE_DEADZONE 250
 
 // max number of errors in a row before torque is cut.
 #define APPS_REPEATED_ERROR_MAX 20
@@ -57,8 +57,8 @@
 #define APPS_DEADZONE 2
 
 #define APPS_NO_ERROR 0
-#define APPS_IMPLAUSIBILITY_ERROR 1
-#define APPS_OUT_OF_RANGE_ERROR 2
+#define APPS_OUT_OF_RANGE_ERROR 1
+#define APPS_IMPLAUSIBILITY_ERROR 2
 
 
 

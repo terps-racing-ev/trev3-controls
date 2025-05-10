@@ -63,7 +63,7 @@
  ***************************************************************************/
 #define PCT_TRAVEL_FOR_MAX_TORQUE 80
 
-#define CONTINUOUS_TORQUE_MAX 200 // TODO 200
+#define CONTINUOUS_TORQUE_MAX 100 // TODO 200
 
 /**************************************************************************
  * CAN Constants

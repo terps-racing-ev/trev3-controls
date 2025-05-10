@@ -1,5 +1,5 @@
 	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09467762
-	; Options: -f cc31344a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=4 -DRTS_TTC_FLASH_DATE_DAY=30 -DRTS_TTC_FLASH_DATE_HOUR=14 -DRTS_TTC_FLASH_DATE_MINUTE=26 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\apps.src
+	; Options: -f cc34484a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=5 -DRTS_TTC_FLASH_DATE_DAY=1 -DRTS_TTC_FLASH_DATE_HOUR=12 -DRTS_TTC_FLASH_DATE_MINUTE=11 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\apps.src
 	; Module start
 	.source	'src/apps.c'
 code_voltage_to_pct_travel_apps_1	.section	code, cluster 'voltage_to_pct_travel_apps_1', new
@@ -49,7 +49,7 @@ _211:
 ; src/apps.c	    31  }
 	ret
 _2:
-	cmpw	r2,#0x1130
+	cmpw	r2,#0x11f8
 	jmp+	cc_ule,_4
 _656:
 	movw	r2,#0x64
@@ -58,7 +58,7 @@ _212:
 _4:
 	subw	r2,#0x40f
 _657:
-	movw	r11,#0x21
+	movw	r11,#0x23
 _658:
 	movw	MDL,r2
 	divu	r11
@@ -98,7 +98,7 @@ _214:
 ; src/apps.c	    44  }
 	ret
 _7:
-	cmpw	r2,#0xfb0
+	cmpw	r2,#0x1078
 	jmp+	cc_ule,_9
 _664:
 	movw	r2,#0x64
@@ -107,7 +107,7 @@ _215:
 _9:
 	subw	r2,#0x294
 _665:
-	movw	r11,#0x21
+	movw	r11,#0x23
 _666:
 	movw	MDL,r2
 	divu	r11
@@ -456,10 +456,10 @@ _190:
 ; src/apps.c	   105  
 ; src/apps.c	   106      bool apps_1_within_threshhold = (apps_1_val >= (APPS_1_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_1_val <= (APPS_1_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
 	movw	r11,[r15+#0x0]
-	subw	r11,#0x315
+	subw	r11,#0x21b
 _693:
 	movw	r4,#0x0
-	cmpw	r11,#0xf15
+	cmpw	r11,#0x11d1
 	jmp	cc_ugt,_23
 	movw	r4,#0x1
 _23:
@@ -467,10 +467,10 @@ _23:
 ; src/apps.c	   107      bool apps_2_within_threshhold = (apps_2_val >= (APPS_2_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_2_val <= (APPS_2_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
 	movw	r11,r2
 _694:
-	subw	r11,#0x19a
+	subw	r11,#0xa0
 _695:
 	movw	r5,#0x0
-	cmpw	r11,#0xf10
+	cmpw	r11,#0x11cc
 	jmp	cc_ugt,_24
 	movw	r5,#0x1
 _24:
@@ -510,7 +510,7 @@ _698:
 _27:
 
 ; src/apps.c	    25      if (apps_1_voltage > APPS_1_MAX_VOLTAGE) {      (inlined)
-	cmpw	r11,#0x1130
+	cmpw	r11,#0x11f8
 	jmp+	cc_ule,_29
 _699:
 	movw	r11,#0x64
@@ -522,7 +522,7 @@ _699:
 _29:
 	subw	r11,#0x40f
 _700:
-	movw	r12,#0x21
+	movw	r12,#0x23
 _701:
 	movw	MDL,r11
 	divu	r12
@@ -545,7 +545,7 @@ _702:
 _31:
 
 ; src/apps.c	    38      if (apps_2_voltage > APPS_2_MAX_VOLTAGE) {      (inlined)
-	cmpw	r2,#0xfb0
+	cmpw	r2,#0x1078
 	jmp+	cc_ule,_33
 _703:
 	movw	r12,#0x64
@@ -557,7 +557,7 @@ _703:
 _33:
 	subw	r2,#0x294
 _704:
-	movw	r12,#0x21
+	movw	r12,#0x23
 _705:
 	movw	MDL,r2
 	divu	r12
@@ -663,20 +663,20 @@ _720:
 ; src/apps.c	   145  
 ; src/apps.c	   146                  apps_1_within_threshhold = (apps_1_val >= (APPS_1_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_1_val <= (APPS_1_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
 	movw	r11,[r15+#0x0]
-	subw	r11,#0x315
+	subw	r11,#0x21b
 _721:
 	movw	r4,#0x0
-	cmpw	r11,#0xf15
+	cmpw	r11,#0x11d1
 	jmp	cc_ugt,_39
 	movw	r4,#0x1
 _39:
 
 ; src/apps.c	   147                  apps_2_within_threshhold = (apps_2_val >= (APPS_2_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_2_val <= (APPS_2_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
 	movw	r11,[r15+#0x2]
-	subw	r11,#0x19a
+	subw	r11,#0xa0
 _722:
 	movw	r5,#0x0
-	cmpw	r11,#0xf10
+	cmpw	r11,#0x11cc
 	jmp	cc_ugt,_40
 	movw	r5,#0x1
 _40:
@@ -708,7 +708,7 @@ _725:
 _43:
 
 ; src/apps.c	    25      if (apps_1_voltage > APPS_1_MAX_VOLTAGE) {      (inlined)
-	cmpw	r11,#0x1130
+	cmpw	r11,#0x11f8
 	jmp+	cc_ule,_45
 _726:
 	movw	r11,#0x64
@@ -720,7 +720,7 @@ _726:
 _45:
 	subw	r11,#0x40f
 _727:
-	movw	r12,#0x21
+	movw	r12,#0x23
 _728:
 	movw	MDL,r11
 	divu	r12
@@ -747,7 +747,7 @@ _729:
 _47:
 
 ; src/apps.c	    38      if (apps_2_voltage > APPS_2_MAX_VOLTAGE) {      (inlined)
-	cmpw	r12,#0xfb0
+	cmpw	r12,#0x1078
 	jmp+	cc_ule,_49
 _730:
 	movw	r12,#0x64
@@ -759,7 +759,7 @@ _730:
 _49:
 	subw	r12,#0x294
 _731:
-	movw	r13,#0x21
+	movw	r13,#0x23
 _732:
 	movw	MDL,r12
 	divu	r13

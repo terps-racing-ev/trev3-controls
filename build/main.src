@@ -1,5 +1,5 @@
 	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09467762
-	; Options: -f cc6288a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=4 -DRTS_TTC_FLASH_DATE_DAY=30 -DRTS_TTC_FLASH_DATE_HOUR=23 -DRTS_TTC_FLASH_DATE_MINUTE=24 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\main.src
+	; Options: -f cc41556a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=5 -DRTS_TTC_FLASH_DATE_DAY=1 -DRTS_TTC_FLASH_DATE_HOUR=12 -DRTS_TTC_FLASH_DATE_MINUTE=11 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\main.src
 	; Module start
 	.source	'src/main.c'
 code_clear_can_frame	.section	code, cluster 'clear_can_frame', new
@@ -70,7 +70,7 @@ code_clear_can_frame	.section	code, cluster 'clear_can_frame', new
 ; src/main.c	    63   ***************************************************************************/
 ; src/main.c	    64  #define PCT_TRAVEL_FOR_MAX_TORQUE 80
 ; src/main.c	    65  
-; src/main.c	    66  #define CONTINUOUS_TORQUE_MAX 200 // TODO 200
+; src/main.c	    66  #define CONTINUOUS_TORQUE_MAX 100 // TODO 200
 ; src/main.c	    67  
 ; src/main.c	    68  /**************************************************************************
 ; src/main.c	    69   * CAN Constants
@@ -525,7 +525,7 @@ _1136:
 _1375:
 
 ; src/main.c	   228           return CONTINUOUS_TORQUE_MAX;
-	movw	r2,#0xc8
+	movw	r2,#0x64
 _1209:
 	movw	r3,#0x0
 _1376:
@@ -543,7 +543,7 @@ _1377:
 	call	__div_spf
 _1378:
 	movw	r4,#0x0
-	movw	r5,#0x4348
+	movw	r5,#0x42c8
 _1379:
 	call	__mul_spf
 _1380:
@@ -2973,7 +2973,7 @@ _497:
 	subcw	r11,#0x0
 	jmp	cc_ult,_62
 _1655:
-	movw	r2,#0xc8
+	movw	r2,#0x64
 
 ; src/main.c	   228           return CONTINUOUS_TORQUE_MAX;      (inlined)
 	jmp	_63
@@ -2988,7 +2988,7 @@ _1657:
 	call	__div_spf
 _1658:
 	movw	r4,#0x0
-	movw	r5,#0x4348
+	movw	r5,#0x42c8
 _1659:
 	call	__mul_spf
 _1660:
@@ -3861,7 +3861,7 @@ _appl_db	.label	word
 	.db	0x0
 	.db	0x0
 	.db	0x0
-	.dl	0x62fe47e9
+	.dl	0x2d8157e9
 	.db	0x0
 	.db	0x0
 	.db	0x0
@@ -7679,35 +7679,11 @@ _475:
 	.dw	3
 	.db	145,244,126
 	.dl	0,0
-_405:
-	.dl	-1,_195,_1254-_195,_1255-_195
+_417:
+	.dl	-1,_195,_1271-_195,_1272-_195
 	.dw	1
 	.db	82
-	.dl	_22-_195,_1256-_195
-	.dw	1
-	.db	82
-	.dl	0,0
-_408:
-	.dl	-1,_195,_1257-_195,_1258-_195
-	.dw	1
-	.db	82
-	.dl	_25-_195,_1259-_195
-	.dw	1
-	.db	82
-	.dl	0,0
-_414:
-	.dl	-1,_195,_1268-_195,_1269-_195
-	.dw	1
-	.db	82
-	.dl	_32-_195,_1270-_195
-	.dw	1
-	.db	82
-	.dl	0,0
-_402:
-	.dl	-1,_195,_1251-_195,_1252-_195
-	.dw	1
-	.db	82
-	.dl	_19-_195,_1253-_195
+	.dl	_35-_195,_1273-_195
 	.dw	1
 	.db	82
 	.dl	0,0
@@ -7727,11 +7703,35 @@ _411:
 	.dw	1
 	.db	82
 	.dl	0,0
-_417:
-	.dl	-1,_195,_1271-_195,_1272-_195
+_414:
+	.dl	-1,_195,_1268-_195,_1269-_195
 	.dw	1
 	.db	82
-	.dl	_35-_195,_1273-_195
+	.dl	_32-_195,_1270-_195
+	.dw	1
+	.db	82
+	.dl	0,0
+_405:
+	.dl	-1,_195,_1254-_195,_1255-_195
+	.dw	1
+	.db	82
+	.dl	_22-_195,_1256-_195
+	.dw	1
+	.db	82
+	.dl	0,0
+_408:
+	.dl	-1,_195,_1257-_195,_1258-_195
+	.dw	1
+	.db	82
+	.dl	_25-_195,_1259-_195
+	.dw	1
+	.db	82
+	.dl	0,0
+_402:
+	.dl	-1,_195,_1251-_195,_1252-_195
+	.dw	1
+	.db	82
+	.dl	_19-_195,_1253-_195
 	.dw	1
 	.db	82
 	.dl	0,0
@@ -7893,6 +7893,11 @@ _295:
 	.dw	3
 	.db	145,174,125
 	.dl	0,0
+_321:
+	.dl	-1,_195,_307-_195,_331-_195
+	.dw	1
+	.db	92
+	.dl	0,0
 _442:
 	.dl	-1,_195,_76-_195,_64-_195
 	.dw	1
@@ -7900,11 +7905,6 @@ _442:
 	.dl	0,0
 _348:
 	.dl	-1,_195,_341-_195,_349-_195
-	.dw	1
-	.db	92
-	.dl	0,0
-_321:
-	.dl	-1,_195,_307-_195,_331-_195
 	.dw	1
 	.db	92
 	.dl	0,0
