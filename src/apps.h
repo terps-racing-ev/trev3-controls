@@ -61,10 +61,10 @@
 #define APPS_IMPLAUSIBILITY_ERROR 2
 
 
-
-ubyte2 voltage_to_pct_travel_apps_1(ubyte2 apps_1_voltage);
-ubyte2 voltage_to_pct_travel_apps_2(ubyte2 apps_2_voltage);
-void get_apps(ubyte2 *apps_pct_result, bool *error, ubyte1 *num_errors);
+// TODO is 100 resolution enough?
+ubyte1 voltage_to_pct_travel_apps_1(ubyte2 apps_1_voltage);
+ubyte1 voltage_to_pct_travel_apps_2(ubyte2 apps_2_voltage);
+void get_apps(ubyte1 *apps_pct_result, ubyte1 *error, ubyte1 *num_errors);
 
 ubyte2 get_filtered_apps1_voltage(void);
 ubyte2 get_filtered_apps2_voltage(void);

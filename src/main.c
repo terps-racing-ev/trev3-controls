@@ -166,6 +166,24 @@ APDB appl_db =
           , 0                      /* ubyte4 headerCRC          */
           };
 
+union diag_flags {
+    struct {
+        /* State change flags 
+        These are only reset upon succesfull rtd */
+        ubyte1 apps_out_of_range_fault      : 1;
+        ubyte1 apps_implausibility_fault    : 1;
+        ubyte1 bse_out_of_range_fault       : 1;
+        ubyte1 rtd_off_fault                : 1;
+        ubyte1 sdc_off_fault                : 1;
+        /* TSIL flags */
+        ubyte1 imd_latch_fault              : 1;
+        ubyte1 bms_latch_fault              : 1;
+        ubyte1 orion_can_timeout_fault      : 1;
+        /* 8 BITS */
+    } bits;
+    ubyte1 diag_flags_byte;
+};
+
 void clear_can_frame(IO_CAN_DATA_FRAME* frame) {
     for (int i = 0; i < 8; i++) {
         frame->data[i] = 0;
@@ -227,12 +245,12 @@ double voltage_to_torque_limit (ubyte2 pack_voltage) {
 
 }
 
-ubyte4 pct_travel_to_torque (ubyte4 pct_travel) {
+ubyte2 pct_travel_to_torque (ubyte1 pct_travel) {
     if (pct_travel >= PCT_TRAVEL_FOR_MAX_TORQUE) {
          return CONTINUOUS_TORQUE_MAX;
     }
 
-    return ((ubyte4)(((float)(pct_travel) / PCT_TRAVEL_FOR_MAX_TORQUE) * ((float) CONTINUOUS_TORQUE_MAX)));
+    return ((ubyte2)(((float)(pct_travel) / PCT_TRAVEL_FOR_MAX_TORQUE) * ((float) CONTINUOUS_TORQUE_MAX)));
 }
 
 
@@ -410,7 +428,7 @@ void main (void)
                  , 0x7FF);*/
 
     /* rtd with 10k pull-up resistor*/
-    bool rtd_val;
+    bool rtd_val = FALSE;
     IO_DI_Init( IO_PIN_RTD,
                 IO_DI_PU_10K );
 
@@ -437,7 +455,7 @@ void main (void)
                         NULL );
 
     /* APPS in general */
-    ubyte2 apps_pct_result = 0;
+    ubyte1 apps_pct_result = 0;
     ubyte1 apps_error = APPS_NO_ERROR;
     ubyte1 num_errors = 0;
 
@@ -480,8 +498,8 @@ void main (void)
     bool first_cycle = TRUE;
 
     // variables to control motor
-    ubyte4 torque = 0;
-    ubyte2 inverter_enabled = INVERTER_DISABLE;
+    ubyte2 torque = 0;
+    ubyte1 inverter_enabled = INVERTER_DISABLE;
 
     // whether a new motor info message has been received since the last time
     bool motor_info_message_received = FALSE;
@@ -524,8 +542,12 @@ void main (void)
 
     // whether a TSIL fault is latching (BMS/IMD faults)
     bool tsil_latched = FALSE;
-
-    bool orion_timeout = FALSE;
+    
+    // Debugging variables
+    ubyte1 vcu_heartbeat = 0;
+    ubyte1 controls_bus_error_count = 0;
+    ubyte1 telemetry_bus_error_count = 0;
+    union diag_flags vcu_diag_flags = { {0} };
 
     IO_RTC_StartTime(&time_since_start);
     IO_RTC_StartTime(&orion_can_timeout);
@@ -577,7 +599,8 @@ void main (void)
             // reset the timeout if a message has been received
             IO_RTC_StartTime(&orion_can_timeout);
             orion_1_message_received_once = TRUE;
-            orion_timeout = FALSE;
+            // We can reset this flag immediately since CAN timeout has no latching behavior
+            vcu_diag_flags.bits.orion_can_timeout_fault = 0;
         }
 
         if (voltage_info_message_received == TRUE) {
@@ -589,6 +612,8 @@ void main (void)
         if (first_cycle) {
             first_cycle = FALSE;
         } else {
+
+            vcu_heartbeat++;
 
             // These 4 values solely determine the state of the car!
             get_rtd(&rtd_val);
@@ -653,8 +678,23 @@ void main (void)
                 if (rtd_val == RTD_OFF) {
                     // rtd off -> switch to not ready state
                     current_state = NOT_READY;
+                    // log rtd flag
+                    vcu_diag_flags.bits.rtd_off_fault = 1;
                 } else if (apps_error != APPS_NO_ERROR || bse_error != BSE_NO_ERROR || (sdc_val == SDC_OFF)) {
                     current_state = ERRORED;
+                    // log flags
+                    if (apps_error == APPS_OUT_OF_RANGE_ERROR) {
+                        vcu_diag_flags.bits.apps_out_of_range_fault = 1;
+                    } 
+                    if (apps_error == APPS_IMPLAUSIBILITY_ERROR) {
+                        vcu_diag_flags.bits.apps_implausibility_fault = 1;
+                    } 
+                    if (bse_error == BSE_OUT_OF_RANGE_ERROR) {
+                        vcu_diag_flags.bits.bse_out_of_range_fault = 1;
+                    }
+                    if (sdc_val == SDC_OFF) {
+                        vcu_diag_flags.bits.sdc_off_fault = 1;
+                    }
                 } else if (!(IGNORE_BRAKE_PLAUSIBILITY) && bse_result > BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD && apps_pct_result >= APPS_THRESHHOLD_BRAKE_PLAUSIBILITY) {
                     current_state = APPS_5PCT_WAIT;
                 } else {
@@ -711,7 +751,7 @@ void main (void)
             if (been_ignore_period_since_start == TRUE) {
                 // if CAN timeout, set light to blinking red
                 if (IO_RTC_GetTimeUS(orion_can_timeout) > ORION_CAN_TIMEOUT_US) {
-                    orion_timeout = TRUE;
+                    vcu_diag_flags.bits.orion_can_timeout_fault = 1;
                     // TODO Fake because Orion tweaks and lags 
                     //set_light_to(BLINKING_RED);
                 } else if (orion_1_message_received_once == TRUE) {
@@ -724,12 +764,22 @@ void main (void)
                         // Added SDC because shhhh
                         if ((!bms_ok || !imd_ok) && sdc_val == SDC_OFF) {
                             tsil_latched = TRUE;
+                            // log flags
+                            if (!bms_ok) {
+                                vcu_diag_flags.bits.bms_latch_fault = 1;
+                            }
+                            if (!imd_ok) {
+                                vcu_diag_flags.bits.imd_latch_fault = 1;
+                            }
                         }
 
                         // If no timeout and everything is good AND sdc is good, clear latch
                         if (tsil_latched) {
                             if (bms_ok && imd_ok && sdc_val != SDC_OFF) {
                                 tsil_latched = FALSE;  // clear latch if everything is okay
+                                // clear flags
+                                vcu_diag_flags.bits.bms_latch_fault = 0;
+                                vcu_diag_flags.bits.imd_latch_fault = 0;
                             }
                         }
 
@@ -756,7 +806,7 @@ void main (void)
 
             // set the torque in the message to be sent to the inverter
             if (inverter_enabled == INVERTER_ENABLE) {
-                ubyte4 torque_scaled = torque * 10;
+                ubyte2 torque_scaled = torque * 10;
                 controls_can_frame.data[0] = torque_scaled & 0xFF;
                 controls_can_frame.data[1] = torque_scaled >> 8;
                 controls_can_frame.data[2] = 0;
@@ -819,15 +869,22 @@ void main (void)
 
             // diagnostics message
             // TODO add diagnostic messages
+            vcu_diag_can_frame.data[0] = vcu_heartbeat;
+            vcu_diag_can_frame.data[1] = vcu_diag_flags.diag_flags_byte;
+            vcu_diag_can_frame.data[2] = controls_bus_error_count;
+            vcu_diag_can_frame.data[3] = telemetry_bus_error_count;
+            vcu_diag_can_frame.data[4] = 0; // TODO add error codes here
+            vcu_diag_can_frame.data[5] = 0; // TODO add error codes here
+            vcu_diag_can_frame.data[6] = 0; // TODO add error codes here
+            vcu_diag_can_frame.data[7] = 0; // TODO add error codes here
+
 
             write_can_msg(handle_controls_fifo_w, &vcu_diag_can_frame);
             write_can_msg(handle_telemetry_fifo_w, &vcu_diag_can_frame);
 
 
             ubyte2 apps_1_val;
-            bool apps_1_fresh;
             ubyte2 apps_2_val;
-            bool apps_2_fresh;
 
             ubyte2 bse_val;
             bool bse_fresh;
@@ -866,7 +923,7 @@ void main (void)
 
             // if so, reset
             if (controls_error != IO_E_OK) {
-
+                controls_bus_error_count++;
                 // Restart CAN bus
                 IO_CAN_MsgStatus(handle_inverter_motor_info_r);
 
@@ -965,6 +1022,7 @@ void main (void)
             }
 
             if (telemetry_error != IO_E_OK) {
+                telemetry_bus_error_count++;
                 // de init handle
                 IO_CAN_DeInitHandle(handle_telemetry_fifo_w);
 
@@ -992,9 +1050,6 @@ void main (void)
                     , VCU_CONTROLS_CAN_ID // TODO does this change anything?
                     , 0);
             }
-
-
-
 
         }
 

@@ -31,7 +31,7 @@
 #define BSE_OUT_OF_RANGE_ERROR 1
 
 ubyte2 voltage_to_psi_bse(ubyte2 bse_voltage);
-void get_bse(ubyte2 *bse_result, bool *error);
+void get_bse(ubyte2 *bse_result, ubyte1 *error);
 
 
 #endif // BSE_H_INCLUDED

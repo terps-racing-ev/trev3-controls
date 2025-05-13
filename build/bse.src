@@ -1,5 +1,5 @@
 	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09467762
-	; Options: -f cc31428a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=4 -DRTS_TTC_FLASH_DATE_DAY=26 -DRTS_TTC_FLASH_DATE_HOUR=4 -DRTS_TTC_FLASH_DATE_MINUTE=37 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\bse.src
+	; Options: -f cc43992a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=5 -DRTS_TTC_FLASH_DATE_DAY=13 -DRTS_TTC_FLASH_DATE_HOUR=19 -DRTS_TTC_FLASH_DATE_MINUTE=22 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\bse.src
 	; Module start
 	.source	'src/bse.c'
 code_voltage_to_psi_bse	.section	code, cluster 'voltage_to_psi_bse', new
@@ -238,28 +238,17 @@ _13:
 _327:
 
 ; src/bse.c	    58      }
-; src/bse.c	    58  }
-
+; src/bse.c	    59  }
 	addw	r15,#0x4
 _130:
-
-
 	movw	r10,[r15+]
 _141:
-
-
 	movw	r9,[r15+]
 _152:
-
-
 	movw	r8,[r15+]
 _163:
-
-
 	movw	r6,[r15+]
 _174:
-
-
 	ret
 _51:
 	; End of function
@@ -274,7 +263,7 @@ _moving_average_struct_initialized	.label	byte
 huge_bse_moving_average_info	.section	huge, clear, cluster 'bse_moving_average_info', new
 	.global	_bse_moving_average_info
 _bse_moving_average_info	.label	word
-	.ds	44
+	.ds	24
 	; End of section
 
 	.calls	'_get_bse','_initialize_moving_average_struct'
@@ -336,21 +325,21 @@ _59:
 	.db	4
 	.db	'fresh',0,2,134,3,39,2
 	.dl	250
-	.db	0,9,40
+	.db	0,9,20
 	.dl	146
-	.db	10,19,0
+	.db	10,9,0
 _71:
 	.db	11
-	.db	'moving_average_info',0,3,15,8,44,12
+	.db	'moving_average_info',0,3,15,8,24,12
 	.db	'points',0
 	.dl	339
-	.db	40,2,35,0,12
+	.db	20,2,35,0,12
 	.db	'all_points_filled',0
 	.dl	216
-	.db	1,2,35,40,12
+	.db	1,2,35,20,12
 	.db	'next_point_index',0
 	.dl	146
-	.db	2,2,35,42,0,6,5
+	.db	2,2,35,22,0,6,5
 	.dl	348
 	.db	8
 	.db	'filter_point',0,3,27,8,6

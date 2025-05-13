@@ -1,5 +1,5 @@
 	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09467762
-	; Options: -f cc34076a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=5 -DRTS_TTC_FLASH_DATE_DAY=1 -DRTS_TTC_FLASH_DATE_HOUR=12 -DRTS_TTC_FLASH_DATE_MINUTE=11 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\moving_average.src
+	; Options: -f cc41580a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=5 -DRTS_TTC_FLASH_DATE_DAY=13 -DRTS_TTC_FLASH_DATE_HOUR=19 -DRTS_TTC_FLASH_DATE_MINUTE=22 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\moving_average.src
 	; Module start
 	.source	'src/moving_average.c'
 code_initialize_moving_average_struct	.section	code, cluster 'initialize_moving_average_struct', new
@@ -15,7 +15,7 @@ _initialize_moving_average_struct	.proc	far
 ; src/moving_average.c	     4      info_struct->all_points_filled = FALSE;
 	movw	r11,r2
 	movw	r12,r3
-	addw	r11,#0x28
+	addw	r11,#0x14
 	addcw	r12,#0x0
 _398:
 	movb	rh4,#0x0
@@ -25,7 +25,7 @@ _399:
 _400:
 
 ; src/moving_average.c	     5      info_struct->next_point_index = 0;
-	addw	r2,#0x2a
+	addw	r2,#0x16
 	addcw	r3,#0x0
 _60:
 	movw	r11,#0x0
@@ -73,7 +73,7 @@ _361:
 ; src/moving_average.c	    10      info_struct->points[info_struct->next_point_index] = data_point;
 	movw	r11,r3
 	movw	r12,r8
-	addw	r11,#0x2a
+	addw	r11,#0x16
 	addcw	r12,#0x0
 	exts	r12,#0x1
 	movw	r13,[r11]
@@ -101,7 +101,7 @@ _377:
 _378:
 
 ; src/moving_average.c	    14      if (info_struct->next_point_index >= MOVING_AVERAGE_SIZE) {
-	cmpw	r13,#0x14
+	cmpw	r13,#0xa
 	jmp+	cc_ult,_2
 _379:
 
@@ -112,7 +112,7 @@ _380:
 ; src/moving_average.c	    16          info_struct->all_points_filled = TRUE;
 	movw	r14,r3
 	movw	r4,r8
-	addw	r14,#0x28
+	addw	r14,#0x14
 	addcw	r4,#0x0
 _381:
 	movb	rh5,#0x1
@@ -133,7 +133,7 @@ _383:
 ; src/moving_average.c	    22      if (info_struct->all_points_filled) {
 	movw	r11,r3
 	movw	r12,r8
-	addw	r11,#0x28
+	addw	r11,#0x14
 	addcw	r12,#0x0
 _384:
 	movw	r5,#0x0
@@ -150,7 +150,7 @@ _387:
 _54:
 
 ; src/moving_average.c	    23          for (int i = 0; i < MOVING_AVERAGE_SIZE; i++) {
-	movw	r11,#0x13
+	movw	r11,#0x9
 _363:
 	movw	MRW,r11
 _4:
@@ -169,8 +169,9 @@ _55:
 
 ; src/moving_average.c	    25          }
 ; src/moving_average.c	    26  
-; src/moving_average.c	    27          return (ubyte2) (sum / (mas));
-	movw	r11,#0x14
+; src/moving_average.c	    27      
+; src/moving_average.c	    28          return (ubyte2) (sum / (mas));
+	movw	r11,#0xa
 _390:
 	movw	MDL,MAL
 	movw	MDH,MAH
@@ -180,8 +181,8 @@ _359:
 	jmp	_5
 _3:
 
-; src/moving_average.c	    28      } else {
-; src/moving_average.c	    29          for (int i = 0; i < info_struct->next_point_index; i++) {
+; src/moving_average.c	    29      } else {
+; src/moving_average.c	    30          for (int i = 0; i < info_struct->next_point_index; i++) {
 	movw	r13,r13
 _365:
 	jmp-	cc_eq,_6
@@ -189,7 +190,7 @@ _365:
 	movw	MRW,r13
 _7:
 
-; src/moving_average.c	    30              sum += info_struct->points[i];
+; src/moving_average.c	    31              sum += info_struct->points[i];
 	exts	r8,#0x1
 	movw	r11,[r3]
 	movw	r12,#0x0
@@ -201,8 +202,8 @@ _392:
 	jmp	cc_nusr1,_7
 _6:
 
-; src/moving_average.c	    31          }
-; src/moving_average.c	    32          return (ubyte2) (sum / (npi));
+; src/moving_average.c	    32          }
+; src/moving_average.c	    33          return (ubyte2) (sum / (npi));
 	CoSTORE	r2,MAL
 _364:
 	CoSTORE	r3,MAH
@@ -210,61 +211,34 @@ _393:
 	movw	r4,r14
 	call	__udil
 
-; src/moving_average.c	    33      }
-; src/moving_average.c	    34  
+; src/moving_average.c	    34      }
 ; src/moving_average.c	    35  
-; src/moving_average.c	    35  }
-
+; src/moving_average.c	    36  
+; src/moving_average.c	    37  }
 _5:
-
-
 	movw	r10,[r15+]
 _138:
-
-
 	movw	r8,[r15+]
 _149:
-
-
 	movw	PSW,[r15]
-
-
 	addw	r15,#0x2
 _160:
-
-
 	movw	MRW,[r15]
 _315:
-
-
 	addw	r15,#0x2
 _171:
-
-
 	movw	MAH,[r15]
 _326:
-
-
 	addw	r15,#0x2
 _182:
-
-
 	movw	MAL,[r15]
 _337:
-
-
 	addw	r15,#0x2
 _193:
-
-
 	movw	MSW,[r15]
 _348:
-
-
 	addw	r15,#0x2
 _204:
-
-
 	ret
 _41:
 	; End of function
@@ -288,20 +262,20 @@ _33:
 	.dl	_36
 _47:
 	.db	2
-	.db	'unsigned int',0,2,7,3,40
+	.db	'unsigned int',0,2,7,3,20
 	.dl	157
-	.db	4,19,0,2
+	.db	4,9,0,2
 	.db	'unsigned char',0,1,8,5
-	.db	'moving_average_info',0,1,15,8,44,6
+	.db	'moving_average_info',0,1,15,8,24,6
 	.db	'points',0
 	.dl	173
-	.db	40,2,35,0,6
+	.db	20,2,35,0,6
 	.db	'all_points_filled',0
 	.dl	182
-	.db	1,2,35,40,6
+	.db	1,2,35,20,6
 	.db	'next_point_index',0
 	.dl	157
-	.db	2,2,35,42,0
+	.db	2,2,35,22,0
 _49:
 	.db	7,5
 	.dl	199
@@ -416,7 +390,7 @@ _37:
 	.db	0,5
 	.dl	_3,_6
 	.db	6
-	.db	'i',0,1,29,18,2
+	.db	'i',0,1,30,18,2
 	.dl	_56,_58
 	.db	0,0,0,0,0
 	; End of section
@@ -484,7 +458,7 @@ _373:
 	.dw	_389-_388
 	.db	1,5,33,7,9
 	.dw	_55-_389
-	.db	3,4,1,5,30,9
+	.db	3,5,1,5,30,9
 	.dw	_390-_55
 	.db	1,5,9,9
 	.dw	_359-_390

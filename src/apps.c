@@ -17,7 +17,7 @@ struct moving_average_info apps_1_moving_average_info;
 struct moving_average_info apps_2_moving_average_info;
 
 
-ubyte2 voltage_to_pct_travel_apps_1(ubyte2 apps_1_voltage) {
+ubyte1 voltage_to_pct_travel_apps_1(ubyte2 apps_1_voltage) {
     if (apps_1_voltage < APPS_1_MIN_VOLTAGE) {
         return 0;
     }
@@ -30,7 +30,7 @@ ubyte2 voltage_to_pct_travel_apps_1(ubyte2 apps_1_voltage) {
 
 }
 
-ubyte2 voltage_to_pct_travel_apps_2(ubyte2 apps_2_voltage) {
+ubyte1 voltage_to_pct_travel_apps_2(ubyte2 apps_2_voltage) {
     if (apps_2_voltage < APPS_2_MIN_VOLTAGE) {
         return 0;
     }
@@ -80,7 +80,7 @@ ubyte2 get_filtered_apps2_voltage(void) {
 
 // gets apps values, puts average pct travel into apps_pct_result
 // if an error is detected, sets error to error code if num_errors is greater than APPS_REPEATED_ERROR_MAX
-void get_apps(ubyte2 *apps_pct_result, ubyte1 *error, ubyte1 *num_errors) {
+void get_apps(ubyte1 *apps_pct_result, ubyte1 *error, ubyte1 *num_errors) {
     if (!moving_average_structs_initialized) {
         initialize_moving_average_struct(&apps_1_moving_average_info);
         initialize_moving_average_struct(&apps_2_moving_average_info);
@@ -102,8 +102,8 @@ void get_apps(ubyte2 *apps_pct_result, ubyte1 *error, ubyte1 *num_errors) {
     bool apps_1_within_threshhold = (apps_1_val >= (APPS_1_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_1_val <= (APPS_1_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
     bool apps_2_within_threshhold = (apps_2_val >= (APPS_2_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_2_val <= (APPS_2_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
 
-    ubyte2 apps_1_pct;
-    ubyte2 apps_2_pct;
+    ubyte1 apps_1_pct;
+    ubyte1 apps_2_pct;
     sbyte2 difference;
 
     // check that both apps are within the treshhold

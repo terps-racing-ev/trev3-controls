@@ -24,6 +24,7 @@ ubyte2 filter_point(ubyte2 data_point, struct moving_average_info* info_struct) 
             sum += info_struct->points[i];
         }
 
+    
         return (ubyte2) (sum / (mas));
     } else {
         for (int i = 0; i < info_struct->next_point_index; i++) {
