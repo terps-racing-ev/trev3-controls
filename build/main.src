@@ -1,5 +1,5 @@
-	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09467762
-	; Options: -f cc26400a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=5 -DRTS_TTC_FLASH_DATE_DAY=13 -DRTS_TTC_FLASH_DATE_HOUR=19 -DRTS_TTC_FLASH_DATE_MINUTE=22 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\main.src
+	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09007774
+	; Options: -f cc5264a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=5 -DRTS_TTC_FLASH_DATE_DAY=17 -DRTS_TTC_FLASH_DATE_HOUR=17 -DRTS_TTC_FLASH_DATE_MINUTE=4 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\main.src
 	; Module start
 	.source	'src/main.c'
 code_clear_can_frame	.section	code, cluster 'clear_can_frame', new
@@ -3993,7 +3993,7 @@ _appl_db	.label	word
 	.db	0x0
 	.db	0x0
 	.db	0x0
-	.dl	0x5a6d57e9
+	.dl	0x123157e9
 	.db	0x0
 	.db	0x0
 	.db	0x0
@@ -4199,7 +4199,7 @@ _$1$ini	.label	word
 	.extern	__INDIRECT__ : far
 	.debug		.debug_info
 _218:
-	.dl	4765
+	.dl	4844
 	.dw	3
 	.dl	_219
 	.db	4
@@ -4207,12 +4207,13 @@ _217:
 	.db	1
 	.db	'src/main.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
+	.db	12,1
 	.dl	_220
 _304:
 	.db	2
 	.db	'unsigned char',0,1,8,3,8
-	.dl	147
+	.dl	226
 	.db	4,7,0
 _301:
 	.db	2
@@ -4221,18 +4222,18 @@ _314:
 	.db	5
 	.db	'_io_can_data_frame',0,2,250,2,16,14,6
 	.db	'data',0
-	.dl	164
+	.dl	243
 	.db	8,2,35,0,6
 	.db	'length',0
-	.dl	147
+	.dl	226
 	.db	1,2,35,8,6
 	.db	'id_format',0
-	.dl	147
+	.dl	226
 	.db	1,2,35,9,6
 	.db	'id',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,10,0,7,5
-	.dl	194
+	.dl	273
 	.db	2
 	.db	'int',0,2,5
 _263:
@@ -4241,7 +4242,7 @@ _263:
 _264:
 	.db	9
 	.db	'frame',0,1,187,1,41,2
-	.dl	281
+	.dl	360
 _324:
 	.db	10
 _330:
@@ -4249,16 +4250,16 @@ _330:
 _267:
 	.db	11
 	.db	'i',0,1,188,1,14,2
-	.dl	287
+	.dl	366
 	.db	0,0,0,7,5
-	.dl	147
+	.dl	226
 _269:
 	.db	8
 	.db	'get_rtd',0,1,1,193,1,6,6,1,1
 _270:
 	.db	9
 	.db	'rtd_val',0,1,193,1,20,2
-	.dl	352
+	.dl	431
 _445:
 	.db	12,0
 _272:
@@ -4267,10 +4268,10 @@ _272:
 _273:
 	.db	9
 	.db	'sdc_val',0,1,201,1,20,2
-	.dl	352
+	.dl	431
 _452:
 	.db	12,0,7,5
-	.dl	147
+	.dl	226
 _296:
 	.db	2
 	.db	'unsigned int',0,2,7
@@ -4280,33 +4281,33 @@ _275:
 _276:
 	.db	9
 	.db	'handle_r',0,1,209,1,27,2
-	.dl	432
+	.dl	511
 _278:
 	.db	9
 	.db	'dst_data_frame',0,1,209,1,56,2
-	.dl	281
+	.dl	360
 _280:
 	.db	9
 	.db	'msg_received',0,1,209,1,78,2
-	.dl	352
+	.dl	431
 _282:
 	.db	9
 	.db	'id',0,1,209,1,99,2
-	.dl	173
+	.dl	252
 _284:
 	.db	9
 	.db	'channel',0,1,209,1,110,2
-	.dl	147
+	.dl	226
 _286:
 	.db	9
 	.db	'frame_type',0,1,209,1,126,2
-	.dl	147
+	.dl	226
 _421:
 	.db	10
 _288:
 	.db	11
 	.db	'can_read_error',0,1,210,1,18,2
-	.dl	438
+	.dl	517
 	.db	0,0
 _290:
 	.db	8
@@ -4314,328 +4315,328 @@ _290:
 _291:
 	.db	9
 	.db	'handle',0,1,232,1,27,2
-	.dl	147
+	.dl	226
 _293:
 	.db	9
 	.db	'src_data_frame',0,1,232,1,54,2
-	.dl	281
+	.dl	360
 _460:
 	.db	12,0
 _298:
 	.db	13
 	.db	'pct_travel_to_torque',0,1,1,248,1,8,6
-	.dl	438
+	.dl	517
 	.db	1,1
 _299:
 	.db	9
 	.db	'pct_travel',0,1,248,1,37,2
-	.dl	147
+	.dl	226
 _526:
 	.db	12,0,14
 	.db	'IO_POWER_Set',0,3,184,1,15,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,9
 	.db	'pin',0,3,184,1,35,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'mode',0,3,184,1,47,2
-	.dl	147
+	.dl	226
 	.db	0,5
 	.db	'_io_driver_safety_conf',0,4,251,2,16,8,6
 	.db	'glitch_filter_time',0
-	.dl	147
+	.dl	226
 	.db	1,2,35,0,6
 	.db	'command_period',0
-	.dl	438
+	.dl	517
 	.db	2,2,35,2,6
 	.db	'timeout_count',0
-	.dl	147
+	.dl	226
 	.db	1,2,35,4,6
 	.db	'CPU_check_loopcount',0
-	.dl	438
+	.dl	517
 	.db	2,2,35,6,0,15
-	.dl	804
+	.dl	883
 	.db	7,5
-	.dl	938
+	.dl	1017
 	.db	15
-	.dl	943
+	.dl	1022
 	.db	14
 	.db	'IO_Driver_Init',0,4,155,4,15,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,9
 	.db	'safety_conf',0,4,155,4,67,2
-	.dl	949
+	.dl	1028
 	.db	0,16
 	.db	'IO_Driver_TaskBegin',0,4,167,4,15,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,16
 	.db	'IO_Driver_TaskEnd',0,4,182,4,15,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,14
 	.db	'IO_CAN_Init',0,2,183,3,15,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,9
 	.db	'channel',0,2,183,3,35,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'baudrate',0,2,184,3,35,2
-	.dl	438
+	.dl	517
 	.db	9
 	.db	'tseg1',0,2,185,3,35,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'tseg2',0,2,186,3,35,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'sjw',0,2,187,3,35,2
-	.dl	147
+	.dl	226
 	.db	0,14
 	.db	'IO_CAN_DeInitHandle',0,2,206,3,15,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,9
 	.db	'handle',0,2,206,3,42,2
-	.dl	147
+	.dl	226
 	.db	0,14
 	.db	'IO_CAN_DeInit',0,2,237,3,15,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,9
 	.db	'channel',0,2,237,3,36,2
-	.dl	147
+	.dl	226
 	.db	0,15
-	.dl	432
+	.dl	511
 	.db	14
 	.db	'IO_CAN_ConfigMsg',0,2,159,4,15,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,9
 	.db	'handle',0,2,159,4,48,2
-	.dl	1281
+	.dl	1360
 	.db	9
 	.db	'channel',0,2,160,4,40,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'mode',0,2,161,4,40,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'id_format',0,2,162,4,40,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'id',0,2,163,4,40,2
-	.dl	173
+	.dl	252
 	.db	9
 	.db	'ac_mask',0,2,164,4,40,2
-	.dl	173
+	.dl	252
 	.db	0,15
-	.dl	281
+	.dl	360
 	.db	14
 	.db	'IO_CAN_ReadMsg',0,2,189,4,15,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,9
 	.db	'handle',0,2,189,4,38,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'buffer',0,2,190,4,57,2
-	.dl	1419
+	.dl	1498
 	.db	0,15
-	.dl	432
+	.dl	511
 	.db	14
 	.db	'IO_CAN_ConfigFIFO',0,2,137,5,15,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,9
 	.db	'handle',0,2,137,5,49,2
-	.dl	1488
+	.dl	1567
 	.db	9
 	.db	'channel',0,2,138,5,41,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'size',0,2,139,5,41,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'mode',0,2,140,5,41,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'id_format',0,2,141,5,41,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'id',0,2,142,5,41,2
-	.dl	173
+	.dl	252
 	.db	9
 	.db	'ac_mask',0,2,143,5,41,2
-	.dl	173
+	.dl	252
 	.db	0,15
-	.dl	194
+	.dl	273
 	.db	7,5
-	.dl	1642
+	.dl	1721
 	.db	15
-	.dl	1647
+	.dl	1726
 	.db	14
 	.db	'IO_CAN_WriteFIFO',0,2,208,5,15,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,9
 	.db	'handle',0,2,208,5,40,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'data',0,2,209,5,65,2
-	.dl	1653
+	.dl	1732
 	.db	9
 	.db	'tx_length',0,2,210,5,40,2
-	.dl	147
+	.dl	226
 	.db	0,15
-	.dl	432
+	.dl	511
 	.db	15
-	.dl	432
+	.dl	511
 	.db	14
 	.db	'IO_CAN_Status',0,2,251,5,15,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,9
 	.db	'channel',0,2,251,5,37,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'rx_error_counter',0,2,252,5,45,2
-	.dl	1742
+	.dl	1821
 	.db	9
 	.db	'tx_error_counter',0,2,253,5,45,2
-	.dl	1747
+	.dl	1826
 	.db	0,14
 	.db	'IO_CAN_MsgStatus',0,2,155,6,15,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,9
 	.db	'handle',0,2,155,6,40,2
-	.dl	147
+	.dl	226
 	.db	0,14
 	.db	'IO_CAN_FIFOStatus',0,2,188,6,15,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,9
 	.db	'handle',0,2,188,6,41,2
-	.dl	147
+	.dl	226
 	.db	0,7,5
-	.dl	173
+	.dl	252
 	.db	15
-	.dl	1952
+	.dl	2031
 	.db	14
 	.db	'IO_RTC_StartTime',0,5,118,15,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,9
 	.db	'timestamp',0,5,118,49,2
-	.dl	1958
+	.dl	2037
 	.db	0,14
 	.db	'IO_RTC_GetTimeUS',0,5,143,1,9,6
-	.dl	173
+	.dl	252
 	.db	1,1,1,1,9
 	.db	'timestamp',0,5,143,1,35,2
-	.dl	173
+	.dl	252
 	.db	0,5
 	.db	'_io_adc_safety_conf',0,6,159,1,16,4,6
 	.db	'adc_val_upper',0
-	.dl	147
+	.dl	226
 	.db	1,2,35,0,6
 	.db	'adc_val_lower',0
-	.dl	147
+	.dl	226
 	.db	1,2,35,1,6
 	.db	'redundant_channel',0
-	.dl	147
+	.dl	226
 	.db	1,2,35,2,0,15
-	.dl	2065
+	.dl	2144
 	.db	7,5
-	.dl	2165
+	.dl	2244
 	.db	15
-	.dl	2170
+	.dl	2249
 	.db	14
 	.db	'IO_ADC_ChannelInit',0,6,157,2,14,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,9
 	.db	'adc_channel',0,6,157,2,41,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'type',0,6,158,2,41,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'range',0,6,159,2,41,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'pupd',0,6,160,2,41,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'sensor_supply',0,6,161,2,41,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'safety_conf',0,6,162,2,67,2
-	.dl	2176
+	.dl	2255
 	.db	0,7,5
-	.dl	438
+	.dl	517
 	.db	15
-	.dl	2329
+	.dl	2408
 	.db	15
-	.dl	352
+	.dl	431
 	.db	14
 	.db	'IO_ADC_Get',0,6,132,3,14,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,9
 	.db	'adc_channel',0,6,132,3,33,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'adc_value',0,6,133,3,41,2
-	.dl	2335
+	.dl	2414
 	.db	9
 	.db	'fresh',0,6,134,3,39,2
-	.dl	2340
+	.dl	2419
 	.db	0,14
 	.db	'IO_DI_Init',0,7,119,14,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,9
 	.db	'di_channel',0,7,119,33,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'mode',0,7,120,33,2
-	.dl	147
+	.dl	226
 	.db	0,14
 	.db	'IO_DO_Init',0,7,155,1,14,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,9
 	.db	'do_channel',0,7,155,1,33,2
-	.dl	147
+	.dl	226
 	.db	0,15
-	.dl	352
+	.dl	431
 	.db	14
 	.db	'IO_DI_Get',0,7,220,1,14,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,9
 	.db	'di_channel',0,7,220,1,32,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'di_value',0,7,221,1,38,2
-	.dl	2535
+	.dl	2614
 	.db	0,14
 	.db	'IO_DO_Set',0,7,147,2,14,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,9
 	.db	'do_channel',0,7,147,2,32,2
-	.dl	147
+	.dl	226
 	.db	9
 	.db	'do_value',0,7,148,2,30,2
-	.dl	147
+	.dl	226
 	.db	0,17
 	.db	'get_apps',0,8,67,6,6,1,1,1,1,9
 	.db	'apps_pct_result',0,8,67,23,2
-	.dl	432
+	.dl	511
 	.db	9
 	.db	'error',0,8,67,48,2
-	.dl	432
+	.dl	511
 	.db	9
 	.db	'num_errors',0,8,67,63,2
-	.dl	432
+	.dl	511
 	.db	0,16
 	.db	'get_filtered_apps1_voltage',0,8,69,8,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,16
 	.db	'get_filtered_apps2_voltage',0,8,70,8,6
-	.dl	438
+	.dl	517
 	.db	1,1,1,1,17
 	.db	'get_bse',0,9,34,6,6,1,1,1,1,9
 	.db	'bse_result',0,9,34,22,2
-	.dl	2329
+	.dl	2408
 	.db	9
 	.db	'error',0,9,34,42,2
-	.dl	432
+	.dl	511
 	.db	0,18
 	.db	'do_lights_action',0,10,21,6,6,1,1,1,1,19
 	.db	'TSIL_State',0,10,19,6,1,20
@@ -4643,71 +4644,71 @@ _526:
 	.db	'BLINKING_RED',0,1,0,17
 	.db	'set_light_to',0,10,22,6,6,1,1,1,1,9
 	.db	's',0,10,22,35,2
-	.dl	2908
+	.dl	2987
 	.db	0
 _295:
 	.db	2
 	.db	'double',0,8,4,21,1,170,1,5,2,22
 	.db	'apps_out_of_range_fault',0,1
-	.dl	147
+	.dl	226
 	.db	1,7,2,35,0,22
 	.db	'apps_implausibility_fault',0,1
-	.dl	147
+	.dl	226
 	.db	1,6,2,35,0,22
 	.db	'bse_out_of_range_fault',0,1
-	.dl	147
+	.dl	226
 	.db	1,5,2,35,0,22
 	.db	'rtd_off_fault',0,1
-	.dl	147
+	.dl	226
 	.db	1,4,2,35,0,22
 	.db	'sdc_off_fault',0,1
-	.dl	147
+	.dl	226
 	.db	1,3,2,35,0,22
 	.db	'imd_latch_fault',0,1
-	.dl	147
+	.dl	226
 	.db	1,2,2,35,0,22
 	.db	'bms_latch_fault',0,1
-	.dl	147
+	.dl	226
 	.db	1,1,2,35,0,22
 	.db	'orion_can_timeout_fault',0,1
-	.dl	147
+	.dl	226
 	.db	1,0,2,35,0,0
 _411:
 	.db	23
 	.db	'diag_flags',0,1,169,1,7,2,6
 	.db	'bits',0
-	.dl	2998
+	.dl	3077
 	.db	2,2,35,0,6
 	.db	'diag_flags_byte',0
-	.dl	147
+	.dl	226
 	.db	1,2,35,0,0,24
 	.db	'_INDIRECT__',0,1,1,1,6,1,1,1,25
 	.db	'void',0,7,5
-	.dl	3327
+	.dl	3406
 	.db	26
 	.db	'__prof_adm',0,1,1,1
-	.dl	3333
+	.dl	3412
 	.db	26
 	.db	'__codeptr',0,1,1,1
-	.dl	173
+	.dl	252
 	.db	26
 	.db	'ubyte1',0,11,21,29
-	.dl	147
+	.dl	226
 	.db	26
 	.db	'ubyte2',0,11,22,29
-	.dl	438
+	.dl	517
 	.db	26
 	.db	'ubyte4',0,11,23,29
-	.dl	173
+	.dl	252
 	.db	26
 	.db	'bool',0,11,31,29
-	.dl	147
+	.dl	226
 	.db	26
 	.db	'IO_ErrorType',0,12,153,1,17
-	.dl	438
+	.dl	517
 	.db	26
 	.db	'IO_DRIVER_SAFETY_CONF',0,4,138,3,3
-	.dl	804
+	.dl	883
 	.db	19
 	.db	'_io_driver_reset_reason',0,4,162,3,14,1,20
 	.db	'IO_DRIVER_RESET_REASON_PORST',0,0,20
@@ -4716,158 +4717,158 @@ _411:
 	.db	'IO_DRIVER_RESET_REASON_SW',0,3,20
 	.db	'IO_DRIVER_RESET_REASON_UNKNOWN',0,4,0,26
 	.db	'IO_DRIVER_RESET_REASON',0,4,169,3,3
-	.dl	3487
+	.dl	3566
 	.db	5
 	.db	'_io_driver_trap_info',0,4,174,3,16,10,6
 	.db	'trap_id',0
-	.dl	438
+	.dl	517
 	.db	2,2,35,0,6
 	.db	'cpu_tfr',0
-	.dl	438
+	.dl	517
 	.db	2,2,35,2,6
 	.db	'cpu_trapstat',0
-	.dl	438
+	.dl	517
 	.db	2,2,35,4,6
 	.db	'fault_location',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,6,0,26
 	.db	'IO_DRIVER_TRAP_INFO',0,4,197,3,3
-	.dl	3701
+	.dl	3780
 	.db	26
 	.db	'IO_CAN_DATA_FRAME',0,2,128,3,3
-	.dl	194
+	.dl	273
 	.db	26
 	.db	'IO_ADC_SAFETY_CONF',0,6,169,1,3
-	.dl	2065
+	.dl	2144
 	.db	5
 	.db	'bl_t_date_',0,13,122,16,4,6
 	.db	'date',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,0,0,26
 	.db	'BL_T_DATE',0,13,131,1,3
-	.dl	3893
+	.dl	3972
 	.db	5
 	.db	'bl_t_can_id_',0,13,138,1,16,8,6
 	.db	'extended',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,0,6
 	.db	'ID',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,4,0,26
 	.db	'BL_T_CAN_ID',0,13,146,1,3
-	.dl	3943
+	.dl	4022
 	.db	3,4
-	.dl	147
+	.dl	226
 	.db	4,3,0,5
 	.db	'bl_apdb_',0,13,155,1,16,128,1,6
 	.db	'APDBVersion',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,0,6
 	.db	'FlashDate',0
-	.dl	3893
+	.dl	3972
 	.db	4,2,35,4,6
 	.db	'BuildDate',0
-	.dl	3893
+	.dl	3972
 	.db	4,2,35,8,6
 	.db	'NodeType',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,12,6
 	.db	'CRCStartAddress',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,16,6
 	.db	'CodeSize',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,20,6
 	.db	'LegacyApplicationCRC',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,24,6
 	.db	'ApplicationCRC',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,28,6
 	.db	'NodeNumber',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,32,6
 	.db	'CRCSeed',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,36,6
 	.db	'Flags',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,40,6
 	.db	'Hook1',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,44,6
 	.db	'Hook2',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,48,6
 	.db	'Hook3',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,52,6
 	.db	'MainAddress',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,56,6
 	.db	'CANDownloadID',0
-	.dl	3943
+	.dl	4022
 	.db	8,2,35,60,6
 	.db	'CANUploadID',0
-	.dl	3943
+	.dl	4022
 	.db	8,2,35,68,6
 	.db	'LegacyHeaderCRC',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,76,6
 	.db	'ApplicationVersion',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,80,6
 	.db	'CANBaudrate',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,84,6
 	.db	'CANChannel',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,88,6
 	.db	'Password',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,92,6
 	.db	'MagicSeed',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,96,6
 	.db	'TargetIPAddress',0
-	.dl	4014
+	.dl	4093
 	.db	4,2,35,100,6
 	.db	'SubnetMask',0
-	.dl	4014
+	.dl	4093
 	.db	4,2,35,104,6
 	.db	'DLMulticastIPAddress',0
-	.dl	4014
+	.dl	4093
 	.db	4,2,35,108,6
 	.db	'DebugKey',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,112,6
 	.db	'ABRDTimeout',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,116,6
 	.db	'ManufacturerID',0
-	.dl	147
+	.dl	226
 	.db	1,2,35,120,6
 	.db	'ApplicationID',0
-	.dl	147
+	.dl	226
 	.db	1,2,35,121,6
 	.db	'Reserved',0
-	.dl	438
+	.dl	517
 	.db	2,2,35,122,6
 	.db	'HeaderCRC',0
-	.dl	173
+	.dl	252
 	.db	4,2,35,124,0,26
 	.db	'BL_APDB',0,13,227,1,3
-	.dl	4023
+	.dl	4102
 	.db	27
-	.dl	4023
+	.dl	4102
 _541:
 	.db	15
-	.dl	4722
+	.dl	4801
 	.db	28
-	.dl	147
+	.dl	226
 	.db	29,0,30
 	.db	'_lc_ub_user_stack',0,1,1,1,2
-	.dl	4732
+	.dl	4811
 	.db	1,1,0
 	; End of section
 
@@ -4916,76 +4917,77 @@ _1384:
 	.debug		.debug_pubnames
 	.dl	577
 	.dw	2
-	.dl	_218,4769,747
+	.dl	_218,4848,826
 	.db	'IO_POWER_Set',0
-	.dl	954
+	.dl	1033
 	.db	'IO_Driver_Init',0
-	.dl	1006
+	.dl	1085
 	.db	'IO_Driver_TaskBegin',0
-	.dl	1040
+	.dl	1119
 	.db	'IO_Driver_TaskEnd',0
-	.dl	1072
+	.dl	1151
 	.db	'IO_CAN_Init',0
-	.dl	1182
+	.dl	1261
 	.db	'IO_CAN_DeInitHandle',0
-	.dl	1234
+	.dl	1313
 	.db	'IO_CAN_DeInit',0
-	.dl	1286
+	.dl	1365
 	.db	'IO_CAN_ConfigMsg',0
-	.dl	1424
+	.dl	1503
 	.db	'IO_CAN_ReadMsg',0
-	.dl	1493
+	.dl	1572
 	.db	'IO_CAN_ConfigFIFO',0
-	.dl	1658
+	.dl	1737
 	.db	'IO_CAN_WriteFIFO',0
-	.dl	1752
+	.dl	1831
 	.db	'IO_CAN_Status',0
-	.dl	1853
+	.dl	1932
 	.db	'IO_CAN_MsgStatus',0
-	.dl	1902
+	.dl	1981
 	.db	'IO_CAN_FIFOStatus',0
-	.dl	1963
+	.dl	2042
 	.db	'IO_RTC_StartTime',0
-	.dl	2013
+	.dl	2092
 	.db	'IO_RTC_GetTimeUS',0
-	.dl	2181
+	.dl	2260
 	.db	'IO_ADC_ChannelInit',0
-	.dl	2345
+	.dl	2424
 	.db	'IO_ADC_Get',0
-	.dl	2429
+	.dl	2508
 	.db	'IO_DI_Init',0
-	.dl	2488
+	.dl	2567
 	.db	'IO_DO_Init',0
-	.dl	2540
+	.dl	2619
 	.db	'IO_DI_Get',0
-	.dl	2605
+	.dl	2684
 	.db	'IO_DO_Set',0
-	.dl	2670
-	.db	'get_apps',0
 	.dl	2749
+	.db	'get_apps',0
+	.dl	2828
 	.db	'get_filtered_apps1_voltage',0
-	.dl	2789
+	.dl	2868
 	.db	'get_filtered_apps2_voltage',0
-	.dl	2829
+	.dl	2908
 	.db	'get_bse',0
-	.dl	2882
+	.dl	2961
 	.db	'do_lights_action',0
-	.dl	2954
+	.dl	3033
 	.db	'set_light_to',0
-	.dl	3307
+	.dl	3386
 	.db	'_INDIRECT__',0
 	.dl	0
 	; End of section
 
 	.debug		.debug_info, cluster 'clear_can_frame'
 _221:
-	.dl	223
+	.dl	302
 	.dw	3
 	.dl	_222
 	.db	4,1
 	.db	'src/main.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
+	.db	12,1
 	.dl	_224,_223
 	.db	2
 	.dl	_217
@@ -5045,13 +5047,14 @@ _224:
 
 	.debug		.debug_info, cluster 'get_rtd'
 _226:
-	.dl	203
+	.dl	282
 	.dw	3
 	.dl	_227
 	.db	4,1
 	.db	'src/main.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
+	.db	12,1
 	.dl	_229,_228
 	.db	2
 	.dl	_217
@@ -5103,13 +5106,14 @@ _229:
 
 	.debug		.debug_info, cluster 'get_sdc'
 _231:
-	.dl	203
+	.dl	282
 	.dw	3
 	.dl	_232
 	.db	4,1
 	.db	'src/main.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
+	.db	12,1
 	.dl	_234,_233
 	.db	2
 	.dl	_217
@@ -5161,13 +5165,14 @@ _234:
 
 	.debug		.debug_info, cluster 'read_can_msg'
 _236:
-	.dl	258
+	.dl	337
 	.dw	3
 	.dl	_237
 	.db	4,1
 	.db	'src/main.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
+	.db	12,1
 	.dl	_239,_238
 	.db	2
 	.dl	_217
@@ -5253,13 +5258,14 @@ _239:
 
 	.debug		.debug_info, cluster 'write_can_msg'
 _241:
-	.dl	212
+	.dl	291
 	.dw	3
 	.dl	_242
 	.db	4,1
 	.db	'src/main.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
+	.db	12,1
 	.dl	_244,_243
 	.db	2
 	.dl	_217
@@ -5313,13 +5319,14 @@ _244:
 
 	.debug		.debug_info, cluster 'voltage_to_torque_limit'
 _246:
-	.dl	252
+	.dl	331
 	.dw	3
 	.dl	_247
 	.db	4,1
 	.db	'src/main.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
+	.db	12,1
 	.dl	_249,_248
 	.db	2
 	.dl	_217
@@ -5387,20 +5394,21 @@ _249:
 	.debug		.debug_pubnames
 	.dl	42
 	.dw	2
-	.dl	_246,256,156
+	.dl	_246,335,235
 	.db	'voltage_to_torque_limit',0
 	.dl	0
 	; End of section
 
 	.debug		.debug_info, cluster 'pct_travel_to_torque'
 _251:
-	.dl	203
+	.dl	282
 	.dw	3
 	.dl	_252
 	.db	4,1
 	.db	'src/main.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
+	.db	12,1
 	.dl	_254,_253
 	.db	2
 	.dl	_217
@@ -5466,13 +5474,14 @@ _254:
 
 	.debug		.debug_info, cluster 'main'
 _256:
-	.dl	5504
+	.dl	5583
 	.dw	3
 	.dl	_257
 	.db	4,1
 	.db	'src/main.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
+	.db	12,1
 	.dl	_259,_258
 	.db	2
 	.dl	_217
@@ -5694,7 +5703,7 @@ _256:
 	.dl	_389,_260
 	.db	13
 	.db	'current_state',0,1,239,3,20,2
-	.dl	156,_390
+	.dl	235,_390
 	.db	7
 	.db	'first_cycle',0,1,242,3,10,2
 	.dl	_304,_391
@@ -7757,20 +7766,21 @@ _529:
 	.debug		.debug_pubnames
 	.dl	23
 	.dw	2
-	.dl	_256,5508,242
+	.dl	_256,5587,321
 	.db	'main',0
 	.dl	0
 	; End of section
 
 	.debug		.debug_info, cluster 'appl_db'
 _261:
-	.dl	170
+	.dl	249
 	.dw	3
 	.dl	_262
 	.db	4,1
 	.db	'src/main.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1,2
+	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
+	.db	12,1,2
 	.dl	_217
 	.db	3
 	.db	'appl_db',0,1,138,1,6,5
@@ -7977,11 +7987,11 @@ _505:
 	.dw	3
 	.db	145,240,126
 	.dl	0,0
-_424:
-	.dl	-1,_206,_1284-_206,_1285-_206
+_430:
+	.dl	-1,_206,_1290-_206,_1291-_206
 	.dw	1
 	.db	82
-	.dl	_17-_206,_1286-_206
+	.dl	_23-_206,_1292-_206
 	.dw	1
 	.db	82
 	.dl	0,0
@@ -7993,11 +8003,19 @@ _436:
 	.dw	1
 	.db	82
 	.dl	0,0
-_430:
-	.dl	-1,_206,_1290-_206,_1291-_206
+_433:
+	.dl	-1,_206,_1293-_206,_1294-_206
 	.dw	1
 	.db	82
-	.dl	_23-_206,_1292-_206
+	.dl	_26-_206,_1295-_206
+	.dw	1
+	.db	82
+	.dl	0,0
+_424:
+	.dl	-1,_206,_1284-_206,_1285-_206
+	.dw	1
+	.db	82
+	.dl	_17-_206,_1286-_206
 	.dw	1
 	.db	82
 	.dl	0,0
@@ -8009,27 +8027,19 @@ _427:
 	.dw	1
 	.db	82
 	.dl	0,0
-_439:
-	.dl	-1,_206,_1301-_206,_1302-_206
-	.dw	1
-	.db	82
-	.dl	_33-_206,_1303-_206
-	.dw	1
-	.db	82
-	.dl	0,0
-_433:
-	.dl	-1,_206,_1293-_206,_1294-_206
-	.dw	1
-	.db	82
-	.dl	_26-_206,_1295-_206
-	.dw	1
-	.db	82
-	.dl	0,0
 _442:
 	.dl	-1,_206,_1304-_206,_1305-_206
 	.dw	1
 	.db	82
 	.dl	_36-_206,_1306-_206
+	.dw	1
+	.db	82
+	.dl	0,0
+_439:
+	.dl	-1,_206,_1301-_206,_1302-_206
+	.dw	1
+	.db	82
+	.dl	_33-_206,_1303-_206
 	.dw	1
 	.db	82
 	.dl	0,0
@@ -8211,8 +8221,8 @@ _306:
 	.dw	3
 	.db	145,154,125
 	.dl	0,0
-_369:
-	.dl	-1,_206,_362-_206,_370-_206
+_332:
+	.dl	-1,_206,_318-_206,_342-_206
 	.dw	1
 	.db	92
 	.dl	0,0
@@ -8221,13 +8231,13 @@ _349:
 	.dw	1
 	.db	92
 	.dl	0,0
-_359:
-	.dl	-1,_206,_352-_206,_362-_206
+_369:
+	.dl	-1,_206,_362-_206,_370-_206
 	.dw	1
 	.db	92
 	.dl	0,0
-_332:
-	.dl	-1,_206,_318-_206,_342-_206
+_359:
+	.dl	-1,_206,_352-_206,_362-_206
 	.dw	1
 	.db	92
 	.dl	0,0

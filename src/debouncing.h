@@ -1,0 +1,28 @@
+#ifndef DEBOUNCING_H_INCLUDED
+#define DEBOUNCING_H_INCLUDED
+
+#include "APDB.h"
+
+#define THRESHHOLD_100_MS 20
+#define THRESHHOLD_500_MS 100
+
+struct debouncing_info {
+    bool current_state;
+
+    // number of cycles needed to switch states
+    // if current_state = high and successive_lows >= switch_treshhold, flip to low
+    // and vice versa
+    ubyte1 switch_threshhold;
+
+    // number of successive low inputs
+    ubyte1 successive_lows;
+
+    // number of successive high inputs
+    ubyte1 successive_highs;
+};
+
+void initialize_debouncing_struct(struct debouncing_info* info, bool starting_state, ubyte1 thresh);
+
+bool debounce_input(struct debouncing_info* info, bool input);
+
+#endif
