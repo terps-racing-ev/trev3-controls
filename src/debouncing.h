@@ -3,6 +3,8 @@
 
 #include "APDB.h"
 
+// 20 cycles -> 100 ms
+// 100 cycles -> 500 ms
 #define THRESHHOLD_100_MS 20
 #define THRESHHOLD_500_MS 100
 
