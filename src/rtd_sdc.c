@@ -16,6 +16,7 @@ struct debouncing_info sdc_debouncing_info;
 
 void get_rtd(bool *rtd_val) {
     if (!rtd_struct_initialized) {
+        // starting value for rtd is off
         initialize_debouncing_struct(&rtd_debouncing_info, RTD_OFF, RTD_DEBOUNCING_THRESH);
 
         rtd_struct_initialized = TRUE;
@@ -32,9 +33,10 @@ void get_rtd(bool *rtd_val) {
 
 void get_sdc(bool *sdc_val) {
     if (!sdc_struct_initialized) {
+        // starting value for sdc is on
         initialize_debouncing_struct(&sdc_debouncing_info, SDC_ON, SDC_DEBOUNCING_THRESH);
 
-        rtd_struct_initialized = TRUE;
+        sdc_struct_initialized = TRUE;
     }
 
 
