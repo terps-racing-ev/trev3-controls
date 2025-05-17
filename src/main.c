@@ -17,19 +17,10 @@
 
 #include "apps.h"
 #include "bse.h"
+#include "rtd_sdc.h"
 #include "tsil.h"
 #include "utilities.h"
 #include "debug_defines.h"
-
-
-/**************************************************************************
- * Sensor Pins
- ***************************************************************************/
-/* RTD -> pin 263 (aka digital in 0) (switched to ground with pullup) */
-#define IO_PIN_RTD IO_DI_00
-
-/* SDC -> pin 256 (aka digital in 1) */
-#define IO_PIN_SDC IO_DI_01
 
 /**************************************************************************
  * Actuator Pins
@@ -46,17 +37,8 @@
 /**************************************************************************
  * RTD Settings
  ***************************************************************************/
-#define RTD_ON 0
-#define RTD_OFF 1
-
 // 1.5 s RTD sound time
 #define RTD_SOUND_DURATION MsToUs(1500ul)
-
-/**************************************************************************
- * SDC Settings
- ***************************************************************************/
-#define SDC_ON 1
-#define SDC_OFF 0
 
 /**************************************************************************
  * Inverter Settings
@@ -190,21 +172,6 @@ void clear_can_frame(IO_CAN_DATA_FRAME* frame) {
     }
 }
 
-void get_rtd(bool *rtd_val) {
-    if (IGNORE_RTD_SWITCH) {
-        *rtd_val = RTD_ON;
-    } else {
-        IO_DI_Get(IO_PIN_RTD, rtd_val);
-    }    
-}
-
-void get_sdc(bool *sdc_val) {
-    if (IGNORE_SDC_OFF) {
-        *sdc_val = SDC_ON;
-    } else {
-        IO_DI_Get(IO_PIN_SDC, sdc_val);
-    }
-}
 
 void read_can_msg(ubyte1* handle_r, IO_CAN_DATA_FRAME* dst_data_frame, bool *msg_received, ubyte4 id, ubyte1 channel, ubyte1 frame_type) {
     IO_ErrorType can_read_error;
