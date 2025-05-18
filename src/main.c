@@ -9,15 +9,16 @@
  **************************************************************************/
 
 #include "IO_Driver.h"
-#include "IO_CAN.h"
 #include "IO_RTC.h"
 #include "IO_ADC.h"
 #include "IO_DIO.h"
+#include "IO_CAN.h"
 #include "APDB.h"
 
 #include "apps.h"
 #include "bse.h"
 #include "rtd_sdc.h"
+#include "read_write_can.h"
 #include "tsil.h"
 #include "utilities.h"
 #include "debug_defines.h"
@@ -148,69 +149,49 @@ APDB appl_db =
           , 0                      /* ubyte4 headerCRC          */
           };
 
-union diag_flags {
-    struct {
-        /* State change flags 
-        These are only reset upon succesfull rtd */
-        ubyte1 apps_out_of_range_fault      : 1;
-        ubyte1 apps_implausibility_fault    : 1;
-        ubyte1 bse_out_of_range_fault       : 1;
-        ubyte1 rtd_off_fault                : 1;
-        ubyte1 sdc_off_fault                : 1;
-        /* TSIL flags */
-        ubyte1 imd_latch_fault              : 1;
-        ubyte1 bms_latch_fault              : 1;
-        ubyte1 orion_can_timeout_fault      : 1;
-        /* 8 BITS */
-    } bits;
-    ubyte1 diag_flags_byte;
+struct diag_flags {
+    /* State change flags 
+    These are only reset upon succesfull rtd */
+    ubyte1 apps_out_of_range_fault;
+    ubyte1 apps_implausibility_fault;
+    ubyte1 bse_out_of_range_fault;
+    ubyte1 rtd_off_fault;
+    ubyte1 sdc_off_fault;
+    /* TSIL flags */
+    ubyte1 imd_latch_fault;
+    ubyte1 bms_latch_fault;
+    ubyte1 orion_can_timeout_fault;
+    /* 8 BITS */
 };
 
-void clear_can_frame(IO_CAN_DATA_FRAME* frame) {
-    for (int i = 0; i < 8; i++) {
-        frame->data[i] = 0;
-    }
+void initialize_diag_flags(struct diag_flags* flags) {
+    flags->apps_out_of_range_fault = 0;
+    flags->apps_implausibility_fault = 0;
+    flags->bse_out_of_range_fault = 0;
+    flags->rtd_off_fault = 0;
+    flags->sdc_off_fault = 0;
+    /* TSIL flags */
+    flags->imd_latch_fault = 0;
+    flags->bms_latch_fault = 0;
+    flags->orion_can_timeout_fault = 0;
 }
 
 
-void read_can_msg(ubyte1* handle_r, IO_CAN_DATA_FRAME* dst_data_frame, bool *msg_received, ubyte4 id, ubyte1 channel, ubyte1 frame_type) {
-    IO_ErrorType can_read_error;
+ubyte1 pack_diag_flags(struct diag_flags* flags) {
+    ubyte1 result = 0;
 
-    *msg_received = FALSE;
+    result |= (flags->apps_out_of_range_fault << 7);
+    result |= (flags->apps_implausibility_fault << 6);
+    result |= (flags->bse_out_of_range_fault << 5);
+    result |= (flags->rtd_off_fault << 4);
+    result |= (flags->sdc_off_fault << 3);
+    result |= (flags->imd_latch_fault << 2);
+    result |= (flags->bms_latch_fault << 1);
+    result |= (flags->orion_can_timeout_fault);
 
-    can_read_error = IO_CAN_MsgStatus(*handle_r);
-
-    if (can_read_error == IO_E_OK) {
-        IO_CAN_ReadMsg(*handle_r, dst_data_frame);
-        *msg_received = TRUE;
-    } else if (can_read_error == IO_E_CAN_OVERFLOW) {
-        IO_CAN_DeInitHandle(*handle_r);
-
-        IO_CAN_ConfigMsg( handle_r
-                , channel
-                , IO_CAN_MSG_READ
-                , frame_type
-                , id
-                , 0x7FF);
-    }
-
+    return result;
 }
 
-void write_can_msg(ubyte1 handle, IO_CAN_DATA_FRAME* src_data_frame) {
-    IO_ErrorType can_write_error = IO_CAN_FIFOStatus(handle);
-
-    IO_CAN_WriteFIFO(handle, src_data_frame, 1);
-}
-
-
-double voltage_to_torque_limit (ubyte2 pack_voltage) {
-    if (pack_voltage < PRECHARGE_VOLTAGE_THRESHHOLD) {
-        return 0;
-    } else {
-        return ((double) (pack_voltage)) * -0.3255 + 231.25;
-    }
-
-}
 
 ubyte2 pct_travel_to_torque (ubyte1 pct_travel) {
     if (pct_travel >= PCT_TRAVEL_FOR_MAX_TORQUE) {
@@ -262,6 +243,7 @@ void main (void)
     controls_can_frame.id = VCU_CONTROLS_CAN_ID;
     controls_can_frame.id_format = IO_CAN_STD_FRAME;
     controls_can_frame.length = 8;
+    clear_can_frame(&controls_can_frame);
 
     IO_CAN_DATA_FRAME inverter_settings_can_frame;
     inverter_settings_can_frame.id = VCU_INVERTER_SETTINGS_CAN_ID;
@@ -514,7 +496,9 @@ void main (void)
     ubyte1 vcu_heartbeat = 0;
     ubyte1 controls_bus_error_count = 0;
     ubyte1 telemetry_bus_error_count = 0;
-    union diag_flags vcu_diag_flags = { {0} };
+    struct diag_flags vcu_diag_flags;
+
+    initialize_diag_flags(&vcu_diag_flags);
 
     IO_RTC_StartTime(&time_since_start);
     IO_RTC_StartTime(&orion_can_timeout);
@@ -567,7 +551,7 @@ void main (void)
             IO_RTC_StartTime(&orion_can_timeout);
             orion_1_message_received_once = TRUE;
             // We can reset this flag immediately since CAN timeout has no latching behavior
-            vcu_diag_flags.bits.orion_can_timeout_fault = 0;
+            vcu_diag_flags.orion_can_timeout_fault = 0;
         }
 
         if (voltage_info_message_received == TRUE) {
@@ -579,6 +563,10 @@ void main (void)
         if (first_cycle) {
             first_cycle = FALSE;
         } else {
+            // reset to prevent overflow
+            if (vcu_heartbeat == 255) {
+                vcu_heartbeat = 0;
+            }
 
             vcu_heartbeat++;
 
@@ -646,21 +634,21 @@ void main (void)
                     // rtd off -> switch to not ready state
                     current_state = NOT_READY;
                     // log rtd flag
-                    vcu_diag_flags.bits.rtd_off_fault = 1;
+                    vcu_diag_flags.rtd_off_fault = 1;
                 } else if (apps_error != APPS_NO_ERROR || bse_error != BSE_NO_ERROR || (sdc_val == SDC_OFF)) {
                     current_state = ERRORED;
                     // log flags
                     if (apps_error == APPS_OUT_OF_RANGE_ERROR) {
-                        vcu_diag_flags.bits.apps_out_of_range_fault = 1;
+                        vcu_diag_flags.apps_out_of_range_fault = 1;
                     } 
                     if (apps_error == APPS_IMPLAUSIBILITY_ERROR) {
-                        vcu_diag_flags.bits.apps_implausibility_fault = 1;
+                        vcu_diag_flags.apps_implausibility_fault = 1;
                     } 
                     if (bse_error == BSE_OUT_OF_RANGE_ERROR) {
-                        vcu_diag_flags.bits.bse_out_of_range_fault = 1;
+                        vcu_diag_flags.bse_out_of_range_fault = 1;
                     }
                     if (sdc_val == SDC_OFF) {
-                        vcu_diag_flags.bits.sdc_off_fault = 1;
+                        vcu_diag_flags.sdc_off_fault = 1;
                     }
                 } else if (!(IGNORE_BRAKE_PLAUSIBILITY) && bse_result > BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD && apps_pct_result >= APPS_THRESHHOLD_BRAKE_PLAUSIBILITY) {
                     current_state = APPS_5PCT_WAIT;
@@ -718,7 +706,7 @@ void main (void)
             if (been_ignore_period_since_start == TRUE) {
                 // if CAN timeout, set light to blinking red
                 if (IO_RTC_GetTimeUS(orion_can_timeout) > ORION_CAN_TIMEOUT_US) {
-                    vcu_diag_flags.bits.orion_can_timeout_fault = 1;
+                    vcu_diag_flags.orion_can_timeout_fault = 1;
                     // TODO Fake because Orion tweaks and lags 
                     //set_light_to(BLINKING_RED);
                 } else if (orion_1_message_received_once == TRUE) {
@@ -733,10 +721,10 @@ void main (void)
                             tsil_latched = TRUE;
                             // log flags
                             if (!bms_ok) {
-                                vcu_diag_flags.bits.bms_latch_fault = 1;
+                                vcu_diag_flags.bms_latch_fault = 1;
                             }
                             if (!imd_ok) {
-                                vcu_diag_flags.bits.imd_latch_fault = 1;
+                                vcu_diag_flags.imd_latch_fault = 1;
                             }
                         }
 
@@ -745,8 +733,8 @@ void main (void)
                             if (bms_ok && imd_ok && sdc_val != SDC_OFF) {
                                 tsil_latched = FALSE;  // clear latch if everything is okay
                                 // clear flags
-                                vcu_diag_flags.bits.bms_latch_fault = 0;
-                                vcu_diag_flags.bits.imd_latch_fault = 0;
+                                vcu_diag_flags.bms_latch_fault = 0;
+                                vcu_diag_flags.imd_latch_fault = 0;
                             }
                         }
 
@@ -837,7 +825,7 @@ void main (void)
             // diagnostics message
             // TODO add diagnostic messages
             vcu_diag_can_frame.data[0] = vcu_heartbeat;
-            vcu_diag_can_frame.data[1] = vcu_diag_flags.diag_flags_byte;
+            vcu_diag_can_frame.data[1] = pack_diag_flags(&vcu_diag_flags);
             vcu_diag_can_frame.data[2] = controls_bus_error_count;
             vcu_diag_can_frame.data[3] = telemetry_bus_error_count;
             vcu_diag_can_frame.data[4] = 0; // TODO add error codes here
