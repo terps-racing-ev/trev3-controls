@@ -17,6 +17,7 @@
 
 #include "apps.h"
 #include "bse.h"
+#include "diag_flags.h"
 #include "rtd_sdc.h"
 #include "read_write_can.h"
 #include "tsil.h"
@@ -148,50 +149,6 @@ APDB appl_db =
           , {0}                    /* ubyte1 reserved[8*4]      */
           , 0                      /* ubyte4 headerCRC          */
           };
-
-struct diag_flags {
-    /* State change flags 
-    These are only reset upon succesfull rtd */
-    ubyte1 apps_out_of_range_fault;
-    ubyte1 apps_implausibility_fault;
-    ubyte1 bse_out_of_range_fault;
-    ubyte1 rtd_off_fault;
-    ubyte1 sdc_off_fault;
-    /* TSIL flags */
-    ubyte1 imd_latch_fault;
-    ubyte1 bms_latch_fault;
-    ubyte1 orion_can_timeout_fault;
-    /* 8 BITS */
-};
-
-void initialize_diag_flags(struct diag_flags* flags) {
-    flags->apps_out_of_range_fault = 0;
-    flags->apps_implausibility_fault = 0;
-    flags->bse_out_of_range_fault = 0;
-    flags->rtd_off_fault = 0;
-    flags->sdc_off_fault = 0;
-    /* TSIL flags */
-    flags->imd_latch_fault = 0;
-    flags->bms_latch_fault = 0;
-    flags->orion_can_timeout_fault = 0;
-}
-
-
-ubyte1 pack_diag_flags(struct diag_flags* flags) {
-    ubyte1 result = 0;
-
-    result |= (flags->apps_out_of_range_fault << 7);
-    result |= (flags->apps_implausibility_fault << 6);
-    result |= (flags->bse_out_of_range_fault << 5);
-    result |= (flags->rtd_off_fault << 4);
-    result |= (flags->sdc_off_fault << 3);
-    result |= (flags->imd_latch_fault << 2);
-    result |= (flags->bms_latch_fault << 1);
-    result |= (flags->orion_can_timeout_fault);
-
-    return result;
-}
-
 
 ubyte2 pct_travel_to_torque (ubyte1 pct_travel) {
     if (pct_travel >= PCT_TRAVEL_FOR_MAX_TORQUE) {
