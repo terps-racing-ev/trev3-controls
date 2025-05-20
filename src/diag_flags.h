@@ -4,7 +4,7 @@
 #include "APDB.h"
 
 struct diag_flags {
-    /* State change flags 
+    /* State change flags that only update on a state change
     These are only reset upon succesfull rtd */
     ubyte1 apps_out_of_range_fault;
     ubyte1 apps_implausibility_fault;
@@ -18,9 +18,23 @@ struct diag_flags {
     /* 8 BITS */
 };
 
+struct live_flags {
+    /* live flags that don't latch and are updated every cycle */
+    ubyte1 apps_out_of_range_fault;
+    ubyte1 apps_implausibility_fault;
+    ubyte1 bse_out_of_range_fault;
+    ubyte1 rtd_val;
+    ubyte1 sdc_val;
+    ubyte1 imd_status;
+    ubyte1 bms_status;
+    //UNUSED
+};
+
 
 void initialize_diag_flags(struct diag_flags* flags);
+void initialize_live_flags(struct live_flags* flags);
 ubyte1 pack_diag_flags(struct diag_flags* flags);
+ubyte1 pack_live_flags(struct live_flags* flags);
 
 
 #endif

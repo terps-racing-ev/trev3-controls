@@ -451,11 +451,13 @@ void main (void)
     
     // Debugging variables
     ubyte1 vcu_heartbeat = 0;
-    ubyte1 controls_bus_error_count = 0;
-    ubyte1 telemetry_bus_error_count = 0;
+    ubyte1 controls_bus_failure_count = 0;
+    ubyte1 telemetry_bus_failure_count = 0;
     struct diag_flags vcu_diag_flags;
+    struct live_flags vcu_live_flags;
 
     initialize_diag_flags(&vcu_diag_flags);
+    initialize_live_flags(&vcu_live_flags);
 
     IO_RTC_StartTime(&time_since_start);
     IO_RTC_StartTime(&orion_can_timeout);
@@ -532,6 +534,14 @@ void main (void)
             get_bse(&bse_result, &bse_error);
             get_sdc(&sdc_val);
             get_apps(&apps_pct_result, &apps_error, &num_errors);
+            vcu_live_flags.apps_out_of_range_fault = apps_error == APPS_OUT_OF_RANGE_ERROR;
+            vcu_live_flags.apps_implausibility_fault = apps_error == APPS_IMPLAUSIBILITY_ERROR;
+            vcu_live_flags.bse_out_of_range_fault = bse_error == BSE_OUT_OF_RANGE_ERROR;
+            vcu_live_flags.rtd_val = rtd_val;
+            vcu_live_flags.sdc_val = sdc_val;
+            vcu_live_flags.imd_status = inverter_state_can_frame.data[ORION_IMD_STATUS_INDEX];
+            vcu_live_flags.bms_status = inverter_state_can_frame.data[ORION_BMS_STATUS_INDEX];
+
 
             if (current_state == NOT_READY) {
 
@@ -783,12 +793,12 @@ void main (void)
             // TODO add diagnostic messages
             vcu_diag_can_frame.data[0] = vcu_heartbeat;
             vcu_diag_can_frame.data[1] = pack_diag_flags(&vcu_diag_flags);
-            vcu_diag_can_frame.data[2] = controls_bus_error_count;
-            vcu_diag_can_frame.data[3] = telemetry_bus_error_count;
-            vcu_diag_can_frame.data[4] = 0; // TODO add error codes here
-            vcu_diag_can_frame.data[5] = 0; // TODO add error codes here
-            vcu_diag_can_frame.data[6] = 0; // TODO add error codes here
-            vcu_diag_can_frame.data[7] = 0; // TODO add error codes here
+            vcu_diag_can_frame.data[2] = pack_live_flags(&vcu_live_flags);
+            vcu_diag_can_frame.data[3] = controls_bus_failure_count;
+            vcu_diag_can_frame.data[4] = telemetry_bus_failure_count;
+            vcu_diag_can_frame.data[5] = controls_tx_error_ctr;
+            vcu_diag_can_frame.data[6] = controls_rx_error_ctr;
+            vcu_diag_can_frame.data[7] = telemetry_rx_error_ctr;
 
 
             write_can_msg(handle_controls_fifo_w, &vcu_diag_can_frame);
@@ -835,7 +845,7 @@ void main (void)
 
             // if so, reset
             if (controls_error != IO_E_OK) {
-                controls_bus_error_count++;
+                controls_bus_failure_count++;
                 // Restart CAN bus
                 IO_CAN_MsgStatus(handle_inverter_motor_info_r);
 
@@ -934,7 +944,7 @@ void main (void)
             }
 
             if (telemetry_error != IO_E_OK) {
-                telemetry_bus_error_count++;
+                telemetry_bus_failure_count++;
                 // de init handle
                 IO_CAN_DeInitHandle(handle_telemetry_fifo_w);
 
