@@ -539,9 +539,8 @@ void main (void)
             vcu_live_flags.bse_out_of_range_fault = bse_error == BSE_OUT_OF_RANGE_ERROR;
             vcu_live_flags.rtd_val = rtd_val;
             vcu_live_flags.sdc_val = sdc_val;
-            vcu_live_flags.imd_status = inverter_state_can_frame.data[ORION_IMD_STATUS_INDEX];
-            vcu_live_flags.bms_status = inverter_state_can_frame.data[ORION_BMS_STATUS_INDEX];
-
+            vcu_live_flags.imd_status = orion_1_can_frame.data[ORION_IMD_STATUS_INDEX];
+            vcu_live_flags.bms_status = orion_1_can_frame.data[ORION_BMS_STATUS_INDEX];
 
             if (current_state == NOT_READY) {
 

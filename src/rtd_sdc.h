@@ -4,8 +4,8 @@
 /**************************************************************************
 * RTD Settings
 ***************************************************************************/
-#define RTD_ON 0
-#define RTD_OFF 1
+#define RTD_ON 1
+#define RTD_OFF 0
 
 // number of successive cycles for debouncing is 100 ms
 #define RTD_DEBOUNCING_THRESH THRESHHOLD_100_MS

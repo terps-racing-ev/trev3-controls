@@ -25,9 +25,10 @@ void get_rtd(bool *rtd_val) {
     if (IGNORE_RTD_SWITCH) {
         *rtd_val = RTD_ON;
     } else {
-        IO_DI_Get(IO_PIN_RTD, rtd_val);
+        bool rtd_raw;
+        IO_DI_Get(IO_PIN_RTD, &rtd_raw);
 
-        *rtd_val = debounce_input(&rtd_debouncing_info, *rtd_val);
+        *rtd_val = debounce_input(&rtd_debouncing_info, rtd_raw);
     }    
 }
 
@@ -43,8 +44,9 @@ void get_sdc(bool *sdc_val) {
     if (IGNORE_SDC_OFF) {
         *sdc_val = SDC_ON;
     } else {
-        IO_DI_Get(IO_PIN_SDC, sdc_val);
+        bool sdc_raw;
+        IO_DI_Get(IO_PIN_SDC, &sdc_raw);
 
-        *sdc_val = debounce_input(&sdc_debouncing_info, *sdc_val);
+        *sdc_val = debounce_input(&sdc_debouncing_info, sdc_raw);
     }
 }
