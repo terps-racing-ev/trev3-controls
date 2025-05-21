@@ -334,7 +334,7 @@ void main (void)
                  , 0x7FF);*/
 
     /* rtd with 10k pull-up resistor*/
-    bool rtd_val = FALSE;
+    bool rtd_val = RTD_OFF;
     IO_DI_Init( IO_PIN_RTD,
                 IO_DI_PU_10K );
 
@@ -376,7 +376,7 @@ void main (void)
     ubyte1 bse_error = BSE_NO_ERROR;
 
     /* sdc with 10k pull-down resistor*/
-    bool sdc_val;
+    bool sdc_val = SDC_OFF;
     IO_DI_Init( IO_PIN_SDC,
                 IO_DI_PD_10K );
 
@@ -537,8 +537,8 @@ void main (void)
             vcu_live_flags.apps_out_of_range_fault = apps_error == APPS_OUT_OF_RANGE_ERROR;
             vcu_live_flags.apps_implausibility_fault = apps_error == APPS_IMPLAUSIBILITY_ERROR;
             vcu_live_flags.bse_out_of_range_fault = bse_error == BSE_OUT_OF_RANGE_ERROR;
-            vcu_live_flags.rtd_val = rtd_val;
-            vcu_live_flags.sdc_val = sdc_val;
+            vcu_live_flags.rtd_val = rtd_val == RTD_ON;
+            vcu_live_flags.sdc_val = sdc_val == SDC_ON;
             vcu_live_flags.imd_status = orion_1_can_frame.data[ORION_IMD_STATUS_INDEX];
             vcu_live_flags.bms_status = orion_1_can_frame.data[ORION_BMS_STATUS_INDEX];
 
