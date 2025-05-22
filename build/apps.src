@@ -1,5 +1,5 @@
-	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09007774
-	; Options: -f cc18936a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=5 -DRTS_TTC_FLASH_DATE_DAY=17 -DRTS_TTC_FLASH_DATE_HOUR=17 -DRTS_TTC_FLASH_DATE_MINUTE=38 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\apps.src
+	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09467762
+	; Options: -f cc56188a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=5 -DRTS_TTC_FLASH_DATE_DAY=22 -DRTS_TTC_FLASH_DATE_HOUR=13 -DRTS_TTC_FLASH_DATE_MINUTE=52 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\apps.src
 	; Module start
 	.source	'src/apps.c'
 code_voltage_to_pct_travel_apps_1	.section	code, cluster 'voltage_to_pct_travel_apps_1', new
@@ -26,17 +26,17 @@ code_voltage_to_pct_travel_apps_1	.section	code, cluster 'voltage_to_pct_travel_
 ; src/apps.c	    19  
 ; src/apps.c	    20  ubyte1 voltage_to_pct_travel_apps_1(ubyte2 apps_1_voltage) {
 ; Function _voltage_to_pct_travel_apps_1
-_42:
+_46:
 _voltage_to_pct_travel_apps_1	.proc	far
 
 ; src/apps.c	    21      if (apps_1_voltage < APPS_1_MIN_VOLTAGE) {
 	cmpw	r2,#0x40f
 	jmp+	cc_uge,_2
-_582:
+_622:
 
 ; src/apps.c	    22          return 0;
 	movb	rl2,#0x0
-_184:
+_182:
 
 ; src/apps.c	    23      }
 ; src/apps.c	    24  
@@ -51,21 +51,21 @@ _184:
 _2:
 	cmpw	r2,#0x1130
 	jmp+	cc_ule,_4
-_583:
+_623:
 	movb	rl2,#0x64
-_185:
+_183:
 	ret
 _4:
 	subw	r2,#0x40f
-_584:
+_624:
 	movw	r11,#0x21
-_585:
+_625:
 	movw	MDL,r2
 	divu	r11
 	movw	r2,MDL
-_186:
+_184:
 	ret
-_109:
+_113:
 	; End of function
 	; End of section
 
@@ -75,17 +75,17 @@ code_voltage_to_pct_travel_apps_2	.section	code, cluster 'voltage_to_pct_travel_
 ; src/apps.c	    32  
 ; src/apps.c	    33  ubyte1 voltage_to_pct_travel_apps_2(ubyte2 apps_2_voltage) {
 ; Function _voltage_to_pct_travel_apps_2
-_54:
+_58:
 _voltage_to_pct_travel_apps_2	.proc	far
 
 ; src/apps.c	    34      if (apps_2_voltage < APPS_2_MIN_VOLTAGE) {
 	cmpw	r2,#0x294
 	jmp+	cc_uge,_7
-_590:
+_630:
 
 ; src/apps.c	    35          return 0;
 	movb	rl2,#0x0
-_187:
+_185:
 
 ; src/apps.c	    36      }
 ; src/apps.c	    37  
@@ -100,21 +100,21 @@ _187:
 _7:
 	cmpw	r2,#0xfb0
 	jmp+	cc_ule,_9
-_591:
+_631:
 	movb	rl2,#0x64
-_188:
+_186:
 	ret
 _9:
 	subw	r2,#0x294
-_592:
+_632:
 	movw	r11,#0x21
-_593:
+_633:
 	movw	MDL,r2
 	divu	r11
 	movw	r2,MDL
-_189:
+_187:
 	ret
-_114:
+_118:
 	; End of function
 	; End of section
 
@@ -124,17 +124,17 @@ code_get_filtered_apps1_voltage	.section	code, cluster 'get_filtered_apps1_volta
 ; src/apps.c	    45  
 ; src/apps.c	    46  ubyte2 get_filtered_apps1_voltage(void) {
 ; Function _get_filtered_apps1_voltage
-_66:
+_70:
 _get_filtered_apps1_voltage	.proc	far
 	subw	r15,#0x4
-_190:
+_188:
 
 ; src/apps.c	    47      if (moving_average_structs_initialized) {
 	movb	rh4,#0x0
 	extp	#@pag(_moving_average_structs_initialized),#0x1
 	cmpb	rh4,@pof(_moving_average_structs_initialized)
 	jmp+	cc_eq,_12
-_177:
+_175:
 
 ; src/apps.c	    48          ubyte2 apps_1_val;
 ; src/apps.c	    49          bool apps_1_fresh;
@@ -142,29 +142,29 @@ _177:
 ; src/apps.c	    51          // get voltage values
 ; src/apps.c	    52          IO_ADC_Get(IO_PIN_APPS_1, &apps_1_val, &apps_1_fresh);
 	movb	rl2,#0x8
-_656:
+_693:
 	movw	r4,r15
 	andw	r4,#0x3fff
 	orw	r4,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r12,#@seg(__lc_ub_user_stack+0xffff)
-_657:
+_694:
 	movw	r11,#0x2
 	addw	r11,r15
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r5,r12
 	call	_IO_ADC_Get
-_658:
+_695:
 
 ; src/apps.c	    53  
 ; src/apps.c	    54          // uncomment once ready to use moving average filter
 ; src/apps.c	    55          return filter_point(apps_1_val, &apps_1_moving_average_info);
 	movw	r2,[r15+#0x0]
-_659:
+_696:
 	movw	r4,#@sof(_apps_1_moving_average_info)
 	movw	r5,#@seg(_apps_1_moving_average_info)
 	call	_filter_point
-_660:
+_697:
 	jmp	_13
 _12:
 
@@ -177,9 +177,9 @@ _12:
 ; src/apps.c	    60  }
 _13:
 	addw	r15,#0x4
-_201:
+_199:
 	ret
-_124:
+_128:
 	; End of function
 	; End of section
 
@@ -187,506 +187,492 @@ code_get_filtered_apps2_voltage	.section	code, cluster 'get_filtered_apps2_volta
 	.global	_get_filtered_apps2_voltage
 
 ; src/apps.c	    61  
-; src/apps.c	    62  
-; src/apps.c	    63  ubyte2 get_filtered_apps2_voltage(void) {
+; src/apps.c	    62  ubyte2 get_filtered_apps2_voltage(void) {
 ; Function _get_filtered_apps2_voltage
-_78:
+_82:
 _get_filtered_apps2_voltage	.proc	far
 	subw	r15,#0x4
-_232:
+_230:
 
-; src/apps.c	    64      if (moving_average_structs_initialized) {
+; src/apps.c	    63      if (moving_average_structs_initialized) {
 	movb	rh4,#0x0
 	extp	#@pag(_moving_average_structs_initialized),#0x1
 	cmpb	rh4,@pof(_moving_average_structs_initialized)
 	jmp+	cc_eq,_15
-_180:
+_178:
 
-; src/apps.c	    65          ubyte2 apps_2_val;
-; src/apps.c	    66          bool apps_2_fresh;
-; src/apps.c	    67  
-; src/apps.c	    68          // get voltage values
-; src/apps.c	    69          IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
+; src/apps.c	    64          ubyte2 apps_2_val;
+; src/apps.c	    65          bool apps_2_fresh;
+; src/apps.c	    66  
+; src/apps.c	    67          // get voltage values
+; src/apps.c	    68          IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
 	movb	rl2,#0x9
-_665:
+_702:
 	movw	r4,r15
 	andw	r4,#0x3fff
 	orw	r4,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r12,#@seg(__lc_ub_user_stack+0xffff)
-_666:
+_703:
 	movw	r11,#0x2
 	addw	r11,r15
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r5,r12
 	call	_IO_ADC_Get
-_667:
+_704:
 
-; src/apps.c	    70  
-; src/apps.c	    71          // uncomment once ready to use moving average filter
-; src/apps.c	    72          return filter_point(apps_2_val, &apps_2_moving_average_info);
+; src/apps.c	    69  
+; src/apps.c	    70          // uncomment once ready to use moving average filter
+; src/apps.c	    71          return filter_point(apps_2_val, &apps_2_moving_average_info);
 	movw	r2,[r15+#0x0]
-_668:
+_705:
 	movw	r4,#@sof(_apps_2_moving_average_info)
 	movw	r5,#@seg(_apps_2_moving_average_info)
 	call	_filter_point
-_669:
+_706:
 	jmp	_16
 _15:
 
-; src/apps.c	    73          // return apps_2_val;
-; src/apps.c	    74      }
-; src/apps.c	    75  
-; src/apps.c	    76      return 0;
+; src/apps.c	    72          // return apps_2_val;
+; src/apps.c	    73      }
+; src/apps.c	    74  
+; src/apps.c	    75      return 0;
 	movw	r2,#0x0
 
-; src/apps.c	    77  }
+; src/apps.c	    76  }
 _16:
 	addw	r15,#0x4
-_243:
+_241:
 	ret
-_129:
+_133:
 	; End of function
 	; End of section
 
 code_get_apps	.section	code, cluster 'get_apps', new
 	.global	_get_apps
 
-; src/apps.c	    78  
-; src/apps.c	    79  
-; src/apps.c	    80  
-; src/apps.c	    81  // gets apps values, puts average pct travel into apps_pct_result
-; src/apps.c	    82  // if an error is detected, sets error to error code if num_errors is greater than APPS_REPEATED_ERROR_MAX
-; src/apps.c	    83  void get_apps(ubyte1 *apps_pct_result, ubyte1 *error, ubyte1 *num_errors) {
+; src/apps.c	    77  
+; src/apps.c	    78  // gets apps values, puts average pct travel into apps_pct_result
+; src/apps.c	    79  // if an error is detected, sets error to error code if num_errors is greater than APPS_REPEATED_ERROR_MAX
+; src/apps.c	    80  void get_apps(ubyte1 *apps_pct_result, ubyte1 *error, ubyte1 *num_errors) {
 ; Function _get_apps
-_90:
+_94:
 _get_apps	.proc	far
 	movw	[-r15],r0
-_274:
+_272:
+	movw	[-r15],r1
+_283:
 	movw	[-r15],r6
-_285:
+_294:
 	movw	[-r15],r7
-_296:
+_305:
 	movw	[-r15],r8
-_307:
+_316:
 	movw	[-r15],r9
-_318:
+_327:
 	movw	[-r15],r10
-_329:
-	subw	r15,#0xa
-_340:
-	movw	r8,r2
-	movw	r9,r3
-_571:
-	movw	r10,r4
-	movw	r6,r5
-_572:
-	movw	r7,r11
-	movw	r0,r12
-_573:
+_338:
+	subw	r15,#0x4
+_349:
+	movw	r1,r2
+	movw	r0,r3
+_611:
+	movw	r8,r4
+	movw	r9,r5
+_612:
+	movw	r10,r11
+	movw	r6,r12
+_613:
 
-; src/apps.c	    84      if (!moving_average_structs_initialized) {
+; src/apps.c	    81      if (!moving_average_structs_initialized) {
 	movb	rh4,#0x0
-_569:
+_609:
 	extp	#@pag(_moving_average_structs_initialized),#0x1
 	cmpb	rh4,@pof(_moving_average_structs_initialized)
 	jmp+	cc_ne,_18
-_598:
+_638:
 
-; src/apps.c	    85          initialize_moving_average_struct(&apps_1_moving_average_info);
+; src/apps.c	    82          initialize_moving_average_struct(&apps_1_moving_average_info);
 	movw	r2,#@sof(_apps_1_moving_average_info)
-_568:
+_608:
 	movw	r3,#@seg(_apps_1_moving_average_info)
 	call	_initialize_moving_average_struct
-_570:
+_610:
 
-; src/apps.c	    86          initialize_moving_average_struct(&apps_2_moving_average_info);
+; src/apps.c	    83          initialize_moving_average_struct(&apps_2_moving_average_info);
 	movw	r2,#@sof(_apps_2_moving_average_info)
 	movw	r3,#@seg(_apps_2_moving_average_info)
 	call	_initialize_moving_average_struct
-_599:
+_639:
 
-; src/apps.c	    87          moving_average_structs_initialized = TRUE;
+; src/apps.c	    84          moving_average_structs_initialized = TRUE;
 	movb	rh4,#0x1
-_600:
+_640:
 	extp	#@pag(_moving_average_structs_initialized),#0x1
 	movb	@pof(_moving_average_structs_initialized),rh4
 _18:
 
-; src/apps.c	    88      }
-; src/apps.c	    89  
-; src/apps.c	    90      ubyte2 apps_1_val;
-; src/apps.c	    91      bool apps_1_fresh;
-; src/apps.c	    92      ubyte2 apps_2_val;
-; src/apps.c	    93      bool apps_2_fresh;
-; src/apps.c	    94  
-; src/apps.c	    95      // get voltage values
-; src/apps.c	    96      IO_ADC_Get(IO_PIN_APPS_1, &apps_1_val, &apps_1_fresh);
-	movb	rl2,#0x8
-_601:
-	movw	r4,r15
-	andw	r4,#0x3fff
-	orw	r4,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	r5,#@seg(__lc_ub_user_stack+0xffff)
-_602:
-	movw	r11,#0x5
-	addw	r11,r15
-	andw	r11,#0x3fff
-	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	r12,r5
-	call	_IO_ADC_Get
-_603:
-
-; src/apps.c	    97      IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
-	movb	rl2,#0x9
-_604:
-	movw	r4,#0x2
-	addw	r4,r15
-	andw	r4,#0x3fff
-	orw	r4,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	r5,#@seg(__lc_ub_user_stack+0xffff)
-_605:
-	movw	r11,#0x4
-	addw	r11,r15
-	andw	r11,#0x3fff
-	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
-	movw	r12,r5
-	call	_IO_ADC_Get
-_153:
+; src/apps.c	    85      }
+; src/apps.c	    86  
+; src/apps.c	    87      // Reset error every call for bit masking
+; src/apps.c	    88      *error = APPS_NO_ERROR;
 	movb	rh4,#0x0
+_641:
+	exts	r9,#0x1
+	movb	[r8],rh4
+_150:
 
 ; src/apps.c	    47      if (moving_average_structs_initialized) {      (inlined)
 	extp	#@pag(_moving_average_structs_initialized),#0x1
 	cmpb	rh4,@pof(_moving_average_structs_initialized)
 	jmp+	cc_eq,_19
-_156:
+_154:
 	movb	rl2,#0x8
-_606:
-	movw	r4,#0x6
-	addw	r4,r15
+_642:
+	movw	r4,r15
 	andw	r4,#0x3fff
 	orw	r4,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r5,#@seg(__lc_ub_user_stack+0xffff)
-_607:
-	movw	r11,#0x8
+_643:
+	movw	r11,#0x2
 	addw	r11,r15
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r12,r5
 	call	_IO_ADC_Get
-_608:
-	movw	r2,[r15+#0x6]
-_609:
+_644:
+	movw	r2,[r15+#0x0]
+_645:
 	movw	r4,#@sof(_apps_1_moving_average_info)
 	movw	r5,#@seg(_apps_1_moving_average_info)
 	call	_filter_point
-_610:
+_646:
+	movw	r7,r2
 
 ; src/apps.c	    55          return filter_point(apps_1_val, &apps_1_moving_average_info);      (inlined)
 	jmp	_20
 
 ; src/apps.c	    47      if (moving_average_structs_initialized) {      (inlined)
 _19:
-	movw	r2,#0x0
+	movw	r7,#0x0
 
 ; src/apps.c	    60  }      (inlined)
 _20:
-
-; src/apps.c	    98  
-; src/apps.c	    99      apps_1_val = get_filtered_apps1_voltage();
-	movw	[r15+#0x0],r2
-_162:
 	movb	rh4,#0x0
 
-; src/apps.c	    64      if (moving_average_structs_initialized) {      (inlined)
+; src/apps.c	    63      if (moving_average_structs_initialized) {      (inlined)
 	extp	#@pag(_moving_average_structs_initialized),#0x1
 	cmpb	rh4,@pof(_moving_average_structs_initialized)
 	jmp+	cc_eq,_21
-_165:
+_162:
 	movb	rl2,#0x9
-_611:
-	movw	r4,#0x6
-	addw	r4,r15
+_647:
+	movw	r4,r15
 	andw	r4,#0x3fff
 	orw	r4,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r5,#@seg(__lc_ub_user_stack+0xffff)
-_612:
-	movw	r11,#0x8
+_648:
+	movw	r11,#0x2
 	addw	r11,r15
 	andw	r11,#0x3fff
 	orw	r11,#@sof(__lc_ub_user_stack+0xffff) & 0xc000
 	movw	r12,r5
 	call	_IO_ADC_Get
-_613:
-	movw	r2,[r15+#0x6]
-_614:
+_649:
+	movw	r2,[r15+#0x0]
+_650:
 	movw	r4,#@sof(_apps_2_moving_average_info)
 	movw	r5,#@seg(_apps_2_moving_average_info)
 	call	_filter_point
-_615:
+_651:
 
-; src/apps.c	    72          return filter_point(apps_2_val, &apps_2_moving_average_info);      (inlined)
+; src/apps.c	    71          return filter_point(apps_2_val, &apps_2_moving_average_info);      (inlined)
 	jmp	_22
 
-; src/apps.c	    64      if (moving_average_structs_initialized) {      (inlined)
+; src/apps.c	    63      if (moving_average_structs_initialized) {      (inlined)
 _21:
 	movw	r2,#0x0
 
-; src/apps.c	    77  }      (inlined)
+; src/apps.c	    76  }      (inlined)
 _22:
 
-; src/apps.c	   100      apps_2_val = get_filtered_apps2_voltage();
-	movw	[r15+#0x2],r2
-_170:
-
-; src/apps.c	   101  
-; src/apps.c	   102      bool apps_1_within_threshhold = (apps_1_val >= (APPS_1_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_1_val <= (APPS_1_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
-; src/apps.c	   103      bool apps_2_within_threshhold = (apps_2_val >= (APPS_2_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_2_val <= (APPS_2_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
-	movw	r11,r2
-_616:
-	subw	r11,#0x19a
-_617:
+; src/apps.c	    89  
+; src/apps.c	    90      ubyte2 apps_1_val = get_filtered_apps1_voltage();;
+; src/apps.c	    91      ubyte2 apps_2_val = get_filtered_apps2_voltage();; 
+; src/apps.c	    92  
+; src/apps.c	    93      bool apps_1_within_threshhold = (apps_1_val >= (APPS_1_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_1_val <= (APPS_1_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
+	movw	r11,r7
+_652:
+	subw	r11,#0x315
+_653:
 	movw	r4,#0x0
-	cmpw	r11,#0xf10
+	cmpw	r11,#0xf15
 	jmp	cc_ugt,_23
 	movw	r4,#0x1
 _23:
-	movw	r11,[r15+#0x0]
-	subw	r11,#0x315
-_618:
 
-; src/apps.c	   104  
-; src/apps.c	   105      ubyte1 apps_1_pct;
-; src/apps.c	   106      ubyte1 apps_2_pct;
-; src/apps.c	   107      sbyte2 difference;
-; src/apps.c	   108  
-; src/apps.c	   109      // check that both apps are within the treshhold
-; src/apps.c	   110      if (apps_1_within_threshhold &&
-	cmpw	r11,#0xf15
-	jmp-	cc_ugt,_24
-_619:
+; src/apps.c	    94      bool apps_2_within_threshhold = (apps_2_val >= (APPS_2_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_2_val <= (APPS_2_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
+	movw	r11,r2
+_654:
+	subw	r11,#0x19a
+_655:
+	movw	r5,#0x0
+	cmpw	r11,#0xf10
+	jmp	cc_ugt,_24
+	movw	r5,#0x1
+_24:
 
-; src/apps.c	   111          apps_2_within_threshhold) {
+; src/apps.c	    95  
+; src/apps.c	    96      ubyte1 apps_1_pct;
+; src/apps.c	    97      ubyte1 apps_2_pct;
+; src/apps.c	    98      sbyte2 difference;
+; src/apps.c	    99  
+; src/apps.c	   100      // check that both apps are within the treshhold
+; src/apps.c	   101      if (apps_1_within_threshhold &&
 	cmpb	rl4,#0x0
-	jmp	cc_eq,_25
-_620:
+	jmp-	cc_eq,_25
+_656:
 
-; src/apps.c	   112  
-; src/apps.c	   113          apps_1_pct = voltage_to_pct_travel_apps_1(apps_1_val);
-	movw	r11,[r15+#0x0]
-_172:
+; src/apps.c	   102          apps_2_within_threshhold) {
+	cmpb	rl5,#0x0
+	jmp-	cc_eq,_26
+_170:
 
 ; src/apps.c	    21      if (apps_1_voltage < APPS_1_MIN_VOLTAGE) {      (inlined)
-	cmpw	r11,#0x40f
-	jmp+	cc_uge,_26
-_621:
+	cmpw	r7,#0x40f
+	jmp+	cc_uge,_27
+_657:
 	movb	rl4,#0x0
 
 ; src/apps.c	    22          return 0;      (inlined)
-	jmp	_27
+	jmp	_28
 
 ; src/apps.c	    21      if (apps_1_voltage < APPS_1_MIN_VOLTAGE) {      (inlined)
-_26:
+_27:
 
 ; src/apps.c	    25      if (apps_1_voltage > APPS_1_MAX_VOLTAGE) {      (inlined)
-	cmpw	r11,#0x1130
-	jmp+	cc_ule,_28
-_622:
+	cmpw	r7,#0x1130
+	jmp+	cc_ule,_29
+_658:
 	movb	rl4,#0x64
 
 ; src/apps.c	    26          return 100;      (inlined)
-	jmp	_29
+	jmp	_30
 
 ; src/apps.c	    25      if (apps_1_voltage > APPS_1_MAX_VOLTAGE) {      (inlined)
-_28:
-	subw	r11,#0x40f
-_623:
-	movw	r12,#0x21
-_624:
-	movw	MDL,r11
-	divu	r12
+_29:
+	subw	r7,#0x40f
+_659:
+	movw	r11,#0x21
+_660:
+	movw	MDL,r7
+	divu	r11
 	movw	r4,MDL
 
 ; src/apps.c	    31  }      (inlined)
-_29:
-_27:
+_30:
+_28:
 
 ; src/apps.c	    34      if (apps_2_voltage < APPS_2_MIN_VOLTAGE) {      (inlined)
 	cmpw	r2,#0x294
-	jmp+	cc_uge,_30
-_625:
+	jmp+	cc_uge,_31
+_661:
 	movb	rl5,#0x0
 
 ; src/apps.c	    35          return 0;      (inlined)
-	jmp	_31
+	jmp	_32
 
 ; src/apps.c	    34      if (apps_2_voltage < APPS_2_MIN_VOLTAGE) {      (inlined)
-_30:
+_31:
 
 ; src/apps.c	    38      if (apps_2_voltage > APPS_2_MAX_VOLTAGE) {      (inlined)
 	cmpw	r2,#0xfb0
-	jmp+	cc_ule,_32
-_626:
+	jmp+	cc_ule,_33
+_662:
 	movb	rl5,#0x64
 
 ; src/apps.c	    39          return 100;      (inlined)
-	jmp	_33
+	jmp	_34
 
 ; src/apps.c	    38      if (apps_2_voltage > APPS_2_MAX_VOLTAGE) {      (inlined)
-_32:
+_33:
 	subw	r2,#0x294
-_627:
+_663:
 	movw	r11,#0x21
-_628:
+_664:
 	movw	MDL,r2
 	divu	r11
 	movw	r5,MDL
 
 ; src/apps.c	    44  }      (inlined)
-_33:
-_31:
-
-; src/apps.c	   114          apps_2_pct = voltage_to_pct_travel_apps_2(apps_2_val);
-; src/apps.c	   115  
-; src/apps.c	   116          difference = apps_1_pct - apps_2_pct;
-	movbz	r11,rl4
-_629:
-	movbz	r12,rl5
-_630:
-	subw	r11,r12
-_631:
-
-; src/apps.c	   117  
-; src/apps.c	   118          // check if there's an implausible deviation between the two
-; src/apps.c	   119          if ((Abs(difference)) >= APPS_MIN_IMPLAUSIBLE_DEVIATION) {
-	jmp	cc_nn,_34
-_632:
-	negw	r11
 _34:
-	cmpw	r11,#0xa
-	jmp+	cc_slt,_35
-_633:
+_32:
 
-; src/apps.c	   120              // only error out if APPS_REPEATED_ERROR_MAX errors have been encountered in a row
-; src/apps.c	   121              (*num_errors)++;
-	exts	r0,#0x1
-	movb	rh4,[r7]
-_634:
-	addb	rh4,#0x1
-	exts	r0,#0x1
-	movb	[r7],rh4
-_635:
+; src/apps.c	   103  
+; src/apps.c	   104          apps_1_pct = voltage_to_pct_travel_apps_1(apps_1_val);
+; src/apps.c	   105          apps_2_pct = voltage_to_pct_travel_apps_2(apps_2_val);
+; src/apps.c	   106  
+; src/apps.c	   107          difference = apps_1_pct - apps_2_pct;
+	movbz	r11,rl4
+_665:
+	movbz	r12,rl5
+_666:
+	subw	r11,r12
+_667:
 
-; src/apps.c	   122              if ((*num_errors) > APPS_REPEATED_ERROR_MAX && !(IGNORE_APPS_ERROR)) {
-	exts	r0,#0x1
-	movb	rh4,[r7]
-_636:
-	cmpb	rh4,#0x14
-	jmp+	cc_ule,_36
-_637:
-
-; src/apps.c	   123                  *error = APPS_IMPLAUSIBILITY_ERROR;
-	movb	rh4,#0x2
-_638:
-
-; src/apps.c	   124              }
-; src/apps.c	   125              *apps_pct_result = 0;
-; src/apps.c	   126              return;
-	jmp	_37
+; src/apps.c	   108  
+; src/apps.c	   109          // check if there's an implausible deviation between the two
+; src/apps.c	   110          if ((Abs(difference)) >= APPS_MIN_IMPLAUSIBLE_DEVIATION) {
+	jmp	cc_nn,_35
+_668:
+	negw	r11
 _35:
+	cmpw	r11,#0xa
+	jmp+	cc_slt,_36
+_669:
 
-; src/apps.c	   127          }
-; src/apps.c	   128  
-; src/apps.c	   129          // set the result to the average of the two
-; src/apps.c	   130          *apps_pct_result = ((apps_1_pct) + (apps_2_pct)) / 2;
-	movbz	r4,rl4
-_639:
-	movbz	r11,rl5
-_640:
-	addw	r4,r11
-	ashr	r4,#0x1
-_641:
+; src/apps.c	   111              // only error out if APPS_REPEATED_ERROR_MAX errors have been encountered in a row
+; src/apps.c	   112              
+; src/apps.c	   113              if ((*num_errors) > APPS_REPEATED_ERROR_MAX && !(IGNORE_APPS_ERROR)) {
+	exts	r6,#0x1
+	movb	rh2,[r10]
+_670:
+	cmpb	rh2,#0x14
+	jmp+	cc_ule,_37
+_671:
 
-; src/apps.c	   131          if (*apps_pct_result <= APPS_DEADZONE) {
-	cmpb	rl4,#0x2
-	jmp+	cc_ugt,_38
-_642:
-
-; src/apps.c	   132              *apps_pct_result = 0;
-	movb	rl4,#0x0
-_38:
-
-; src/apps.c	   133          }
-; src/apps.c	   134          *num_errors = 0;
+; src/apps.c	   114                  *error |= APPS_IMPLAUSIBILITY_ERROR;
 	exts	r9,#0x1
-	movb	[r8],rl4
-_643:
-	movb	rh4,#0x0
-_644:
-	exts	r0,#0x1
-	movb	[r7],rh4
-_645:
-
-; src/apps.c	   135          *error = APPS_NO_ERROR;
-	exts	r6,#0x1
-	movb	[r10],rh4
-_646:
-	jmp	_39
-_25:
-_24:
-
-; src/apps.c	   136      } else {
-; src/apps.c	   137          // only error out if APPS_REPEATED_ERROR_MAX errors have been encountered in a row
-; src/apps.c	   138          (*num_errors)++;
-	exts	r0,#0x1
-	movb	rh4,[r7]
-_647:
-	addb	rh4,#0x1
-	exts	r0,#0x1
-	movb	[r7],rh4
-_648:
-
-; src/apps.c	   139          if ((*num_errors) > APPS_REPEATED_ERROR_MAX && !(IGNORE_APPS_ERROR)) {
-	exts	r0,#0x1
-	movb	rh4,[r7]
-_649:
-	cmpb	rh4,#0x14
-	jmp+	cc_ule,_40
-_650:
-
-; src/apps.c	   140              *error = APPS_OUT_OF_RANGE_ERROR;
-	movb	rh4,#0x1
-
-; src/apps.c	   141          }
-; src/apps.c	   142          *apps_pct_result = 0;
-; src/apps.c	   143      }
-; src/apps.c	   144  }
-_37:
-	exts	r6,#0x1
-	movb	[r10],rh4
-_40:
-_36:
-	movb	rh4,#0x0
-_651:
+	movb	rh4,[r8]
+_672:
+	bset	r4.10
 	exts	r9,#0x1
 	movb	[r8],rh4
+_673:
+	jmp	_38
+_36:
+
+; src/apps.c	   115              } else {
+; src/apps.c	   116                  (*num_errors)++;
+; src/apps.c	   117              }
+; src/apps.c	   118              *apps_pct_result = 0;
+; src/apps.c	   119              return;
+; src/apps.c	   120          }
+; src/apps.c	   121  
+; src/apps.c	   122          // set the result to the average of the two
+; src/apps.c	   123          *apps_pct_result = ((apps_1_pct) + (apps_2_pct)) / 2;
+	movbz	r4,rl4
+_674:
+	movbz	r11,rl5
+_675:
+	addw	r4,r11
+	ashr	r4,#0x1
+_676:
+
+; src/apps.c	   124          if (*apps_pct_result <= APPS_DEADZONE) {
+	cmpb	rl4,#0x2
+	jmp+	cc_ugt,_39
+_677:
+
+; src/apps.c	   125              *apps_pct_result = 0;
+	movb	rl4,#0x0
 _39:
-	addw	r15,#0xa
-_351:
+
+; src/apps.c	   126          }
+; src/apps.c	   127          *num_errors = 0;
+	exts	r0,#0x1
+	movb	[r1],rl4
+_678:
+	movb	rh4,#0x0
+_679:
+	exts	r6,#0x1
+	movb	[r10],rh4
+_680:
+	jmp	_40
+_26:
+_25:
+
+; src/apps.c	   128          
+; src/apps.c	   129      } else {
+; src/apps.c	   130          // only error out if APPS_REPEATED_ERROR_MAX errors have been encountered in a row       
+; src/apps.c	   131          if ((*num_errors) > APPS_REPEATED_ERROR_MAX && !(IGNORE_APPS_ERROR)) {
+	exts	r6,#0x1
+	movb	rh2,[r10]
+_681:
+	cmpb	rh2,#0x14
+	jmp+	cc_ule,_41
+_682:
+
+; src/apps.c	   132              if (!apps_1_within_threshhold) {
+	cmpb	rl4,#0x0
+	jmp+	cc_ne,_42
+_683:
+
+; src/apps.c	   133                  *error |= APPS_1_OUT_OF_RANGE_ERROR;
+	exts	r9,#0x1
+	movb	rh4,[r8]
+_684:
+	bset	r4.8
+	exts	r9,#0x1
+	movb	[r8],rh4
+_42:
+
+; src/apps.c	   134              }
+; src/apps.c	   135              if (!apps_2_within_threshhold) {
+	cmpb	rl5,#0x0
+	jmp+	cc_ne,_43
+_685:
+
+; src/apps.c	   136                  *error |= APPS_2_OUT_OF_RANGE_ERROR;
+	exts	r9,#0x1
+	movb	rh4,[r8]
+_686:
+	bset	r4.9
+	exts	r9,#0x1
+	movb	[r8],rh4
+_687:
+	jmp	_44
+_41:
+_37:
+
+; src/apps.c	   137              }
+; src/apps.c	   138          } else {
+; src/apps.c	   139              (*num_errors)++;
+	addb	rh2,#0x1
+	exts	r6,#0x1
+	movb	[r10],rh2
+_44:
+_43:
+_38:
+
+; src/apps.c	   140          }
+; src/apps.c	   141          *apps_pct_result = 0;
+	movb	rh4,#0x0
+_688:
+	exts	r0,#0x1
+	movb	[r1],rh4
+_40:
+
+; src/apps.c	   142      }
+; src/apps.c	   143  }
+	addw	r15,#0x4
+_360:
 	movw	r10,[r15+]
-_362:
+_371:
 	movw	r9,[r15+]
-_373:
+_382:
 	movw	r8,[r15+]
-_384:
+_393:
 	movw	r7,[r15+]
-_395:
+_404:
 	movw	r6,[r15+]
-_406:
+_415:
+	movw	r1,[r15+]
+_426:
 	movw	r0,[r15+]
-_417:
+_437:
 	ret
-_119:
+_123:
 	; End of function
 	; End of section
 
@@ -719,165 +705,162 @@ _apps_2_moving_average_info	.label	word
 	.calls	'_voltage_to_pct_travel_apps_2','',4,0
 	.calls	'_get_filtered_apps1_voltage','',4,4
 	.calls	'_get_filtered_apps2_voltage','',4,4
-	.calls	'_get_apps','',4,22
+	.calls	'_get_apps','',4,18
 	.extern	_IO_ADC_Get : far
 	.extern	_filter_point : far
 	.extern	_initialize_moving_average_struct : far
 	.extern	__lc_ub_user_stack : nearbyte
 	.debug		.debug_info
-_102:
-	.dl	1574
+_106:
+	.dl	1495
 	.dw	3
-	.dl	_103
+	.dl	_107
 	.db	4
-_101:
+_105:
 	.db	1
 	.db	'src/apps.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
-	.db	12,1
-	.dl	_104
-_148:
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1
+	.dl	_108
+_167:
 	.db	2
-	.db	'unsigned char',0,1,8
-_146:
-	.db	2
+	.db	'unsigned char',0,1,8,2
 	.db	'unsigned int',0,2,7
-_136:
+_140:
 	.db	3
 	.db	'voltage_to_pct_travel_apps_1',0,1,1,20,8,6
-	.dl	226
+	.dl	147
 	.db	1,1
-_137:
+_141:
 	.db	4
 	.db	'apps_1_voltage',0,1,20,44,2
-	.dl	243
-_174:
+	.dl	164
+_172:
 	.db	5,0
-_139:
+_143:
 	.db	3
 	.db	'voltage_to_pct_travel_apps_2',0,1,1,33,8,6
-	.dl	226
+	.dl	147
 	.db	1,1
-_140:
+_144:
 	.db	4
 	.db	'apps_2_voltage',0,1,33,44,2
-	.dl	243
-_176:
+	.dl	164
+_174:
 	.db	5,0
-_152:
+_151:
 	.db	3
 	.db	'get_filtered_apps1_voltage',0,1,1,46,8,6
-	.dl	243
+	.dl	164
 	.db	1,1
-_154:
+_152:
+	.db	6
+_153:
 	.db	6
 _155:
-	.db	6
-_157:
 	.db	7
 	.db	'apps_1_val',0,1,48,16,2
-	.dl	243
-_159:
+	.dl	164
+_157:
 	.db	7
 	.db	'apps_1_fresh',0,1,49,14,2
-	.dl	226
+	.dl	147
 	.db	0,0,0
-_161:
+_159:
 	.db	3
-	.db	'get_filtered_apps2_voltage',0,1,1,63,8,6
-	.dl	243
+	.db	'get_filtered_apps2_voltage',0,1,1,62,8,6
+	.dl	164
 	.db	1,1
+_160:
+	.db	6
+_161:
+	.db	6
 _163:
-	.db	6
-_164:
-	.db	6
-_166:
 	.db	7
-	.db	'apps_2_val',0,1,65,16,2
-	.dl	243
-_168:
+	.db	'apps_2_val',0,1,64,16,2
+	.dl	164
+_165:
 	.db	7
-	.db	'apps_2_fresh',0,1,66,14,2
-	.dl	226
+	.db	'apps_2_fresh',0,1,65,14,2
+	.dl	147
 	.db	0,0,0,8,5
-	.dl	243
+	.dl	164
 	.db	9
-	.dl	565
+	.dl	486
 	.db	8,5
-	.dl	226
+	.dl	147
 	.db	9
-	.dl	576
+	.dl	497
 	.db	10
 	.db	'IO_ADC_Get',0,2,132,3,14,6
-	.dl	243
+	.dl	164
 	.db	1,1,1,1,4
 	.db	'adc_channel',0,2,132,3,33,2
-	.dl	226
+	.dl	147
 	.db	4
 	.db	'adc_value',0,2,133,3,41,2
-	.dl	571
+	.dl	492
 	.db	4
 	.db	'fresh',0,2,134,3,39,2
-	.dl	582
+	.dl	503
 	.db	0
-_142:
+_146:
 	.db	8,5
-	.dl	226
+	.dl	147
 	.db	11,20
-	.dl	243
+	.dl	164
 	.db	12,9,0
-_183:
+_181:
 	.db	13
 	.db	'moving_average_info',0,3,15,8,24,14
 	.db	'points',0
-	.dl	677
+	.dl	598
 	.db	20,2,35,0,14
 	.db	'all_points_filled',0
-	.dl	226
+	.dl	147
 	.db	1,2,35,20,14
 	.db	'next_point_index',0
-	.dl	243
+	.dl	164
 	.db	2,2,35,22,0,8,5
-	.dl	686
+	.dl	607
 	.db	10
 	.db	'filter_point',0,3,27,8,6
-	.dl	243
+	.dl	164
 	.db	1,1,1,1,4
 	.db	'data_point',0,3,27,28,2
-	.dl	243
+	.dl	164
 	.db	4
 	.db	'info_struct',0,3,27,68,2
-	.dl	781
+	.dl	702
 	.db	0,15
 	.db	'initialize_moving_average_struct',0,3,29,6,6,1,1,1,1,4
 	.db	'info_struct',0,3,29,67,2
-	.dl	781
+	.dl	702
 	.db	0,16
 	.db	'void',0,8,5
-	.dl	919
+	.dl	840
 	.db	17
 	.db	'__prof_adm',0,1,1,1
-	.dl	925
+	.dl	846
 	.db	2
 	.db	'unsigned long int',0,4,7,17
 	.db	'__codeptr',0,1,1,1
-	.dl	950
+	.dl	871
 	.db	17
 	.db	'ubyte1',0,4,21,29
-	.dl	226
+	.dl	147
 	.db	17
 	.db	'ubyte2',0,4,22,29
-	.dl	243
+	.dl	164
 	.db	17
 	.db	'ubyte4',0,4,23,29
-	.dl	950
+	.dl	871
 	.db	17
 	.db	'bool',0,4,31,29
-	.dl	226
+	.dl	147
 	.db	17
 	.db	'IO_ErrorType',0,5,153,1,17
-	.dl	243
+	.dl	164
 	.db	18
 	.db	'_io_driver_reset_reason',0,6,162,3,14,1,19
 	.db	'IO_DRIVER_RESET_REASON_PORST',0,0,19
@@ -886,50 +869,50 @@ _183:
 	.db	'IO_DRIVER_RESET_REASON_SW',0,3,19
 	.db	'IO_DRIVER_RESET_REASON_UNKNOWN',0,4,0,17
 	.db	'IO_DRIVER_RESET_REASON',0,6,169,3,3
-	.dl	1069
+	.dl	990
 	.db	13
 	.db	'_io_driver_trap_info',0,6,174,3,16,10,14
 	.db	'trap_id',0
-	.dl	243
+	.dl	164
 	.db	2,2,35,0,14
 	.db	'cpu_tfr',0
-	.dl	243
+	.dl	164
 	.db	2,2,35,2,14
 	.db	'cpu_trapstat',0
-	.dl	243
+	.dl	164
 	.db	2,2,35,4,14
 	.db	'fault_location',0
-	.dl	950
+	.dl	871
 	.db	4,2,35,6,0,17
 	.db	'IO_DRIVER_TRAP_INFO',0,6,197,3,3
-	.dl	1283
+	.dl	1204
 	.db	13
 	.db	'bl_t_date_',0,7,122,16,4,14
 	.db	'date',0
-	.dl	950
+	.dl	871
 	.db	4,2,35,0,0,17
 	.db	'BL_T_DATE',0,7,131,1,3
-	.dl	1420
+	.dl	1341
 	.db	13
 	.db	'bl_t_can_id_',0,7,138,1,16,8,14
 	.db	'extended',0
-	.dl	950
+	.dl	871
 	.db	4,2,35,0,14
 	.db	'ID',0
-	.dl	950
+	.dl	871
 	.db	4,2,35,4,0,17
 	.db	'BL_T_CAN_ID',0,7,146,1,3
-	.dl	1470
+	.dl	1391
 	.db	20
-	.dl	226
+	.dl	147
 	.db	21,0,22
 	.db	'_lc_ub_user_stack',0,1,1,1,2
-	.dl	1541
+	.dl	1462
 	.db	1,1,0
 	; End of section
 
 	.debug		.debug_abbrev
-_103:
+_107:
 	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,16,6,0,0,2,36,0,3,8,11,15,62,15,0,0,3,46,1,3,8,32,13,58,15,59,15
 	.db	57,15,51,15,73,19,54,15,39,12,0,0,4,5,0,3,8,58,15,59,15,57,15,51,15,73,19,0,0,5,11,0,0,0,6,11,1,0,0,7
 	.db	52,0,3,8,58,15,59,15,57,15,51,15,73,19,0,0,8,15,0,51,15,73,19,0,0,9,38,0,73,19,0,0,10,46,1,3,8,58,15,59
@@ -941,12 +924,12 @@ _103:
 	; End of section
 
 	.debug		.debug_line
-_104:
-	.dl	_575-_574
-_574:
+_108:
+	.dl	_615-_614
+_614:
 	.dw	3
-	.dl	_577-_576
-_576:
+	.dl	_617-_616
+_616:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1
 	.db	'..\\..\\..\\Environment\\inc',0,0
 	.db	'src/apps.c',0,0,0,0
@@ -956,1652 +939,1147 @@ _576:
 	.db	'IO_Constants.h',0,1,0,0
 	.db	'IO_Driver.h',0,1,0,0
 	.db	'APDB.h',0,1,0,0,0
-_577:
-_575:
+_617:
+_615:
 	; End of section
 
 	.debug		.debug_pubnames
 	.dl	83
 	.dw	2
-	.dl	_102,1578,587
+	.dl	_106,1499,508
 	.db	'IO_ADC_Get',0
-	.dl	787
+	.dl	708
 	.db	'filter_point',0
-	.dl	855
+	.dl	776
 	.db	'initialize_moving_average_struct',0
 	.dl	0
 	; End of section
 
 	.debug		.debug_info, cluster 'voltage_to_pct_travel_apps_1'
-_105:
-	.dl	282
+_109:
+	.dl	203
 	.dw	3
-	.dl	_106
+	.dl	_110
 	.db	4,1
 	.db	'src/apps.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
-	.db	12,1
-	.dl	_108,_107
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1
+	.dl	_112,_111
 	.db	2
-	.dl	_101
+	.dl	_105
 	.db	3
-	.dl	_136
+	.dl	_140
 	.db	1
-	.dl	_42,_109,_41
+	.dl	_46,_113,_45
 	.db	12,19,146,176,2,0,64,36,146,161,2,0,33,4
-	.dl	_137,_138
+	.dl	_141,_142
 	.db	5
-	.dl	_42,_109
+	.dl	_46,_113
 	.db	0,0
 	; End of section
 
 	.debug		.debug_abbrev, cluster 'voltage_to_pct_travel_apps_1'
-_106:
+_110:
 	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,85,6,16,6,0,0,2,61,0,24,16,0,0,3,46,1,49,16,63,12,17,1,18,1,64,6
 	.db	42,9,0,0,4,5,0,49,16,2,6,0,0,5,11,0,17,1,18,1,0,0,0
 	; End of section
 
 	.debug		.debug_line, cluster 'voltage_to_pct_travel_apps_1'
-_107:
-	.dl	_579-_578
-_578:
+_111:
+	.dl	_619-_618
+_618:
 	.dw	3
-	.dl	_581-_580
-_580:
+	.dl	_621-_620
+_620:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
 	.db	'src/apps.c',0,0,0,0,0
-_581:
+_621:
 	.db	5,5,7,0,5,2
-	.dl	_42
+	.dl	_46
 	.db	3,20,1,5,16,9
-	.dw	_582-_42
+	.dw	_622-_46
 	.db	3,1,1,5,1,9
-	.dw	_184-_582
+	.dw	_182-_622
 	.db	3,9,1,5,5,7,9
-	.dw	_2-_184
+	.dw	_2-_182
 	.db	3,122,1,5,16,9
-	.dw	_583-_2
+	.dw	_623-_2
 	.db	3,1,1,5,1,9
-	.dw	_185-_583
+	.dw	_183-_623
 	.db	3,5,1,5,29,7,9
-	.dw	_4-_185
+	.dw	_4-_183
 	.db	3,126,1,5,75,9
-	.dw	_584-_4
+	.dw	_624-_4
 	.db	1,5,51,9
-	.dw	_585-_584
+	.dw	_625-_624
 	.db	1,5,1,9
-	.dw	_186-_585
+	.dw	_184-_625
 	.db	3,2,1,7,9
-	.dw	_109-_186
+	.dw	_113-_184
 	.db	0,1,1
-_579:
+_619:
 	; End of section
 
 	.debug		.debug_ranges, cluster 'voltage_to_pct_travel_apps_1'
-_108:
-	.dl	-1,_42,0,_109-_42,0,0
+_112:
+	.dl	-1,_46,0,_113-_46,0,0
 	; End of section
 
 	.debug		.debug_info, cluster 'voltage_to_pct_travel_apps_2'
-_110:
-	.dl	282
+_114:
+	.dl	203
 	.dw	3
-	.dl	_111
+	.dl	_115
 	.db	4,1
 	.db	'src/apps.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
-	.db	12,1
-	.dl	_113,_112
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1
+	.dl	_117,_116
 	.db	2
-	.dl	_101
+	.dl	_105
 	.db	3
-	.dl	_139
+	.dl	_143
 	.db	1
-	.dl	_54,_114,_53
+	.dl	_58,_118,_57
 	.db	12,19,146,176,2,0,64,36,146,161,2,0,33,4
-	.dl	_140,_141
+	.dl	_144,_145
 	.db	5
-	.dl	_54,_114
+	.dl	_58,_118
 	.db	0,0
 	; End of section
 
 	.debug		.debug_abbrev, cluster 'voltage_to_pct_travel_apps_2'
-_111:
+_115:
 	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,85,6,16,6,0,0,2,61,0,24,16,0,0,3,46,1,49,16,63,12,17,1,18,1,64,6
 	.db	42,9,0,0,4,5,0,49,16,2,6,0,0,5,11,0,17,1,18,1,0,0,0
 	; End of section
 
 	.debug		.debug_line, cluster 'voltage_to_pct_travel_apps_2'
-_112:
-	.dl	_587-_586
-_586:
+_116:
+	.dl	_627-_626
+_626:
 	.dw	3
-	.dl	_589-_588
-_588:
+	.dl	_629-_628
+_628:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
 	.db	'src/apps.c',0,0,0,0,0
-_589:
+_629:
 	.db	5,5,7,0,5,2
-	.dl	_54
+	.dl	_58
 	.db	3,33,1,5,16,9
-	.dw	_590-_54
+	.dw	_630-_58
 	.db	3,1,1,5,1,9
-	.dw	_187-_590
+	.dw	_185-_630
 	.db	3,9,1,5,5,7,9
-	.dw	_7-_187
+	.dw	_7-_185
 	.db	3,122,1,5,16,9
-	.dw	_591-_7
+	.dw	_631-_7
 	.db	3,1,1,5,1,9
-	.dw	_188-_591
+	.dw	_186-_631
 	.db	3,5,1,5,29,7,9
-	.dw	_9-_188
+	.dw	_9-_186
 	.db	3,126,1,5,75,9
-	.dw	_592-_9
+	.dw	_632-_9
 	.db	1,5,51,9
-	.dw	_593-_592
+	.dw	_633-_632
 	.db	1,5,1,9
-	.dw	_189-_593
+	.dw	_187-_633
 	.db	3,2,1,7,9
-	.dw	_114-_189
+	.dw	_118-_187
 	.db	0,1,1
-_587:
+_627:
 	; End of section
 
 	.debug		.debug_ranges, cluster 'voltage_to_pct_travel_apps_2'
-_113:
-	.dl	-1,_54,0,_114-_54,0,0
+_117:
+	.dl	-1,_58,0,_118-_58,0,0
 	; End of section
 
 	.debug		.debug_info, cluster 'get_apps'
-_115:
-	.dl	707
+_119:
+	.dl	576
 	.dw	3
-	.dl	_116
+	.dl	_120
 	.db	4,1
 	.db	'src/apps.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
-	.db	12,1
-	.dl	_118,_117
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1
+	.dl	_122,_121
 	.db	2
-	.dl	_101
+	.dl	_105
 	.db	3
-	.db	'get_apps',0,1,83,6,6,1,1,1
-	.dl	_90,_119,_89
+	.db	'get_apps',0,1,80,6,6,1,1,1
+	.dl	_94,_123,_93
 	.db	12,19,146,176,2,0,64,36,146,161,2,0,33,4
-	.db	'apps_pct_result',0,1,83,23,2
-	.dl	_142,_143
-	.db	4
-	.db	'error',0,1,83,48,2
-	.dl	_142,_144
-	.db	4
-	.db	'num_errors',0,1,83,63,2
-	.dl	_142,_145
-	.db	5
-	.dl	_90,_119
-	.db	5
-	.dl	_18,_119
-	.db	6
-	.db	'apps_1_val',0,1,90,12,2
+	.db	'apps_pct_result',0,1,80,23,2
 	.dl	_146,_147
+	.db	4
+	.db	'error',0,1,80,48,2
+	.dl	_146,_148
+	.db	4
+	.db	'num_errors',0,1,80,63,2
+	.dl	_146,_149
+	.db	5
+	.dl	_94,_123
+	.db	5
+	.dl	_150,_123
 	.db	6
-	.db	'apps_1_fresh',0,1,91,10,2
-	.dl	_148,_149
-	.db	6
-	.db	'apps_2_val',0,1,92,12,2
-	.dl	_146,_150
-	.db	6
-	.db	'apps_2_fresh',0,1,93,10,2
-	.dl	_148,_151
+	.dl	_151,_150,_20
 	.db	7
-	.dl	_152,_153,_20
+	.dl	_152,_150,_20
+	.db	7
+	.dl	_153,_154,_19
 	.db	8
-	.dl	_154,_153,_20
+	.dl	_155,_156
 	.db	8
-	.dl	_155,_156,_19
-	.db	9
 	.dl	_157,_158
-	.db	9
-	.dl	_159,_160
-	.db	0,0,0,7
-	.dl	_161,_162,_22
-	.db	8
-	.dl	_163,_162,_22
-	.db	8
-	.dl	_164,_165,_21
-	.db	9
-	.dl	_166,_167
-	.db	9
-	.dl	_168,_169
 	.db	0,0,0,5
-	.dl	_170,_119
+	.dl	_20,_123
 	.db	6
-	.db	'apps_2_within_threshhold',0,1,103,10,2
-	.dl	_148,_171
+	.dl	_159,_20,_22
 	.db	7
-	.dl	_136,_172,_27
+	.dl	_160,_20,_22
+	.db	7
+	.dl	_161,_162,_21
+	.db	8
+	.dl	_163,_164
+	.db	8
+	.dl	_165,_166
+	.db	0,0,0,5
+	.dl	_22,_123
+	.db	9
+	.db	'apps_1_within_threshhold',0,1,93,10,2
+	.dl	_167,_168
+	.db	9
+	.db	'apps_2_within_threshhold',0,1,94,10,2
+	.dl	_167,_169
+	.db	6
+	.dl	_140,_170,_28
 	.db	10
-	.dl	_137,_173
+	.dl	_141,_171
 	.db	11
-	.dl	_174,_172,_27
-	.db	0,7
-	.dl	_139,_27,_31
+	.dl	_172,_170,_28
+	.db	0,6
+	.dl	_143,_28,_32
 	.db	10
-	.dl	_140,_175
+	.dl	_144,_173
 	.db	11
-	.dl	_176,_27,_31
-	.db	0,0,0,0,0,0
+	.dl	_174,_28,_32
+	.db	0,0,0,0,0,0,0
 	; End of section
 
 	.debug		.debug_abbrev, cluster 'get_apps'
-_116:
+_120:
 	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,85,6,16,6,0,0,2,61,0,24,16,0,0,3,46,1,3,8,58,15,59,15,57,15,51,15
 	.db	54,15,39,12,63,12,17,1,18,1,64,6,42,9,0,0,4,5,0,3,8,58,15,59,15,57,15,51,15,73,16,2,6,0,0,5,11,1,17,1
-	.db	18,1,0,0,6,52,0,3,8,58,15,59,15,57,15,51,15,73,16,2,6,0,0,7,29,1,49,16,17,1,18,1,0,0,8,11,1,49,16,17,1
-	.db	18,1,0,0,9,52,0,49,16,2,6,0,0,10,5,0,49,16,2,6,0,0,11,11,0,49,16,17,1,18,1,0,0,0
+	.db	18,1,0,0,6,29,1,49,16,17,1,18,1,0,0,7,11,1,49,16,17,1,18,1,0,0,8,52,0,49,16,2,6,0,0,9,52,0,3,8,58,15,59
+	.db	15,57,15,51,15,73,16,2,6,0,0,10,5,0,49,16,2,6,0,0,11,11,0,49,16,17,1,18,1,0,0,0
 	; End of section
 
 	.debug		.debug_line, cluster 'get_apps'
-_117:
-	.dl	_595-_594
-_594:
+_121:
+	.dl	_635-_634
+_634:
 	.dw	3
-	.dl	_597-_596
-_596:
+	.dl	_637-_636
+_636:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
 	.db	'src/apps.c',0,0,0,0,0
-_597:
+_637:
 	.db	5,6,7,0,5,2
-	.dl	_90
-	.db	3,210,0,1,5,10,9
-	.dw	_573-_90
+	.dl	_94
+	.db	3,207,0,1,5,10,9
+	.dw	_613-_94
 	.db	3,1,1,5,43,9
-	.dw	_598-_573
+	.dw	_638-_613
 	.db	3,1,1,9
-	.dw	_570-_598
+	.dw	_610-_638
 	.db	3,1,1,5,46,9
-	.dw	_599-_570
+	.dw	_639-_610
 	.db	3,1,1,5,44,9
-	.dw	_600-_599
-	.db	1,5,16,9
-	.dw	_18-_600
-	.db	3,9,1,5,32,9
-	.dw	_601-_18
-	.db	1,5,45,9
-	.dw	_602-_601
-	.db	1,5,16,9
-	.dw	_603-_602
-	.db	3,1,1,5,32,9
-	.dw	_604-_603
-	.db	1,5,45,9
-	.dw	_605-_604
-	.db	1,5,5,9
-	.dw	_153-_605
-	.db	3,78,1,5,20,9
-	.dw	_156-_153
-	.db	3,5,1,5,36,9
-	.dw	_606-_156
-	.db	1,5,49,9
-	.dw	_607-_606
-	.db	1,5,29,9
-	.dw	_608-_607
-	.db	3,3,1,5,42,9
-	.dw	_609-_608
-	.db	1,5,9,9
-	.dw	_610-_609
-	.db	1,5,5,9
-	.dw	_19-_610
-	.db	3,4,1,5,16,9
-	.dw	_20-_19
-	.db	3,40,1,5,5,9
-	.dw	_162-_20
-	.db	3,93,1,5,20,9
-	.dw	_165-_162
-	.db	3,5,1,5,36,9
-	.dw	_611-_165
-	.db	1,5,49,9
-	.dw	_612-_611
-	.db	1,5,29,9
-	.dw	_613-_612
-	.db	3,3,1,5,42,9
-	.dw	_614-_613
-	.db	1,5,9,9
-	.dw	_615-_614
-	.db	1,5,5,9
-	.dw	_21-_615
-	.db	3,4,1,5,16,9
-	.dw	_22-_21
-	.db	3,24,1,5,72,9
-	.dw	_170-_22
-	.db	3,3,1,5,102,9
-	.dw	_616-_170
-	.db	1,5,113,9
-	.dw	_617-_616
-	.db	1,5,102,9
-	.dw	_23-_617
-	.db	3,127,1,5,9,9
-	.dw	_618-_23
-	.db	3,8,1,9
-	.dw	_619-_618
-	.db	3,1,1,5,51,9
-	.dw	_620-_619
-	.db	3,2,1,5,5,9
-	.dw	_172-_620
-	.db	3,164,127,1,5,9,9
-	.dw	_621-_172
-	.db	3,1,1,5,5,9
-	.dw	_26-_621
-	.db	3,3,1,5,9,9
-	.dw	_622-_26
-	.db	3,1,1,5,29,9
-	.dw	_28-_622
-	.db	3,3,1,5,75,9
-	.dw	_623-_28
-	.db	1,5,51,9
-	.dw	_624-_623
-	.db	1,5,5,9
-	.dw	_27-_624
-	.db	3,5,1,5,9,9
-	.dw	_625-_27
-	.db	3,1,1,5,5,9
-	.dw	_30-_625
-	.db	3,3,1,5,9,9
-	.dw	_626-_30
-	.db	3,1,1,5,29,9
-	.dw	_32-_626
-	.db	3,3,1,5,75,9
-	.dw	_627-_32
-	.db	1,5,51,9
-	.dw	_628-_627
-	.db	1,5,22,9
-	.dw	_31-_628
-	.db	3,202,0,1,5,35,9
-	.dw	_629-_31
-	.db	1,5,33,9
-	.dw	_630-_629
-	.db	1,5,14,9
-	.dw	_631-_630
-	.db	3,3,1,7,9
-	.dw	_632-_631
-	.db	1,5,9,9
-	.dw	_34-_632
-	.db	1,5,15,9
-	.dw	_633-_34
-	.db	3,2,1,5,26,9
-	.dw	_634-_633
-	.db	1,5,18,9
-	.dw	_635-_634
-	.db	3,1,1,5,17,9
-	.dw	_636-_635
-	.db	1,5,26,9
-	.dw	_637-_636
-	.db	3,1,1,5,13,9
-	.dw	_638-_637
-	.db	3,3,1,5,30,9
-	.dw	_35-_638
-	.db	3,4,1,5,45,9
-	.dw	_639-_35
-	.db	1,5,42,9
 	.dw	_640-_639
-	.db	1,5,9,9
-	.dw	_641-_640
-	.db	3,1,1,5,30,9
-	.dw	_642-_641
-	.db	3,1,1,5,24,9
-	.dw	_38-_642
-	.db	3,2,1,5,23,9
-	.dw	_643-_38
-	.db	1,5,21,9
-	.dw	_644-_643
-	.db	1,5,16,9
-	.dw	_645-_644
-	.db	3,1,1,5,24,9
-	.dw	_646-_645
-	.db	3,127,1,5,11,9
-	.dw	_24-_646
-	.db	3,4,1,5,22,9
-	.dw	_647-_24
 	.db	1,5,14,9
+	.dw	_18-_640
+	.db	3,4,1,5,12,9
+	.dw	_641-_18
+	.db	1,5,5,9
+	.dw	_150-_641
+	.db	3,87,1,5,20,9
+	.dw	_154-_150
+	.db	3,5,1,5,36,9
+	.dw	_642-_154
+	.db	1,5,49,9
+	.dw	_643-_642
+	.db	1,5,29,9
+	.dw	_644-_643
+	.db	3,3,1,5,42,9
+	.dw	_645-_644
+	.db	1,5,9,9
+	.dw	_646-_645
+	.db	1,5,5,9
+	.dw	_19-_646
+	.db	3,4,1,9
+	.dw	_20-_19
+	.db	3,4,1,5,20,9
+	.dw	_162-_20
+	.db	3,5,1,5,36,9
+	.dw	_647-_162
+	.db	1,5,49,9
 	.dw	_648-_647
-	.db	3,1,1,5,13,9
+	.db	1,5,29,9
 	.dw	_649-_648
-	.db	1,5,22,9
+	.db	3,3,1,5,42,9
 	.dw	_650-_649
-	.db	3,1,1,5,20,9
-	.dw	_37-_650
-	.db	1,5,28,9
-	.dw	_36-_37
-	.db	3,2,1,5,26,9
-	.dw	_651-_36
-	.db	1,5,1,9
-	.dw	_39-_651
+	.db	1,5,9,9
+	.dw	_651-_650
+	.db	1,5,5,9
+	.dw	_21-_651
+	.db	3,4,1,5,72,9
+	.dw	_22-_21
+	.db	3,18,1,5,102,9
+	.dw	_652-_22
+	.db	1,5,113,9
+	.dw	_653-_652
+	.db	1,5,72,9
+	.dw	_23-_653
+	.db	3,1,1,5,102,9
+	.dw	_654-_23
+	.db	1,5,113,9
+	.dw	_655-_654
+	.db	1,5,9,9
+	.dw	_24-_655
+	.db	3,7,1,9
+	.dw	_656-_24
+	.db	3,1,1,5,5,9
+	.dw	_170-_656
+	.db	3,175,127,1,5,9,9
+	.dw	_657-_170
+	.db	3,1,1,5,5,9
+	.dw	_27-_657
+	.db	3,3,1,5,9,9
+	.dw	_658-_27
+	.db	3,1,1,5,29,9
+	.dw	_29-_658
+	.db	3,3,1,5,75,9
+	.dw	_659-_29
+	.db	1,5,51,9
+	.dw	_660-_659
+	.db	1,5,5,9
+	.dw	_28-_660
+	.db	3,5,1,5,9,9
+	.dw	_661-_28
+	.db	3,1,1,5,5,9
+	.dw	_31-_661
+	.db	3,3,1,5,9,9
+	.dw	_662-_31
+	.db	3,1,1,5,29,9
+	.dw	_33-_662
+	.db	3,3,1,5,75,9
+	.dw	_663-_33
+	.db	1,5,51,9
+	.dw	_664-_663
+	.db	1,5,22,9
+	.dw	_32-_664
+	.db	3,193,0,1,5,35,9
+	.dw	_665-_32
+	.db	1,5,33,9
+	.dw	_666-_665
+	.db	1,5,14,9
+	.dw	_667-_666
+	.db	3,3,1,7,9
+	.dw	_668-_667
+	.db	1,5,9,9
+	.dw	_35-_668
+	.db	1,5,18,9
+	.dw	_669-_35
+	.db	3,3,1,5,17,9
+	.dw	_670-_669
+	.db	1,5,18,9
+	.dw	_671-_670
+	.db	3,1,1,5,24,9
+	.dw	_672-_671
+	.db	1,5,52,9
+	.dw	_673-_672
+	.db	1,5,30,9
+	.dw	_36-_673
+	.db	3,9,1,5,45,9
+	.dw	_674-_36
+	.db	1,5,42,9
+	.dw	_675-_674
+	.db	1,5,9,9
+	.dw	_676-_675
+	.db	3,1,1,5,30,9
+	.dw	_677-_676
+	.db	3,1,1,5,24,9
+	.dw	_39-_677
+	.db	3,2,1,5,23,9
+	.dw	_678-_39
+	.db	1,5,21,9
+	.dw	_679-_678
+	.db	1,5,24,9
+	.dw	_680-_679
+	.db	1,5,14,9
+	.dw	_25-_680
+	.db	3,4,1,5,13,9
+	.dw	_681-_25
+	.db	1,5,18,9
+	.dw	_682-_681
+	.db	3,1,1,9
+	.dw	_683-_682
+	.db	3,1,1,5,24,9
+	.dw	_684-_683
+	.db	1,5,18,9
+	.dw	_42-_684
 	.db	3,2,1,9
-	.dw	_119-_39
+	.dw	_685-_42
+	.db	3,1,1,5,24,9
+	.dw	_686-_685
+	.db	1,5,13,9
+	.dw	_687-_686
+	.db	3,127,1,5,26,9
+	.dw	_37-_687
+	.db	3,4,1,5,28,9
+	.dw	_38-_37
+	.db	3,2,1,5,26,9
+	.dw	_688-_38
+	.db	1,5,1,9
+	.dw	_40-_688
+	.db	3,2,1,9
+	.dw	_123-_40
 	.db	0,1,1
-_595:
+_635:
 	; End of section
 
 	.debug		.debug_ranges, cluster 'get_apps'
-_118:
-	.dl	-1,_90,0,_119-_90,0,0
+_122:
+	.dl	-1,_94,0,_123-_94,0,0
 	; End of section
 
 	.debug		.debug_pubnames
 	.dl	27
 	.dw	2
-	.dl	_115,711,235
+	.dl	_119,580,156
 	.db	'get_apps',0
 	.dl	0
 	; End of section
 
 	.debug		.debug_info, cluster 'get_filtered_apps1_voltage'
-_120:
-	.dl	302
+_124:
+	.dl	223
 	.dw	3
-	.dl	_121
+	.dl	_125
 	.db	4,1
 	.db	'src/apps.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
-	.db	12,1
-	.dl	_123,_122
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1
+	.dl	_127,_126
 	.db	2
-	.dl	_101
+	.dl	_105
 	.db	3
-	.dl	_152
+	.dl	_151
 	.db	1
-	.dl	_66,_124,_65
+	.dl	_70,_128,_69
 	.db	12,19,146,176,2,0,64,36,146,161,2,0,33,4
-	.dl	_66,_124
+	.dl	_70,_128
 	.db	4
-	.dl	_177,_12
+	.dl	_175,_12
 	.db	5
-	.dl	_157,_178
+	.dl	_155,_176
 	.db	5
-	.dl	_159,_179
+	.dl	_157,_177
 	.db	0,0,0,0
 	; End of section
 
 	.debug		.debug_abbrev, cluster 'get_filtered_apps1_voltage'
-_121:
+_125:
 	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,85,6,16,6,0,0,2,61,0,24,16,0,0,3,46,1,49,16,63,12,17,1,18,1,64,6
 	.db	42,9,0,0,4,11,1,17,1,18,1,0,0,5,52,0,49,16,2,6,0,0,0
 	; End of section
 
 	.debug		.debug_line, cluster 'get_filtered_apps1_voltage'
-_122:
-	.dl	_653-_652
-_652:
+_126:
+	.dl	_690-_689
+_689:
 	.dw	3
-	.dl	_655-_654
-_654:
+	.dl	_692-_691
+_691:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
 	.db	'src/apps.c',0,0,0,0,0
-_655:
+_692:
 	.db	5,8,7,0,5,2
-	.dl	_66
+	.dl	_70
 	.db	3,45,1,5,5,9
-	.dw	_190-_66
+	.dw	_188-_70
 	.db	3,1,1,5,20,9
-	.dw	_177-_190
+	.dw	_175-_188
 	.db	3,5,1,5,36,9
-	.dw	_656-_177
+	.dw	_693-_175
 	.db	1,5,49,9
-	.dw	_657-_656
+	.dw	_694-_693
 	.db	1,5,29,9
-	.dw	_658-_657
+	.dw	_695-_694
 	.db	3,3,1,5,42,9
-	.dw	_659-_658
+	.dw	_696-_695
 	.db	1,5,9,9
-	.dw	_660-_659
+	.dw	_697-_696
 	.db	1,5,12,9
-	.dw	_12-_660
+	.dw	_12-_697
 	.db	3,4,1,5,1,9
 	.dw	_13-_12
 	.db	3,1,1,9
-	.dw	_124-_13
+	.dw	_128-_13
 	.db	0,1,1
-_653:
+_690:
 	; End of section
 
 	.debug		.debug_ranges, cluster 'get_filtered_apps1_voltage'
-_123:
-	.dl	-1,_66,0,_124-_66,0,0
+_127:
+	.dl	-1,_70,0,_128-_70,0,0
 	; End of section
 
 	.debug		.debug_info, cluster 'get_filtered_apps2_voltage'
-_125:
-	.dl	302
+_129:
+	.dl	223
 	.dw	3
-	.dl	_126
+	.dl	_130
 	.db	4,1
 	.db	'src/apps.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
-	.db	12,1
-	.dl	_128,_127
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1
+	.dl	_132,_131
 	.db	2
-	.dl	_101
+	.dl	_105
 	.db	3
-	.dl	_161
+	.dl	_159
 	.db	1
-	.dl	_78,_129,_77
+	.dl	_82,_133,_81
 	.db	12,19,146,176,2,0,64,36,146,161,2,0,33,4
-	.dl	_78,_129
+	.dl	_82,_133
 	.db	4
-	.dl	_180,_15
+	.dl	_178,_15
 	.db	5
-	.dl	_166,_181
+	.dl	_163,_179
 	.db	5
-	.dl	_168,_182
+	.dl	_165,_180
 	.db	0,0,0,0
 	; End of section
 
 	.debug		.debug_abbrev, cluster 'get_filtered_apps2_voltage'
-_126:
+_130:
 	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,85,6,16,6,0,0,2,61,0,24,16,0,0,3,46,1,49,16,63,12,17,1,18,1,64,6
 	.db	42,9,0,0,4,11,1,17,1,18,1,0,0,5,52,0,49,16,2,6,0,0,0
 	; End of section
 
 	.debug		.debug_line, cluster 'get_filtered_apps2_voltage'
-_127:
-	.dl	_662-_661
-_661:
+_131:
+	.dl	_699-_698
+_698:
 	.dw	3
-	.dl	_664-_663
-_663:
+	.dl	_701-_700
+_700:
 	.db	2,1,-4,9,10,0,1,1,1,1,0,0,0,1,0
 	.db	'src/apps.c',0,0,0,0,0
-_664:
+_701:
 	.db	5,8,7,0,5,2
-	.dl	_78
-	.db	3,62,1,5,5,9
-	.dw	_232-_78
+	.dl	_82
+	.db	3,61,1,5,5,9
+	.dw	_230-_82
 	.db	3,1,1,5,20,9
-	.dw	_180-_232
+	.dw	_178-_230
 	.db	3,5,1,5,36,9
-	.dw	_665-_180
+	.dw	_702-_178
 	.db	1,5,49,9
-	.dw	_666-_665
+	.dw	_703-_702
 	.db	1,5,29,9
-	.dw	_667-_666
+	.dw	_704-_703
 	.db	3,3,1,5,42,9
-	.dw	_668-_667
+	.dw	_705-_704
 	.db	1,5,9,9
-	.dw	_669-_668
+	.dw	_706-_705
 	.db	1,5,12,9
-	.dw	_15-_669
+	.dw	_15-_706
 	.db	3,4,1,5,1,9
 	.dw	_16-_15
 	.db	3,1,1,9
-	.dw	_129-_16
+	.dw	_133-_16
 	.db	0,1,1
-_662:
+_699:
 	; End of section
 
 	.debug		.debug_ranges, cluster 'get_filtered_apps2_voltage'
-_128:
-	.dl	-1,_78,0,_129-_78,0,0
+_132:
+	.dl	-1,_82,0,_133-_82,0,0
 	; End of section
 
 	.debug		.debug_info, cluster 'moving_average_structs_initialized'
-_130:
-	.dl	275
+_134:
+	.dl	196
 	.dw	3
-	.dl	_131
+	.dl	_135
 	.db	4,1
 	.db	'src/apps.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
-	.db	12,1,2
-	.dl	_101
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1,2
+	.dl	_105
 	.db	3
 	.db	'moving_average_structs_initialized',0,1,14,6,5
-	.dl	_148
+	.dl	_167
 	.db	1,5,3
 	.dl	_moving_average_structs_initialized
 	.db	0
 	; End of section
 
 	.debug		.debug_abbrev, cluster 'moving_average_structs_initialized'
-_131:
+_135:
 	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,0,0,2,61,0,24,16,0,0,3,52,0,3,8,58,15,59,15,57,15,51,15,73,16,63
 	.db	12,2,9,0,0,0
 	; End of section
 
 	.debug		.debug_info, cluster 'apps_1_moving_average_info'
-_132:
-	.dl	267
+_136:
+	.dl	188
 	.dw	3
-	.dl	_133
+	.dl	_137
 	.db	4,1
 	.db	'src/apps.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
-	.db	12,1,2
-	.dl	_101
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1,2
+	.dl	_105
 	.db	3
 	.db	'apps_1_moving_average_info',0,1,16,28,5
-	.dl	_183
+	.dl	_181
 	.db	1,5,3
 	.dl	_apps_1_moving_average_info
 	.db	0
 	; End of section
 
 	.debug		.debug_abbrev, cluster 'apps_1_moving_average_info'
-_133:
+_137:
 	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,0,0,2,61,0,24,16,0,0,3,52,0,3,8,58,15,59,15,57,15,51,15,73,16,63
 	.db	12,2,9,0,0,0
 	; End of section
 
 	.debug		.debug_info, cluster 'apps_2_moving_average_info'
-_134:
-	.dl	267
+_138:
+	.dl	188
 	.dw	3
-	.dl	_135
+	.dl	_139
 	.db	4,1
 	.db	'src/apps.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
-	.db	12,1,2
-	.dl	_101
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1,2
+	.dl	_105
 	.db	3
 	.db	'apps_2_moving_average_info',0,1,17,28,5
-	.dl	_183
+	.dl	_181
 	.db	1,5,3
 	.dl	_apps_2_moving_average_info
 	.db	0
 	; End of section
 
 	.debug		.debug_abbrev, cluster 'apps_2_moving_average_info'
-_135:
+_139:
 	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,0,0,2,61,0,24,16,0,0,3,52,0,3,8,58,15,59,15,57,15,51,15,73,16,63
 	.db	12,2,9,0,0,0
 	; End of section
 
 	.debug		.debug_loc, cluster 'get_apps'
-_160:
-	.dl	-1,_90,0,_119-_90
-	.dw	2
-	.db	145,114
-	.dl	0,0
-_149:
-	.dl	-1,_90,0,_119-_90
-	.dw	2
-	.db	145,111
-	.dl	0,0
 _158:
-	.dl	-1,_90,0,_119-_90
+	.dl	-1,_94,0,_123-_94
 	.dw	2
 	.db	145,112
 	.dl	0,0
-_147:
-	.dl	-1,_90,0,_119-_90
+_156:
+	.dl	-1,_94,0,_123-_94
 	.dw	2
-	.db	145,106
+	.db	145,110
+	.dl	0,0
+_171:
+	.dl	0,0
+_168:
+	.dl	0,0
+_166:
+	.dl	-1,_94,0,_123-_94
+	.dw	2
+	.db	145,112
+	.dl	0,0
+_164:
+	.dl	-1,_94,0,_123-_94
+	.dw	2
+	.db	145,110
 	.dl	0,0
 _173:
 	.dl	0,0
 _169:
-	.dl	-1,_90,0,_119-_90
-	.dw	2
-	.db	145,114
 	.dl	0,0
-_151:
-	.dl	-1,_90,0,_119-_90
-	.dw	2
-	.db	145,110
-	.dl	0,0
-_167:
-	.dl	-1,_90,0,_119-_90
-	.dw	2
-	.db	145,112
-	.dl	0,0
-_150:
-	.dl	-1,_90,0,_119-_90
-	.dw	2
-	.db	145,108
-	.dl	0,0
-_175:
-	.dl	0,0
-_171:
-	.dl	0,0
-_143:
-	.dl	-1,_90,0,_568-_90
+_147:
+	.dl	-1,_94,0,_608-_94
 	.dw	6
 	.db	82,147,2,83,147,2
-	.dl	_571-_90,_373-_90
+	.dl	_611-_94,_426-_94
+	.dw	6
+	.db	81,147,2,80,147,2
+	.dl	0,0
+_148:
+	.dl	-1,_94,0,_609-_94
+	.dw	6
+	.db	84,147,2,85,147,2
+	.dl	_612-_94,_382-_94
 	.dw	6
 	.db	88,147,2,89,147,2
 	.dl	0,0
-_144:
-	.dl	-1,_90,0,_569-_90
-	.dw	6
-	.db	84,147,2,85,147,2
-	.dl	_572-_90,_362-_90
-	.dw	6
-	.db	90,147,2,86,147,2
-	.dl	0,0
-_89:
-	.dl	-1,_90,0,_274-_90
-	.dw	58
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_91-_95
-_95:
-	.db	146,177,2,0,47
-	.dw	_94-_96
-_96:
-_91:
-	.db	18,49,46,40
-	.dw	_92-_97
-_97:
-	.db	146,178,2,0,47
-	.dw	_94-_98
-_98:
-_92:
-	.db	18,50,46,40
-	.dw	_93-_99
-_99:
-	.db	146,179,2,0,47
-	.dw	_94-_100
-_100:
 _93:
+	.dl	-1,_94,0,_272-_94
+	.dw	58
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_95-_99
+_99:
+	.db	146,177,2,0,47
+	.dw	_98-_100
+_100:
+_95:
+	.db	18,49,46,40
+	.dw	_96-_101
+_101:
+	.db	146,178,2,0,47
+	.dw	_98-_102
+_102:
+_96:
+	.db	18,50,46,40
+	.dw	_97-_103
+_103:
+	.db	146,179,2,0,47
+	.dw	_98-_104
+_104:
+_97:
 	.db	146,180,2,0
-_94:
+_98:
 	.db	22,19,62,36,33
-	.dl	_274-_90,_285-_90
+	.dl	_272-_94,_283-_94
 	.dw	60
 	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_275-_279
-_279:
-	.db	146,177,2,0,47
-	.dw	_278-_280
-_280:
-_275:
-	.db	18,49,46,40
-	.dw	_276-_281
-_281:
-	.db	146,178,2,0,47
-	.dw	_278-_282
-_282:
-_276:
-	.db	18,50,46,40
-	.dw	_277-_283
-_283:
-	.db	146,179,2,0,47
-	.dw	_278-_284
-_284:
+	.dw	_273-_277
 _277:
-	.db	146,180,2,0
+	.db	146,177,2,0,47
+	.dw	_276-_278
 _278:
-	.db	22,19,62,36,33,50,34
-	.dl	_285-_90,_296-_90
-	.dw	60
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_286-_290
-_290:
-	.db	146,177,2,0,47
-	.dw	_289-_291
-_291:
-_286:
-	.db	18,49,46,40
-	.dw	_287-_292
-_292:
-	.db	146,178,2,0,47
-	.dw	_289-_293
-_293:
-_287:
-	.db	18,50,46,40
-	.dw	_288-_294
-_294:
-	.db	146,179,2,0,47
-	.dw	_289-_295
-_295:
-_288:
-	.db	146,180,2,0
-_289:
-	.db	22,19,62,36,33,52,34
-	.dl	_296-_90,_307-_90
-	.dw	60
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_297-_301
-_301:
-	.db	146,177,2,0,47
-	.dw	_300-_302
-_302:
-_297:
-	.db	18,49,46,40
-	.dw	_298-_303
-_303:
-	.db	146,178,2,0,47
-	.dw	_300-_304
-_304:
-_298:
-	.db	18,50,46,40
-	.dw	_299-_305
-_305:
-	.db	146,179,2,0,47
-	.dw	_300-_306
-_306:
-_299:
-	.db	146,180,2,0
-_300:
-	.db	22,19,62,36,33,54,34
-	.dl	_307-_90,_318-_90
-	.dw	60
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_308-_312
-_312:
-	.db	146,177,2,0,47
-	.dw	_311-_313
-_313:
-_308:
-	.db	18,49,46,40
-	.dw	_309-_314
-_314:
-	.db	146,178,2,0,47
-	.dw	_311-_315
-_315:
-_309:
-	.db	18,50,46,40
-	.dw	_310-_316
-_316:
-	.db	146,179,2,0,47
-	.dw	_311-_317
-_317:
-_310:
-	.db	146,180,2,0
-_311:
-	.db	22,19,62,36,33,56,34
-	.dl	_318-_90,_329-_90
-	.dw	60
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_319-_323
-_323:
-	.db	146,177,2,0,47
-	.dw	_322-_324
-_324:
-_319:
-	.db	18,49,46,40
-	.dw	_320-_325
-_325:
-	.db	146,178,2,0,47
-	.dw	_322-_326
-_326:
-_320:
-	.db	18,50,46,40
-	.dw	_321-_327
-_327:
-	.db	146,179,2,0,47
-	.dw	_322-_328
-_328:
-_321:
-	.db	146,180,2,0
-_322:
-	.db	22,19,62,36,33,58,34
-	.dl	_329-_90,_340-_90
-	.dw	60
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_330-_334
-_334:
-	.db	146,177,2,0,47
-	.dw	_333-_335
-_335:
-_330:
-	.db	18,49,46,40
-	.dw	_331-_336
-_336:
-	.db	146,178,2,0,47
-	.dw	_333-_337
-_337:
-_331:
-	.db	18,50,46,40
-	.dw	_332-_338
-_338:
-	.db	146,179,2,0,47
-	.dw	_333-_339
-_339:
-_332:
-	.db	146,180,2,0
-_333:
-	.db	22,19,62,36,33,60,34
-	.dl	_340-_90,_351-_90
-	.dw	60
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_341-_345
-_345:
-	.db	146,177,2,0,47
-	.dw	_344-_346
-_346:
-_341:
-	.db	18,49,46,40
-	.dw	_342-_347
-_347:
-	.db	146,178,2,0,47
-	.dw	_344-_348
-_348:
-_342:
-	.db	18,50,46,40
-	.dw	_343-_349
-_349:
-	.db	146,179,2,0,47
-	.dw	_344-_350
-_350:
-_343:
-	.db	146,180,2,0
-_344:
-	.db	22,19,62,36,33,70,34
-	.dl	_351-_90,_362-_90
-	.dw	60
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_352-_356
-_356:
-	.db	146,177,2,0,47
-	.dw	_355-_357
-_357:
-_352:
-	.db	18,49,46,40
-	.dw	_353-_358
-_358:
-	.db	146,178,2,0,47
-	.dw	_355-_359
-_359:
-_353:
-	.db	18,50,46,40
-	.dw	_354-_360
-_360:
-	.db	146,179,2,0,47
-	.dw	_355-_361
-_361:
-_354:
-	.db	146,180,2,0
-_355:
-	.db	22,19,62,36,33,60,34
-	.dl	_362-_90,_373-_90
-	.dw	60
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_363-_367
-_367:
-	.db	146,177,2,0,47
-	.dw	_366-_368
-_368:
-_363:
-	.db	18,49,46,40
-	.dw	_364-_369
-_369:
-	.db	146,178,2,0,47
-	.dw	_366-_370
-_370:
-_364:
-	.db	18,50,46,40
-	.dw	_365-_371
-_371:
-	.db	146,179,2,0,47
-	.dw	_366-_372
-_372:
-_365:
-	.db	146,180,2,0
-_366:
-	.db	22,19,62,36,33,58,34
-	.dl	_373-_90,_384-_90
-	.dw	60
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_374-_378
-_378:
-	.db	146,177,2,0,47
-	.dw	_377-_379
-_379:
-_374:
-	.db	18,49,46,40
-	.dw	_375-_380
-_380:
-	.db	146,178,2,0,47
-	.dw	_377-_381
-_381:
-_375:
-	.db	18,50,46,40
-	.dw	_376-_382
-_382:
-	.db	146,179,2,0,47
-	.dw	_377-_383
-_383:
-_376:
-	.db	146,180,2,0
-_377:
-	.db	22,19,62,36,33,56,34
-	.dl	_384-_90,_395-_90
-	.dw	60
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_385-_389
-_389:
-	.db	146,177,2,0,47
-	.dw	_388-_390
-_390:
-_385:
-	.db	18,49,46,40
-	.dw	_386-_391
-_391:
-	.db	146,178,2,0,47
-	.dw	_388-_392
-_392:
-_386:
-	.db	18,50,46,40
-	.dw	_387-_393
-_393:
-	.db	146,179,2,0,47
-	.dw	_388-_394
-_394:
-_387:
-	.db	146,180,2,0
-_388:
-	.db	22,19,62,36,33,54,34
-	.dl	_395-_90,_406-_90
-	.dw	60
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_396-_400
-_400:
-	.db	146,177,2,0,47
-	.dw	_399-_401
-_401:
-_396:
-	.db	18,49,46,40
-	.dw	_397-_402
-_402:
-	.db	146,178,2,0,47
-	.dw	_399-_403
-_403:
-_397:
-	.db	18,50,46,40
-	.dw	_398-_404
-_404:
-	.db	146,179,2,0,47
-	.dw	_399-_405
-_405:
-_398:
-	.db	146,180,2,0
-_399:
-	.db	22,19,62,36,33,52,34
-	.dl	_406-_90,_417-_90
-	.dw	60
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_407-_411
-_411:
-	.db	146,177,2,0,47
-	.dw	_410-_412
-_412:
-_407:
-	.db	18,49,46,40
-	.dw	_408-_413
-_413:
-	.db	146,178,2,0,47
-	.dw	_410-_414
-_414:
-_408:
-	.db	18,50,46,40
-	.dw	_409-_415
-_415:
-	.db	146,179,2,0,47
-	.dw	_410-_416
-_416:
-_409:
-	.db	146,180,2,0
-_410:
-	.db	22,19,62,36,33,50,34
-	.dl	_417-_90,_119-_90
-	.dw	58
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_418-_422
-_422:
-	.db	146,177,2,0,47
-	.dw	_421-_423
-_423:
-_418:
-	.db	18,49,46,40
-	.dw	_419-_424
-_424:
-	.db	146,178,2,0,47
-	.dw	_421-_425
-_425:
-_419:
-	.db	18,50,46,40
-	.dw	_420-_426
-_426:
-	.db	146,179,2,0,47
-	.dw	_421-_427
-_427:
-_420:
-	.db	146,180,2,0
-_421:
-	.db	22,19,62,36,33
-	.dl	0,0
-_145:
-	.dl	-1,_90,0,_570-_90
-	.dw	6
-	.db	91,147,2,92,147,2
-	.dl	_573-_90,_395-_90
-	.dw	6
-	.db	87,147,2,80,147,2
-	.dl	0,0
-	; End of section
-
-	.debug		.debug_loc, cluster 'get_filtered_apps1_voltage'
-_179:
-	.dl	-1,_66,0,_124-_66
-	.dw	2
-	.db	145,126
-	.dl	0,0
-_178:
-	.dl	-1,_66,0,_124-_66
-	.dw	2
-	.db	145,124
-	.dl	0,0
-_65:
-	.dl	-1,_66,0,_190-_66
-	.dw	58
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_67-_71
-_71:
-	.db	146,177,2,0,47
-	.dw	_70-_72
-_72:
-_67:
-	.db	18,49,46,40
-	.dw	_68-_73
-_73:
-	.db	146,178,2,0,47
-	.dw	_70-_74
-_74:
-_68:
-	.db	18,50,46,40
-	.dw	_69-_75
-_75:
-	.db	146,179,2,0,47
-	.dw	_70-_76
-_76:
-_69:
-	.db	146,180,2,0
-_70:
-	.db	22,19,62,36,33
-	.dl	_190-_66,_201-_66
-	.dw	60
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_191-_195
-_195:
-	.db	146,177,2,0,47
-	.dw	_194-_196
-_196:
-_191:
-	.db	18,49,46,40
-	.dw	_192-_197
-_197:
-	.db	146,178,2,0,47
-	.dw	_194-_198
-_198:
-_192:
-	.db	18,50,46,40
-	.dw	_193-_199
-_199:
-	.db	146,179,2,0,47
-	.dw	_194-_200
-_200:
-_193:
-	.db	146,180,2,0
-_194:
-	.db	22,19,62,36,33,52,34
-	.dl	_201-_66,_124-_66
-	.dw	58
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_202-_206
-_206:
-	.db	146,177,2,0,47
-	.dw	_205-_207
-_207:
-_202:
-	.db	18,49,46,40
-	.dw	_203-_208
-_208:
-	.db	146,178,2,0,47
-	.dw	_205-_209
-_209:
-_203:
-	.db	18,50,46,40
-	.dw	_204-_210
-_210:
-	.db	146,179,2,0,47
-	.dw	_205-_211
-_211:
-_204:
-	.db	146,180,2,0
-_205:
-	.db	22,19,62,36,33
-	.dl	0,0
-	; End of section
-
-	.debug		.debug_loc, cluster 'get_filtered_apps2_voltage'
-_182:
-	.dl	-1,_78,0,_129-_78
-	.dw	2
-	.db	145,126
-	.dl	0,0
-_181:
-	.dl	-1,_78,0,_129-_78
-	.dw	2
-	.db	145,124
-	.dl	0,0
-_77:
-	.dl	-1,_78,0,_232-_78
-	.dw	58
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_79-_83
-_83:
-	.db	146,177,2,0,47
-	.dw	_82-_84
-_84:
-_79:
-	.db	18,49,46,40
-	.dw	_80-_85
-_85:
-	.db	146,178,2,0,47
-	.dw	_82-_86
-_86:
-_80:
-	.db	18,50,46,40
-	.dw	_81-_87
-_87:
-	.db	146,179,2,0,47
-	.dw	_82-_88
-_88:
-_81:
-	.db	146,180,2,0
-_82:
-	.db	22,19,62,36,33
-	.dl	_232-_78,_243-_78
-	.dw	60
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_233-_237
-_237:
-	.db	146,177,2,0,47
-	.dw	_236-_238
-_238:
-_233:
-	.db	18,49,46,40
-	.dw	_234-_239
-_239:
-	.db	146,178,2,0,47
-	.dw	_236-_240
-_240:
-_234:
-	.db	18,50,46,40
-	.dw	_235-_241
-_241:
-	.db	146,179,2,0,47
-	.dw	_236-_242
-_242:
-_235:
-	.db	146,180,2,0
-_236:
-	.db	22,19,62,36,33,52,34
-	.dl	_243-_78,_129-_78
-	.dw	58
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_244-_248
-_248:
-	.db	146,177,2,0,47
-	.dw	_247-_249
-_249:
-_244:
-	.db	18,49,46,40
-	.dw	_245-_250
-_250:
-	.db	146,178,2,0,47
-	.dw	_247-_251
-_251:
-_245:
-	.db	18,50,46,40
-	.dw	_246-_252
-_252:
-	.db	146,179,2,0,47
-	.dw	_247-_253
-_253:
-_246:
-	.db	146,180,2,0
-_247:
-	.db	22,19,62,36,33
-	.dl	0,0
-	; End of section
-
-	.debug		.debug_loc, cluster 'voltage_to_pct_travel_apps_1'
-_138:
-	.dl	-1,_42,0,_184-_42
-	.dw	1
-	.db	82
-	.dl	_2-_42,_185-_42
-	.dw	1
-	.db	82
-	.dl	_4-_42,_186-_42
-	.dw	1
-	.db	82
-	.dl	0,0
-_41:
-	.dl	-1,_42,0,_109-_42
-	.dw	58
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_43-_47
-_47:
-	.db	146,177,2,0,47
-	.dw	_46-_48
-_48:
-_43:
-	.db	18,49,46,40
-	.dw	_44-_49
-_49:
-	.db	146,178,2,0,47
-	.dw	_46-_50
-_50:
-_44:
-	.db	18,50,46,40
-	.dw	_45-_51
-_51:
-	.db	146,179,2,0,47
-	.dw	_46-_52
-_52:
-_45:
-	.db	146,180,2,0
-_46:
-	.db	22,19,62,36,33
-	.dl	0,0
-	; End of section
-
-	.debug		.debug_loc, cluster 'voltage_to_pct_travel_apps_2'
-_141:
-	.dl	-1,_54,0,_187-_54
-	.dw	1
-	.db	82
-	.dl	_7-_54,_188-_54
-	.dw	1
-	.db	82
-	.dl	_9-_54,_189-_54
-	.dw	1
-	.db	82
-	.dl	0,0
-_53:
-	.dl	-1,_54,0,_114-_54
-	.dw	58
-	.db	127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_55-_59
-_59:
-	.db	146,177,2,0,47
-	.dw	_58-_60
-_60:
-_55:
-	.db	18,49,46,40
-	.dw	_56-_61
-_61:
-	.db	146,178,2,0,47
-	.dw	_58-_62
-_62:
-_56:
-	.db	18,50,46,40
-	.dw	_57-_63
-_63:
-	.db	146,179,2,0,47
-	.dw	_58-_64
-_64:
-_57:
-	.db	146,180,2,0
-_58:
-	.db	22,19,62,36,33
-	.dl	0,0
-	; End of section
-
-	.debug		.debug_frame
-_670:
-	.dl	184
-	.dl	-1
-	.db	3,0,2,2,173,2,15,60,127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_671-_675
-_675:
-	.db	146,177,2,0,47
-	.dw	_674-_676
-_676:
-_671:
-	.db	18,49,46,40
-	.dw	_672-_677
-_677:
-	.db	146,178,2,0,47
-	.dw	_674-_678
-_678:
-_672:
-	.db	18,50,46,40
-	.dw	_673-_679
-_679:
-	.db	146,179,2,0,47
-	.dw	_674-_680
-_680:
-_673:
-	.db	146,180,2,0
-_674:
-	.db	22,19,62,36,33,48,34,16,173,2,12,19,146,176,2,0,64,36,146,161,2,0,33,8,15,22,161,2,5,19,146,161,2,4,8
-	.db	162,2,8,166,2,8,177,2,8,178,2,8,179,2,8,180,2,8,0,8,1,8,6,8,7,8,8,8,9,8,10,8,167,2,8,168,2,8,169,2,8,170
-	.db	2,8,171,2,8,172,2,16,174,2,12,19,146,176,2,0,64,36,146,161,2,0,33,16,175,2,12,19,146,176,2,0,64,36,146
-	.db	161,2,2,33,8,176,2
-	; End of section
-
-	.debug		.debug_frame, cluster 'voltage_to_pct_travel_apps_1'
-	.dl	28
-	.dl	_670,_42,_109-_42
-	.db	8,160,2,8,3,8,4,8,5,8,12,8,13,8,14,0
-	; End of section
-
-	.debug		.debug_frame, cluster 'voltage_to_pct_travel_apps_2'
-	.dl	28
-	.dl	_670,_54,_114-_54
-	.db	8,160,2,8,3,8,4,8,5,8,12,8,13,8,14,0
-	; End of section
-
-	.debug		.debug_frame, cluster 'get_filtered_apps1_voltage'
-	.dl	156
-	.dl	_670,_66,_124-_66
-	.db	4
-	.dl	(_190-_66)/2
-	.db	15,60,127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_212-_216
-_216:
-	.db	146,177,2,0,47
-	.dw	_215-_217
-_217:
-_212:
-	.db	18,49,46,40
-	.dw	_213-_218
-_218:
-	.db	146,178,2,0,47
-	.dw	_215-_219
-_219:
-_213:
-	.db	18,50,46,40
-	.dw	_214-_220
-_220:
-	.db	146,179,2,0,47
-	.dw	_215-_221
-_221:
-_214:
-	.db	146,180,2,0
-_215:
-	.db	22,19,62,36,33,52,34,22,15,3,19,127,4,4
-	.dl	(_201-_190)/2
-	.db	15,60,127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_222-_226
-_226:
-	.db	146,177,2,0,47
-	.dw	_225-_227
-_227:
-_222:
-	.db	18,49,46,40
-	.dw	_223-_228
-_228:
-	.db	146,178,2,0,47
-	.dw	_225-_229
-_229:
-_223:
-	.db	18,50,46,40
-	.dw	_224-_230
-_230:
-	.db	146,179,2,0,47
-	.dw	_225-_231
-_231:
-_224:
-	.db	146,180,2,0
-_225:
-	.db	22,19,62,36,33,48,34,8,15,0,0
-	; End of section
-
-	.debug		.debug_frame, cluster 'get_filtered_apps2_voltage'
-	.dl	156
-	.dl	_670,_78,_129-_78
-	.db	4
-	.dl	(_232-_78)/2
-	.db	15,60,127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_254-_258
-_258:
-	.db	146,177,2,0,47
-	.dw	_257-_259
-_259:
-_254:
-	.db	18,49,46,40
-	.dw	_255-_260
-_260:
-	.db	146,178,2,0,47
-	.dw	_257-_261
-_261:
-_255:
-	.db	18,50,46,40
-	.dw	_256-_262
-_262:
-	.db	146,179,2,0,47
-	.dw	_257-_263
-_263:
-_256:
-	.db	146,180,2,0
-_257:
-	.db	22,19,62,36,33,52,34,22,15,3,19,127,4,4
-	.dl	(_243-_232)/2
-	.db	15,60,127,0,18,10
-	.dw	16383
-	.db	26,22,62,37,18,48,46,40
-	.dw	_264-_268
-_268:
-	.db	146,177,2,0,47
-	.dw	_267-_269
-_269:
-_264:
-	.db	18,49,46,40
-	.dw	_265-_270
-_270:
-	.db	146,178,2,0,47
-	.dw	_267-_271
-_271:
-_265:
-	.db	18,50,46,40
-	.dw	_266-_272
-_272:
-	.db	146,179,2,0,47
-	.dw	_267-_273
 _273:
-_266:
+	.db	18,49,46,40
+	.dw	_274-_279
+_279:
+	.db	146,178,2,0,47
+	.dw	_276-_280
+_280:
+_274:
+	.db	18,50,46,40
+	.dw	_275-_281
+_281:
+	.db	146,179,2,0,47
+	.dw	_276-_282
+_282:
+_275:
 	.db	146,180,2,0
-_267:
-	.db	22,19,62,36,33,48,34,8,15,0,0
-	; End of section
-
-	.debug		.debug_frame, cluster 'get_apps'
-	.dl	1056
-	.dl	_670,_90,_119-_90
-	.db	4
-	.dl	(_274-_90)/2
-	.db	15,60,127,0,18,10
+_276:
+	.db	22,19,62,36,33,50,34
+	.dl	_283-_94,_294-_94
+	.dw	60
+	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
-	.dw	_428-_432
-_432:
+	.dw	_284-_288
+_288:
 	.db	146,177,2,0,47
-	.dw	_431-_433
-_433:
-_428:
+	.dw	_287-_289
+_289:
+_284:
 	.db	18,49,46,40
-	.dw	_429-_434
-_434:
+	.dw	_285-_290
+_290:
 	.db	146,178,2,0,47
-	.dw	_431-_435
-_435:
-_429:
+	.dw	_287-_291
+_291:
+_285:
 	.db	18,50,46,40
+	.dw	_286-_292
+_292:
+	.db	146,179,2,0,47
+	.dw	_287-_293
+_293:
+_286:
+	.db	146,180,2,0
+_287:
+	.db	22,19,62,36,33,52,34
+	.dl	_294-_94,_305-_94
+	.dw	60
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_295-_299
+_299:
+	.db	146,177,2,0,47
+	.dw	_298-_300
+_300:
+_295:
+	.db	18,49,46,40
+	.dw	_296-_301
+_301:
+	.db	146,178,2,0,47
+	.dw	_298-_302
+_302:
+_296:
+	.db	18,50,46,40
+	.dw	_297-_303
+_303:
+	.db	146,179,2,0,47
+	.dw	_298-_304
+_304:
+_297:
+	.db	146,180,2,0
+_298:
+	.db	22,19,62,36,33,54,34
+	.dl	_305-_94,_316-_94
+	.dw	60
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_306-_310
+_310:
+	.db	146,177,2,0,47
+	.dw	_309-_311
+_311:
+_306:
+	.db	18,49,46,40
+	.dw	_307-_312
+_312:
+	.db	146,178,2,0,47
+	.dw	_309-_313
+_313:
+_307:
+	.db	18,50,46,40
+	.dw	_308-_314
+_314:
+	.db	146,179,2,0,47
+	.dw	_309-_315
+_315:
+_308:
+	.db	146,180,2,0
+_309:
+	.db	22,19,62,36,33,56,34
+	.dl	_316-_94,_327-_94
+	.dw	60
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_317-_321
+_321:
+	.db	146,177,2,0,47
+	.dw	_320-_322
+_322:
+_317:
+	.db	18,49,46,40
+	.dw	_318-_323
+_323:
+	.db	146,178,2,0,47
+	.dw	_320-_324
+_324:
+_318:
+	.db	18,50,46,40
+	.dw	_319-_325
+_325:
+	.db	146,179,2,0,47
+	.dw	_320-_326
+_326:
+_319:
+	.db	146,180,2,0
+_320:
+	.db	22,19,62,36,33,58,34
+	.dl	_327-_94,_338-_94
+	.dw	60
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_328-_332
+_332:
+	.db	146,177,2,0,47
+	.dw	_331-_333
+_333:
+_328:
+	.db	18,49,46,40
+	.dw	_329-_334
+_334:
+	.db	146,178,2,0,47
+	.dw	_331-_335
+_335:
+_329:
+	.db	18,50,46,40
+	.dw	_330-_336
+_336:
+	.db	146,179,2,0,47
+	.dw	_331-_337
+_337:
+_330:
+	.db	146,180,2,0
+_331:
+	.db	22,19,62,36,33,60,34
+	.dl	_338-_94,_349-_94
+	.dw	60
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_339-_343
+_343:
+	.db	146,177,2,0,47
+	.dw	_342-_344
+_344:
+_339:
+	.db	18,49,46,40
+	.dw	_340-_345
+_345:
+	.db	146,178,2,0,47
+	.dw	_342-_346
+_346:
+_340:
+	.db	18,50,46,40
+	.dw	_341-_347
+_347:
+	.db	146,179,2,0,47
+	.dw	_342-_348
+_348:
+_341:
+	.db	146,180,2,0
+_342:
+	.db	22,19,62,36,33,62,34
+	.dl	_349-_94,_360-_94
+	.dw	60
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_350-_354
+_354:
+	.db	146,177,2,0,47
+	.dw	_353-_355
+_355:
+_350:
+	.db	18,49,46,40
+	.dw	_351-_356
+_356:
+	.db	146,178,2,0,47
+	.dw	_353-_357
+_357:
+_351:
+	.db	18,50,46,40
+	.dw	_352-_358
+_358:
+	.db	146,179,2,0,47
+	.dw	_353-_359
+_359:
+_352:
+	.db	146,180,2,0
+_353:
+	.db	22,19,62,36,33,66,34
+	.dl	_360-_94,_371-_94
+	.dw	60
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_361-_365
+_365:
+	.db	146,177,2,0,47
+	.dw	_364-_366
+_366:
+_361:
+	.db	18,49,46,40
+	.dw	_362-_367
+_367:
+	.db	146,178,2,0,47
+	.dw	_364-_368
+_368:
+_362:
+	.db	18,50,46,40
+	.dw	_363-_369
+_369:
+	.db	146,179,2,0,47
+	.dw	_364-_370
+_370:
+_363:
+	.db	146,180,2,0
+_364:
+	.db	22,19,62,36,33,62,34
+	.dl	_371-_94,_382-_94
+	.dw	60
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_372-_376
+_376:
+	.db	146,177,2,0,47
+	.dw	_375-_377
+_377:
+_372:
+	.db	18,49,46,40
+	.dw	_373-_378
+_378:
+	.db	146,178,2,0,47
+	.dw	_375-_379
+_379:
+_373:
+	.db	18,50,46,40
+	.dw	_374-_380
+_380:
+	.db	146,179,2,0,47
+	.dw	_375-_381
+_381:
+_374:
+	.db	146,180,2,0
+_375:
+	.db	22,19,62,36,33,60,34
+	.dl	_382-_94,_393-_94
+	.dw	60
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_383-_387
+_387:
+	.db	146,177,2,0,47
+	.dw	_386-_388
+_388:
+_383:
+	.db	18,49,46,40
+	.dw	_384-_389
+_389:
+	.db	146,178,2,0,47
+	.dw	_386-_390
+_390:
+_384:
+	.db	18,50,46,40
+	.dw	_385-_391
+_391:
+	.db	146,179,2,0,47
+	.dw	_386-_392
+_392:
+_385:
+	.db	146,180,2,0
+_386:
+	.db	22,19,62,36,33,58,34
+	.dl	_393-_94,_404-_94
+	.dw	60
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_394-_398
+_398:
+	.db	146,177,2,0,47
+	.dw	_397-_399
+_399:
+_394:
+	.db	18,49,46,40
+	.dw	_395-_400
+_400:
+	.db	146,178,2,0,47
+	.dw	_397-_401
+_401:
+_395:
+	.db	18,50,46,40
+	.dw	_396-_402
+_402:
+	.db	146,179,2,0,47
+	.dw	_397-_403
+_403:
+_396:
+	.db	146,180,2,0
+_397:
+	.db	22,19,62,36,33,56,34
+	.dl	_404-_94,_415-_94
+	.dw	60
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_405-_409
+_409:
+	.db	146,177,2,0,47
+	.dw	_408-_410
+_410:
+_405:
+	.db	18,49,46,40
+	.dw	_406-_411
+_411:
+	.db	146,178,2,0,47
+	.dw	_408-_412
+_412:
+_406:
+	.db	18,50,46,40
+	.dw	_407-_413
+_413:
+	.db	146,179,2,0,47
+	.dw	_408-_414
+_414:
+_407:
+	.db	146,180,2,0
+_408:
+	.db	22,19,62,36,33,54,34
+	.dl	_415-_94,_426-_94
+	.dw	60
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_416-_420
+_420:
+	.db	146,177,2,0,47
+	.dw	_419-_421
+_421:
+_416:
+	.db	18,49,46,40
+	.dw	_417-_422
+_422:
+	.db	146,178,2,0,47
+	.dw	_419-_423
+_423:
+_417:
+	.db	18,50,46,40
+	.dw	_418-_424
+_424:
+	.db	146,179,2,0,47
+	.dw	_419-_425
+_425:
+_418:
+	.db	146,180,2,0
+_419:
+	.db	22,19,62,36,33,52,34
+	.dl	_426-_94,_437-_94
+	.dw	60
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_427-_431
+_431:
+	.db	146,177,2,0,47
+	.dw	_430-_432
+_432:
+_427:
+	.db	18,49,46,40
+	.dw	_428-_433
+_433:
+	.db	146,178,2,0,47
+	.dw	_430-_434
+_434:
+_428:
+	.db	18,50,46,40
+	.dw	_429-_435
+_435:
+	.db	146,179,2,0,47
 	.dw	_430-_436
 _436:
-	.db	146,179,2,0,47
-	.dw	_431-_437
-_437:
-_430:
+_429:
 	.db	146,180,2,0
-_431:
-	.db	22,19,62,36,33,50,34,22,15,3,19,127,2,17,0,127,4
-	.dl	(_285-_274)/2
-	.db	15,60,127,0,18,10
+_430:
+	.db	22,19,62,36,33,50,34
+	.dl	_437-_94,_123-_94
+	.dw	58
+	.db	127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
 	.dw	_438-_442
@@ -2626,8 +2104,476 @@ _447:
 _440:
 	.db	146,180,2,0
 _441:
-	.db	22,19,62,36,33,52,34,22,15,3,19,127,4,17,6,126,4
-	.dl	(_296-_285)/2
+	.db	22,19,62,36,33
+	.dl	0,0
+_149:
+	.dl	-1,_94,0,_610-_94
+	.dw	6
+	.db	91,147,2,92,147,2
+	.dl	_613-_94,_371-_94
+	.dw	6
+	.db	90,147,2,86,147,2
+	.dl	0,0
+	; End of section
+
+	.debug		.debug_loc, cluster 'get_filtered_apps1_voltage'
+_177:
+	.dl	-1,_70,0,_128-_70
+	.dw	2
+	.db	145,126
+	.dl	0,0
+_176:
+	.dl	-1,_70,0,_128-_70
+	.dw	2
+	.db	145,124
+	.dl	0,0
+_69:
+	.dl	-1,_70,0,_188-_70
+	.dw	58
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_71-_75
+_75:
+	.db	146,177,2,0,47
+	.dw	_74-_76
+_76:
+_71:
+	.db	18,49,46,40
+	.dw	_72-_77
+_77:
+	.db	146,178,2,0,47
+	.dw	_74-_78
+_78:
+_72:
+	.db	18,50,46,40
+	.dw	_73-_79
+_79:
+	.db	146,179,2,0,47
+	.dw	_74-_80
+_80:
+_73:
+	.db	146,180,2,0
+_74:
+	.db	22,19,62,36,33
+	.dl	_188-_70,_199-_70
+	.dw	60
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_189-_193
+_193:
+	.db	146,177,2,0,47
+	.dw	_192-_194
+_194:
+_189:
+	.db	18,49,46,40
+	.dw	_190-_195
+_195:
+	.db	146,178,2,0,47
+	.dw	_192-_196
+_196:
+_190:
+	.db	18,50,46,40
+	.dw	_191-_197
+_197:
+	.db	146,179,2,0,47
+	.dw	_192-_198
+_198:
+_191:
+	.db	146,180,2,0
+_192:
+	.db	22,19,62,36,33,52,34
+	.dl	_199-_70,_128-_70
+	.dw	58
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_200-_204
+_204:
+	.db	146,177,2,0,47
+	.dw	_203-_205
+_205:
+_200:
+	.db	18,49,46,40
+	.dw	_201-_206
+_206:
+	.db	146,178,2,0,47
+	.dw	_203-_207
+_207:
+_201:
+	.db	18,50,46,40
+	.dw	_202-_208
+_208:
+	.db	146,179,2,0,47
+	.dw	_203-_209
+_209:
+_202:
+	.db	146,180,2,0
+_203:
+	.db	22,19,62,36,33
+	.dl	0,0
+	; End of section
+
+	.debug		.debug_loc, cluster 'get_filtered_apps2_voltage'
+_180:
+	.dl	-1,_82,0,_133-_82
+	.dw	2
+	.db	145,126
+	.dl	0,0
+_179:
+	.dl	-1,_82,0,_133-_82
+	.dw	2
+	.db	145,124
+	.dl	0,0
+_81:
+	.dl	-1,_82,0,_230-_82
+	.dw	58
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_83-_87
+_87:
+	.db	146,177,2,0,47
+	.dw	_86-_88
+_88:
+_83:
+	.db	18,49,46,40
+	.dw	_84-_89
+_89:
+	.db	146,178,2,0,47
+	.dw	_86-_90
+_90:
+_84:
+	.db	18,50,46,40
+	.dw	_85-_91
+_91:
+	.db	146,179,2,0,47
+	.dw	_86-_92
+_92:
+_85:
+	.db	146,180,2,0
+_86:
+	.db	22,19,62,36,33
+	.dl	_230-_82,_241-_82
+	.dw	60
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_231-_235
+_235:
+	.db	146,177,2,0,47
+	.dw	_234-_236
+_236:
+_231:
+	.db	18,49,46,40
+	.dw	_232-_237
+_237:
+	.db	146,178,2,0,47
+	.dw	_234-_238
+_238:
+_232:
+	.db	18,50,46,40
+	.dw	_233-_239
+_239:
+	.db	146,179,2,0,47
+	.dw	_234-_240
+_240:
+_233:
+	.db	146,180,2,0
+_234:
+	.db	22,19,62,36,33,52,34
+	.dl	_241-_82,_133-_82
+	.dw	58
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_242-_246
+_246:
+	.db	146,177,2,0,47
+	.dw	_245-_247
+_247:
+_242:
+	.db	18,49,46,40
+	.dw	_243-_248
+_248:
+	.db	146,178,2,0,47
+	.dw	_245-_249
+_249:
+_243:
+	.db	18,50,46,40
+	.dw	_244-_250
+_250:
+	.db	146,179,2,0,47
+	.dw	_245-_251
+_251:
+_244:
+	.db	146,180,2,0
+_245:
+	.db	22,19,62,36,33
+	.dl	0,0
+	; End of section
+
+	.debug		.debug_loc, cluster 'voltage_to_pct_travel_apps_1'
+_142:
+	.dl	-1,_46,0,_182-_46
+	.dw	1
+	.db	82
+	.dl	_2-_46,_183-_46
+	.dw	1
+	.db	82
+	.dl	_4-_46,_184-_46
+	.dw	1
+	.db	82
+	.dl	0,0
+_45:
+	.dl	-1,_46,0,_113-_46
+	.dw	58
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_47-_51
+_51:
+	.db	146,177,2,0,47
+	.dw	_50-_52
+_52:
+_47:
+	.db	18,49,46,40
+	.dw	_48-_53
+_53:
+	.db	146,178,2,0,47
+	.dw	_50-_54
+_54:
+_48:
+	.db	18,50,46,40
+	.dw	_49-_55
+_55:
+	.db	146,179,2,0,47
+	.dw	_50-_56
+_56:
+_49:
+	.db	146,180,2,0
+_50:
+	.db	22,19,62,36,33
+	.dl	0,0
+	; End of section
+
+	.debug		.debug_loc, cluster 'voltage_to_pct_travel_apps_2'
+_145:
+	.dl	-1,_58,0,_185-_58
+	.dw	1
+	.db	82
+	.dl	_7-_58,_186-_58
+	.dw	1
+	.db	82
+	.dl	_9-_58,_187-_58
+	.dw	1
+	.db	82
+	.dl	0,0
+_57:
+	.dl	-1,_58,0,_118-_58
+	.dw	58
+	.db	127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_59-_63
+_63:
+	.db	146,177,2,0,47
+	.dw	_62-_64
+_64:
+_59:
+	.db	18,49,46,40
+	.dw	_60-_65
+_65:
+	.db	146,178,2,0,47
+	.dw	_62-_66
+_66:
+_60:
+	.db	18,50,46,40
+	.dw	_61-_67
+_67:
+	.db	146,179,2,0,47
+	.dw	_62-_68
+_68:
+_61:
+	.db	146,180,2,0
+_62:
+	.db	22,19,62,36,33
+	.dl	0,0
+	; End of section
+
+	.debug		.debug_frame
+_707:
+	.dl	184
+	.dl	-1
+	.db	3,0,2,2,173,2,15,60,127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_708-_712
+_712:
+	.db	146,177,2,0,47
+	.dw	_711-_713
+_713:
+_708:
+	.db	18,49,46,40
+	.dw	_709-_714
+_714:
+	.db	146,178,2,0,47
+	.dw	_711-_715
+_715:
+_709:
+	.db	18,50,46,40
+	.dw	_710-_716
+_716:
+	.db	146,179,2,0,47
+	.dw	_711-_717
+_717:
+_710:
+	.db	146,180,2,0
+_711:
+	.db	22,19,62,36,33,48,34,16,173,2,12,19,146,176,2,0,64,36,146,161,2,0,33,8,15,22,161,2,5,19,146,161,2,4,8
+	.db	162,2,8,166,2,8,177,2,8,178,2,8,179,2,8,180,2,8,0,8,1,8,6,8,7,8,8,8,9,8,10,8,167,2,8,168,2,8,169,2,8,170
+	.db	2,8,171,2,8,172,2,16,174,2,12,19,146,176,2,0,64,36,146,161,2,0,33,16,175,2,12,19,146,176,2,0,64,36,146
+	.db	161,2,2,33,8,176,2
+	; End of section
+
+	.debug		.debug_frame, cluster 'voltage_to_pct_travel_apps_1'
+	.dl	28
+	.dl	_707,_46,_113-_46
+	.db	8,160,2,8,3,8,4,8,5,8,12,8,13,8,14,0
+	; End of section
+
+	.debug		.debug_frame, cluster 'voltage_to_pct_travel_apps_2'
+	.dl	28
+	.dl	_707,_58,_118-_58
+	.db	8,160,2,8,3,8,4,8,5,8,12,8,13,8,14,0
+	; End of section
+
+	.debug		.debug_frame, cluster 'get_filtered_apps1_voltage'
+	.dl	156
+	.dl	_707,_70,_128-_70
+	.db	4
+	.dl	(_188-_70)/2
+	.db	15,60,127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_210-_214
+_214:
+	.db	146,177,2,0,47
+	.dw	_213-_215
+_215:
+_210:
+	.db	18,49,46,40
+	.dw	_211-_216
+_216:
+	.db	146,178,2,0,47
+	.dw	_213-_217
+_217:
+_211:
+	.db	18,50,46,40
+	.dw	_212-_218
+_218:
+	.db	146,179,2,0,47
+	.dw	_213-_219
+_219:
+_212:
+	.db	146,180,2,0
+_213:
+	.db	22,19,62,36,33,52,34,22,15,3,19,127,4,4
+	.dl	(_199-_188)/2
+	.db	15,60,127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_220-_224
+_224:
+	.db	146,177,2,0,47
+	.dw	_223-_225
+_225:
+_220:
+	.db	18,49,46,40
+	.dw	_221-_226
+_226:
+	.db	146,178,2,0,47
+	.dw	_223-_227
+_227:
+_221:
+	.db	18,50,46,40
+	.dw	_222-_228
+_228:
+	.db	146,179,2,0,47
+	.dw	_223-_229
+_229:
+_222:
+	.db	146,180,2,0
+_223:
+	.db	22,19,62,36,33,48,34,8,15,0,0
+	; End of section
+
+	.debug		.debug_frame, cluster 'get_filtered_apps2_voltage'
+	.dl	156
+	.dl	_707,_82,_133-_82
+	.db	4
+	.dl	(_230-_82)/2
+	.db	15,60,127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_252-_256
+_256:
+	.db	146,177,2,0,47
+	.dw	_255-_257
+_257:
+_252:
+	.db	18,49,46,40
+	.dw	_253-_258
+_258:
+	.db	146,178,2,0,47
+	.dw	_255-_259
+_259:
+_253:
+	.db	18,50,46,40
+	.dw	_254-_260
+_260:
+	.db	146,179,2,0,47
+	.dw	_255-_261
+_261:
+_254:
+	.db	146,180,2,0
+_255:
+	.db	22,19,62,36,33,52,34,22,15,3,19,127,4,4
+	.dl	(_241-_230)/2
+	.db	15,60,127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_262-_266
+_266:
+	.db	146,177,2,0,47
+	.dw	_265-_267
+_267:
+_262:
+	.db	18,49,46,40
+	.dw	_263-_268
+_268:
+	.db	146,178,2,0,47
+	.dw	_265-_269
+_269:
+_263:
+	.db	18,50,46,40
+	.dw	_264-_270
+_270:
+	.db	146,179,2,0,47
+	.dw	_265-_271
+_271:
+_264:
+	.db	146,180,2,0
+_265:
+	.db	22,19,62,36,33,48,34,8,15,0,0
+	; End of section
+
+	.debug		.debug_frame, cluster 'get_apps'
+	.dl	1204
+	.dl	_707,_94,_123-_94
+	.db	4
+	.dl	(_272-_94)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
@@ -2653,8 +2599,8 @@ _457:
 _450:
 	.db	146,180,2,0
 _451:
-	.db	22,19,62,36,33,54,34,22,15,3,19,127,6,17,7,125,4
-	.dl	(_307-_296)/2
+	.db	22,19,62,36,33,50,34,22,15,3,19,127,2,17,0,127,4
+	.dl	(_283-_272)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
@@ -2680,8 +2626,8 @@ _467:
 _460:
 	.db	146,180,2,0
 _461:
-	.db	22,19,62,36,33,56,34,22,15,3,19,127,8,17,8,124,4
-	.dl	(_318-_307)/2
+	.db	22,19,62,36,33,52,34,22,15,3,19,127,4,17,1,126,4
+	.dl	(_294-_283)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
@@ -2707,8 +2653,8 @@ _477:
 _470:
 	.db	146,180,2,0
 _471:
-	.db	22,19,62,36,33,58,34,22,15,3,19,127,10,17,9,123,4
-	.dl	(_329-_318)/2
+	.db	22,19,62,36,33,54,34,22,15,3,19,127,6,17,6,125,4
+	.dl	(_305-_294)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
@@ -2734,8 +2680,8 @@ _487:
 _480:
 	.db	146,180,2,0
 _481:
-	.db	22,19,62,36,33,60,34,22,15,3,19,127,12,17,10,122,4
-	.dl	(_340-_329)/2
+	.db	22,19,62,36,33,56,34,22,15,3,19,127,8,17,7,124,4
+	.dl	(_316-_305)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
@@ -2761,8 +2707,8 @@ _497:
 _490:
 	.db	146,180,2,0
 _491:
-	.db	22,19,62,36,33,70,34,22,15,3,19,127,22,4
-	.dl	(_351-_340)/2
+	.db	22,19,62,36,33,58,34,22,15,3,19,127,10,17,8,123,4
+	.dl	(_327-_316)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
@@ -2788,8 +2734,8 @@ _507:
 _500:
 	.db	146,180,2,0
 _501:
-	.db	22,19,62,36,33,60,34,22,15,3,19,127,12,4
-	.dl	(_362-_351)/2
+	.db	22,19,62,36,33,60,34,22,15,3,19,127,12,17,9,122,4
+	.dl	(_338-_327)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
@@ -2815,8 +2761,8 @@ _517:
 _510:
 	.db	146,180,2,0
 _511:
-	.db	22,19,62,36,33,58,34,22,15,3,19,127,10,202,4
-	.dl	(_373-_362)/2
+	.db	22,19,62,36,33,62,34,22,15,3,19,127,14,17,10,121,4
+	.dl	(_349-_338)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
@@ -2842,8 +2788,8 @@ _527:
 _520:
 	.db	146,180,2,0
 _521:
-	.db	22,19,62,36,33,56,34,22,15,3,19,127,8,201,4
-	.dl	(_384-_373)/2
+	.db	22,19,62,36,33,66,34,22,15,3,19,127,18,4
+	.dl	(_360-_349)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
@@ -2869,8 +2815,8 @@ _537:
 _530:
 	.db	146,180,2,0
 _531:
-	.db	22,19,62,36,33,54,34,22,15,3,19,127,6,200,4
-	.dl	(_395-_384)/2
+	.db	22,19,62,36,33,62,34,22,15,3,19,127,14,4
+	.dl	(_371-_360)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
@@ -2896,8 +2842,8 @@ _547:
 _540:
 	.db	146,180,2,0
 _541:
-	.db	22,19,62,36,33,52,34,22,15,3,19,127,4,199,4
-	.dl	(_406-_395)/2
+	.db	22,19,62,36,33,60,34,22,15,3,19,127,12,202,4
+	.dl	(_382-_371)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
@@ -2923,8 +2869,8 @@ _557:
 _550:
 	.db	146,180,2,0
 _551:
-	.db	22,19,62,36,33,50,34,22,15,3,19,127,2,198,4
-	.dl	(_417-_406)/2
+	.db	22,19,62,36,33,58,34,22,15,3,19,127,10,201,4
+	.dl	(_393-_382)/2
 	.db	15,60,127,0,18,10
 	.dw	16383
 	.db	26,22,62,37,18,48,46,40
@@ -2950,7 +2896,115 @@ _567:
 _560:
 	.db	146,180,2,0
 _561:
-	.db	22,19,62,36,33,48,34,8,15,192,0,0
+	.db	22,19,62,36,33,56,34,22,15,3,19,127,8,200,4
+	.dl	(_404-_393)/2
+	.db	15,60,127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_568-_572
+_572:
+	.db	146,177,2,0,47
+	.dw	_571-_573
+_573:
+_568:
+	.db	18,49,46,40
+	.dw	_569-_574
+_574:
+	.db	146,178,2,0,47
+	.dw	_571-_575
+_575:
+_569:
+	.db	18,50,46,40
+	.dw	_570-_576
+_576:
+	.db	146,179,2,0,47
+	.dw	_571-_577
+_577:
+_570:
+	.db	146,180,2,0
+_571:
+	.db	22,19,62,36,33,54,34,22,15,3,19,127,6,199,4
+	.dl	(_415-_404)/2
+	.db	15,60,127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_578-_582
+_582:
+	.db	146,177,2,0,47
+	.dw	_581-_583
+_583:
+_578:
+	.db	18,49,46,40
+	.dw	_579-_584
+_584:
+	.db	146,178,2,0,47
+	.dw	_581-_585
+_585:
+_579:
+	.db	18,50,46,40
+	.dw	_580-_586
+_586:
+	.db	146,179,2,0,47
+	.dw	_581-_587
+_587:
+_580:
+	.db	146,180,2,0
+_581:
+	.db	22,19,62,36,33,52,34,22,15,3,19,127,4,198,4
+	.dl	(_426-_415)/2
+	.db	15,60,127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_588-_592
+_592:
+	.db	146,177,2,0,47
+	.dw	_591-_593
+_593:
+_588:
+	.db	18,49,46,40
+	.dw	_589-_594
+_594:
+	.db	146,178,2,0,47
+	.dw	_591-_595
+_595:
+_589:
+	.db	18,50,46,40
+	.dw	_590-_596
+_596:
+	.db	146,179,2,0,47
+	.dw	_591-_597
+_597:
+_590:
+	.db	146,180,2,0
+_591:
+	.db	22,19,62,36,33,50,34,22,15,3,19,127,2,193,4
+	.dl	(_437-_426)/2
+	.db	15,60,127,0,18,10
+	.dw	16383
+	.db	26,22,62,37,18,48,46,40
+	.dw	_598-_602
+_602:
+	.db	146,177,2,0,47
+	.dw	_601-_603
+_603:
+_598:
+	.db	18,49,46,40
+	.dw	_599-_604
+_604:
+	.db	146,178,2,0,47
+	.dw	_601-_605
+_605:
+_599:
+	.db	18,50,46,40
+	.dw	_600-_606
+_606:
+	.db	146,179,2,0,47
+	.dw	_601-_607
+_607:
+_600:
+	.db	146,180,2,0
+_601:
+	.db	22,19,62,36,33,48,34,8,15,192
 	; End of section
 
 

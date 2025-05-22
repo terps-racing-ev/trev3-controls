@@ -57,11 +57,10 @@
 #define APPS_DEADZONE 2
 
 #define APPS_NO_ERROR 0
-#define APPS_OUT_OF_RANGE_ERROR 1
-#define APPS_IMPLAUSIBILITY_ERROR 2
+#define APPS_1_OUT_OF_RANGE_ERROR      0x01  // binary 00000001
+#define APPS_2_OUT_OF_RANGE_ERROR      0x02  // binary 00000010
+#define APPS_IMPLAUSIBILITY_ERROR      0x04  // binary 00000100
 
-
-// TODO is 100 resolution enough?
 ubyte1 voltage_to_pct_travel_apps_1(ubyte2 apps_1_voltage);
 ubyte1 voltage_to_pct_travel_apps_2(ubyte2 apps_2_voltage);
 void get_apps(ubyte1 *apps_pct_result, ubyte1 *error, ubyte1 *num_errors);

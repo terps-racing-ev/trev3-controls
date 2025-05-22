@@ -59,7 +59,6 @@ ubyte2 get_filtered_apps1_voltage(void) {
     return 0;
 }
 
-
 ubyte2 get_filtered_apps2_voltage(void) {
     if (moving_average_structs_initialized) {
         ubyte2 apps_2_val;
@@ -76,8 +75,6 @@ ubyte2 get_filtered_apps2_voltage(void) {
     return 0;
 }
 
-
-
 // gets apps values, puts average pct travel into apps_pct_result
 // if an error is detected, sets error to error code if num_errors is greater than APPS_REPEATED_ERROR_MAX
 void get_apps(ubyte1 *apps_pct_result, ubyte1 *error, ubyte1 *num_errors) {
@@ -87,17 +84,11 @@ void get_apps(ubyte1 *apps_pct_result, ubyte1 *error, ubyte1 *num_errors) {
         moving_average_structs_initialized = TRUE;
     }
 
-    ubyte2 apps_1_val;
-    bool apps_1_fresh;
-    ubyte2 apps_2_val;
-    bool apps_2_fresh;
+    // Reset error every call for bit masking
+    *error = APPS_NO_ERROR;
 
-    // get voltage values
-    IO_ADC_Get(IO_PIN_APPS_1, &apps_1_val, &apps_1_fresh);
-    IO_ADC_Get(IO_PIN_APPS_2, &apps_2_val, &apps_2_fresh);
-
-    apps_1_val = get_filtered_apps1_voltage();
-    apps_2_val = get_filtered_apps2_voltage();
+    ubyte2 apps_1_val = get_filtered_apps1_voltage();;
+    ubyte2 apps_2_val = get_filtered_apps2_voltage();; 
 
     bool apps_1_within_threshhold = (apps_1_val >= (APPS_1_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_1_val <= (APPS_1_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
     bool apps_2_within_threshhold = (apps_2_val >= (APPS_2_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_2_val <= (APPS_2_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
@@ -118,9 +109,11 @@ void get_apps(ubyte1 *apps_pct_result, ubyte1 *error, ubyte1 *num_errors) {
         // check if there's an implausible deviation between the two
         if ((Abs(difference)) >= APPS_MIN_IMPLAUSIBLE_DEVIATION) {
             // only error out if APPS_REPEATED_ERROR_MAX errors have been encountered in a row
-            (*num_errors)++;
+            
             if ((*num_errors) > APPS_REPEATED_ERROR_MAX && !(IGNORE_APPS_ERROR)) {
-                *error = APPS_IMPLAUSIBILITY_ERROR;
+                *error |= APPS_IMPLAUSIBILITY_ERROR;
+            } else {
+                (*num_errors)++;
             }
             *apps_pct_result = 0;
             return;
@@ -132,12 +125,18 @@ void get_apps(ubyte1 *apps_pct_result, ubyte1 *error, ubyte1 *num_errors) {
             *apps_pct_result = 0;
         }
         *num_errors = 0;
-        *error = APPS_NO_ERROR;
+        
     } else {
-        // only error out if APPS_REPEATED_ERROR_MAX errors have been encountered in a row
-        (*num_errors)++;
+        // only error out if APPS_REPEATED_ERROR_MAX errors have been encountered in a row       
         if ((*num_errors) > APPS_REPEATED_ERROR_MAX && !(IGNORE_APPS_ERROR)) {
-            *error = APPS_OUT_OF_RANGE_ERROR;
+            if (!apps_1_within_threshhold) {
+                *error |= APPS_1_OUT_OF_RANGE_ERROR;
+            }
+            if (!apps_2_within_threshhold) {
+                *error |= APPS_2_OUT_OF_RANGE_ERROR;
+            }
+        } else {
+            (*num_errors)++;
         }
         *apps_pct_result = 0;
     }

@@ -481,52 +481,15 @@ void main (void)
          */
         IO_Driver_TaskBegin();
 
-        // read info from inverter
-        read_can_msg(&handle_inverter_current_info_r, &inverter_current_info_can_frame, &current_info_message_received, CURRENT_INFO_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
-        read_can_msg(&handle_inverter_torque_info_r, &inverter_torque_info_can_frame, &torque_info_message_received, TORQUE_INFO_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
-        read_can_msg(&handle_inverter_state_r, &inverter_state_can_frame, &inverter_state_message_received, INVERTER_STATE_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
-
-        // read message from inverter with motor speed and update motor speed accordingly
-        read_can_msg(&handle_inverter_motor_info_r, &inverter_motor_info_can_frame, &motor_info_message_received, MOTOR_INFO_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
-        if (motor_info_message_received) {
-            // d0 and d1 are used for the outgoing CAN message
-            last_speed_d0 = inverter_motor_info_can_frame.data[INVERTER_MOTOR_SPEED_LO];
-            last_speed_d1 = inverter_motor_info_can_frame.data[INVERTER_MOTOR_SPEED_HI];
-            last_speed = (last_speed_d1 << 8) | last_speed_d0;
-            motor_speed_updated_once = TRUE;
-        }
-
-
-        // read message from inverter with voltage and update pack voltage accordingly
-        read_can_msg(&handle_inverter_voltage_info_r, &inverter_voltage_info_can_frame, &voltage_info_message_received, VOLTAGE_INFO_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
-
-        // read message from orion
-        read_can_msg(&handle_orion_1_r, &orion_1_can_frame, &orion_1_message_received, ORION_1_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
-        read_can_msg(&handle_orion_2_r, &orion_2_can_frame, &orion_2_message_received, ORION_2_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
-        //read_can_msg(&handle_orion_therm_exp_r, &orion_therm_exp_can_frame, &orion_therm_exp_message_received, ORION_THERM_EXP_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_EXT_FRAME);
-
-        if (orion_1_message_received) {
-            // reset the timeout if a message has been received
-            IO_RTC_StartTime(&orion_can_timeout);
-            orion_1_message_received_once = TRUE;
-            // We can reset this flag immediately since CAN timeout has no latching behavior
-            vcu_diag_flags.orion_can_timeout_fault = 0;
-        }
-
-        if (voltage_info_message_received == TRUE) {
-            pack_voltage = ((inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_HI] << 8) | inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_LO]) / 10;
-            pack_voltage_updated_once = TRUE;
-        }
-
         // during the first cycle, every sensor input is invalid, so skip it
         if (first_cycle) {
             first_cycle = FALSE;
+
         } else {
             // reset to prevent overflow
             if (vcu_heartbeat == 255) {
                 vcu_heartbeat = 0;
             }
-
             vcu_heartbeat++;
 
             // These 4 values solely determine the state of the car!
@@ -534,13 +497,54 @@ void main (void)
             get_bse(&bse_result, &bse_error);
             get_sdc(&sdc_val);
             get_apps(&apps_pct_result, &apps_error, &num_errors);
-            vcu_live_flags.apps_out_of_range_fault = apps_error == APPS_OUT_OF_RANGE_ERROR;
-            vcu_live_flags.apps_implausibility_fault = apps_error == APPS_IMPLAUSIBILITY_ERROR;
+            vcu_live_flags.apps_1_out_of_range_fault = (apps_error & APPS_1_OUT_OF_RANGE_ERROR) != 0;
+            vcu_live_flags.apps_2_out_of_range_fault = (apps_error & APPS_2_OUT_OF_RANGE_ERROR) != 0;
+            vcu_live_flags.apps_implausibility_fault = (apps_error & APPS_IMPLAUSIBILITY_ERROR) != 0;
             vcu_live_flags.bse_out_of_range_fault = bse_error == BSE_OUT_OF_RANGE_ERROR;
             vcu_live_flags.rtd_val = rtd_val == RTD_ON;
             vcu_live_flags.sdc_val = sdc_val == SDC_ON;
             vcu_live_flags.imd_status = orion_1_can_frame.data[ORION_IMD_STATUS_INDEX];
             vcu_live_flags.bms_status = orion_1_can_frame.data[ORION_BMS_STATUS_INDEX];
+
+
+            /*** CAN RX ***/
+
+            // read info from inverter
+            read_can_msg(&handle_inverter_current_info_r, &inverter_current_info_can_frame, &current_info_message_received, CURRENT_INFO_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
+            read_can_msg(&handle_inverter_torque_info_r, &inverter_torque_info_can_frame, &torque_info_message_received, TORQUE_INFO_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
+            read_can_msg(&handle_inverter_state_r, &inverter_state_can_frame, &inverter_state_message_received, INVERTER_STATE_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
+
+            // read message from inverter with motor speed and update motor speed accordingly
+            read_can_msg(&handle_inverter_motor_info_r, &inverter_motor_info_can_frame, &motor_info_message_received, MOTOR_INFO_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
+            if (motor_info_message_received) {
+                // d0 and d1 are used for the outgoing CAN message
+                last_speed_d0 = inverter_motor_info_can_frame.data[INVERTER_MOTOR_SPEED_LO];
+                last_speed_d1 = inverter_motor_info_can_frame.data[INVERTER_MOTOR_SPEED_HI];
+                last_speed = (last_speed_d1 << 8) | last_speed_d0;
+                motor_speed_updated_once = TRUE;
+            }
+
+
+            // read message from inverter with voltage and update pack voltage accordingly
+            read_can_msg(&handle_inverter_voltage_info_r, &inverter_voltage_info_can_frame, &voltage_info_message_received, VOLTAGE_INFO_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
+
+            // read message from orion
+            read_can_msg(&handle_orion_1_r, &orion_1_can_frame, &orion_1_message_received, ORION_1_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
+            read_can_msg(&handle_orion_2_r, &orion_2_can_frame, &orion_2_message_received, ORION_2_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
+            //read_can_msg(&handle_orion_therm_exp_r, &orion_therm_exp_can_frame, &orion_therm_exp_message_received, ORION_THERM_EXP_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_EXT_FRAME);
+
+            if (orion_1_message_received) {
+                // reset the timeout if a message has been received
+                IO_RTC_StartTime(&orion_can_timeout);
+                orion_1_message_received_once = TRUE;
+            }
+
+            if (voltage_info_message_received == TRUE) {
+                pack_voltage = ((inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_HI] << 8) | inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_LO]) / 10;
+                pack_voltage_updated_once = TRUE;
+            }
+
+            /****** FSM START ******/
 
             if (current_state == NOT_READY) {
 
@@ -604,10 +608,13 @@ void main (void)
                 } else if (apps_error != APPS_NO_ERROR || bse_error != BSE_NO_ERROR || (sdc_val == SDC_OFF)) {
                     current_state = ERRORED;
                     // log flags
-                    if (apps_error == APPS_OUT_OF_RANGE_ERROR) {
-                        vcu_diag_flags.apps_out_of_range_fault = 1;
-                    } 
-                    if (apps_error == APPS_IMPLAUSIBILITY_ERROR) {
+                    if (apps_error & APPS_1_OUT_OF_RANGE_ERROR) {
+                        vcu_diag_flags.apps_1_out_of_range_fault = 1;
+                    }
+                    if (apps_error & APPS_2_OUT_OF_RANGE_ERROR) {
+                        vcu_diag_flags.apps_2_out_of_range_fault = 1;
+                    }
+                    if (apps_error & APPS_IMPLAUSIBILITY_ERROR) {
                         vcu_diag_flags.apps_implausibility_fault = 1;
                     } 
                     if (bse_error == BSE_OUT_OF_RANGE_ERROR) {
@@ -672,7 +679,6 @@ void main (void)
             if (been_ignore_period_since_start == TRUE) {
                 // if CAN timeout, set light to blinking red
                 if (IO_RTC_GetTimeUS(orion_can_timeout) > ORION_CAN_TIMEOUT_US) {
-                    vcu_diag_flags.orion_can_timeout_fault = 1;
                     // TODO Fake because Orion tweaks and lags 
                     //set_light_to(BLINKING_RED);
                 } else if (orion_1_message_received_once == TRUE) {
@@ -723,7 +729,7 @@ void main (void)
             }
 
 
-            /* SENDING MESSAGES */
+            /* CAN TX */
 
             // set the torque in the message to be sent to the inverter
             if (inverter_enabled == INVERTER_ENABLE) {
@@ -789,7 +795,6 @@ void main (void)
 
 
             // diagnostics message
-            // TODO add diagnostic messages
             vcu_diag_can_frame.data[0] = vcu_heartbeat;
             vcu_diag_can_frame.data[1] = pack_diag_flags(&vcu_diag_flags);
             vcu_diag_can_frame.data[2] = pack_live_flags(&vcu_live_flags);
