@@ -420,6 +420,8 @@ void main (void)
     bool voltage_info_message_received = FALSE;
     // last received pack voltage
     ubyte2 pack_voltage = 0;
+    // max power in kw x 10, never resets
+    ubyte2 max_power = 0;
     // whether any voltage info has been received
     bool pack_voltage_updated_once = FALSE;
 
@@ -537,6 +539,10 @@ void main (void)
                 // reset the timeout if a message has been received
                 IO_RTC_StartTime(&orion_can_timeout);
                 orion_1_message_received_once = TRUE;
+                ubyte2 power = ((orion_1_can_frame.data[6] << 8) | orion_1_can_frame.data[7]) / 10;
+                if (power > max_power) {
+                    max_power = power;
+                }
             }
 
             if (voltage_info_message_received == TRUE) {
@@ -818,10 +824,10 @@ void main (void)
             // send debug message
             IO_ADC_Get(IO_PIN_BSE, &bse_val, &bse_fresh);
 
-            debug_can_frame.data[0] = apps_error;
-            debug_can_frame.data[1] = bse_error;
+            debug_can_frame.data[0] = max_power & 0xFF;
+            debug_can_frame.data[1] = max_power >> 8;
 
-            apps_1_val = get_filtered_apps1_voltage();
+            apps_1_val = get_filtered_apps1_voltage(); // TODO Technically this isn't the number get_apps sees
             apps_2_val = get_filtered_apps2_voltage();
             debug_can_frame.data[2] = apps_1_val & 0xFF;
             debug_can_frame.data[3] = apps_1_val >> 8;
