@@ -312,14 +312,14 @@ void main (void)
                  , 0x7FF);           
 
     IO_CAN_ConfigMsg( &handle_orion_1_r
-                 , CONTROLS_CAN_CHANNEL
+                 , TELEMETRY_CAN_CHANNEL
                  , IO_CAN_MSG_READ
                  , IO_CAN_STD_FRAME
                  , ORION_1_CAN_ID
                  , 0x7FF);
 
     IO_CAN_ConfigMsg( &handle_orion_2_r
-                 , CONTROLS_CAN_CHANNEL
+                 , TELEMETRY_CAN_CHANNEL
                  , IO_CAN_MSG_READ
                  , IO_CAN_STD_FRAME
                  , ORION_2_CAN_ID
@@ -531,8 +531,8 @@ void main (void)
             read_can_msg(&handle_inverter_voltage_info_r, &inverter_voltage_info_can_frame, &voltage_info_message_received, VOLTAGE_INFO_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
 
             // read message from orion
-            read_can_msg(&handle_orion_1_r, &orion_1_can_frame, &orion_1_message_received, ORION_1_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
-            read_can_msg(&handle_orion_2_r, &orion_2_can_frame, &orion_2_message_received, ORION_2_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
+            read_can_msg(&handle_orion_1_r, &orion_1_can_frame, &orion_1_message_received, ORION_1_CAN_ID, TELEMETRY_CAN_CHANNEL, IO_CAN_STD_FRAME);
+            read_can_msg(&handle_orion_2_r, &orion_2_can_frame, &orion_2_message_received, ORION_2_CAN_ID, TELEMETRY_CAN_CHANNEL, IO_CAN_STD_FRAME);
             //read_can_msg(&handle_orion_therm_exp_r, &orion_therm_exp_can_frame, &orion_therm_exp_message_received, ORION_THERM_EXP_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_EXT_FRAME);
 
             if (orion_1_message_received) {
@@ -770,6 +770,7 @@ void main (void)
                 write_can_msg(handle_telemetry_fifo_w, &inverter_state_can_frame);
             }
 
+            /* Unneedeed because orion is on data bus now
             // echo orion messages
             if (orion_1_message_received) {
                 write_can_msg(handle_telemetry_fifo_w, &orion_1_can_frame);
@@ -777,6 +778,8 @@ void main (void)
             if (orion_2_message_received) {
                 write_can_msg(handle_telemetry_fifo_w, &orion_2_can_frame);
             }
+            */
+
             /*if (orion_therm_exp_message_received) {
                 write_can_msg(handle_telemetry_fifo_w, &orion_therm_exp_can_frame);
             }*/
@@ -866,8 +869,6 @@ void main (void)
                 IO_CAN_DeInitHandle(handle_inverter_current_info_r);
                 IO_CAN_DeInitHandle(handle_inverter_torque_info_r);
                 IO_CAN_DeInitHandle(handle_inverter_state_r);
-                IO_CAN_DeInitHandle(handle_orion_1_r);
-                IO_CAN_DeInitHandle(handle_orion_2_r);
                 //IO_CAN_DeInitHandle(handle_orion_therm_exp_r);
 
                 // de init the channel
@@ -930,20 +931,6 @@ void main (void)
                         , INVERTER_STATE_CAN_ID
                         , 0x7FF);           
 
-                IO_CAN_ConfigMsg( &handle_orion_1_r
-                        , CONTROLS_CAN_CHANNEL
-                        , IO_CAN_MSG_READ
-                        , IO_CAN_STD_FRAME
-                        , ORION_1_CAN_ID
-                        , 0x7FF);
-
-                IO_CAN_ConfigMsg( &handle_orion_2_r
-                        , CONTROLS_CAN_CHANNEL
-                        , IO_CAN_MSG_READ
-                        , IO_CAN_STD_FRAME
-                        , ORION_2_CAN_ID
-                        , 0x7FF);
-
 
                 /*IO_CAN_ConfigMsg( &handle_orion_therm_exp_r
                         , CONTROLS_CAN_CHANNEL
@@ -957,6 +944,9 @@ void main (void)
                 telemetry_bus_failure_count++;
                 // de init handle
                 IO_CAN_DeInitHandle(handle_telemetry_fifo_w);
+
+                IO_CAN_DeInitHandle(handle_orion_1_r);
+                IO_CAN_DeInitHandle(handle_orion_2_r);
 
                 // de init channel
                 IO_CAN_DeInit(TELEMETRY_CAN_CHANNEL);
@@ -981,6 +971,20 @@ void main (void)
                     , IO_CAN_STD_FRAME
                     , VCU_CONTROLS_CAN_ID // TODO does this change anything?
                     , 0);
+
+                IO_CAN_ConfigMsg( &handle_orion_1_r
+                        , TELEMETRY_CAN_CHANNEL
+                        , IO_CAN_MSG_READ
+                        , IO_CAN_STD_FRAME
+                        , ORION_1_CAN_ID
+                        , 0x7FF);
+
+                IO_CAN_ConfigMsg( &handle_orion_2_r
+                        , TELEMETRY_CAN_CHANNEL
+                        , IO_CAN_MSG_READ
+                        , IO_CAN_STD_FRAME
+                        , ORION_2_CAN_ID
+                        , 0x7FF);
             }
 
         }
