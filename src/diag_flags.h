@@ -25,8 +25,10 @@ struct live_flags {
     ubyte1 apps_2_out_of_range_fault;
     ubyte1 apps_implausibility_fault;
     ubyte1 bse_out_of_range_fault;
+    // RTD/SDC: 1 for RTD_ON / SDC_ON, 0 of RTD_OFF / SDC_OFF
     ubyte1 rtd_val;
     ubyte1 sdc_val;
+    // IMD/BMS: 1 for good, 0 for errored
     ubyte1 imd_status;
     ubyte1 bms_status;
 };
