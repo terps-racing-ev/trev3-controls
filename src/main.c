@@ -23,6 +23,7 @@
 #include "tsil.h"
 #include "utilities.h"
 #include "debug_defines.h"
+#include "debouncing.h"
 
 /**************************************************************************
  * Actuator Pins
@@ -106,6 +107,9 @@
 // 3 second period for ignoring Orion
 #define ORION_IGNORE_PERIOD_S 3
 #define ORION_IGNORE_PERIOD_US MsToUs(ORION_IGNORE_PERIOD_S * 1000)
+
+// 0.5 second debouncing threshhold for BMS/IMD CAN
+#define CAN_IMD_BMS_DEBOUNCE_THRESHHOLD THRESHHOLD_500_MS
 
 /**************************************************************************
  * Other
@@ -455,6 +459,13 @@ void main (void)
     ubyte4 time_since_start;
     ubyte4 orion_can_timeout;
 
+    // structs for debouncing can info
+    struct debouncing_info bms_status_can_debouncing_struct;
+    struct debouncing_info imd_status_can_debouncing_struct;
+    initialize_debouncing_struct(bms_status_can_debouncing_struct, TRUE, CAN_IMD_BMS_DEBOUNCE_THRESHHOLD);
+    initialize_debouncing_struct(imd_status_can_debouncing_struct, TRUE, CAN_IMD_BMS_DEBOUNCE_THRESHHOLD);
+
+
     // whether a TSIL fault is latching (BMS/IMD faults)
     bool tsil_latched = FALSE;
     
@@ -698,6 +709,9 @@ void main (void)
 
                         bool bms_ok = orion_1_can_frame.data[ORION_BMS_STATUS_INDEX];
                         bool imd_ok = orion_1_can_frame.data[ORION_IMD_STATUS_INDEX];
+
+                        bms_ok = debounce_input(bms_status_can_debouncing_struct, bms_ok);
+                        imd_ok = debounce_input(imd_status_can_debouncing_struct, imd_ok);
 
                         // control bms status pin
                         if (!bms_ok) {
