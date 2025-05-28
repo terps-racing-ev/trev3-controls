@@ -36,6 +36,9 @@
 /* DCDC Relay */
 #define DCDC_RELAY_PIN IO_DO_03
 
+/* BMS status signal to SDC */
+#define BMS_STATUS_PIN IO_DO_04
+
 /**************************************************************************
  * RTD Settings
  ***************************************************************************/
@@ -390,6 +393,10 @@ void main (void)
     IO_DO_Init( DCDC_RELAY_PIN );
     IO_DO_Set( DCDC_RELAY_PIN, FALSE );
 
+    /* BMS Status */
+    IO_DO_Init( BMS_STATUS_PIN );
+    IO_DO_Set( BMS_STATUS_PIN, TRUE );
+
     /* TSSI lights */
     IO_DO_Init( TSIL_GREEN_PIN );
     IO_DO_Init( TSIL_RED_PIN );
@@ -688,14 +695,21 @@ void main (void)
                     // TODO Fake because Orion tweaks and lags 
                     //set_light_to(BLINKING_RED);
                 } else if (orion_1_message_received_once == TRUE) {
-                        get_sdc(&sdc_val);
 
                         bool bms_ok = orion_1_can_frame.data[ORION_BMS_STATUS_INDEX];
                         bool imd_ok = orion_1_can_frame.data[ORION_IMD_STATUS_INDEX];
 
+                        // control bms status pin
+                        if (!bms_ok) {
+                            IO_DO_Set(BMS_STATUS_PIN, FALSE);
+                        } else {
+                            IO_DO_Set(BMS_STATUS_PIN, TRUE);
+                        }
+
                         // latch BMS and IMD faults
                         // Added SDC because shhhh
-                        if ((!bms_ok || !imd_ok) && sdc_val == SDC_OFF) {
+                        if (!bms_ok || 
+                            (!imd_ok && sdc_val == SDC_OFF)) {
                             tsil_latched = TRUE;
                             // log flags
                             if (!bms_ok) {
@@ -706,7 +720,8 @@ void main (void)
                             }
                         }
 
-                        // If no timeout and everything is good AND sdc is good, clear latch
+                        // If no timeout and everything is good AND sdc is good (i.e.
+                        // everything is good and reset buttons have been pressed), clear latch
                         if (tsil_latched) {
                             if (bms_ok && imd_ok && sdc_val != SDC_OFF) {
                                 tsil_latched = FALSE;  // clear latch if everything is okay
