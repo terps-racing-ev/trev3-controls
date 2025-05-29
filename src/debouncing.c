@@ -1,7 +1,7 @@
 #include "debouncing.h"
 
 
-void initialize_debouncing_struct(struct debouncing_info* info, bool starting_state, ubyte1 thresh) {
+void initialize_debouncing_struct(struct debouncing_info* info, bool starting_state, ubyte2 thresh) {
     info->current_state = starting_state;
 
     info->switch_threshhold = thresh;

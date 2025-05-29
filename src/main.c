@@ -462,8 +462,8 @@ void main (void)
     // structs for debouncing can info
     struct debouncing_info bms_status_can_debouncing_struct;
     struct debouncing_info imd_status_can_debouncing_struct;
-    initialize_debouncing_struct(bms_status_can_debouncing_struct, TRUE, CAN_IMD_BMS_DEBOUNCE_THRESHHOLD);
-    initialize_debouncing_struct(imd_status_can_debouncing_struct, TRUE, CAN_IMD_BMS_DEBOUNCE_THRESHHOLD);
+    initialize_debouncing_struct(&bms_status_can_debouncing_struct, TRUE, CAN_IMD_BMS_DEBOUNCE_THRESHHOLD);
+    initialize_debouncing_struct(&imd_status_can_debouncing_struct, TRUE, CAN_IMD_BMS_DEBOUNCE_THRESHHOLD);
 
 
     // whether a TSIL fault is latching (BMS/IMD faults)
@@ -710,8 +710,8 @@ void main (void)
                         bool bms_ok = orion_1_can_frame.data[ORION_BMS_STATUS_INDEX];
                         bool imd_ok = orion_1_can_frame.data[ORION_IMD_STATUS_INDEX];
 
-                        bms_ok = debounce_input(bms_status_can_debouncing_struct, bms_ok);
-                        imd_ok = debounce_input(imd_status_can_debouncing_struct, imd_ok);
+                        bms_ok = debounce_input(&bms_status_can_debouncing_struct, bms_ok);
+                        imd_ok = debounce_input(&imd_status_can_debouncing_struct, imd_ok);
 
                         // control bms status pin
                         if (!bms_ok) {
