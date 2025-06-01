@@ -76,6 +76,7 @@
 
 #define VCU_CONTROLS_CAN_ID 0xC0
 #define VCU_INVERTER_SETTINGS_CAN_ID 0xC1
+#define INVERTER_CCL_DCL 0x202
 
 #define VCU_SUMMARY_CAN_ID 0xC5
 #define VCU_DIAG_CAN_ID 0xCD
@@ -110,6 +111,9 @@
 
 // 0.5 second debouncing threshhold for BMS/IMD CAN
 #define CAN_IMD_BMS_DEBOUNCE_THRESHHOLD THRESHHOLD_500_MS
+
+#define MAX_POWER_LIMIT 75000
+#define CHARGE_CURRENT_LIMIT 20
 
 /**************************************************************************
  * Other
@@ -214,6 +218,12 @@ void main (void)
     inverter_settings_can_frame.id_format = IO_CAN_STD_FRAME;
     inverter_settings_can_frame.length = 8;
     clear_can_frame(&inverter_settings_can_frame);
+
+    IO_CAN_DATA_FRAME inverter_ccl_dcl_can_frame;
+    inverter_ccl_dcl_can_frame.id = INVERTER_CCL_DCL;
+    inverter_ccl_dcl_can_frame.id_format = IO_CAN_STD_FRAME;
+    inverter_ccl_dcl_can_frame.length = 8;
+    clear_can_frame(&inverter_ccl_dcl_can_frame);
 
     /* CAN frame for reading from inverter */
     IO_CAN_DATA_FRAME inverter_motor_info_can_frame;
@@ -429,12 +439,12 @@ void main (void)
 
     // whether a new voltage info message has been received since the last time
     bool voltage_info_message_received = FALSE;
-    // last received pack voltage
-    ubyte2 pack_voltage = 0;
+    // last received dc bus voltage
+    ubyte2 dc_bus_voltage = 0;
     // max power in kw x 10, never resets
     ubyte2 max_power = 0;
     // whether any voltage info has been received
-    bool pack_voltage_updated_once = FALSE;
+    bool dc_bus_voltage_updated_once = FALSE;
 
     //inverter current info received
     bool current_info_message_received = FALSE;
@@ -564,8 +574,8 @@ void main (void)
             }
 
             if (voltage_info_message_received == TRUE) {
-                pack_voltage = ((inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_HI] << 8) | inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_LO]) / 10;
-                pack_voltage_updated_once = TRUE;
+                dc_bus_voltage = ((inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_HI] << 8) | inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_LO]) / 10;
+                dc_bus_voltage_updated_once = TRUE;
             }
 
             /****** FSM START ******/
@@ -586,7 +596,7 @@ void main (void)
                     // torque message to the motor with 0 torque
                     torque = 0;
                     inverter_enabled = INVERTER_DISABLE;
-                    pack_voltage_updated_once = FALSE;
+                    dc_bus_voltage_updated_once = FALSE;
                 }
 
             } else if (current_state == PLAYING_RTD_SOUND) {
@@ -782,6 +792,18 @@ void main (void)
             }
             write_can_msg(handle_controls_fifo_w, &controls_can_frame);
 
+            ubyte4 dcl4 = dc_bus_voltage == 0 ? 0 : (ubyte4)MAX_POWER_LIMIT / (ubyte4)dc_bus_voltage;
+            ubyte2 dcl = (ubyte2)dcl4;
+            ubyte2 ccl = (ubyte2)CHARGE_CURRENT_LIMIT;
+            if (dcl < 200) {
+                dcl = 200; // minimum CCL
+            }
+            inverter_ccl_dcl_can_frame.data[0] = dcl & 0xFF;
+            inverter_ccl_dcl_can_frame.data[1] = dcl >> 8;
+            inverter_ccl_dcl_can_frame.data[2] = ccl & 0xFF;
+            inverter_ccl_dcl_can_frame.data[3] = ccl >> 8;
+            write_can_msg(handle_controls_fifo_w, &inverter_ccl_dcl_can_frame);
+
             // echo motor info message
             if (motor_info_message_received) {
                 write_can_msg(handle_telemetry_fifo_w, &inverter_motor_info_can_frame);
@@ -841,7 +863,6 @@ void main (void)
             vcu_diag_can_frame.data[5] = controls_tx_error_ctr;
             vcu_diag_can_frame.data[6] = controls_rx_error_ctr;
             vcu_diag_can_frame.data[7] = telemetry_tx_error_ctr;
-
 
             write_can_msg(handle_controls_fifo_w, &vcu_diag_can_frame);
             write_can_msg(handle_telemetry_fifo_w, &vcu_diag_can_frame);
