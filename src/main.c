@@ -114,6 +114,7 @@
 
 #define MAX_POWER_LIMIT 75000
 #define CHARGE_CURRENT_LIMIT 20
+#define MIN_DCL 150
 
 /**************************************************************************
  * Other
@@ -712,9 +713,9 @@ void main (void)
             // only check CAN message if it's been "ignore period" seconds since start
             if (been_ignore_period_since_start == TRUE) {
                 // if CAN timeout, set light to blinking red
-                if (IO_RTC_GetTimeUS(orion_can_timeout) > ORION_CAN_TIMEOUT_US) {
+                if (TSIL_TIMEOUT_ENABLED && IO_RTC_GetTimeUS(orion_can_timeout) > ORION_CAN_TIMEOUT_US) {
                     // TODO Fake because Orion tweaks and lags 
-                    //set_light_to(BLINKING_RED);
+                    set_light_to(BLINKING_RED);
                 } else if (orion_1_message_received_once == TRUE) {
 
                         bool bms_ok = orion_1_can_frame.data[ORION_BMS_STATUS_INDEX];
@@ -792,17 +793,19 @@ void main (void)
             }
             write_can_msg(handle_controls_fifo_w, &controls_can_frame);
 
-            ubyte4 dcl4 = dc_bus_voltage == 0 ? 0 : (ubyte4)MAX_POWER_LIMIT / (ubyte4)dc_bus_voltage;
-            ubyte2 dcl = (ubyte2)dcl4;
-            ubyte2 ccl = (ubyte2)CHARGE_CURRENT_LIMIT;
-            if (dcl < 200) {
-                dcl = 200; // minimum CCL
+            if (CURRENT_LIMITING_ENABLED) {
+                ubyte4 dcl4 = dc_bus_voltage == 0 ? 0 : ((ubyte4)MAX_POWER_LIMIT) / ((ubyte4)dc_bus_voltage);
+                ubyte2 dcl = (ubyte2)dcl4;
+                ubyte2 ccl = (ubyte2)CHARGE_CURRENT_LIMIT;
+                if (dcl < MIN_DCL) {
+                    dcl = MIN_DCL;
+                }
+                inverter_ccl_dcl_can_frame.data[0] = dcl & 0xFF;
+                inverter_ccl_dcl_can_frame.data[1] = dcl >> 8;
+                inverter_ccl_dcl_can_frame.data[2] = ccl & 0xFF;
+                inverter_ccl_dcl_can_frame.data[3] = ccl >> 8;
+                write_can_msg(handle_controls_fifo_w, &inverter_ccl_dcl_can_frame);
             }
-            inverter_ccl_dcl_can_frame.data[0] = dcl & 0xFF;
-            inverter_ccl_dcl_can_frame.data[1] = dcl >> 8;
-            inverter_ccl_dcl_can_frame.data[2] = ccl & 0xFF;
-            inverter_ccl_dcl_can_frame.data[3] = ccl >> 8;
-            write_can_msg(handle_controls_fifo_w, &inverter_ccl_dcl_can_frame);
 
             // echo motor info message
             if (motor_info_message_received) {

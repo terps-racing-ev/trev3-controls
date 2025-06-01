@@ -20,5 +20,11 @@
 // turn off the brake plausibility code
 #define IGNORE_BRAKE_PLAUSIBILITY FALSE
 
+// timeout turns tsil blinking red
+#define TSIL_TIMEOUT_ENABLED FALSE
+
+// send current limiting messages to inverter
+#define CURRENT_LIMITING_ENABLED TRUE
+
 
 #endif
