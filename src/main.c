@@ -661,11 +661,11 @@ void main (void)
                     if (sdc_val == SDC_OFF) {
                         vcu_diag_flags.sdc_off_fault = 1;
                     }
-                } else if (!(IGNORE_BRAKE_PLAUSIBILITY) && bse_result > BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD && apps_pct_result >= APPS_THRESHHOLD_BRAKE_PLAUSIBILITY) {
+                } else if (!(IGNORE_BRAKE_PLAUSIBILITY) && bse_result > BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD && apps_pedal_travel_result >= APPS_THRESHHOLD_BRAKE_PLAUSIBILITY) {
                     current_state = APPS_5PCT_WAIT;
                 } else {
                     // no transition into another state -> send controls message
-                    torque = pct_travel_to_torque(apps_pct_result);
+                    torque = pedal_travel_to_torque(apps_pedal_travel_result);
                     inverter_enabled = INVERTER_ENABLE;
                 }
             } else if (current_state == ERRORED) {
@@ -687,7 +687,7 @@ void main (void)
 
                 } else if (apps_error != APPS_NO_ERROR || bse_error != BSE_NO_ERROR || (sdc_val == SDC_OFF)) {
                     current_state = ERRORED;
-                } else if (apps_pct_result <= APPS_THRESHHOLD_REESTABLISH_PLAUSIBILITY) {
+                } else if (apps_pedal_travel_result <= APPS_THRESHHOLD_REESTABLISH_PLAUSIBILITY) {
                     // go back to driving when apps <= 5%
                     current_state = DRIVING;
                 } else {
