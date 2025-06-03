@@ -17,29 +17,29 @@ struct moving_average_info apps_1_moving_average_info;
 struct moving_average_info apps_2_moving_average_info;
 
 
-ubyte1 voltage_to_pct_travel_apps_1(ubyte2 apps_1_voltage) {
+ubyte1 voltage_to_pedal_travel_apps_1(ubyte2 apps_1_voltage) {
     if (apps_1_voltage < APPS_1_MIN_VOLTAGE) {
         return 0;
     }
 
     if (apps_1_voltage > APPS_1_MAX_VOLTAGE) {
-        return 100;
+        return 255;
     }
 
-    return ((apps_1_voltage - APPS_1_MIN_VOLTAGE) / (APPS_1_VOLTAGE_RANGE / 100));
+    return (ubyte1)(((ubyte4)(apps_1_voltage - APPS_1_MIN_VOLTAGE) * 255) / APPS_1_VOLTAGE_RANGE);
 
 }
 
-ubyte1 voltage_to_pct_travel_apps_2(ubyte2 apps_2_voltage) {
+ubyte1 voltage_to_pedal_travel_apps_2(ubyte2 apps_2_voltage) {
     if (apps_2_voltage < APPS_2_MIN_VOLTAGE) {
         return 0;
     }
 
     if (apps_2_voltage > APPS_2_MAX_VOLTAGE) {
-        return 100;
+        return 255;
     }
 
-    return ((apps_2_voltage - APPS_2_MIN_VOLTAGE) / (APPS_2_VOLTAGE_RANGE / 100));
+    return (ubyte1)(((ubyte4)(apps_2_voltage - APPS_2_MIN_VOLTAGE) * 255) / APPS_2_VOLTAGE_RANGE);
 
 }
 
@@ -75,9 +75,9 @@ ubyte2 get_filtered_apps2_voltage(void) {
     return 0;
 }
 
-// gets apps values, puts average pct travel into apps_pct_result
+// gets apps values, puts average pct travel into apps_pedal_travel_result
 // if an error is detected, sets error to error code if num_errors is greater than APPS_REPEATED_ERROR_MAX
-void get_apps(ubyte1 *apps_pct_result, ubyte1 *error, ubyte1 *num_errors) {
+void get_apps(ubyte1 *apps_pedal_travel_result, ubyte1 *error, ubyte1 *num_errors) {
     if (!moving_average_structs_initialized) {
         initialize_moving_average_struct(&apps_1_moving_average_info);
         initialize_moving_average_struct(&apps_2_moving_average_info);
@@ -93,18 +93,18 @@ void get_apps(ubyte1 *apps_pct_result, ubyte1 *error, ubyte1 *num_errors) {
     bool apps_1_within_threshhold = (apps_1_val >= (APPS_1_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_1_val <= (APPS_1_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
     bool apps_2_within_threshhold = (apps_2_val >= (APPS_2_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_2_val <= (APPS_2_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
 
-    ubyte1 apps_1_pct;
-    ubyte1 apps_2_pct;
+    ubyte1 apps_1_pedal_travel;
+    ubyte1 apps_2_pedal_travel;
     sbyte2 difference;
 
     // check that both apps are within the treshhold
     if (apps_1_within_threshhold &&
         apps_2_within_threshhold) {
 
-        apps_1_pct = voltage_to_pct_travel_apps_1(apps_1_val);
-        apps_2_pct = voltage_to_pct_travel_apps_2(apps_2_val);
+        apps_1_pedal_travel = voltage_to_pedal_travel_apps_1(apps_1_val);
+        apps_2_pedal_travel = voltage_to_pedal_travel_apps_2(apps_2_val);
 
-        difference = apps_1_pct - apps_2_pct;
+        difference = apps_1_pedal_travel - apps_2_pedal_travel;
 
         // check if there's an implausible deviation between the two
         if ((Abs(difference)) >= APPS_MIN_IMPLAUSIBLE_DEVIATION) {
@@ -115,14 +115,14 @@ void get_apps(ubyte1 *apps_pct_result, ubyte1 *error, ubyte1 *num_errors) {
             } else {
                 (*num_errors)++;
             }
-            *apps_pct_result = 0;
+            *apps_pedal_travel_result = 0;
             return;
         }
 
         // set the result to the average of the two
-        *apps_pct_result = ((apps_1_pct) + (apps_2_pct)) / 2;
-        if (*apps_pct_result <= APPS_DEADZONE) {
-            *apps_pct_result = 0;
+        *apps_pedal_travel_result = ((apps_1_pedal_travel) + (apps_2_pedal_travel)) / 2;
+        if (*apps_pedal_travel_result <= APPS_DEADZONE) {
+            *apps_pedal_travel_result = 0;
         }
         *num_errors = 0;
         
@@ -138,6 +138,6 @@ void get_apps(ubyte1 *apps_pct_result, ubyte1 *error, ubyte1 *num_errors) {
         } else {
             (*num_errors)++;
         }
-        *apps_pct_result = 0;
+        *apps_pedal_travel_result = 0;
     }
 }

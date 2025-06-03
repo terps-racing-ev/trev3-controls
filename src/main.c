@@ -55,7 +55,7 @@
 #define INVERTER_DISABLE 0
 #define INVERTER_ENABLE 1
 
-#define PCT_TRAVEL_FOR_MAX_TORQUE 80
+#define PEDAL_TRAVEL_FOR_MAX_TORQUE 230 // 90 percent travel
 #define CONTINUOUS_TORQUE_MAX 200 // TODO 200
 #define MOTOR_DIRECTION MOTOR_FORWARDS // TODO backwards for dyno testing
 
@@ -162,12 +162,12 @@ APDB appl_db =
           , 0                      /* ubyte4 headerCRC          */
           };
 
-ubyte2 pct_travel_to_torque (ubyte1 pct_travel) {
-    if (pct_travel >= PCT_TRAVEL_FOR_MAX_TORQUE) {
-         return CONTINUOUS_TORQUE_MAX;
+ubyte2 pedal_travel_to_torque(ubyte1 pedal_travel) {
+    if (pedal_travel >= PEDAL_TRAVEL_FOR_MAX_TORQUE) {
+        return CONTINUOUS_TORQUE_MAX;
     }
 
-    return ((ubyte2)(((float)(pct_travel) / PCT_TRAVEL_FOR_MAX_TORQUE) * ((float) CONTINUOUS_TORQUE_MAX)));
+    return (ubyte2)(((ubyte4)pedal_travel * CONTINUOUS_TORQUE_MAX) / PEDAL_TRAVEL_FOR_MAX_TORQUE);
 }
 
 
@@ -379,7 +379,7 @@ void main (void)
                         NULL );
 
     /* APPS in general */
-    ubyte1 apps_pct_result = 0;
+    ubyte1 apps_pedal_travel_result = 0;
     ubyte1 apps_error = APPS_NO_ERROR;
     ubyte1 num_errors = 0;
 
@@ -527,7 +527,7 @@ void main (void)
             get_rtd(&rtd_val);
             get_bse(&bse_result, &bse_error);
             get_sdc(&sdc_val);
-            get_apps(&apps_pct_result, &apps_error, &num_errors);
+            get_apps(&apps_pedal_travel_result, &apps_error, &num_errors);
             vcu_live_flags.apps_1_out_of_range_fault = (apps_error & APPS_1_OUT_OF_RANGE_ERROR) != 0;
             vcu_live_flags.apps_2_out_of_range_fault = (apps_error & APPS_2_OUT_OF_RANGE_ERROR) != 0;
             vcu_live_flags.apps_implausibility_fault = (apps_error & APPS_IMPLAUSIBILITY_ERROR) != 0;
@@ -842,7 +842,7 @@ void main (void)
             }*/
 
             // send vcu summary message
-            vcu_summary_can_frame.data[0] = apps_pct_result;
+            vcu_summary_can_frame.data[0] = apps_pedal_travel_result;
 
             vcu_summary_can_frame.data[1] = torque & 0xFF;
             vcu_summary_can_frame.data[2] = torque >> 8;

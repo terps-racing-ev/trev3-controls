@@ -25,14 +25,14 @@
 /**************************************************************************
  * Settings
  ***************************************************************************/
-/* min. difference between the APPS pct travels
- * that'll trigger the implausibility check */
-#define APPS_MIN_IMPLAUSIBLE_DEVIATION 10
+/* min. difference between the APPS travels
+ * that'll trigger the implausibility check, 10 percent of 256 */
+#define APPS_MIN_IMPLAUSIBLE_DEVIATION 25
 
 #define IMPLAUSIBILITY_PERSISTENCE_PERIOD_US MsToUs(100ul)
 
-//***************************************** used to be 25
-#define APPS_THRESHHOLD_BRAKE_PLAUSIBILITY 25
+//******************************************* 25 percent of 256
+#define APPS_THRESHHOLD_BRAKE_PLAUSIBILITY 64
 //*******************************************************
 
 #define APPS_THRESHHOLD_REESTABLISH_PLAUSIBILITY 5
