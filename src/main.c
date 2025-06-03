@@ -38,7 +38,7 @@
 #define DCDC_RELAY_PIN IO_DO_03
 
 /* BMS status signal to SDC */
-#define BMS_STATUS_PIN IO_DO_04
+#define BMS_STATUS_PIN IO_DO_06
 
 /**************************************************************************
  * RTD Settings
@@ -626,6 +626,9 @@ void main (void)
                     current_state = DRIVING;
                     just_entered_sound_state = TRUE;
                     IO_DO_Set(IO_PIN_BUZZER, FALSE);
+                    
+                    initialize_diag_flags(&vcu_diag_flags);
+                    // reset flags
                 }
 
                 // keep sending 0 torque messages to the inverter in this state
