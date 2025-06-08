@@ -35,7 +35,7 @@
 #define APPS_THRESHHOLD_BRAKE_PLAUSIBILITY 64
 //*******************************************************
 
-#define APPS_THRESHHOLD_REESTABLISH_PLAUSIBILITY 5
+#define APPS_THRESHHOLD_REESTABLISH_PLAUSIBILITY 12 // 5% of 256
 
 /* apps 1 */
 #define APPS_1_MAX_VOLTAGE 4400
