@@ -663,6 +663,7 @@ void main (void)
                     }
                 } else if (!(IGNORE_BRAKE_PLAUSIBILITY) && bse_result > BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD && apps_pedal_travel_result >= APPS_THRESHHOLD_BRAKE_PLAUSIBILITY) {
                     current_state = APPS_5PCT_WAIT;
+                    torque = 0;
                 } else {
                     // no transition into another state -> send controls message
                     torque = pedal_travel_to_torque(apps_pedal_travel_result);
@@ -808,6 +809,7 @@ void main (void)
                 inverter_ccl_dcl_can_frame.data[2] = ccl & 0xFF;
                 inverter_ccl_dcl_can_frame.data[3] = ccl >> 8;
                 write_can_msg(handle_controls_fifo_w, &inverter_ccl_dcl_can_frame);
+                write_can_msg(handle_telemetry_fifo_w, &inverter_ccl_dcl_can_frame);
             }
 
             // echo motor info message
