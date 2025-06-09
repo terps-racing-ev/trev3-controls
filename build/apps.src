@@ -1,5 +1,5 @@
 	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09467762
-	; Options: -f cc1588a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=6 -DRTS_TTC_FLASH_DATE_DAY=2 -DRTS_TTC_FLASH_DATE_HOUR=21 -DRTS_TTC_FLASH_DATE_MINUTE=1 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\apps.src
+	; Options: -f cc33708a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=6 -DRTS_TTC_FLASH_DATE_DAY=8 -DRTS_TTC_FLASH_DATE_HOUR=20 -DRTS_TTC_FLASH_DATE_MINUTE=25 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\apps.src
 	; Module start
 	.source	'src/apps.c'
 code_voltage_to_pedal_travel_apps_1	.section	code, cluster 'voltage_to_pedal_travel_apps_1', new
@@ -355,7 +355,7 @@ _144:
 	extp	#@pag(_moving_average_structs_initialized),#0x1
 	cmpb	rh4,@pof(_moving_average_structs_initialized)
 	jmp+	cc_eq,_19
-_148:
+_151:
 	movb	rl2,#0x8
 _710:
 	movw	r4,r15
@@ -393,7 +393,7 @@ _20:
 	extp	#@pag(_moving_average_structs_initialized),#0x1
 	cmpb	rh4,@pof(_moving_average_structs_initialized)
 	jmp+	cc_eq,_21
-_156:
+_159:
 	movb	rl2,#0x9
 _715:
 	movw	r4,r15
@@ -427,8 +427,8 @@ _21:
 _22:
 
 ; src/apps.c	    89  
-; src/apps.c	    90      ubyte2 apps_1_val = get_filtered_apps1_voltage();;
-; src/apps.c	    91      ubyte2 apps_2_val = get_filtered_apps2_voltage();; 
+; src/apps.c	    90      ubyte2 apps_1_val = get_filtered_apps1_voltage();
+; src/apps.c	    91      ubyte2 apps_2_val = get_filtered_apps2_voltage();
 ; src/apps.c	    92  
 ; src/apps.c	    93      bool apps_1_within_threshhold = (apps_1_val >= (APPS_1_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_1_val <= (APPS_1_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
 	movw	r12,r10
@@ -778,41 +778,41 @@ _105:
 	.dl	_108
 	.db	2
 	.db	'unsigned int',0,2,7
-_161:
+_145:
 	.db	2
 	.db	'unsigned char',0,1,8
-_145:
+_148:
 	.db	3
 	.db	'get_filtered_apps1_voltage',0,1,1,46,8,6
 	.dl	147
 	.db	1,1
-_146:
-	.db	4
-_147:
-	.db	4
 _149:
+	.db	4
+_150:
+	.db	4
+_152:
 	.db	5
 	.db	'apps_1_val',0,1,48,16,2
 	.dl	147
-_151:
+_154:
 	.db	5
 	.db	'apps_1_fresh',0,1,49,14,2
 	.dl	163
 	.db	0,0,0
-_153:
+_156:
 	.db	3
 	.db	'get_filtered_apps2_voltage',0,1,1,62,8,6
 	.dl	147
 	.db	1,1
-_154:
-	.db	4
-_155:
-	.db	4
 _157:
+	.db	4
+_158:
+	.db	4
+_160:
 	.db	5
 	.db	'apps_2_val',0,1,64,16,2
 	.dl	147
-_159:
+_162:
 	.db	5
 	.db	'apps_2_fresh',0,1,65,14,2
 	.dl	163
@@ -1012,7 +1012,7 @@ _699:
 
 	.debug		.debug_info, cluster 'get_apps'
 _109:
-	.dl	585
+	.dl	565
 	.dw	3
 	.dl	_110
 	.db	4,1
@@ -1039,56 +1039,52 @@ _109:
 	.db	5
 	.dl	_144,_113
 	.db	6
-	.dl	_145,_144,_20
-	.db	7
-	.dl	_146,_144,_20
-	.db	7
-	.dl	_147,_148,_19
-	.db	8
-	.dl	_149,_150
-	.db	8
-	.dl	_151,_152
-	.db	0,0,0,5
-	.dl	_20,_113
-	.db	6
-	.dl	_153,_20,_22
-	.db	7
-	.dl	_154,_20,_22
-	.db	7
-	.dl	_155,_156,_21
-	.db	8
-	.dl	_157,_158
-	.db	8
-	.dl	_159,_160
-	.db	0,0,0,5
-	.dl	_22,_113
-	.db	9
 	.db	'apps_1_within_threshhold',0,1,93,10,2
-	.dl	_161,_162
-	.db	9
-	.db	'apps_2_within_threshhold',0,1,94,10,2
-	.dl	_161,_163
+	.dl	_145,_146
 	.db	6
+	.db	'apps_2_within_threshhold',0,1,94,10,2
+	.dl	_145,_147
+	.db	7
+	.dl	_148,_144,_20
+	.db	8
+	.dl	_149,_144,_20
+	.db	8
+	.dl	_150,_151,_19
+	.db	9
+	.dl	_152,_153
+	.db	9
+	.dl	_154,_155
+	.db	0,0,0,7
+	.dl	_156,_20,_22
+	.db	8
+	.dl	_157,_20,_22
+	.db	8
+	.dl	_158,_159,_21
+	.db	9
+	.dl	_160,_161
+	.db	9
+	.dl	_162,_163
+	.db	0,0,0,7
 	.dl	_164,_165,_28
 	.db	10
 	.dl	_166,_167
 	.db	11
 	.dl	_168,_165,_28
-	.db	0,6
+	.db	0,7
 	.dl	_169,_28,_32
 	.db	10
 	.dl	_170,_171
 	.db	11
 	.dl	_172,_28,_32
-	.db	0,0,0,0,0,0,0
+	.db	0,0,0,0,0
 	; End of section
 
 	.debug		.debug_abbrev, cluster 'get_apps'
 _110:
 	.db	1,17,1,3,8,37,8,27,8,19,15,128,70,12,85,6,16,6,0,0,2,61,0,24,16,0,0,3,46,1,3,8,58,15,59,15,57,15,51,15
 	.db	54,15,39,12,63,12,17,1,18,1,64,6,42,9,0,0,4,5,0,3,8,58,15,59,15,57,15,51,15,73,16,2,6,0,0,5,11,1,17,1
-	.db	18,1,0,0,6,29,1,49,16,17,1,18,1,0,0,7,11,1,49,16,17,1,18,1,0,0,8,52,0,49,16,2,6,0,0,9,52,0,3,8,58,15,59
-	.db	15,57,15,51,15,73,16,2,6,0,0,10,5,0,49,16,2,6,0,0,11,11,0,49,16,17,1,18,1,0,0,0
+	.db	18,1,0,0,6,52,0,3,8,58,15,59,15,57,15,51,15,73,16,2,6,0,0,7,29,1,49,16,17,1,18,1,0,0,8,11,1,49,16,17,1
+	.db	18,1,0,0,9,52,0,49,16,2,6,0,0,10,5,0,49,16,2,6,0,0,11,11,0,49,16,17,1,18,1,0,0,0
 	; End of section
 
 	.debug		.debug_line, cluster 'get_apps'
@@ -1120,9 +1116,9 @@ _705:
 	.db	1,5,5,9
 	.dw	_144-_709
 	.db	3,87,1,5,20,9
-	.dw	_148-_144
+	.dw	_151-_144
 	.db	3,5,1,5,36,9
-	.dw	_710-_148
+	.dw	_710-_151
 	.db	1,5,49,9
 	.dw	_711-_710
 	.db	1,5,29,9
@@ -1136,9 +1132,9 @@ _705:
 	.db	3,4,1,9
 	.dw	_20-_19
 	.db	3,4,1,5,20,9
-	.dw	_156-_20
+	.dw	_159-_20
 	.db	3,5,1,5,36,9
-	.dw	_715-_156
+	.dw	_715-_159
 	.db	1,5,49,9
 	.dw	_716-_715
 	.db	1,5,29,9
@@ -1295,7 +1291,7 @@ _112:
 	.debug		.debug_pubnames
 	.dl	27
 	.dw	2
-	.dl	_109,589,156
+	.dl	_109,569,156
 	.db	'get_apps',0
 	.dl	0
 	; End of section
@@ -1313,7 +1309,7 @@ _114:
 	.db	2
 	.dl	_105
 	.db	3
-	.dl	_145
+	.dl	_148
 	.db	1
 	.dl	_70,_118,_69
 	.db	12,19,146,176,2,0,64,36,146,161,2,0,33,4
@@ -1321,9 +1317,9 @@ _114:
 	.db	4
 	.dl	_173,_12
 	.db	5
-	.dl	_149,_174
+	.dl	_152,_174
 	.db	5
-	.dl	_151,_175
+	.dl	_154,_175
 	.db	0,0,0,0
 	; End of section
 
@@ -1387,7 +1383,7 @@ _119:
 	.db	2
 	.dl	_105
 	.db	3
-	.dl	_153
+	.dl	_156
 	.db	1
 	.dl	_82,_123,_81
 	.db	12,19,146,176,2,0,64,36,146,161,2,0,33,4
@@ -1395,9 +1391,9 @@ _119:
 	.db	4
 	.dl	_176,_15
 	.db	5
-	.dl	_157,_177
+	.dl	_160,_177
 	.db	5
-	.dl	_159,_178
+	.dl	_162,_178
 	.db	0,0,0,0
 	; End of section
 
@@ -1620,7 +1616,7 @@ _134:
 	.dl	_105
 	.db	3
 	.db	'moving_average_structs_initialized',0,1,14,6,5
-	.dl	_161
+	.dl	_145
 	.db	1,5,3
 	.dl	_moving_average_structs_initialized
 	.db	0
@@ -1681,33 +1677,33 @@ _139:
 	; End of section
 
 	.debug		.debug_loc, cluster 'get_apps'
-_152:
+_155:
 	.dl	-1,_94,0,_113-_94
 	.dw	2
 	.db	145,110
 	.dl	0,0
-_150:
+_153:
 	.dl	-1,_94,0,_113-_94
 	.dw	2
 	.db	145,108
 	.dl	0,0
 _167:
 	.dl	0,0
-_162:
+_146:
 	.dl	0,0
-_160:
+_163:
 	.dl	-1,_94,0,_113-_94
 	.dw	2
 	.db	145,110
 	.dl	0,0
-_158:
+_161:
 	.dl	-1,_94,0,_113-_94
 	.dw	2
 	.db	145,108
 	.dl	0,0
 _171:
 	.dl	0,0
-_163:
+_147:
 	.dl	0,0
 _141:
 	.dl	-1,_94,0,_692-_94

@@ -87,8 +87,8 @@ void get_apps(ubyte1 *apps_pedal_travel_result, ubyte1 *error, ubyte1 *num_error
     // Reset error every call for bit masking
     *error = APPS_NO_ERROR;
 
-    ubyte2 apps_1_val = get_filtered_apps1_voltage();;
-    ubyte2 apps_2_val = get_filtered_apps2_voltage();; 
+    ubyte2 apps_1_val = get_filtered_apps1_voltage();
+    ubyte2 apps_2_val = get_filtered_apps2_voltage();
 
     bool apps_1_within_threshhold = (apps_1_val >= (APPS_1_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_1_val <= (APPS_1_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
     bool apps_2_within_threshhold = (apps_2_val >= (APPS_2_MIN_VOLTAGE - APPS_VOLTAGE_DEADZONE)) && (apps_2_val <= (APPS_2_MAX_VOLTAGE + APPS_VOLTAGE_DEADZONE));
