@@ -942,8 +942,8 @@ void main (void)
             vcu_diag_can_frame.data[2] = pack_live_flags(&vcu_live_flags);
             vcu_diag_can_frame.data[3] = controls_bus_failure_count;
             vcu_diag_can_frame.data[4] = telemetry_bus_failure_count;
-            vcu_diag_can_frame.data[5] = controls_tx_error_ctr;
-            vcu_diag_can_frame.data[6] = controls_rx_error_ctr;
+            vcu_diag_can_frame.data[5] = launch_control_torque_limit & 0xFF;
+            vcu_diag_can_frame.data[6] = launch_control_torque_limit >> 8;
             vcu_diag_can_frame.data[7] = telemetry_tx_error_ctr;
 
             write_can_msg(handle_controls_fifo_w, &vcu_diag_can_frame);
