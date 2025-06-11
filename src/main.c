@@ -836,22 +836,15 @@ void main (void)
 
             // launch control
 
-            if (LAUNCH_CONTROL_ENABLED) {
-                // only run PID if we get new data
-                if (wheel_speed_message_received && avg_front_wheel_speed > LAUNCH_CONTROL_MINIMUM_FRONT_SPEED) {
-                    launch_control_torque_limit = get_launch_control_torque_limit(avg_front_wheel_speed, avg_rear_wheel_speed) 
-                                                  + LAUNCH_CONTROL_CONSTANT_TORQUE;
-
-                    if (launch_control_torque_limit < LAUNCH_CONTROL_MINIMUM_TORQUE) {
-                        launch_control_torque_limit = LAUNCH_CONTROL_MINIMUM_TORQUE;
-                    }
-
-                    if (torque > launch_control_torque_limit) {
-                        torque = launch_control_torque_limit;
-                    }
-                }
+            // only run PID if we get new data
+            if (wheel_speed_message_received && avg_front_wheel_speed > LAUNCH_CONTROL_MINIMUM_FRONT_SPEED) {
+                launch_control_torque_limit = get_launch_control_torque_limit(avg_front_wheel_speed, avg_rear_wheel_speed) 
+                                                + LAUNCH_CONTROL_CONSTANT_TORQUE;
             }
 
+            if (LAUNCH_CONTROL_ENABLED && torque > launch_control_torque_limit) {
+                torque = launch_control_torque_limit;
+            }
 
             /* CAN TX */
 
@@ -882,6 +875,12 @@ void main (void)
                 inverter_ccl_dcl_can_frame.data[1] = dcl >> 8;
                 inverter_ccl_dcl_can_frame.data[2] = ccl & 0xFF;
                 inverter_ccl_dcl_can_frame.data[3] = ccl >> 8;
+                ubyte2 afwspd = (ubyte2)(avg_front_wheel_speed * 100);
+                ubyte2 arwspd = (ubyte2)(avg_rear_wheel_speed * 100);
+                inverter_ccl_dcl_can_frame.data[4] = afwspd & 0xFF;
+                inverter_ccl_dcl_can_frame.data[5] = afwspd >> 8;
+                inverter_ccl_dcl_can_frame.data[6] = arwspd & 0xFF;
+                inverter_ccl_dcl_can_frame.data[7] = arwspd >> 8;
                 write_can_msg(handle_controls_fifo_w, &inverter_ccl_dcl_can_frame);
                 write_can_msg(handle_telemetry_fifo_w, &inverter_ccl_dcl_can_frame);
             }
