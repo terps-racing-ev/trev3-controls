@@ -15,6 +15,9 @@ struct pid_info {
 
     // for derivative
     float4 last_error;
+
+    ubyte4 last_error_timestamp;
+    bool timestamp_initialized;
 };
 
 void initialize_pid_info_struct(struct pid_info* pid_struct,
