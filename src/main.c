@@ -100,6 +100,10 @@
 #define BL_WHEEL_SPEED_LO_INDEX 6
 #define BL_WHEEL_SPEED_HI_INDEX 7
 
+#define LAUNCH_CONTROL_CONSTANT_TORQUE (CONTINUOUS_TORQUE_MAX / 2)
+#define LAUNCH_CONTROL_MINIMUM_TORQUE 0
+#define LAUNCH_CONTROL_MINIMUM_FRONT_SPEED 10.0
+
 #define INVERTER_PACK_VOLT_LO 0
 #define INVERTER_PACK_VOLT_HI 1
 
@@ -482,7 +486,6 @@ void main (void)
 
     // wheel speed message received
     bool wheel_speed_message_received = FALSE;
-    bool wheel_speed_message_received_once = FALSE;
 
     ubyte2 fr_wheel_speed;
     ubyte2 fl_wheel_speed;
@@ -622,8 +625,6 @@ void main (void)
             }
 
             if (wheel_speed_message_received) {
-                wheel_speed_message_received_once = TRUE;
-
                 fr_wheel_speed = (wheel_speed_can_frame.data[FR_WHEEL_SPEED_HI_INDEX] << 8) | (wheel_speed_can_frame.data[FR_WHEEL_SPEED_LO_INDEX]);
                 fl_wheel_speed = (wheel_speed_can_frame.data[FL_WHEEL_SPEED_HI_INDEX] << 8) | (wheel_speed_can_frame.data[FL_WHEEL_SPEED_LO_INDEX]);
 
@@ -836,8 +837,14 @@ void main (void)
             // launch control
 
             if (LAUNCH_CONTROL_ENABLED) {
-                if (wheel_speed_message_received_once) {
-                    launch_control_torque_limit = get_launch_control_torque_limit(avg_front_wheel_speed, avg_rear_wheel_speed);
+                // only run PID if we get new data
+                if (wheel_speed_message_received && avg_front_wheel_speed > LAUNCH_CONTROL_MINIMUM_FRONT_SPEED) {
+                    launch_control_torque_limit = get_launch_control_torque_limit(avg_front_wheel_speed, avg_rear_wheel_speed) 
+                                                  + LAUNCH_CONTROL_CONSTANT_TORQUE;
+
+                    if (launch_control_torque_limit < LAUNCH_CONTROL_MINIMUM_TORQUE) {
+                        launch_control_torque_limit = LAUNCH_CONTROL_MINIMUM_TORQUE;
+                    }
 
                     if (torque > launch_control_torque_limit) {
                         torque = launch_control_torque_limit;
