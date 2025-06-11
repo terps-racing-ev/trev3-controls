@@ -9,8 +9,8 @@ void initialize_pid_info_struct(struct pid_info* pid_struct,
 
 
     pid_struct->Kp = Kp;
-    pid_struct->Kp = Ki;
-    pid_struct->Kp = Kd;
+    pid_struct->Ki = Ki;
+    pid_struct->Kd = Kd;
 
     pid_struct->target = target;
 

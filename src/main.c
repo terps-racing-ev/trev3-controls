@@ -24,6 +24,7 @@
 #include "utilities.h"
 #include "debug_defines.h"
 #include "debouncing.h"
+#include "launch_control.h"
 
 /**************************************************************************
  * Actuator Pins
@@ -87,6 +88,17 @@
 #define CURRENT_INFO_CAN_ID 0xA6
 #define TORQUE_INFO_CAN_ID 0xAC
 #define INVERTER_STATE_CAN_ID 0xAB
+
+//TODO: Change
+#define WHEEL_SPEED_CAN_ID 0x99
+#define FR_WHEEL_SPEED_LO_INDEX 0
+#define FR_WHEEL_SPEED_HI_INDEX 1
+#define FL_WHEEL_SPEED_LO_INDEX 2
+#define FL_WHEEL_SPEED_HI_INDEX 3
+#define BR_WHEEL_SPEED_LO_INDEX 4
+#define BR_WHEEL_SPEED_HI_INDEX 5
+#define BL_WHEEL_SPEED_LO_INDEX 6
+#define BL_WHEEL_SPEED_HI_INDEX 7
 
 #define INVERTER_PACK_VOLT_LO 0
 #define INVERTER_PACK_VOLT_HI 1
@@ -205,6 +217,7 @@ void main (void)
     ubyte1 handle_inverter_state_r;
     ubyte1 handle_orion_1_r;
     ubyte1 handle_orion_2_r;
+    ubyte1 handle_wheel_speed_r;
     //ubyte1 handle_orion_therm_exp_r;
 
     /* can frame used to send torque requests to the inverter */
@@ -226,6 +239,7 @@ void main (void)
     inverter_ccl_dcl_can_frame.length = 8;
     clear_can_frame(&inverter_ccl_dcl_can_frame);
 
+
     /* CAN frame for reading from inverter */
     IO_CAN_DATA_FRAME inverter_motor_info_can_frame;
     IO_CAN_DATA_FRAME inverter_voltage_info_can_frame;
@@ -237,6 +251,9 @@ void main (void)
     IO_CAN_DATA_FRAME orion_1_can_frame;
     IO_CAN_DATA_FRAME orion_2_can_frame;
     //IO_CAN_DATA_FRAME orion_therm_exp_can_frame;
+
+    /* CAN frame for reading from datalogger */
+    IO_CAN_DATA_FRAME wheel_speed_can_frame;
 
     /* CAN frame for controls summary*/
     IO_CAN_DATA_FRAME vcu_summary_can_frame;
@@ -341,6 +358,13 @@ void main (void)
                  , IO_CAN_MSG_READ
                  , IO_CAN_STD_FRAME
                  , ORION_2_CAN_ID
+                 , 0x7FF);
+
+    IO_CAN_ConfigMsg( &handle_wheel_speed_r
+                 , TELEMETRY_CAN_CHANNEL
+                 , IO_CAN_MSG_READ
+                 , IO_CAN_STD_FRAME
+                 , WHEEL_SPEED_CAN_ID
                  , 0x7FF);
     
     
@@ -456,6 +480,20 @@ void main (void)
     //inverter state info received
     bool inverter_state_message_received = FALSE;
 
+    // wheel speed message received
+    bool wheel_speed_message_received = FALSE;
+    bool wheel_speed_message_received_once = FALSE;
+
+    ubyte2 fr_wheel_speed;
+    ubyte2 fl_wheel_speed;
+    ubyte2 br_wheel_speed;
+    ubyte2 bl_wheel_speed;
+
+    float4 avg_front_wheel_speed;
+    float4 avg_rear_wheel_speed;
+
+    ubyte2 launch_control_torque_limit = CONTINUOUS_TORQUE_MAX;
+
     // orion message received
     bool orion_1_message_received = FALSE;
     bool orion_1_message_received_once = FALSE;
@@ -564,6 +602,10 @@ void main (void)
             read_can_msg(&handle_orion_2_r, &orion_2_can_frame, &orion_2_message_received, ORION_2_CAN_ID, TELEMETRY_CAN_CHANNEL, IO_CAN_STD_FRAME);
             //read_can_msg(&handle_orion_therm_exp_r, &orion_therm_exp_can_frame, &orion_therm_exp_message_received, ORION_THERM_EXP_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_EXT_FRAME);
 
+            // read message from datalogger
+            read_can_msg(&handle_wheel_speed_r, &wheel_speed_can_frame, &wheel_speed_message_received, WHEEL_SPEED_CAN_ID, TELEMETRY_CAN_CHANNEL, IO_CAN_STD_FRAME);
+
+
             if (orion_1_message_received) {
                 // reset the timeout if a message has been received
                 IO_RTC_StartTime(&orion_can_timeout);
@@ -577,6 +619,19 @@ void main (void)
             if (voltage_info_message_received == TRUE) {
                 dc_bus_voltage = ((inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_HI] << 8) | inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_LO]) / 10;
                 dc_bus_voltage_updated_once = TRUE;
+            }
+
+            if (wheel_speed_message_received) {
+                wheel_speed_message_received_once = TRUE;
+
+                fr_wheel_speed = (wheel_speed_can_frame.data[FR_WHEEL_SPEED_HI_INDEX] << 8) | (wheel_speed_can_frame.data[FR_WHEEL_SPEED_LO_INDEX]);
+                fl_wheel_speed = (wheel_speed_can_frame.data[FL_WHEEL_SPEED_HI_INDEX] << 8) | (wheel_speed_can_frame.data[FL_WHEEL_SPEED_LO_INDEX]);
+
+                br_wheel_speed = (wheel_speed_can_frame.data[BR_WHEEL_SPEED_HI_INDEX] << 8) | (wheel_speed_can_frame.data[BR_WHEEL_SPEED_LO_INDEX]);
+                bl_wheel_speed = (wheel_speed_can_frame.data[BL_WHEEL_SPEED_HI_INDEX] << 8) | (wheel_speed_can_frame.data[BL_WHEEL_SPEED_LO_INDEX]);
+
+                avg_front_wheel_speed = (((float4) fr_wheel_speed) + ((float4) fl_wheel_speed)) / ((float4) 2.0);
+                avg_rear_wheel_speed = (((float4) br_wheel_speed) + ((float4) bl_wheel_speed)) / ((float4) 2.0);
             }
 
             /****** FSM START ******/
@@ -776,6 +831,18 @@ void main (void)
                 IO_DO_Set(BRAKE_LIGHT_PIN, TRUE);
             } else {
                 IO_DO_Set(BRAKE_LIGHT_PIN, FALSE);
+            }
+
+            // launch control
+
+            if (LAUNCH_CONTROL_ENABLED) {
+                if (wheel_speed_message_received_once) {
+                    launch_control_torque_limit = get_launch_control_torque_limit(avg_front_wheel_speed, avg_rear_wheel_speed);
+
+                    if (torque > launch_control_torque_limit) {
+                        torque = launch_control_torque_limit;
+                    }
+                }
             }
 
 
@@ -1005,6 +1072,7 @@ void main (void)
 
                 IO_CAN_DeInitHandle(handle_orion_1_r);
                 IO_CAN_DeInitHandle(handle_orion_2_r);
+                IO_CAN_DeInitHandle(handle_wheel_speed_r);
 
                 // de init channel
                 IO_CAN_DeInit(TELEMETRY_CAN_CHANNEL);
@@ -1042,6 +1110,13 @@ void main (void)
                         , IO_CAN_MSG_READ
                         , IO_CAN_STD_FRAME
                         , ORION_2_CAN_ID
+                        , 0x7FF);
+
+                IO_CAN_ConfigMsg( &handle_wheel_speed_r
+                        , TELEMETRY_CAN_CHANNEL
+                        , IO_CAN_MSG_READ
+                        , IO_CAN_STD_FRAME
+                        , WHEEL_SPEED_CAN_ID
                         , 0x7FF);
             }
 
