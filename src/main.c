@@ -875,8 +875,8 @@ void main (void)
                 inverter_ccl_dcl_can_frame.data[1] = dcl >> 8;
                 inverter_ccl_dcl_can_frame.data[2] = ccl & 0xFF;
                 inverter_ccl_dcl_can_frame.data[3] = ccl >> 8;
-                ubyte2 afwspd = (ubyte2)(avg_front_wheel_speed * 100);
-                ubyte2 arwspd = (ubyte2)(avg_rear_wheel_speed * 100);
+                ubyte2 afwspd = (ubyte2)(avg_front_wheel_speed);
+                ubyte2 arwspd = (ubyte2)(avg_rear_wheel_speed);
                 inverter_ccl_dcl_can_frame.data[4] = afwspd & 0xFF;
                 inverter_ccl_dcl_can_frame.data[5] = afwspd >> 8;
                 inverter_ccl_dcl_can_frame.data[6] = arwspd & 0xFF;
