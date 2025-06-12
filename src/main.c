@@ -680,7 +680,7 @@ void main (void)
                     torque = pedal_travel_to_torque(apps_pedal_travel_result);
                     inverter_enabled = INVERTER_ENABLE;
                 }
-            } else if (current_state == ERRORED) {
+            } else if (current_state >= ERRORED) {
 
                 if (rtd_val == RTD_OFF) {
                     // rtd off -> switch to not ready state
