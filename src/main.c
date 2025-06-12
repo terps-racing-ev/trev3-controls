@@ -191,7 +191,9 @@ void main (void)
 {
     ubyte4 timestamp;
 
-    enum VCU_State { NOT_READY, PLAYING_RTD_SOUND, DRIVING, ERRORED, APPS_5PCT_WAIT };
+    // put all the errored states after ERRORED
+    // that way we can put vcu_state >= ERRORED and add as many errored states as we want
+    enum VCU_State { NOT_READY, PLAYING_RTD_SOUND, DRIVING, APPS_5PCT_WAIT, ERRORED, ERRORED_APPS_IMPLAUSIBLE, ERRORED_APPS_OOR, ERRORED_BSE_OOR, ERRORED_SDC_OFF};
 
     /*******************************************/
     /*             INITIALIZATION              */
@@ -704,18 +706,23 @@ void main (void)
                     // log flags
                     if (apps_error & APPS_1_OUT_OF_RANGE_ERROR) {
                         vcu_diag_flags.apps_1_out_of_range_fault = 1;
+                        current_state = ERRORED_APPS_OOR;
                     }
                     if (apps_error & APPS_2_OUT_OF_RANGE_ERROR) {
                         vcu_diag_flags.apps_2_out_of_range_fault = 1;
+                        current_state = ERRORED_APPS_OOR;
                     }
                     if (apps_error & APPS_IMPLAUSIBILITY_ERROR) {
                         vcu_diag_flags.apps_implausibility_fault = 1;
+                        current_state = ERRORED_APPS_IMPLAUSIBLE;
                     } 
                     if (bse_error == BSE_OUT_OF_RANGE_ERROR) {
                         vcu_diag_flags.bse_out_of_range_fault = 1;
+                        current_state = ERRORED_BSE_OOR;
                     }
                     if (sdc_val == SDC_OFF) {
                         vcu_diag_flags.sdc_off_fault = 1;
+                        current_state = ERRORED_SDC_OFF;
                     }
                 } else if (!(IGNORE_BRAKE_PLAUSIBILITY) && bse_result > BRAKE_PLAUSIBILITY_BRAKES_ENGAGED_BSE_THRESHOLD && apps_pedal_travel_result >= APPS_THRESHHOLD_BRAKE_PLAUSIBILITY) {
                     current_state = APPS_5PCT_WAIT;
@@ -725,7 +732,7 @@ void main (void)
                     torque = pedal_travel_to_torque(apps_pedal_travel_result);
                     inverter_enabled = INVERTER_ENABLE;
                 }
-            } else if (current_state == ERRORED) {
+            } else if (current_state >= ERRORED) {
 
                 if (rtd_val == RTD_OFF) {
                     // rtd off -> switch to not ready state
@@ -744,6 +751,28 @@ void main (void)
 
                 } else if (apps_error != APPS_NO_ERROR || bse_error != BSE_NO_ERROR || (sdc_val == SDC_OFF)) {
                     current_state = ERRORED;
+                    
+                    // log flags
+                    if (apps_error & APPS_1_OUT_OF_RANGE_ERROR) {
+                        vcu_diag_flags.apps_1_out_of_range_fault = 1;
+                        current_state = ERRORED_APPS_OOR;
+                    }
+                    if (apps_error & APPS_2_OUT_OF_RANGE_ERROR) {
+                        vcu_diag_flags.apps_2_out_of_range_fault = 1;
+                        current_state = ERRORED_APPS_OOR;
+                    }
+                    if (apps_error & APPS_IMPLAUSIBILITY_ERROR) {
+                        vcu_diag_flags.apps_implausibility_fault = 1;
+                        current_state = ERRORED_APPS_IMPLAUSIBLE;
+                    } 
+                    if (bse_error == BSE_OUT_OF_RANGE_ERROR) {
+                        vcu_diag_flags.bse_out_of_range_fault = 1;
+                        current_state = ERRORED_BSE_OOR;
+                    }
+                    if (sdc_val == SDC_OFF) {
+                        vcu_diag_flags.sdc_off_fault = 1;
+                        current_state = ERRORED_SDC_OFF;
+                    }
                 } else if (apps_pedal_travel_result <= APPS_THRESHHOLD_REESTABLISH_PLAUSIBILITY) {
                     // go back to driving when apps <= 5%
                     current_state = DRIVING;
