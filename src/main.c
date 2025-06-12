@@ -193,7 +193,11 @@ void main (void)
 
     // put all the errored states after ERRORED
     // that way we can put vcu_state >= ERRORED and add as many errored states as we want
-    enum VCU_State { NOT_READY, PLAYING_RTD_SOUND, DRIVING, APPS_5PCT_WAIT, ERRORED, ERRORED_APPS_IMPLAUSIBLE, ERRORED_APPS_OOR, ERRORED_BSE_OOR, ERRORED_SDC_OFF};
+    enum VCU_State { NOT_READY, PLAYING_RTD_SOUND, DRIVING, APPS_5PCT_WAIT, ERRORED, 
+                    ERRORED_APPS_IMPLAUSIBLE, // 5
+                    ERRORED_APPS_OOR, // 6
+                    ERRORED_BSE_OOR, // 7
+                    ERRORED_SDC_OFF}; // 8
 
     /*******************************************/
     /*             INITIALIZATION              */
