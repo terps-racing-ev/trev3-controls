@@ -26,8 +26,8 @@
  * Settings
  ***************************************************************************/
 /* min. difference between the APPS travels
- * that'll trigger the implausibility check, 10 percent of 256 */
-#define APPS_MIN_IMPLAUSIBLE_DEVIATION 25
+ * that'll trigger the implausibility check, 10 percent of 255 */
+#define APPS_MIN_IMPLAUSIBLE_DEVIATION 100 // TODO 25 FOR TECH
 
 #define IMPLAUSIBILITY_PERSISTENCE_PERIOD_US MsToUs(100ul)
 

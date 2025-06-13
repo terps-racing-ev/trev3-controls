@@ -1,5 +1,5 @@
-	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09007774
-	; Options: -f cc23512a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=6 -DRTS_TTC_FLASH_DATE_DAY=11 -DRTS_TTC_FLASH_DATE_HOUR=22 -DRTS_TTC_FLASH_DATE_MINUTE=5 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\tsil.src
+	; TASKING VX-toolset for C166: C compiler v4.0r1 Build 741 SN 09467762
+	; Options: -f cc22680a -c99 -Mh --fp-model=FT -Cxc2287 --core=xc16x -DTASKING_VIPER -D__USIC_MEM_TYPE=__PAGE_080_MEM_TYPE -D__MULTICAN_MEM_TYPE=__PAGE_080_MEM_TYPE -DTTC60 -DRTS_TTC_FLASH_DATE_YEAR=2025 -DRTS_TTC_FLASH_DATE_MONTH=6 -DRTS_TTC_FLASH_DATE_DAY=13 -DRTS_TTC_FLASH_DATE_HOUR=16 -DRTS_TTC_FLASH_DATE_MINUTE=2 -I..\..\..\Environment\inc -I..\..\..\Environment\inc_int -I..\..\..\Environment\bsp -I. --tradeoff=0 --no-tasking-sfr -ga --language=+cmp14,+div32,-gcc,-strings -OabcefgiklopRsY,+predict --source --mac -o build\tsil.src
 	; Module start
 	.source	'src/tsil.c'
 code_set_light_to	.section	code, cluster 'set_light_to', new
@@ -240,7 +240,7 @@ _timer_initialized	.label	byte
 	.extern	_IO_DO_Set : far
 	.debug		.debug_info
 _36:
-	.dl	1102
+	.dl	1023
 	.dw	3
 	.dl	_37
 	.db	4
@@ -248,41 +248,40 @@ _35:
 	.db	1
 	.db	'src/tsil.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
-	.db	12,1
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1
 	.dl	_38
 	.db	2
 	.db	'unsigned int',0,2,7
 _60:
 	.db	2
 	.db	'unsigned long int',0,4,7,3,5
-	.dl	242
+	.dl	163
 	.db	4
-	.dl	263
+	.dl	184
 	.db	5
 	.db	'IO_RTC_StartTime',0,1,118,15,6
-	.dl	226
+	.dl	147
 	.db	1,1,1,1,6
 	.db	'timestamp',0,1,118,49,2
-	.dl	269
+	.dl	190
 	.db	0,5
 	.db	'IO_RTC_GetTimeUS',0,1,143,1,9,6
-	.dl	242
+	.dl	163
 	.db	1,1,1,1,6
 	.db	'timestamp',0,1,143,1,35,2
-	.dl	242
+	.dl	163
 	.db	0
 _59:
 	.db	2
 	.db	'unsigned char',0,1,8,5
 	.db	'IO_DO_Set',0,2,147,2,14,6
-	.dl	226
+	.dl	147
 	.db	1,1,1,1,6
 	.db	'do_channel',0,2,147,2,32,2
-	.dl	376
+	.dl	297
 	.db	6
 	.db	'do_value',0,2,148,2,30,2
-	.dl	376
+	.dl	297
 	.db	0
 _57:
 	.db	7
@@ -290,28 +289,28 @@ _57:
 	.db	'SOLID_GREEN',0,0,8
 	.db	'BLINKING_RED',0,1,0,9
 	.db	'void',0,3,5
-	.dl	504
+	.dl	425
 	.db	10
 	.db	'__prof_adm',0,4,1,1
-	.dl	510
+	.dl	431
 	.db	10
 	.db	'__codeptr',0,4,1,1
-	.dl	242
+	.dl	163
 	.db	10
 	.db	'ubyte1',0,5,21,29
-	.dl	376
+	.dl	297
 	.db	10
 	.db	'ubyte2',0,5,22,29
-	.dl	226
+	.dl	147
 	.db	10
 	.db	'ubyte4',0,5,23,29
-	.dl	242
+	.dl	163
 	.db	10
 	.db	'bool',0,5,31,29
-	.dl	376
+	.dl	297
 	.db	10
 	.db	'IO_ErrorType',0,6,153,1,17
-	.dl	226
+	.dl	147
 	.db	7
 	.db	'_io_driver_reset_reason',0,7,162,3,14,1,8
 	.db	'IO_DRIVER_RESET_REASON_PORST',0,0,8
@@ -320,40 +319,40 @@ _57:
 	.db	'IO_DRIVER_RESET_REASON_SW',0,3,8
 	.db	'IO_DRIVER_RESET_REASON_UNKNOWN',0,4,0,10
 	.db	'IO_DRIVER_RESET_REASON',0,7,169,3,3
-	.dl	633
+	.dl	554
 	.db	11
 	.db	'_io_driver_trap_info',0,7,174,3,16,10,12
 	.db	'trap_id',0
-	.dl	226
+	.dl	147
 	.db	2,2,35,0,12
 	.db	'cpu_tfr',0
-	.dl	226
+	.dl	147
 	.db	2,2,35,2,12
 	.db	'cpu_trapstat',0
-	.dl	226
+	.dl	147
 	.db	2,2,35,4,12
 	.db	'fault_location',0
-	.dl	242
+	.dl	163
 	.db	4,2,35,6,0,10
 	.db	'IO_DRIVER_TRAP_INFO',0,7,197,3,3
-	.dl	847
+	.dl	768
 	.db	11
 	.db	'bl_t_date_',0,8,122,16,4,12
 	.db	'date',0
-	.dl	242
+	.dl	163
 	.db	4,2,35,0,0,10
 	.db	'BL_T_DATE',0,8,131,1,3
-	.dl	984
+	.dl	905
 	.db	11
 	.db	'bl_t_can_id_',0,8,138,1,16,8,12
 	.db	'extended',0
-	.dl	242
+	.dl	163
 	.db	4,2,35,0,12
 	.db	'ID',0
-	.dl	242
+	.dl	163
 	.db	4,2,35,4,0,10
 	.db	'BL_T_CAN_ID',0,8,146,1,3
-	.dl	1034
+	.dl	955
 	.db	0
 	; End of section
 
@@ -390,25 +389,24 @@ _62:
 	.debug		.debug_pubnames
 	.dl	70
 	.dw	2
-	.dl	_36,1106,274
+	.dl	_36,1027,195
 	.db	'IO_RTC_StartTime',0
-	.dl	324
+	.dl	245
 	.db	'IO_RTC_GetTimeUS',0
-	.dl	393
+	.dl	314
 	.db	'IO_DO_Set',0
 	.dl	0
 	; End of section
 
 	.debug		.debug_info, cluster 'do_lights_action'
 _39:
-	.dl	292
+	.dl	213
 	.dw	3
 	.dl	_40
 	.db	4,1
 	.db	'src/tsil.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
-	.db	12,1
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1
 	.dl	_42,_41
 	.db	2
 	.dl	_35
@@ -518,21 +516,20 @@ _42:
 	.debug		.debug_pubnames
 	.dl	35
 	.dw	2
-	.dl	_39,296,235
+	.dl	_39,217,156
 	.db	'do_lights_action',0
 	.dl	0
 	; End of section
 
 	.debug		.debug_info, cluster 'set_light_to'
 _44:
-	.dl	303
+	.dl	224
 	.dw	3
 	.dl	_45
 	.db	4,1
 	.db	'src/tsil.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
-	.db	12,1
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1
 	.dl	_47,_46
 	.db	2
 	.dl	_35
@@ -582,21 +579,20 @@ _47:
 	.debug		.debug_pubnames
 	.dl	31
 	.dw	2
-	.dl	_44,307,235
+	.dl	_44,228,156
 	.db	'set_light_to',0
 	.dl	0
 	; End of section
 
 	.debug		.debug_info, cluster 'current_state'
 _49:
-	.dl	254
+	.dl	175
 	.dw	3
 	.dl	_50
 	.db	4,1
 	.db	'src/tsil.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
-	.db	12,1,2
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1,2
 	.dl	_35
 	.db	3
 	.db	'current_state',0,4,10,17,5
@@ -614,14 +610,13 @@ _50:
 
 	.debug		.debug_info, cluster 'blinking_state'
 _51:
-	.dl	255
+	.dl	176
 	.dw	3
 	.dl	_52
 	.db	4,1
 	.db	'src/tsil.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
-	.db	12,1,2
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1,2
 	.dl	_35
 	.db	3
 	.db	'blinking_state',0,4,11,6,5
@@ -639,14 +634,13 @@ _52:
 
 	.debug		.debug_info, cluster 'light_timestamp'
 _53:
-	.dl	256
+	.dl	177
 	.dw	3
 	.dl	_54
 	.db	4,1
 	.db	'src/tsil.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
-	.db	12,1,2
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1,2
 	.dl	_35
 	.db	3
 	.db	'light_timestamp',0,4,14,8,5
@@ -664,14 +658,13 @@ _54:
 
 	.debug		.debug_info, cluster 'timer_initialized'
 _55:
-	.dl	258
+	.dl	179
 	.dw	3
 	.dl	_56
 	.db	4,1
 	.db	'src/tsil.c',0
 	.db	'TASKING VX-toolset for C166: C compiler',0
-	.db	'C:\\Users\\Yasadu De Silva\\School\\College\\Junior Year\\Terps Racing (TREV 2)\\C-Programming Environment\\Programming Environments\\Environment\\dev\\trev2-controls\\',0
-	.db	12,1,2
+	.db	'C:\\Users\\caleb\\EV\\Programming Environments\\Environment\\github\\trev3-controls\\',0,12,1,2
 	.dl	_35
 	.db	3
 	.db	'timer_initialized',0,4,15,6,5

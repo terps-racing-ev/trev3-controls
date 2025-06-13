@@ -5,10 +5,10 @@
 	<part>
 		<name>Tool and Invocation</name>
 		<table>
-			<row>tool;TASKING VX-toolset for C166: Linker Locator v4.0r1 Build 163 SN 09007774</row>
+			<row>tool;TASKING VX-toolset for C166: Linker Locator v4.0r1 Build 163 SN 09467762</row>
 			<row>path;C:\Program Files (x86)\TASKING\C166-VX v4.0r1\bin\lk166</row>
-			<row>arguments;-f cc34576a </row>
-			<row>file:cc34576a;-o build/main.elf -d../../../Environment/bsp/lsl/TTC60/application.lsl -DXC2287_96F -D__CPU__=xc2287 -D__CPU_XC2287__ -obuild/main.hex:IHEX -obuild/main.s19:SREC -OtZXycL --error-limit=42 --map-file=build/main.mapxml:XML --map-file -mcrfiklSmNuQ ../../../Environment/bsp/bin/bsp_cstart_ttc60.obj build/apps.obj build/bse.obj build/debouncing.obj build/diag_flags.obj build/launch_control.obj build/main.obj build/moving_average.obj build/pid.obj build/read_write_can.obj build/rtd_sdc.obj build/tsil.obj ../../../Environment/lib/xc2000_ttc60.lib -lch -lfph -lrth -LC:\Program" "Files" "(x86)\TASKING\C166-VX" "v4.0r1\lib\2 </row>
+			<row>arguments;-f cc23568a </row>
+			<row>file:cc23568a;-o build/main.elf -d../../../Environment/bsp/lsl/TTC60/application.lsl -DXC2287_96F -D__CPU__=xc2287 -D__CPU_XC2287__ -obuild/main.hex:IHEX -obuild/main.s19:SREC -OtZXycL --error-limit=42 --map-file=build/main.mapxml:XML --map-file -mcrfiklSmNuQ ../../../Environment/bsp/bin/bsp_cstart_ttc60.obj build/apps.obj build/bse.obj build/debouncing.obj build/diag_flags.obj build/launch_control.obj build/main.obj build/moving_average.obj build/pid.obj build/read_write_can.obj build/rtd_sdc.obj build/tsil.obj ../../../Environment/lib/xc2000_ttc60.lib -lch -lfph -lrth -LC:\Program" "Files" "(x86)\TASKING\C166-VX" "v4.0r1\lib\2 </row>
 			<row>task;task1</row>
 		</table>
 	</part>
@@ -3340,45 +3340,59 @@
 			<column>
 				<name>Reason</name>
 			</column>
-			<row>code_IO_PWD_INT_CCU2_GetPulseFreq (1173);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CCU2_GetPulseFreq;unreferenced</row>
-			<row>code_IO_PWD_INT_AccumulateEdges (1169);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_AccumulateEdges;unreferenced</row>
-			<row>code_IO_PWD_INT_CCU6_CaptureInit (1170);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CCU6_CaptureInit;unreferenced</row>
-			<row>code_IO_PWD_INT_CCU2_Init (1171);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CCU2_Init;unreferenced</row>
-			<row>code_IO_PWD_INT_CCU2_DeInit (1172);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CCU2_DeInit;unreferenced</row>
-			<row>code_IO_PWD_INT_IncInit (1174);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_IncInit;unreferenced</row>
-			<row>code_IO_PWD_INT_GetInc (1175);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_GetInc;unreferenced</row>
-			<row>code_IO_PWD_INT_SetInc (1176);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_SetInc;unreferenced</row>
-			<row>code_IO_PWD_INT_CountInit (1177);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CountInit;unreferenced</row>
-			<row>code_IO_PWD_INT_GetCount (1178);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_GetCount;unreferenced</row>
-			<row>code_IO_PWD_INT_CCU6_FreqInit (1180);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CCU6_FreqInit;unreferenced</row>
-			<row>code_IO_PWD_INT_SetCount (1179);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_SetCount;unreferenced</row>
-			<row>code_IO_PWD_INT_CCU6_GetFreq (1181);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CCU6_GetFreq;unreferenced</row>
+			<row>code_IO_PWD_INT_CCU6_FreqPulseDeInit (1186);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CCU6_FreqPulseDeInit;unreferenced</row>
+			<row>code_IO_PWD_INT_CCU6_GetPwmPulse (1184);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CCU6_GetPwmPulse;unreferenced</row>
+			<row>code_IO_PWD_INT_CC6IntOn (1187);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CC6IntOn;unreferenced</row>
+			<row>code_IO_INT_SBRAM_Read (1321);IO_INT_SBRAM.obj;xc2000_ttc60.lib;_IO_INT_SBRAM_Read;unreferenced</row>
+			<row>code_librt (1374);cphnw.obj;c166rth.lib;__cphnw;unreferenced</row>
+			<row>code_librt (1375);cphnw.obj;c166rth.lib;_$cocofun_1;unreferenced</row>
+			<row>code_librt (1376);cphnw.obj;c166rth.lib;___memcphnw;unreferenced</row>
+			<row>code_librt (1395);cphnb.obj;c166rth.lib;___memcphnb;unreferenced</row>
+			<row>shuge__10_swt (328);IO_ADC.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>shuge__9_swt (327);IO_ADC.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>huge_io_driver_data_section (369);IO_CAN.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>huge_io_driver_data_section (368);IO_CAN.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>shuge__3_swt (417);IO_DIO.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>huge_io_driver_data_section (372);IO_CAN.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>huge_io_driver_data_section (370);IO_CAN.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>shuge__8_swt (326);IO_ADC.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>shuge__6_swt (324);IO_ADC.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>shuge__7_swt (325);IO_ADC.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>huge_io_driver_data_section (517);IO_EEPROM_Preload.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>shuge__1_swt (615);IO_INT_PWM.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>shuge__3_swt (620);IO_INT_PWM.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>shuge__4_swt (623);IO_INT_PWM.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>code_IO_POWER_GetStatus (893);IO_POWER.obj;xc2000_ttc60.lib;_IO_POWER_GetStatus;unreferenced</row>
+			<row>code_IO_POWER_DeInit (884);IO_POWER.obj;xc2000_ttc60.lib;_IO_POWER_DeInit;unreferenced</row>
+			<row>code_IO_PWD_IntPulseDeInit (915);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_IntPulseDeInit;unreferenced</row>
+			<row>code_IO_PWD_IncInit (916);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_IncInit;unreferenced</row>
+			<row>code_IO_PWD_IncGet (918);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_IncGet;unreferenced</row>
+			<row>code_IO_PWD_IncSet (919);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_IncSet;unreferenced</row>
+			<row>code_IO_PWD_ComplexInit (921);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_ComplexInit;unreferenced</row>
+			<row>code_IO_PWD_IncDeInit (920);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_IncDeInit;unreferenced</row>
+			<row>code_IO_PWD_ComplexGet (922);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_ComplexGet;unreferenced</row>
+			<row>code_IO_PWD_ComplexDeInit (923);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_ComplexDeInit;unreferenced</row>
+			<row>code_IO_PWD_PulseInit (925);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_PulseInit;unreferenced</row>
+			<row>code_IO_PWD_FreqGet (926);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_FreqGet;unreferenced</row>
+			<row>code_IO_PWD_PulseDeInit (931);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_PulseDeInit;unreferenced</row>
+			<row>code_IO_PWD_FreqDeInit (930);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_FreqDeInit;unreferenced</row>
+			<row>code_IO_PWD_CountInit (932);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_CountInit;unreferenced</row>
+			<row>code_IO_PWD_CountGet (933);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_CountGet;unreferenced</row>
+			<row>code_IO_PWD_FreqInit (924);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_FreqInit;unreferenced</row>
+			<row>code_IO_PWD_PulseGet (928);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_PulseGet;unreferenced</row>
+			<row>code_IO_PWD_CountSet (934);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_CountSet;unreferenced</row>
+			<row>code_IO_PWD_CountDeInit (935);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_CountDeInit;unreferenced</row>
+			<row>code_IO_RTC_PeriodicDeInit (995);IO_RTC.obj;xc2000_ttc60.lib;_IO_RTC_PeriodicDeInit;unreferenced</row>
+			<row>code_IO_RTC_PeriodicInit (994);IO_RTC.obj;xc2000_ttc60.lib;_IO_RTC_PeriodicInit;unreferenced</row>
 			<row>code_IO_Tools_DistanceUbyte4 (1023);IO_Tools.obj;xc2000_ttc60.lib;_IO_Tools_DistanceUbyte4;unreferenced</row>
 			<row>code_IO_Tools_DistanceUbyte2 (1024);IO_Tools.obj;xc2000_ttc60.lib;_IO_Tools_DistanceUbyte2;unreferenced</row>
 			<row>code_IO_Tools_DistanceUbyte1 (1025);IO_Tools.obj;xc2000_ttc60.lib;_IO_Tools_DistanceUbyte1;unreferenced</row>
-			<row>code_IO_PWD_ComplexGet (922);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_ComplexGet;unreferenced</row>
-			<row>code_IO_PWD_FreqGet (926);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_FreqGet;unreferenced</row>
-			<row>code_IO_PWD_FreqDeInit (930);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_FreqDeInit;unreferenced</row>
-			<row>code_IO_PWD_CountInit (932);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_CountInit;unreferenced</row>
-			<row>code_IO_PWD_CountSet (934);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_CountSet;unreferenced</row>
-			<row>code_IO_PWD_CountDeInit (935);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_CountDeInit;unreferenced</row>
-			<row>code_IO_PWD_IncDeInit (920);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_IncDeInit;unreferenced</row>
-			<row>code_IO_PWD_PulseInit (925);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_PulseInit;unreferenced</row>
-			<row>code_IO_PWD_PulseGet (928);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_PulseGet;unreferenced</row>
-			<row>code_IO_PWD_IncSet (919);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_IncSet;unreferenced</row>
-			<row>code_IO_PWD_ComplexDeInit (923);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_ComplexDeInit;unreferenced</row>
-			<row>code_IO_PWD_PulseDeInit (931);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_PulseDeInit;unreferenced</row>
-			<row>code_IO_PWD_ComplexInit (921);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_ComplexInit;unreferenced</row>
-			<row>code_IO_PWD_FreqInit (924);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_FreqInit;unreferenced</row>
-			<row>code_IO_RTC_PeriodicInit (994);IO_RTC.obj;xc2000_ttc60.lib;_IO_RTC_PeriodicInit;unreferenced</row>
-			<row>code_IO_PWD_CountGet (933);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_CountGet;unreferenced</row>
-			<row>code_IO_RTC_PeriodicDeInit (995);IO_RTC.obj;xc2000_ttc60.lib;_IO_RTC_PeriodicDeInit;unreferenced</row>
+			<row>code_IO_UART_WriteQueue (1103);IO_UART.obj;xc2000_ttc60.lib;_IO_UART_WriteQueue;unreferenced</row>
+			<row>code_IO_UART_Init (1106);IO_UART.obj;xc2000_ttc60.lib;_IO_UART_Init;unreferenced</row>
+			<row>code_IO_Tools_UnlockWDFunc (1033);IO_Tools.obj;xc2000_ttc60.lib;_IO_Tools_UnlockWDFunc;unreferenced</row>
+			<row>code_IO_Tools_LockWDFunc (1034);IO_Tools.obj;xc2000_ttc60.lib;_IO_Tools_LockWDFunc;unreferenced</row>
 			<row>code_IO_Tools_CalcCRC16 (1031);IO_Tools.obj;xc2000_ttc60.lib;_IO_Tools_CalcCRC16;unreferenced</row>
 			<row>code_IO_Tools_GetIdentificationRegisters (1032);IO_Tools.obj;xc2000_ttc60.lib;_IO_Tools_GetIdentificationRegisters;unreferenced</row>
-			<row>code_IO_Tools_LockWDFunc (1034);IO_Tools.obj;xc2000_ttc60.lib;_IO_Tools_LockWDFunc;unreferenced</row>
-			<row>code_IO_Tools_UnlockWDFunc (1033);IO_Tools.obj;xc2000_ttc60.lib;_IO_Tools_UnlockWDFunc;unreferenced</row>
-			<row>code_IO_UART_Init (1106);IO_UART.obj;xc2000_ttc60.lib;_IO_UART_Init;unreferenced</row>
-			<row>code_IO_UART_WriteQueue (1103);IO_UART.obj;xc2000_ttc60.lib;_IO_UART_WriteQueue;unreferenced</row>
 			<row>code_IO_UART_DeInit (1109);IO_UART.obj;xc2000_ttc60.lib;_IO_UART_DeInit;unreferenced</row>
 			<row>code_IO_UART_Read (1114);IO_UART.obj;xc2000_ttc60.lib;_IO_UART_Read;unreferenced</row>
 			<row>code_IO_UART_Write (1115);IO_UART.obj;xc2000_ttc60.lib;_IO_UART_Write;unreferenced</row>
@@ -3386,103 +3400,89 @@
 			<row>code_IO_UART_GetTxStatus (1117);IO_UART.obj;xc2000_ttc60.lib;_IO_UART_GetTxStatus;unreferenced</row>
 			<row>code_IO_WDTimer_DeInit (1153);IO_WDTimer.obj;xc2000_ttc60.lib;_IO_WDTimer_DeInit;unreferenced</row>
 			<row>code_IO_WDTimer_Service (1154);IO_WDTimer.obj;xc2000_ttc60.lib;_IO_WDTimer_Service;unreferenced</row>
-			<row>code_IO_PWD_INT_CCU6_GetPwmPulse (1184);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CCU6_GetPwmPulse;unreferenced</row>
-			<row>code_IO_PWD_INT_CCU6_GetPulse (1183);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CCU6_GetPulse;unreferenced</row>
-			<row>code_IO_PWD_INT_CCU6_FreqPulseDeInit (1186);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CCU6_FreqPulseDeInit;unreferenced</row>
-			<row>code_IO_PWD_INT_CC6IntOn (1187);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CC6IntOn;unreferenced</row>
+			<row>code_IO_PWD_INT_AccumulateEdges (1169);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_AccumulateEdges;unreferenced</row>
+			<row>code_IO_PWD_INT_CCU6_CaptureInit (1170);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CCU6_CaptureInit;unreferenced</row>
+			<row>code_IO_PWD_INT_CCU2_GetPulseFreq (1173);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CCU2_GetPulseFreq;unreferenced</row>
+			<row>code_IO_PWD_INT_IncInit (1174);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_IncInit;unreferenced</row>
+			<row>code_IO_PWD_INT_CCU2_Init (1171);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CCU2_Init;unreferenced</row>
+			<row>code_IO_PWD_INT_CCU2_DeInit (1172);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CCU2_DeInit;unreferenced</row>
+			<row>code_IO_PWD_INT_GetInc (1175);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_GetInc;unreferenced</row>
+			<row>code_IO_PWD_INT_SetInc (1176);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_SetInc;unreferenced</row>
+			<row>code_IO_PWD_INT_SetCount (1179);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_SetCount;unreferenced</row>
+			<row>code_IO_PWD_INT_GetCount (1178);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_GetCount;unreferenced</row>
+			<row>code_IO_PWD_INT_CCU6_FreqInit (1180);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CCU6_FreqInit;unreferenced</row>
+			<row>code_IO_PWD_INT_CountInit (1177);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CountInit;unreferenced</row>
+			<row>code_IO_PWD_INT_CCU6_GetFreq (1181);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CCU6_GetFreq;unreferenced</row>
 			<row>code_IO_PWD_INT_CCU6_PulseInit (1182);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CCU6_PulseInit;unreferenced</row>
-			<row>code_IO_INT_SBRAM_Read (1321);IO_INT_SBRAM.obj;xc2000_ttc60.lib;_IO_INT_SBRAM_Read;unreferenced</row>
-			<row>code_librt (1376);cphnw.obj;c166rth.lib;___memcphnw;unreferenced</row>
-			<row>code_librt (1395);cphnb.obj;c166rth.lib;___memcphnb;unreferenced</row>
-			<row>code_librt (1374);cphnw.obj;c166rth.lib;__cphnw;unreferenced</row>
-			<row>code_librt (1375);cphnw.obj;c166rth.lib;_$cocofun_1;unreferenced</row>
-			<row>code_IO_Driver_Reset (449);IO_Driver.obj;xc2000_ttc60.lib;_IO_Driver_Reset;unreferenced</row>
-			<row>code_IO_EEPROM_Write (482);IO_EEPROM.obj;xc2000_ttc60.lib;_IO_EEPROM_Write;unreferenced</row>
-			<row>code_IO_EEPROM_GetStatus (483);IO_EEPROM.obj;xc2000_ttc60.lib;_IO_EEPROM_GetStatus;unreferenced</row>
-			<row>code_IO_Driver_SetTrapHandler (451);IO_Driver.obj;xc2000_ttc60.lib;_IO_Driver_SetTrapHandler;unreferenced</row>
-			<row>code_IO_EEPROM_PreloadInit (510);IO_EEPROM_Preload.obj;xc2000_ttc60.lib;_IO_EEPROM_PreloadInit;unreferenced</row>
-			<row>code_IO_EEPROM_PreloadDeInit (512);IO_EEPROM_Preload.obj;xc2000_ttc60.lib;_IO_EEPROM_PreloadDeInit;unreferenced</row>
-			<row>code_IO_Driver_GetResetStatus (450);IO_Driver.obj;xc2000_ttc60.lib;_IO_Driver_GetResetStatus;unreferenced</row>
-			<row>code_IO_EEPROM_DeInit (480);IO_EEPROM.obj;xc2000_ttc60.lib;_IO_EEPROM_DeInit;unreferenced</row>
-			<row>code_IO_EEPROM_Read (481);IO_EEPROM.obj;xc2000_ttc60.lib;_IO_EEPROM_Read;unreferenced</row>
-			<row>code_IO_EEPROM_PreloadRead (513);IO_EEPROM_Preload.obj;xc2000_ttc60.lib;_IO_EEPROM_PreloadRead;unreferenced</row>
-			<row>code_IO_EEPROM_PreloadWrite (514);IO_EEPROM_Preload.obj;xc2000_ttc60.lib;_IO_EEPROM_PreloadWrite;unreferenced</row>
-			<row>code_IO_EEPROM_PreloadStatus (515);IO_EEPROM_Preload.obj;xc2000_ttc60.lib;_IO_EEPROM_PreloadStatus;unreferenced</row>
-			<row>code_IO_EEPROM_PreloadTask (516);IO_EEPROM_Preload.obj;xc2000_ttc60.lib;_IO_EEPROM_PreloadTask;unreferenced</row>
-			<row>code_IO_ADC_INT_MuxChannelDeInit (545);IO_INT_ADC.obj;xc2000_ttc60.lib;_IO_ADC_INT_MuxChannelDeInit;unreferenced</row>
-			<row>code_IO_ADC_INT_ChannelDeInit (544);IO_INT_ADC.obj;xc2000_ttc60.lib;_IO_ADC_INT_ChannelDeInit;unreferenced</row>
-			<row>code_IO_PWM_INT_CC2Init (611);IO_INT_PWM.obj;xc2000_ttc60.lib;_IO_PWM_INT_CC2Init;unreferenced</row>
-			<row>code_IO_INT_Driver_ResetCpu (589);IO_INT_Driver.obj;xc2000_ttc60.lib;_IO_INT_Driver_ResetCpu;unreferenced</row>
-			<row>code_IO_PWM_INT_CC2IntOff (614);IO_INT_PWM.obj;xc2000_ttc60.lib;_IO_PWM_INT_CC2IntOff;unreferenced</row>
-			<row>code_IO_PWM_INT_CC6SetFreq (619);IO_INT_PWM.obj;xc2000_ttc60.lib;_IO_PWM_INT_CC6SetFreq;unreferenced</row>
-			<row>code_IO_PWM_INT_CC2Deinit (621);IO_INT_PWM.obj;xc2000_ttc60.lib;_IO_PWM_INT_CC2Deinit;unreferenced</row>
-			<row>code_IO_PWM_INT_CC6Deinit (622);IO_INT_PWM.obj;xc2000_ttc60.lib;_IO_PWM_INT_CC6Deinit;unreferenced</row>
-			<row>code_IO_PWM_INT_CC2SetDuty (613);IO_INT_PWM.obj;xc2000_ttc60.lib;_IO_PWM_INT_CC2SetDuty;unreferenced</row>
-			<row>code_IO_PWM_INT_CalcPwmData (637);IO_INT_PWM.obj;xc2000_ttc60.lib;_IO_PWM_INT_CalcPwmData;unreferenced</row>
-			<row>code_IO_INT_SBRAM_RGN_ReadTrapData (694);IO_INT_SBRAM_RGN.obj;xc2000_ttc60.lib;_IO_INT_SBRAM_RGN_ReadTrapData;unreferenced</row>
-			<row>code_IO_INT_SBRAM_RGN_ReadAppRst (696);IO_INT_SBRAM_RGN.obj;xc2000_ttc60.lib;_IO_INT_SBRAM_RGN_ReadAppRst;unreferenced</row>
-			<row>code_IO_INT_SBRAM_RGN_WriteAppRst (697);IO_INT_SBRAM_RGN.obj;xc2000_ttc60.lib;_IO_INT_SBRAM_RGN_WriteAppRst;unreferenced</row>
-			<row>code_IO_SHIFT_DeInit (720);IO_INT_SHIFT.obj;xc2000_ttc60.lib;_IO_SHIFT_DeInit;unreferenced</row>
-			<row>code_IO_SHIFT_Write (721);IO_INT_SHIFT.obj;xc2000_ttc60.lib;_IO_SHIFT_Write;unreferenced</row>
-			<row>code_IO_SHIFT_Read (723);IO_INT_SHIFT.obj;xc2000_ttc60.lib;_IO_SHIFT_Read;unreferenced</row>
-			<row>code_IO_SPI_DeInit (747);IO_INT_SPI.obj;xc2000_ttc60.lib;_IO_SPI_DeInit;unreferenced</row>
-			<row>code_IO_Timer_INT_GPTTimerInit (776);IO_INT_Timer.obj;xc2000_ttc60.lib;_IO_Timer_INT_GPTTimerInit;unreferenced</row>
-			<row>code_IO_Timer_INT_GPTTimerStart (777);IO_INT_Timer.obj;xc2000_ttc60.lib;_IO_Timer_INT_GPTTimerStart;unreferenced</row>
-			<row>code_IO_Timer_INT_GPTTimerEnable (775);IO_INT_Timer.obj;xc2000_ttc60.lib;_IO_Timer_INT_GPTTimerEnable;unreferenced</row>
-			<row>code_IO_Timer_INT_GPTTimerStop (778);IO_INT_Timer.obj;xc2000_ttc60.lib;_IO_Timer_INT_GPTTimerStop;unreferenced</row>
-			<row>code_IO_INT_TRAP_Setup (803);IO_INT_Trap.obj;xc2000_ttc60.lib;_IO_INT_TRAP_Setup;unreferenced</row>
-			<row>code_IO_INT_TRAP_GetPrevReason (806);IO_INT_Trap.obj;xc2000_ttc60.lib;_IO_INT_TRAP_GetPrevReason;unreferenced</row>
+			<row>code_IO_PWD_INT_CCU6_GetPulse (1183);IO_INT_PWD.obj;xc2000_ttc60.lib;_IO_PWD_INT_CCU6_GetPulse;unreferenced</row>
 			<row>code_IO_SPI_RemoveDevice (749);IO_INT_SPI.obj;xc2000_ttc60.lib;_IO_SPI_RemoveDevice;unreferenced</row>
 			<row>code_IO_Timer_INT_CC2Setup (774);IO_INT_Timer.obj;xc2000_ttc60.lib;_IO_Timer_INT_CC2Setup;unreferenced</row>
+			<row>code_IO_Timer_INT_GPTTimerInit (776);IO_INT_Timer.obj;xc2000_ttc60.lib;_IO_Timer_INT_GPTTimerInit;unreferenced</row>
+			<row>code_IO_Timer_INT_GPTTimerStart (777);IO_INT_Timer.obj;xc2000_ttc60.lib;_IO_Timer_INT_GPTTimerStart;unreferenced</row>
+			<row>code_IO_Timer_INT_GPTTimerStop (778);IO_INT_Timer.obj;xc2000_ttc60.lib;_IO_Timer_INT_GPTTimerStop;unreferenced</row>
+			<row>code_IO_Timer_INT_GPTTimerEnable (775);IO_INT_Timer.obj;xc2000_ttc60.lib;_IO_Timer_INT_GPTTimerEnable;unreferenced</row>
+			<row>code_IO_INT_TRAP_Setup (803);IO_INT_Trap.obj;xc2000_ttc60.lib;_IO_INT_TRAP_Setup;unreferenced</row>
+			<row>code_IO_INT_TRAP_GetPrevReason (806);IO_INT_Trap.obj;xc2000_ttc60.lib;_IO_INT_TRAP_GetPrevReason;unreferenced</row>
 			<row>code_IO_INT_TRAP_HookSetup (850);IO_INT_Trap_Hook.obj;xc2000_ttc60.lib;_IO_INT_TRAP_HookSetup;unreferenced</row>
-			<row>code_IO_POWER_DeInit (884);IO_POWER.obj;xc2000_ttc60.lib;_IO_POWER_DeInit;unreferenced</row>
-			<row>code_IO_POWER_GetStatus (893);IO_POWER.obj;xc2000_ttc60.lib;_IO_POWER_GetStatus;unreferenced</row>
-			<row>code_IO_PWD_IncGet (918);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_IncGet;unreferenced</row>
-			<row>code_IO_PWD_IntPulseDeInit (915);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_IntPulseDeInit;unreferenced</row>
-			<row>code_IO_PWD_IncInit (916);IO_PWD.obj;xc2000_ttc60.lib;_IO_PWD_IncInit;unreferenced</row>
-			<row>code_IO_DI_DeInit (416);IO_DIO.obj;xc2000_ttc60.lib;_IO_DI_DeInit;unreferenced</row>
-			<row>code_IO_DO_DeInit (418);IO_DIO.obj;xc2000_ttc60.lib;_IO_DO_DeInit;unreferenced</row>
-			<row>code_IO_Driver_GetVersionOfDriver (442);IO_Driver.obj;xc2000_ttc60.lib;_IO_Driver_GetVersionOfDriver;unreferenced</row>
 			<row>code_voltage_to_pedal_travel_apps_1 (5);apps.obj;;_voltage_to_pedal_travel_apps_1;unreferenced</row>
 			<row>code_voltage_to_pedal_travel_apps_2 (6);apps.obj;;_voltage_to_pedal_travel_apps_2;unreferenced</row>
 			<row>code_voltage_to_psi_bse (55);bse.obj;;_voltage_to_psi_bse;unreferenced</row>
 			<row>code_pedal_travel_to_torque (156);main.obj;;_pedal_travel_to_torque;unreferenced</row>
-			<row>code_IO_CAN_ReadFIFO (360);IO_CAN.obj;xc2000_ttc60.lib;_IO_CAN_ReadFIFO;unreferenced</row>
 			<row>code_IO_ADC_BoardTempSbyte (333);IO_ADC.obj;xc2000_ttc60.lib;_IO_ADC_BoardTempSbyte;unreferenced</row>
+			<row>code_IO_DI_DeInit (416);IO_DIO.obj;xc2000_ttc60.lib;_IO_DI_DeInit;unreferenced</row>
 			<row>code_IO_ADC_BoardTempFloat (332);IO_ADC.obj;xc2000_ttc60.lib;_IO_ADC_BoardTempFloat;unreferenced</row>
-			<row>code_IO_ADC_ChannelDeInit (323);IO_ADC.obj;xc2000_ttc60.lib;_IO_ADC_ChannelDeInit;unreferenced</row>
+			<row>code_IO_DO_DeInit (418);IO_DIO.obj;xc2000_ttc60.lib;_IO_DO_DeInit;unreferenced</row>
 			<row>code_IO_CAN_WriteMsg (358);IO_CAN.obj;xc2000_ttc60.lib;_IO_CAN_WriteMsg;unreferenced</row>
-			<row>huge_io_driver_data_section (368);IO_CAN.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>huge_io_driver_data_section (369);IO_CAN.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>huge_io_driver_data_section (370);IO_CAN.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>huge_io_driver_data_section (372);IO_CAN.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>shuge__8_swt (326);IO_ADC.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>shuge__3_swt (417);IO_DIO.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>shuge__9_swt (327);IO_ADC.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>shuge__7_swt (325);IO_ADC.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>shuge__6_swt (324);IO_ADC.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>shuge__10_swt (328);IO_ADC.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>shuge__3_swt (620);IO_INT_PWM.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>shuge__1_swt (615);IO_INT_PWM.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>shuge__4_swt (623);IO_INT_PWM.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>huge_io_driver_data_section (517);IO_EEPROM_Preload.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>huge__999001_cc2_initialized (780);IO_INT_Timer.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>code_IO_ADC_ChannelDeInit (323);IO_ADC.obj;xc2000_ttc60.lib;_IO_ADC_ChannelDeInit;unreferenced</row>
+			<row>code_IO_CAN_ReadFIFO (360);IO_CAN.obj;xc2000_ttc60.lib;_IO_CAN_ReadFIFO;unreferenced</row>
+			<row>code_IO_Driver_GetVersionOfDriver (442);IO_Driver.obj;xc2000_ttc60.lib;_IO_Driver_GetVersionOfDriver;unreferenced</row>
+			<row>code_IO_Driver_Reset (449);IO_Driver.obj;xc2000_ttc60.lib;_IO_Driver_Reset;unreferenced</row>
+			<row>code_IO_EEPROM_PreloadTask (516);IO_EEPROM_Preload.obj;xc2000_ttc60.lib;_IO_EEPROM_PreloadTask;unreferenced</row>
+			<row>code_IO_EEPROM_Read (481);IO_EEPROM.obj;xc2000_ttc60.lib;_IO_EEPROM_Read;unreferenced</row>
+			<row>code_IO_EEPROM_GetStatus (483);IO_EEPROM.obj;xc2000_ttc60.lib;_IO_EEPROM_GetStatus;unreferenced</row>
+			<row>code_IO_ADC_INT_MuxChannelDeInit (545);IO_INT_ADC.obj;xc2000_ttc60.lib;_IO_ADC_INT_MuxChannelDeInit;unreferenced</row>
+			<row>code_IO_EEPROM_Write (482);IO_EEPROM.obj;xc2000_ttc60.lib;_IO_EEPROM_Write;unreferenced</row>
+			<row>code_IO_EEPROM_PreloadRead (513);IO_EEPROM_Preload.obj;xc2000_ttc60.lib;_IO_EEPROM_PreloadRead;unreferenced</row>
+			<row>code_IO_Driver_SetTrapHandler (451);IO_Driver.obj;xc2000_ttc60.lib;_IO_Driver_SetTrapHandler;unreferenced</row>
+			<row>code_IO_EEPROM_PreloadWrite (514);IO_EEPROM_Preload.obj;xc2000_ttc60.lib;_IO_EEPROM_PreloadWrite;unreferenced</row>
+			<row>code_IO_Driver_GetResetStatus (450);IO_Driver.obj;xc2000_ttc60.lib;_IO_Driver_GetResetStatus;unreferenced</row>
+			<row>code_IO_EEPROM_DeInit (480);IO_EEPROM.obj;xc2000_ttc60.lib;_IO_EEPROM_DeInit;unreferenced</row>
+			<row>code_IO_ADC_INT_ChannelDeInit (544);IO_INT_ADC.obj;xc2000_ttc60.lib;_IO_ADC_INT_ChannelDeInit;unreferenced</row>
+			<row>code_IO_EEPROM_PreloadDeInit (512);IO_EEPROM_Preload.obj;xc2000_ttc60.lib;_IO_EEPROM_PreloadDeInit;unreferenced</row>
+			<row>code_IO_EEPROM_PreloadInit (510);IO_EEPROM_Preload.obj;xc2000_ttc60.lib;_IO_EEPROM_PreloadInit;unreferenced</row>
+			<row>code_IO_INT_Driver_ResetCpu (589);IO_INT_Driver.obj;xc2000_ttc60.lib;_IO_INT_Driver_ResetCpu;unreferenced</row>
+			<row>code_IO_EEPROM_PreloadStatus (515);IO_EEPROM_Preload.obj;xc2000_ttc60.lib;_IO_EEPROM_PreloadStatus;unreferenced</row>
+			<row>code_IO_INT_SBRAM_RGN_ReadTrapData (694);IO_INT_SBRAM_RGN.obj;xc2000_ttc60.lib;_IO_INT_SBRAM_RGN_ReadTrapData;unreferenced</row>
+			<row>code_IO_PWM_INT_CC2IntOff (614);IO_INT_PWM.obj;xc2000_ttc60.lib;_IO_PWM_INT_CC2IntOff;unreferenced</row>
+			<row>code_IO_PWM_INT_CalcPwmData (637);IO_INT_PWM.obj;xc2000_ttc60.lib;_IO_PWM_INT_CalcPwmData;unreferenced</row>
+			<row>code_IO_SHIFT_DeInit (720);IO_INT_SHIFT.obj;xc2000_ttc60.lib;_IO_SHIFT_DeInit;unreferenced</row>
+			<row>code_IO_PWM_INT_CC6SetFreq (619);IO_INT_PWM.obj;xc2000_ttc60.lib;_IO_PWM_INT_CC6SetFreq;unreferenced</row>
+			<row>code_IO_PWM_INT_CC2Init (611);IO_INT_PWM.obj;xc2000_ttc60.lib;_IO_PWM_INT_CC2Init;unreferenced</row>
+			<row>code_IO_SHIFT_Read (723);IO_INT_SHIFT.obj;xc2000_ttc60.lib;_IO_SHIFT_Read;unreferenced</row>
+			<row>code_IO_PWM_INT_CC2SetDuty (613);IO_INT_PWM.obj;xc2000_ttc60.lib;_IO_PWM_INT_CC2SetDuty;unreferenced</row>
+			<row>code_IO_PWM_INT_CC6Deinit (622);IO_INT_PWM.obj;xc2000_ttc60.lib;_IO_PWM_INT_CC6Deinit;unreferenced</row>
+			<row>code_IO_SPI_DeInit (747);IO_INT_SPI.obj;xc2000_ttc60.lib;_IO_SPI_DeInit;unreferenced</row>
+			<row>code_IO_INT_SBRAM_RGN_ReadAppRst (696);IO_INT_SBRAM_RGN.obj;xc2000_ttc60.lib;_IO_INT_SBRAM_RGN_ReadAppRst;unreferenced</row>
+			<row>code_IO_SHIFT_Write (721);IO_INT_SHIFT.obj;xc2000_ttc60.lib;_IO_SHIFT_Write;unreferenced</row>
+			<row>code_IO_INT_SBRAM_RGN_WriteAppRst (697);IO_INT_SBRAM_RGN.obj;xc2000_ttc60.lib;_IO_INT_SBRAM_RGN_WriteAppRst;unreferenced</row>
+			<row>code_IO_PWM_INT_CC2Deinit (621);IO_INT_PWM.obj;xc2000_ttc60.lib;_IO_PWM_INT_CC2Deinit;unreferenced</row>
 			<row>huge__999002_gpt_initialized (781);IO_INT_Timer.obj;xc2000_ttc60.lib;;unreferenced</row>
 			<row>shuge__1_swt (851);IO_INT_Trap_Hook.obj;xc2000_ttc60.lib;;unreferenced</row>
 			<row>shuge__1_swt (804);IO_INT_Trap.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>shuge__2_swt (1107);IO_UART.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>shuge__3_swt (1108);IO_UART.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>huge__1_ini (1052);IO_Tools.obj;xc2000_ttc60.lib;;unreferenced</row>
 			<row>huge__999001_sens_state (899);IO_POWER.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>shuge__2_swt (929);IO_PWD.obj;xc2000_ttc60.lib;;unreferenced</row>
 			<row>shuge__1_swt (927);IO_PWD.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>shuge__6_swt (1192);IO_INT_PWD.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>shuge__3_swt (1189);IO_INT_PWD.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>shuge__4_swt (1190);IO_INT_PWD.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>shuge__2_swt (1188);IO_INT_PWD.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>huge__999001_cc2_initialized (780);IO_INT_Timer.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>shuge__2_swt (929);IO_PWD.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>shuge__2_swt (1107);IO_UART.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>huge__1_ini (1052);IO_Tools.obj;xc2000_ttc60.lib;;unreferenced</row>
 			<row>shuge__5_swt (1111);IO_UART.obj;xc2000_ttc60.lib;;unreferenced</row>
-			<row>shuge__4_swt (1110);IO_UART.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>shuge__2_swt (1188);IO_INT_PWD.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>shuge__3_swt (1189);IO_INT_PWD.obj;xc2000_ttc60.lib;;unreferenced</row>
 			<row>shuge__5_swt (1191);IO_INT_PWD.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>shuge__6_swt (1192);IO_INT_PWD.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>shuge__4_swt (1190);IO_INT_PWD.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>shuge__3_swt (1108);IO_UART.obj;xc2000_ttc60.lib;;unreferenced</row>
+			<row>shuge__4_swt (1110);IO_UART.obj;xc2000_ttc60.lib;;unreferenced</row>
 			<row>code_libfp (1353);cl2spf.obj;c166fph.lib;__ll2spf;unreferenced</row>
 		</table>
 	</part>
