@@ -57,7 +57,7 @@
 #define INVERTER_ENABLE 1
 
 #define PEDAL_TRAVEL_FOR_MAX_TORQUE 230 // 90 percent travel
-#define CONTINUOUS_TORQUE_MAX 200 // TODO 200
+#define CONTINUOUS_TORQUE_MAX 220 // TODO 200
 #define MOTOR_DIRECTION MOTOR_FORWARDS // TODO backwards for dyno testing
 
 /**************************************************************************

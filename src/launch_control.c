@@ -1,37 +1,48 @@
 #include "APDB.h"
 
-#include "pid.h"
 #include "launch_control.h"
 
-
-bool launch_control_pid_struct_initialized = FALSE;
-
-struct pid_info launch_control_pid_info_struct;
+// number of torque limit regions
+#define NUM_TORQUE_LIMIT_REGIONS 3
 
 
-ubyte2 get_launch_control_torque_limit(float4 avg_front_wheel_speed, float4 avg_rear_wheel_speed) {
-    // initialize struct if necessary
-    if (!launch_control_pid_struct_initialized) {
-        initialize_pid_info_struct(&launch_control_pid_info_struct,
-                                    (float4) LAUNCH_CONTROL_KP,
-                                    (float4) LAUNCH_CONTROL_KI,
-                                    (float4) LAUNCH_CONTROL_KD,
-                                    (float4) LAUNCH_CONTROL_TARGET_SLIP_RATIO);
-        launch_control_pid_struct_initialized = TRUE;
+// the different torques, in order from least to most rpm
+// THERE MUST BE NUM_TORQUE_LIMIT_REGIONS ENTRIES IN THIS ARRAY
+ubyte2 torque_limit_regions[NUM_TORQUE_LIMIT_REGIONS] = {100, 150, 220};
+
+// the rpm threshholds at which to switch from one threshhold to another
+// IN ORDER FROM LEAST TO MOST RPM
+// e.g., right now, at <= 500 rpm we're at 100 Nm
+// from 501 - 1500 rpm we're at 150 Nm
+// at 1501+ rpm we're at 220
+ubyte2 rpm_boundaries[NUM_TORQUE_LIMIT_REGIONS - 1] = {500, 1500};
+
+
+ubyte2 get_launch_control_torque_limit(ubyte2 rpm) {
+
+    // if the rpm is greater than the last boundary, return the 
+    // last torque
+    if (rpm > rpm_boundaries[NUM_TORQUE_LIMIT_REGIONS - 2]) {
+        return torque_limit_regions[NUM_TORQUE_LIMIT_REGIONS - 1];
     }
 
-    // avoid divide by 0 error
-    float4 wheel_slip;
-    if (avg_front_wheel_speed == 0) {
-        wheel_slip = (avg_rear_wheel_speed) / 0.001;
-    } else {
-        wheel_slip = (avg_rear_wheel_speed) / (avg_front_wheel_speed);
+    ubyte1 i = 0;
+
+    // now we're only considering rpms less than the last boundary
+    // find the first rpm boundary the rpm is less than and return the
+    // corresponding torque
+    while (i < NUM_TORQUE_LIMIT_REGIONS - 1) {
+        if (rpm <= rpm_boundaries[i]) {
+            return torque_limit_regions[i];
+        }
+
+        i++;
     }
 
-    float4 returned_torque_limit = get_pid_output(&launch_control_pid_info_struct, wheel_slip);
-    if (returned_torque_limit < 0) returned_torque_limit = 0;
-    return ((ubyte2) returned_torque_limit);
-
+    // this should never be reached assuming the arrays were
+    // structured correctly
+    // but if they weren't, return the max torque
+    return rpm_boundaries[NUM_TORQUE_LIMIT_REGIONS - 1];
 }
 
 
