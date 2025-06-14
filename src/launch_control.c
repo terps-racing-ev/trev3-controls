@@ -16,6 +16,7 @@ ubyte2 torque_limit_regions[NUM_TORQUE_LIMIT_REGIONS] = {100, 150, 220};
 // e.g., right now, at <= 500 rpm we're at 100 Nm
 // from 501 - 1500 rpm we're at 150 Nm
 // at 1501+ rpm we're at 220
+// THERE MUST BE NUM_TORQUE_LIMIT_REGIONS - 1 ENTRIES IN THIS ARRAY
 ubyte2 rpm_boundaries[NUM_TORQUE_LIMIT_REGIONS - 1] = {500, 1500};
 
 
