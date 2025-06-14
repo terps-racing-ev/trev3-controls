@@ -38,17 +38,17 @@
 #define APPS_THRESHHOLD_REESTABLISH_PLAUSIBILITY 12 // 5% of 256
 
 /* apps 1 */
-#define APPS_1_MAX_VOLTAGE 4400
+#define APPS_1_MAX_VOLTAGE 4823
 #define APPS_1_MIN_VOLTAGE 1039
 #define APPS_1_VOLTAGE_RANGE (APPS_1_MAX_VOLTAGE - APPS_1_MIN_VOLTAGE)
 
 /* apps 2 (with diode) */
-#define APPS_2_MAX_VOLTAGE 4016
+#define APPS_2_MAX_VOLTAGE 4438
 #define APPS_2_MIN_VOLTAGE 660
 #define APPS_2_VOLTAGE_RANGE (APPS_2_MAX_VOLTAGE - APPS_2_MIN_VOLTAGE)
 
 /* voltage range above max and below min that doesn't count as an error */
-#define APPS_VOLTAGE_DEADZONE 250
+#define APPS_VOLTAGE_DEADZONE 100
 
 // max number of errors in a row before torque is cut.
 #define APPS_REPEATED_ERROR_MAX 20
