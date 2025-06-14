@@ -3,6 +3,7 @@
 #include "launch_control.h"
 
 // number of torque limit regions
+// edit this however you want
 #define NUM_TORQUE_LIMIT_REGIONS 3
 
 
@@ -10,7 +11,7 @@
 // THERE MUST BE NUM_TORQUE_LIMIT_REGIONS ENTRIES IN THIS ARRAY
 ubyte2 torque_limit_regions[NUM_TORQUE_LIMIT_REGIONS] = {100, 150, 220};
 
-// the rpm threshholds at which to switch from one threshhold to another
+// the rpm threshholds at which to switch from one torque to another
 // IN ORDER FROM LEAST TO MOST RPM
 // e.g., right now, at <= 500 rpm we're at 100 Nm
 // from 501 - 1500 rpm we're at 150 Nm
