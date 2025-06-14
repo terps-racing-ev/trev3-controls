@@ -103,7 +103,7 @@
 #define ORION_BMS_STATUS_INDEX 1
 
 // 10 second CAN timeout on Orion
-#define ORION_CAN_TIMEOUT_S 10
+#define ORION_CAN_TIMEOUT_S 30
 #define ORION_CAN_TIMEOUT_US MsToUs(ORION_CAN_TIMEOUT_S * 1000)
 
 // 3 second period for ignoring Orion
@@ -115,7 +115,7 @@
 
 #define MAX_POWER_LIMIT 135000
 #define CHARGE_CURRENT_LIMIT 20
-#define MIN_DCL 150
+#define MIN_DCL 0
 
 /**************************************************************************
  * Other

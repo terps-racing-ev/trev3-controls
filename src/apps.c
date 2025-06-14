@@ -110,7 +110,7 @@ void get_apps(ubyte1 *apps_pedal_travel_result, ubyte1 *error, ubyte1 *num_error
         if ((Abs(difference)) >= APPS_MIN_IMPLAUSIBLE_DEVIATION) {
             // only error out if APPS_REPEATED_ERROR_MAX errors have been encountered in a row
             
-            if ((*num_errors) > APPS_REPEATED_ERROR_MAX && !(IGNORE_APPS_ERROR)) {
+            if ((*num_errors) > APPS_REPEATED_ERROR_MAX && !(IGNORE_APPS_IMPLAUSIBILITY)) {
                 *error |= APPS_IMPLAUSIBILITY_ERROR;
             } else {
                 (*num_errors)++;
@@ -128,7 +128,7 @@ void get_apps(ubyte1 *apps_pedal_travel_result, ubyte1 *error, ubyte1 *num_error
         
     } else {
         // only error out if APPS_REPEATED_ERROR_MAX errors have been encountered in a row       
-        if ((*num_errors) > APPS_REPEATED_ERROR_MAX && !(IGNORE_APPS_ERROR)) {
+        if ((*num_errors) > APPS_REPEATED_ERROR_MAX && !(IGNORE_APPS_OOR)) {
             if (!apps_1_within_threshhold) {
                 *error |= APPS_1_OUT_OF_RANGE_ERROR;
             }

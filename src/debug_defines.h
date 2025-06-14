@@ -13,7 +13,8 @@
 #define IGNORE_RTD_BRAKES FALSE
 
 // ignore these error conditions
-#define IGNORE_APPS_ERROR FALSE
+#define IGNORE_APPS_IMPLAUSIBILITY TRUE
+#define IGNORE_APPS_OOR FALSE
 #define IGNORE_BSE_ERROR FALSE
 #define IGNORE_SDC_OFF FALSE
 
