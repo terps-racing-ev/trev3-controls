@@ -98,8 +98,8 @@ void get_apps(ubyte1 *apps_pedal_travel_result, ubyte1 *error, ubyte1 *num_error
     sbyte2 difference;
 
     // check that both apps are within the treshhold
-    if (apps_1_within_threshhold &&
-        apps_2_within_threshhold) {
+    if (IGNORE_APPS_OOR || (apps_1_within_threshhold &&
+        apps_2_within_threshhold)) {
 
         apps_1_pedal_travel = voltage_to_pedal_travel_apps_1(apps_1_val);
         apps_2_pedal_travel = voltage_to_pedal_travel_apps_2(apps_2_val);
