@@ -89,21 +89,6 @@
 #define TORQUE_INFO_CAN_ID 0xAC
 #define INVERTER_STATE_CAN_ID 0xAB
 
-//TODO: Change
-#define WHEEL_SPEED_CAN_ID 0x99
-#define FR_WHEEL_SPEED_LO_INDEX 0
-#define FR_WHEEL_SPEED_HI_INDEX 1
-#define FL_WHEEL_SPEED_LO_INDEX 2
-#define FL_WHEEL_SPEED_HI_INDEX 3
-#define BR_WHEEL_SPEED_LO_INDEX 4
-#define BR_WHEEL_SPEED_HI_INDEX 5
-#define BL_WHEEL_SPEED_LO_INDEX 6
-#define BL_WHEEL_SPEED_HI_INDEX 7
-
-#define LAUNCH_CONTROL_CONSTANT_TORQUE (CONTINUOUS_TORQUE_MAX / 2)
-#define LAUNCH_CONTROL_MINIMUM_TORQUE 0
-#define LAUNCH_CONTROL_MINIMUM_FRONT_SPEED 10.0
-
 #define INVERTER_PACK_VOLT_LO 0
 #define INVERTER_PACK_VOLT_HI 1
 
@@ -227,7 +212,6 @@ void main (void)
     ubyte1 handle_inverter_state_r;
     ubyte1 handle_orion_1_r;
     ubyte1 handle_orion_2_r;
-    ubyte1 handle_wheel_speed_r;
     //ubyte1 handle_orion_therm_exp_r;
 
     /* can frame used to send torque requests to the inverter */
@@ -261,9 +245,6 @@ void main (void)
     IO_CAN_DATA_FRAME orion_1_can_frame;
     IO_CAN_DATA_FRAME orion_2_can_frame;
     //IO_CAN_DATA_FRAME orion_therm_exp_can_frame;
-
-    /* CAN frame for reading from datalogger */
-    IO_CAN_DATA_FRAME wheel_speed_can_frame;
 
     /* CAN frame for controls summary*/
     IO_CAN_DATA_FRAME vcu_summary_can_frame;
@@ -370,15 +351,7 @@ void main (void)
                  , ORION_2_CAN_ID
                  , 0x7FF);
 
-    IO_CAN_ConfigMsg( &handle_wheel_speed_r
-                 , TELEMETRY_CAN_CHANNEL
-                 , IO_CAN_MSG_READ
-                 , IO_CAN_STD_FRAME
-                 , WHEEL_SPEED_CAN_ID
-                 , 0x7FF);
-    
-    
-    /*IO_CAN_ConfigMsg( &handle_orion_therm_exp_r
+                 /*IO_CAN_ConfigMsg( &handle_orion_therm_exp_r
                  , CONTROLS_CAN_CHANNEL
                  , IO_CAN_MSG_READ
                  , IO_CAN_EXT_FRAME //Extended 29 bit ID. problem?
@@ -469,6 +442,7 @@ void main (void)
     ubyte1 last_speed_d0 = 0;
     ubyte1 last_speed_d1 = 0;
     ubyte2 last_speed = 0; // TODO useless for now
+
     // whether any motor info message has been received
     bool motor_speed_updated_once = FALSE;
 
@@ -489,17 +463,6 @@ void main (void)
 
     //inverter state info received
     bool inverter_state_message_received = FALSE;
-
-    // wheel speed message received
-    bool wheel_speed_message_received = FALSE;
-
-    ubyte2 fr_wheel_speed;
-    ubyte2 fl_wheel_speed;
-    ubyte2 br_wheel_speed;
-    ubyte2 bl_wheel_speed;
-
-    float4 avg_front_wheel_speed;
-    float4 avg_rear_wheel_speed;
 
     ubyte2 launch_control_torque_limit = CONTINUOUS_TORQUE_MAX;
 
@@ -611,8 +574,6 @@ void main (void)
             read_can_msg(&handle_orion_2_r, &orion_2_can_frame, &orion_2_message_received, ORION_2_CAN_ID, TELEMETRY_CAN_CHANNEL, IO_CAN_STD_FRAME);
             //read_can_msg(&handle_orion_therm_exp_r, &orion_therm_exp_can_frame, &orion_therm_exp_message_received, ORION_THERM_EXP_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_EXT_FRAME);
 
-            // read message from datalogger
-            read_can_msg(&handle_wheel_speed_r, &wheel_speed_can_frame, &wheel_speed_message_received, WHEEL_SPEED_CAN_ID, TELEMETRY_CAN_CHANNEL, IO_CAN_STD_FRAME);
 
 
             if (orion_1_message_received) {
@@ -628,17 +589,6 @@ void main (void)
             if (voltage_info_message_received == TRUE) {
                 dc_bus_voltage = ((inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_HI] << 8) | inverter_voltage_info_can_frame.data[INVERTER_PACK_VOLT_LO]) / 10;
                 dc_bus_voltage_updated_once = TRUE;
-            }
-
-            if (wheel_speed_message_received) {
-                fr_wheel_speed = (wheel_speed_can_frame.data[FR_WHEEL_SPEED_HI_INDEX] << 8) | (wheel_speed_can_frame.data[FR_WHEEL_SPEED_LO_INDEX]);
-                fl_wheel_speed = (wheel_speed_can_frame.data[FL_WHEEL_SPEED_HI_INDEX] << 8) | (wheel_speed_can_frame.data[FL_WHEEL_SPEED_LO_INDEX]);
-
-                br_wheel_speed = (wheel_speed_can_frame.data[BR_WHEEL_SPEED_HI_INDEX] << 8) | (wheel_speed_can_frame.data[BR_WHEEL_SPEED_LO_INDEX]);
-                bl_wheel_speed = (wheel_speed_can_frame.data[BL_WHEEL_SPEED_HI_INDEX] << 8) | (wheel_speed_can_frame.data[BL_WHEEL_SPEED_LO_INDEX]);
-
-                avg_front_wheel_speed = (((float4) fr_wheel_speed) + ((float4) fl_wheel_speed)) / ((float4) 2.0);
-                avg_rear_wheel_speed = (((float4) br_wheel_speed) + ((float4) bl_wheel_speed)) / ((float4) 2.0);
             }
 
             /****** FSM START ******/
@@ -870,9 +820,8 @@ void main (void)
             // launch control
 
             // only run PID if we get new data
-            if (wheel_speed_message_received && avg_front_wheel_speed > LAUNCH_CONTROL_MINIMUM_FRONT_SPEED) {
-                launch_control_torque_limit = get_launch_control_torque_limit(avg_front_wheel_speed, avg_rear_wheel_speed) 
-                                                + LAUNCH_CONTROL_CONSTANT_TORQUE;
+            if (motor_speed_updated_once) {
+                launch_control_torque_limit = get_launch_control_torque_limit(last_speed);
             }
 
             if (LAUNCH_CONTROL_ENABLED && torque > launch_control_torque_limit) {
@@ -904,16 +853,14 @@ void main (void)
                 if (dcl < MIN_DCL) {
                     dcl = MIN_DCL;
                 }
+
                 inverter_ccl_dcl_can_frame.data[0] = dcl & 0xFF;
                 inverter_ccl_dcl_can_frame.data[1] = dcl >> 8;
                 inverter_ccl_dcl_can_frame.data[2] = ccl & 0xFF;
                 inverter_ccl_dcl_can_frame.data[3] = ccl >> 8;
-                ubyte2 afwspd = (ubyte2)(avg_front_wheel_speed);
-                ubyte2 arwspd = (ubyte2)(avg_rear_wheel_speed);
-                inverter_ccl_dcl_can_frame.data[4] = afwspd & 0xFF;
-                inverter_ccl_dcl_can_frame.data[5] = afwspd >> 8;
-                inverter_ccl_dcl_can_frame.data[6] = arwspd & 0xFF;
-                inverter_ccl_dcl_can_frame.data[7] = arwspd >> 8;
+                // used to be average forward wheel speed
+                inverter_ccl_dcl_can_frame.data[4] = launch_control_torque_limit & 0xFF;
+                inverter_ccl_dcl_can_frame.data[5] = launch_control_torque_limit >> 8;
                 write_can_msg(handle_controls_fifo_w, &inverter_ccl_dcl_can_frame);
                 write_can_msg(handle_telemetry_fifo_w, &inverter_ccl_dcl_can_frame);
             }
@@ -1111,7 +1058,6 @@ void main (void)
 
                 IO_CAN_DeInitHandle(handle_orion_1_r);
                 IO_CAN_DeInitHandle(handle_orion_2_r);
-                IO_CAN_DeInitHandle(handle_wheel_speed_r);
 
                 // de init channel
                 IO_CAN_DeInit(TELEMETRY_CAN_CHANNEL);
@@ -1149,13 +1095,6 @@ void main (void)
                         , IO_CAN_MSG_READ
                         , IO_CAN_STD_FRAME
                         , ORION_2_CAN_ID
-                        , 0x7FF);
-
-                IO_CAN_ConfigMsg( &handle_wheel_speed_r
-                        , TELEMETRY_CAN_CHANNEL
-                        , IO_CAN_MSG_READ
-                        , IO_CAN_STD_FRAME
-                        , WHEEL_SPEED_CAN_ID
                         , 0x7FF);
             }
 

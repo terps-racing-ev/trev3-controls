@@ -42,7 +42,7 @@ ubyte2 get_launch_control_torque_limit(ubyte2 rpm) {
     // this should never be reached assuming the arrays were
     // structured correctly
     // but if they weren't, return the max torque
-    return rpm_boundaries[NUM_TORQUE_LIMIT_REGIONS - 1];
+    return torque_limit_regions[NUM_TORQUE_LIMIT_REGIONS - 1];
 }
 
 
