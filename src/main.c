@@ -612,11 +612,7 @@ void main (void)
                     // rtd on -> switch to playing rtd sound
                     current_state = PLAYING_RTD_SOUND;
 
-                    // only run dcdc if bus isn't undervolted
-                    if (!(orion_1_message_received_once && dc_bus_voltage_updated_once && 
-                            pack_voltage > dc_bus_voltage && (pack_voltage - dc_bus_voltage) >  BUS_PACK_DIFF_THRESHHOLD)) {
-                                IO_DO_Set(DCDC_RELAY_PIN, TRUE);
-                    }
+                    IO_DO_Set(DCDC_RELAY_PIN, TRUE);
 
                     
                 } else {
@@ -703,12 +699,6 @@ void main (void)
                     torque = pedal_travel_to_torque(apps_pedal_travel_result);
                     inverter_enabled = INVERTER_ENABLE;
 
-                    if (!(orion_1_message_received_once && dc_bus_voltage_updated_once && 
-                        pack_voltage > dc_bus_voltage && (pack_voltage - dc_bus_voltage) >  BUS_PACK_DIFF_THRESHHOLD)) {
-                        IO_DO_Set(DCDC_RELAY_PIN, TRUE);
-                    } else {
-                        IO_DO_Set(DCDC_RELAY_PIN, FALSE);
-                    }
                 }
             } else if (current_state >= ERRORED) {
 
@@ -723,10 +713,6 @@ void main (void)
                 torque = 0;
                 inverter_enabled = INVERTER_DISABLE;
 
-                if ((orion_1_message_received_once && dc_bus_voltage_updated_once && 
-                    pack_voltage > dc_bus_voltage && (pack_voltage - dc_bus_voltage) >  BUS_PACK_DIFF_THRESHHOLD)) {
-                    IO_DO_Set(DCDC_RELAY_PIN, FALSE);
-                }
             } else if (current_state == APPS_5PCT_WAIT) {
                 // when brakes are engaged and apps > 25%, the car goes into this state
 
@@ -767,20 +753,22 @@ void main (void)
                     // no transition into another state -> send 0 torque message, no need to disable inverter
                     torque = 0;
                     inverter_enabled = INVERTER_ENABLE;
-
-                    if ((orion_1_message_received_once && dc_bus_voltage_updated_once && 
-                    pack_voltage > dc_bus_voltage && (pack_voltage - dc_bus_voltage) >  BUS_PACK_DIFF_THRESHHOLD)) {
-                        IO_DO_Set(DCDC_RELAY_PIN, FALSE);
-                    }
                 }
 
             }
 
             /************ POST FSM ***********/
+            if ((orion_1_message_received_once && dc_bus_voltage_updated_once && 
+                pack_voltage > dc_bus_voltage && (pack_voltage - dc_bus_voltage) >  BUS_PACK_DIFF_THRESHHOLD)) {
+                IO_DO_Set(DCDC_RELAY_PIN, FALSE);
+            }
+
 
             if (sdc_val == SDC_OFF){
                 IO_DO_Set(DCDC_RELAY_PIN, FALSE);
             }
+
+
 
             // code to control tsil lights 
 
