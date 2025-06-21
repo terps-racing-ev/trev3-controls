@@ -57,7 +57,7 @@
 #define INVERTER_ENABLE 1
 
 #define PEDAL_TRAVEL_FOR_MAX_TORQUE 230 // 90 percent travel
-#define CONTINUOUS_TORQUE_MAX 220 // TODO 200
+#define CONTINUOUS_TORQUE_MAX 170 // TODO 200
 #define MOTOR_DIRECTION MOTOR_FORWARDS // TODO backwards for dyno testing
 
 /**************************************************************************
@@ -101,6 +101,10 @@
 
 #define ORION_IMD_STATUS_INDEX 0
 #define ORION_BMS_STATUS_INDEX 1
+#define ORION_PACK_VOLT_LO 2
+#define ORION_PACK_VOLT_HI 3
+#define BUS_PACK_DIFF_THRESHHOLD 100
+
 
 // 10 second CAN timeout on Orion
 #define ORION_CAN_TIMEOUT_S 30
@@ -113,7 +117,7 @@
 // 0.5 second debouncing threshhold for BMS/IMD CAN
 #define CAN_IMD_BMS_DEBOUNCE_THRESHHOLD THRESHHOLD_500_MS
 
-#define MAX_POWER_LIMIT 135000
+#define MAX_POWER_LIMIT 100000
 #define CHARGE_CURRENT_LIMIT 20
 #define MIN_DCL 0
 
@@ -468,6 +472,8 @@ void main (void)
 
     // orion message received
     bool orion_1_message_received = FALSE;
+    ubyte2 pack_voltage = 0;
+
     bool orion_1_message_received_once = FALSE;
     bool orion_good = TRUE;
 
@@ -584,6 +590,8 @@ void main (void)
                 if (power > max_power) {
                     max_power = power;
                 }
+
+                pack_voltage = ((orion_1_can_frame.data[ORION_PACK_VOLT_HI] << 8) | orion_1_can_frame.data[ORION_PACK_VOLT_LO]);
             }
 
             if (voltage_info_message_received == TRUE) {
@@ -603,7 +611,14 @@ void main (void)
                     sdc_val != SDC_OFF) {
                     // rtd on -> switch to playing rtd sound
                     current_state = PLAYING_RTD_SOUND;
-                    IO_DO_Set(DCDC_RELAY_PIN, TRUE);
+
+                    // only run dcdc if bus isn't undervolted
+                    if (!(orion_1_message_received_once && dc_bus_voltage_updated_once && 
+                            pack_voltage > dc_bus_voltage && (pack_voltage - dc_bus_voltage) >  BUS_PACK_DIFF_THRESHHOLD)) {
+                                IO_DO_Set(DCDC_RELAY_PIN, TRUE);
+                    }
+
+                    
                 } else {
                     // if you don't transition away from this state, send a 0
                     // torque message to the motor with 0 torque
@@ -655,6 +670,8 @@ void main (void)
                     current_state = NOT_READY;
                     // log rtd flag
                     vcu_diag_flags.rtd_off_fault = 1;
+
+                    IO_DO_Set(DCDC_RELAY_PIN, FALSE);
                 } else if (apps_error != APPS_NO_ERROR || bse_error != BSE_NO_ERROR || (sdc_val == SDC_OFF)) {
                     current_state = ERRORED;
                     // log flags
@@ -685,23 +702,39 @@ void main (void)
                     // no transition into another state -> send controls message
                     torque = pedal_travel_to_torque(apps_pedal_travel_result);
                     inverter_enabled = INVERTER_ENABLE;
+
+                    if (!(orion_1_message_received_once && dc_bus_voltage_updated_once && 
+                        pack_voltage > dc_bus_voltage && (pack_voltage - dc_bus_voltage) >  BUS_PACK_DIFF_THRESHHOLD)) {
+                        IO_DO_Set(DCDC_RELAY_PIN, TRUE);
+                    } else {
+                        IO_DO_Set(DCDC_RELAY_PIN, FALSE);
+                    }
                 }
             } else if (current_state >= ERRORED) {
 
                 if (rtd_val == RTD_OFF) {
                     // rtd off -> switch to not ready state
                     current_state = NOT_READY;
+
+                    IO_DO_Set(DCDC_RELAY_PIN, FALSE);
                 }
 
                 // continue sending 0 torque messages to the inverter in this state
                 torque = 0;
                 inverter_enabled = INVERTER_DISABLE;
+
+                if ((orion_1_message_received_once && dc_bus_voltage_updated_once && 
+                    pack_voltage > dc_bus_voltage && (pack_voltage - dc_bus_voltage) >  BUS_PACK_DIFF_THRESHHOLD)) {
+                    IO_DO_Set(DCDC_RELAY_PIN, FALSE);
+                }
             } else if (current_state == APPS_5PCT_WAIT) {
                 // when brakes are engaged and apps > 25%, the car goes into this state
 
                 if (rtd_val == RTD_OFF) {
                     // rtd off -> switch to not ready state
                     current_state = NOT_READY;
+
+                    IO_DO_Set(DCDC_RELAY_PIN, FALSE);
 
                 } else if (apps_error != APPS_NO_ERROR || bse_error != BSE_NO_ERROR || (sdc_val == SDC_OFF)) {
                     current_state = ERRORED;
@@ -734,6 +767,11 @@ void main (void)
                     // no transition into another state -> send 0 torque message, no need to disable inverter
                     torque = 0;
                     inverter_enabled = INVERTER_ENABLE;
+
+                    if ((orion_1_message_received_once && dc_bus_voltage_updated_once && 
+                    pack_voltage > dc_bus_voltage && (pack_voltage - dc_bus_voltage) >  BUS_PACK_DIFF_THRESHHOLD)) {
+                        IO_DO_Set(DCDC_RELAY_PIN, FALSE);
+                    }
                 }
 
             }
