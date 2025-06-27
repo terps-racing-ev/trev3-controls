@@ -506,6 +506,8 @@ void main (void)
     initialize_diag_flags(&vcu_diag_flags);
     initialize_live_flags(&vcu_live_flags);
 
+    ubyte2 accel_time_counter_ms = 0;
+
     IO_RTC_StartTime(&time_since_start);
     IO_RTC_StartTime(&orion_can_timeout);
 
@@ -650,8 +652,10 @@ void main (void)
                     just_entered_sound_state = TRUE;
                     IO_DO_Set(IO_PIN_BUZZER, FALSE);
                     
-                    initialize_diag_flags(&vcu_diag_flags);
                     // reset flags
+                    initialize_diag_flags(&vcu_diag_flags);
+                    // reset accel counter
+                    accel_time_counter_ms = 0;
                 }
 
                 // keep sending 0 torque messages to the inverter in this state
@@ -699,6 +703,9 @@ void main (void)
                     torque = pedal_travel_to_torque(apps_pedal_travel_result);
                     inverter_enabled = INVERTER_ENABLE;
 
+                    if (apps_pedal_travel_result >= PEDAL_TRAVEL_FOR_MAX_TORQUE) {
+                        accel_time_counter_ms += 5;
+                    }
                 }
             } else if (current_state >= ERRORED) {
 
@@ -767,8 +774,6 @@ void main (void)
             if (sdc_val == SDC_OFF){
                 IO_DO_Set(DCDC_RELAY_PIN, FALSE);
             }
-
-
 
             // code to control tsil lights 
 
@@ -947,8 +952,8 @@ void main (void)
             vcu_diag_can_frame.data[2] = pack_live_flags(&vcu_live_flags);
             vcu_diag_can_frame.data[3] = controls_bus_failure_count;
             vcu_diag_can_frame.data[4] = telemetry_bus_failure_count;
-            vcu_diag_can_frame.data[5] = launch_control_torque_limit & 0xFF;
-            vcu_diag_can_frame.data[6] = launch_control_torque_limit >> 8;
+            vcu_diag_can_frame.data[5] = accel_time_counter_ms & 0xFF;
+            vcu_diag_can_frame.data[6] = accel_time_counter_ms >> 8;
             vcu_diag_can_frame.data[7] = telemetry_tx_error_ctr;
 
             write_can_msg(handle_controls_fifo_w, &vcu_diag_can_frame);
