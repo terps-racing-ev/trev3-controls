@@ -57,7 +57,7 @@
 #define INVERTER_ENABLE 1
 
 #define PEDAL_TRAVEL_FOR_MAX_TORQUE 230 // 90 percent travel
-#define CONTINUOUS_TORQUE_MAX 200 // TODO 200
+#define CONTINUOUS_TORQUE_MAX 3 // TODO 200
 #define MOTOR_DIRECTION MOTOR_FORWARDS // TODO backwards for dyno testing
 
 /**************************************************************************
@@ -888,9 +888,8 @@ void main (void)
             ubyte2 wheel_slip_scaled = (ubyte2)(wheel_slip * 1000.0);
 
             // only run PID if we get new data
-            if (wheel_speed_message_received && avg_front_wheel_speed > LAUNCH_CONTROL_MINIMUM_FRONT_SPEED) {
-                launch_control_torque_limit = get_launch_control_torque_limit(avg_front_wheel_speed, (float4)last_speed) 
-                                                + LAUNCH_CONTROL_CONSTANT_TORQUE;
+            if (wheel_speed_message_received) {
+                launch_control_torque_limit = get_launch_control_torque_limit((float4)torque, wheel_slip);
             }
 
             if (LAUNCH_CONTROL_ENABLED && torque > launch_control_torque_limit) {
