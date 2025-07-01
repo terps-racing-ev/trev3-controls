@@ -9,7 +9,7 @@ bool launch_control_pid_struct_initialized = FALSE;
 struct pid_info launch_control_pid_info_struct;
 
 
-ubyte2 get_launch_control_torque_limit(float4 avg_front_wheel_speed, float4 avg_rear_wheel_speed) {
+ubyte2 get_launch_control_torque_limit(float4 avg_front_wheel_speed, float4 rear_rpm) {
     // initialize struct if necessary
     if (!launch_control_pid_struct_initialized) {
         initialize_pid_info_struct(&launch_control_pid_info_struct,
@@ -23,9 +23,9 @@ ubyte2 get_launch_control_torque_limit(float4 avg_front_wheel_speed, float4 avg_
     // avoid divide by 0 error
     float4 wheel_slip;
     if (avg_front_wheel_speed == 0) {
-        wheel_slip = (avg_rear_wheel_speed) / 0.001;
+        wheel_slip = (rear_rpm * 13.4) / 0.001;
     } else {
-        wheel_slip = (avg_rear_wheel_speed) / (avg_front_wheel_speed);
+        wheel_slip = (rear_rpm * 13.4) / (avg_front_wheel_speed);
     }
 
     float4 returned_torque_limit = get_pid_output(&launch_control_pid_info_struct, wheel_slip);

@@ -875,10 +875,21 @@ void main (void)
             }
 
             // launch control
+            float4 wheel_slip;
+            if (avg_front_wheel_speed == 0) {
+                wheel_slip = ((float4)last_speed * 13.4) / 0.001;
+            } else {
+                wheel_slip = ((float4)last_speed * 13.4) / (avg_front_wheel_speed);
+            }
+            if (wheel_slip > 50.0) {
+                wheel_slip = 50.0;
+            }
+
+            ubyte2 wheel_slip_scaled = (ubyte2)(wheel_slip * 1000.0);
 
             // only run PID if we get new data
             if (wheel_speed_message_received && avg_front_wheel_speed > LAUNCH_CONTROL_MINIMUM_FRONT_SPEED) {
-                launch_control_torque_limit = get_launch_control_torque_limit(avg_front_wheel_speed, avg_rear_wheel_speed) 
+                launch_control_torque_limit = get_launch_control_torque_limit(avg_front_wheel_speed, (float4)last_speed) 
                                                 + LAUNCH_CONTROL_CONSTANT_TORQUE;
             }
 
@@ -980,8 +991,8 @@ void main (void)
             vcu_diag_can_frame.data[2] = pack_live_flags(&vcu_live_flags);
             vcu_diag_can_frame.data[3] = controls_bus_failure_count;
             vcu_diag_can_frame.data[4] = telemetry_bus_failure_count;
-            vcu_diag_can_frame.data[5] = launch_control_torque_limit & 0xFF;
-            vcu_diag_can_frame.data[6] = launch_control_torque_limit >> 8;
+            vcu_diag_can_frame.data[5] = wheel_slip_scaled & 0xFF;
+            vcu_diag_can_frame.data[6] = wheel_slip_scaled >> 8;
             vcu_diag_can_frame.data[7] = telemetry_tx_error_ctr;
 
             write_can_msg(handle_controls_fifo_w, &vcu_diag_can_frame);
