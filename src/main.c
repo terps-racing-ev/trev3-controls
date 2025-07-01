@@ -534,6 +534,8 @@ void main (void)
     struct diag_flags vcu_diag_flags;
     struct live_flags vcu_live_flags;
 
+    ubyte2 accel_timer = 0;
+
     initialize_diag_flags(&vcu_diag_flags);
     initialize_live_flags(&vcu_live_flags);
 
@@ -691,6 +693,7 @@ void main (void)
                     
                     initialize_diag_flags(&vcu_diag_flags);
                     // reset flags
+                    accel_timer = 0;
                 }
 
                 // keep sending 0 torque messages to the inverter in this state
@@ -735,6 +738,10 @@ void main (void)
                     // no transition into another state -> send controls message
                     torque = pedal_travel_to_torque(apps_pedal_travel_result);
                     inverter_enabled = INVERTER_ENABLE;
+
+                    if(apps_pedal_travel_result >= PEDAL_TRAVEL_FOR_MAX_TORQUE && last_speed < 4478) {
+                        accel_timer += 5;
+                    }
                 }
             } else if (current_state >= ERRORED) {
 
@@ -790,7 +797,7 @@ void main (void)
 
             /************ POST FSM ***********/
 
-            if (sdc_val == SDC_OFF){
+            if (sdc_val == SDC_OFF || rtd_val == RTD_OFF || dc_bus_voltage < 300){
                 IO_DO_Set(DCDC_RELAY_PIN, FALSE);
             }
 
@@ -906,14 +913,13 @@ void main (void)
                 }
                 inverter_ccl_dcl_can_frame.data[0] = dcl & 0xFF;
                 inverter_ccl_dcl_can_frame.data[1] = dcl >> 8;
-                inverter_ccl_dcl_can_frame.data[2] = ccl & 0xFF;
-                inverter_ccl_dcl_can_frame.data[3] = ccl >> 8;
+                inverter_ccl_dcl_can_frame.data[2] = accel_timer & 0xFF;
+                inverter_ccl_dcl_can_frame.data[3] = accel_timer >> 8;
                 ubyte2 afwspd = (ubyte2)(avg_front_wheel_speed);
-                ubyte2 arwspd = (ubyte2)(avg_rear_wheel_speed);
                 inverter_ccl_dcl_can_frame.data[4] = afwspd & 0xFF;
                 inverter_ccl_dcl_can_frame.data[5] = afwspd >> 8;
-                inverter_ccl_dcl_can_frame.data[6] = arwspd & 0xFF;
-                inverter_ccl_dcl_can_frame.data[7] = arwspd >> 8;
+                inverter_ccl_dcl_can_frame.data[6] = launch_control_torque_limit & 0xFF;
+                inverter_ccl_dcl_can_frame.data[7] = launch_control_torque_limit >> 8;
                 write_can_msg(handle_controls_fifo_w, &inverter_ccl_dcl_can_frame);
                 write_can_msg(handle_telemetry_fifo_w, &inverter_ccl_dcl_can_frame);
             }
