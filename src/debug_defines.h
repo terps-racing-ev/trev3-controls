@@ -29,5 +29,7 @@
 
 #define LAUNCH_CONTROL_ENABLED FALSE
 
+#define BRAKE_REGEN_ENABLED FALSE
+
 
 #endif

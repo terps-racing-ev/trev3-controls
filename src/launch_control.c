@@ -22,7 +22,8 @@ ubyte2 get_launch_control_torque_limit(float4 torque, float4 wheel_slip) {
 
     // get_pid_output should return negative number when wheelspin happens
     float4 returned_torque_limit = torque + get_pid_output(&launch_control_pid_info_struct, wheel_slip);
-    if (returned_torque_limit < 0) returned_torque_limit = 0;
+    if (returned_torque_limit < MINIMUM_TORQUE_LIMIT) returned_torque_limit = MINIMUM_TORQUE_LIMIT;
+    // not mutually exclusive
     if (returned_torque_limit > torque) returned_torque_limit = torque;
     return ((ubyte2) returned_torque_limit);
 

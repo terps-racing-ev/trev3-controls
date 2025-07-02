@@ -60,6 +60,10 @@
 #define CONTINUOUS_TORQUE_MAX 3 // TODO 200
 #define MOTOR_DIRECTION MOTOR_FORWARDS // TODO backwards for dyno testing
 
+#define REGEN_TORQUE_MAX -100
+
+ubyte1
+
 /**************************************************************************
  * CAN Constants
  ***************************************************************************/
@@ -178,12 +182,20 @@ APDB appl_db =
           , 0                      /* ubyte4 headerCRC          */
           };
 
-ubyte2 pedal_travel_to_torque(ubyte1 pedal_travel) {
+sbyte2 pedal_travel_to_torque(ubyte1 pedal_travel) {
     if (pedal_travel >= PEDAL_TRAVEL_FOR_MAX_TORQUE) {
         return CONTINUOUS_TORQUE_MAX;
     }
 
-    return (ubyte2)(((ubyte4)pedal_travel * CONTINUOUS_TORQUE_MAX) / PEDAL_TRAVEL_FOR_MAX_TORQUE);
+    return (sbyte2)(((ubyte4)pedal_travel * CONTINUOUS_TORQUE_MAX) / PEDAL_TRAVEL_FOR_MAX_TORQUE);
+}
+
+sbyte2 brake_pressure_to_torque(ubyte2 psi) {
+    if (psi >= 2000) {
+        return REGEN_TORQUE_MAX;
+    }
+
+    return (sbyte2)((sbyte2)psi * REGEN_TORQUE_MAX / 2000);
 }
 
 
@@ -460,7 +472,7 @@ void main (void)
     bool first_cycle = TRUE;
 
     // variables to control motor
-    ubyte2 torque = 0;
+    sbyte2 torque = 0;
     ubyte1 inverter_enabled = INVERTER_DISABLE;
 
     // whether a new motor info message has been received since the last time
@@ -739,6 +751,10 @@ void main (void)
                     torque = pedal_travel_to_torque(apps_pedal_travel_result);
                     inverter_enabled = INVERTER_ENABLE;
 
+                    if (bse_result > BRAKES_ENGAGED_BSE_THRESHOLD && BRAKE_REGEN_ENABLED) {
+                        torque = brake_pressure_to_torque(bse_result);
+                    }
+
                     if(apps_pedal_travel_result >= PEDAL_TRAVEL_FOR_MAX_TORQUE && last_speed < 4478) {
                         accel_timer += 5;
                     }
@@ -900,7 +916,7 @@ void main (void)
 
             // set the torque in the message to be sent to the inverter
             if (inverter_enabled == INVERTER_ENABLE) {
-                ubyte2 torque_scaled = torque * 10;
+                sbyte2 torque_scaled = torque * 10;
                 controls_can_frame.data[0] = torque_scaled & 0xFF;
                 controls_can_frame.data[1] = torque_scaled >> 8;
                 controls_can_frame.data[2] = 0;
