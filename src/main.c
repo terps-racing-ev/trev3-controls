@@ -133,7 +133,7 @@
 #define CAN_IMD_BMS_DEBOUNCE_THRESHHOLD THRESHHOLD_500_MS
 
 #define MAX_POWER_LIMIT 135000
-#define CHARGE_CURRENT_LIMIT 20
+#define CHARGE_CURRENT_LIMIT 7
 #define MIN_DCL 150
 
 /**************************************************************************
@@ -1007,7 +1007,7 @@ void main (void)
 
             // diagnostics message
 
-            distance_meters += (avg_front_wheel_speed * 0.001) * 0.00319314;
+            distance_meters += (avg_front_wheel_speed * 0.001) * 0.0022352;
             ubyte2 distance_meters_int = (ubyte2)(distance_meters);
 
             vcu_diag_can_frame.data[0] = vcu_heartbeat;
