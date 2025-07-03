@@ -763,7 +763,7 @@ void main (void)
                         torque = brake_pressure_to_torque(bse_result);
                     }
 
-                    if(apps_pedal_travel_result >= PEDAL_TRAVEL_FOR_MAX_TORQUE && last_speed < 4478) {
+                    if(apps_pedal_travel_result >= PEDAL_TRAVEL_FOR_MAX_TORQUE && distance_meters < 75.0) {
                         accel_timer += 5;
                     }
                 }
@@ -947,7 +947,6 @@ void main (void)
                 inverter_ccl_dcl_can_frame.data[1] = dcl >> 8;
                 inverter_ccl_dcl_can_frame.data[2] = ccl & 0xFF;
                 inverter_ccl_dcl_can_frame.data[3] = ccl >> 8;
-                ubyte2 afwspd = (ubyte2)(avg_front_wheel_speed);
                 inverter_ccl_dcl_can_frame.data[4] = 0;
                 inverter_ccl_dcl_can_frame.data[5] = 0;
                 inverter_ccl_dcl_can_frame.data[6] = 0; // UNUSED
@@ -1008,7 +1007,7 @@ void main (void)
 
             // diagnostics message
 
-            distance_meters += (avg_front_wheel_speed * 0.001) * 0.0022352;
+            distance_meters += (avg_front_wheel_speed * 0.001) * 0.00319314;
             ubyte2 distance_meters_int = (ubyte2)(distance_meters);
 
             vcu_diag_can_frame.data[0] = vcu_heartbeat;
