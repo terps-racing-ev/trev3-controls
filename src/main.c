@@ -57,7 +57,7 @@
 #define INVERTER_ENABLE 1
 
 #define PEDAL_TRAVEL_FOR_MAX_TORQUE 230 // 90 percent travel
-#define CONTINUOUS_TORQUE_MAX 200 // TODO 200
+#define CONTINUOUS_TORQUE_MAX 220 // TODO 200
 #define MOTOR_DIRECTION MOTOR_FORWARDS // TODO backwards for dyno testing
 
 #define REGEN_TORQUE_MAX -100
@@ -91,16 +91,18 @@
 #define TORQUE_INFO_CAN_ID 0xAC
 #define INVERTER_STATE_CAN_ID 0xAB
 
-//TODO: Change
 #define WHEEL_SPEED_CAN_ID 0x99
 #define FR_WHEEL_SPEED_LO_INDEX 0
 #define FR_WHEEL_SPEED_HI_INDEX 1
 #define FL_WHEEL_SPEED_LO_INDEX 2
 #define FL_WHEEL_SPEED_HI_INDEX 3
+// THE REARS ARE BUGGY SO WE USE RPM
 #define BR_WHEEL_SPEED_LO_INDEX 4
 #define BR_WHEEL_SPEED_HI_INDEX 5
 #define BL_WHEEL_SPEED_LO_INDEX 6
 #define BL_WHEEL_SPEED_HI_INDEX 7
+
+#define VCU_ACCEL_INFO_CAN_ID 0x69
 
 #define LAUNCH_CONTROL_CONSTANT_TORQUE (CONTINUOUS_TORQUE_MAX / 2)
 #define LAUNCH_CONTROL_MINIMUM_TORQUE 0
@@ -140,11 +142,6 @@
 // 5 ms cycle time
 #define CYCLE_TIME MsToUs(5ul)
 #define CAN_RESTART_TIME MsToUs(100ul)
-
-// TODO Unused
-#define PRECHARGE_VOLTAGE_THRESHHOLD 268
-#define TORQUE_LIMITING_RPM_THRESHHOLD 80
-#define RPM_BASED_TORQUE_LIMIT 15
 
 /* Application Database,
  * needed for TTC-Downloader
@@ -240,6 +237,25 @@ void main (void)
     ubyte1 handle_wheel_speed_r;
     //ubyte1 handle_orion_therm_exp_r;
 
+    /* RX FRAMES */
+
+    /* CAN frame for reading from inverter */
+    IO_CAN_DATA_FRAME inverter_motor_info_can_frame;
+    IO_CAN_DATA_FRAME inverter_voltage_info_can_frame;
+    IO_CAN_DATA_FRAME inverter_current_info_can_frame;
+    IO_CAN_DATA_FRAME inverter_torque_info_can_frame;
+    IO_CAN_DATA_FRAME inverter_state_can_frame;
+
+    /* CAN frame for orion */
+    IO_CAN_DATA_FRAME orion_1_can_frame;
+    IO_CAN_DATA_FRAME orion_2_can_frame;
+    //IO_CAN_DATA_FRAME orion_therm_exp_can_frame;
+
+    /* CAN frame for reading from datalogger */
+    IO_CAN_DATA_FRAME wheel_speed_can_frame;
+
+    /* TX FRAMES */
+
     /* can frame used to send torque requests to the inverter */
     IO_CAN_DATA_FRAME controls_can_frame;
     controls_can_frame.id = VCU_CONTROLS_CAN_ID;
@@ -259,23 +275,7 @@ void main (void)
     inverter_ccl_dcl_can_frame.length = 8;
     clear_can_frame(&inverter_ccl_dcl_can_frame);
 
-
-    /* CAN frame for reading from inverter */
-    IO_CAN_DATA_FRAME inverter_motor_info_can_frame;
-    IO_CAN_DATA_FRAME inverter_voltage_info_can_frame;
-    IO_CAN_DATA_FRAME inverter_current_info_can_frame;
-    IO_CAN_DATA_FRAME inverter_torque_info_can_frame;
-    IO_CAN_DATA_FRAME inverter_state_can_frame;
-
-    /* CAN frame for orion */
-    IO_CAN_DATA_FRAME orion_1_can_frame;
-    IO_CAN_DATA_FRAME orion_2_can_frame;
-    //IO_CAN_DATA_FRAME orion_therm_exp_can_frame;
-
-    /* CAN frame for reading from datalogger */
-    IO_CAN_DATA_FRAME wheel_speed_can_frame;
-
-    /* CAN frame for controls summary*/
+    /* CAN frame for controls summary */
     IO_CAN_DATA_FRAME vcu_summary_can_frame;
     vcu_summary_can_frame.id = VCU_SUMMARY_CAN_ID;
     vcu_summary_can_frame.id_format = IO_CAN_STD_FRAME;
@@ -295,6 +295,13 @@ void main (void)
     debug_can_frame.id_format = IO_CAN_STD_FRAME;
     debug_can_frame.length = 8;
     clear_can_frame(&debug_can_frame);
+
+    /* CAN frame for accel info */
+    IO_CAN_DATA_FRAME vcu_accel_can_frame;
+    vcu_accel_can_frame.id = VCU_ACCEL_INFO_CAN_ID;
+    vcu_accel_can_frame.id_format = IO_CAN_STD_FRAME;
+    vcu_accel_can_frame.length = 8;
+    clear_can_frame(&vcu_accel_can_frame);
 
     /* initialize can channel and fifo buffer */
     IO_CAN_Init( CONTROLS_CAN_CHANNEL
@@ -503,13 +510,13 @@ void main (void)
     // wheel speed message received
     bool wheel_speed_message_received = FALSE;
 
-    ubyte2 fr_wheel_speed;
-    ubyte2 fl_wheel_speed;
-    ubyte2 br_wheel_speed;
-    ubyte2 bl_wheel_speed;
+    ubyte2 fr_wheel_speed = 0;
+    ubyte2 fl_wheel_speed = 0;
+    ubyte2 br_wheel_speed = 0;
+    ubyte2 bl_wheel_speed = 0;
 
-    float4 avg_front_wheel_speed;
-    float4 avg_rear_wheel_speed;
+    float4 avg_front_wheel_speed = 0.0;
+    float4 avg_rear_wheel_speed = 0.0;
 
     ubyte2 launch_control_torque_limit = CONTINUOUS_TORQUE_MAX;
 
@@ -545,6 +552,7 @@ void main (void)
     struct live_flags vcu_live_flags;
 
     ubyte2 accel_timer = 0;
+    float4 distance_meters = 0;
 
     initialize_diag_flags(&vcu_diag_flags);
     initialize_live_flags(&vcu_live_flags);
@@ -649,6 +657,7 @@ void main (void)
                 br_wheel_speed = (wheel_speed_can_frame.data[BR_WHEEL_SPEED_HI_INDEX] << 8) | (wheel_speed_can_frame.data[BR_WHEEL_SPEED_LO_INDEX]);
                 bl_wheel_speed = (wheel_speed_can_frame.data[BL_WHEEL_SPEED_HI_INDEX] << 8) | (wheel_speed_can_frame.data[BL_WHEEL_SPEED_LO_INDEX]);
 
+                // Scaled by 1000!
                 avg_front_wheel_speed = (((float4) fr_wheel_speed) + ((float4) fl_wheel_speed)) / ((float4) 2.0);
                 avg_rear_wheel_speed = (((float4) br_wheel_speed) + ((float4) bl_wheel_speed)) / ((float4) 2.0);
             }
@@ -704,6 +713,7 @@ void main (void)
                     initialize_diag_flags(&vcu_diag_flags);
                     // reset flags
                     accel_timer = 0;
+                    distance_meters = 0;
                 }
 
                 // keep sending 0 torque messages to the inverter in this state
@@ -891,15 +901,13 @@ void main (void)
             // launch control
             float4 wheel_slip;
             if (avg_front_wheel_speed == 0) {
-                wheel_slip = ((float4)last_speed * 13.4) / 0.001;
+                wheel_slip = ((float4)last_speed * 14.8) / 0.001;
             } else {
-                wheel_slip = ((float4)last_speed * 13.4) / (avg_front_wheel_speed);
+                wheel_slip = ((float4)last_speed * 14.8) / (avg_front_wheel_speed);
             }
             if (wheel_slip > 50.0) {
                 wheel_slip = 50.0;
             }
-
-            ubyte2 wheel_slip_scaled = (ubyte2)(wheel_slip * 1000.0);
 
             // only run PID if we get new data
             if (wheel_speed_message_received) {
@@ -937,13 +945,13 @@ void main (void)
                 }
                 inverter_ccl_dcl_can_frame.data[0] = dcl & 0xFF;
                 inverter_ccl_dcl_can_frame.data[1] = dcl >> 8;
-                inverter_ccl_dcl_can_frame.data[2] = accel_timer & 0xFF;
-                inverter_ccl_dcl_can_frame.data[3] = accel_timer >> 8;
+                inverter_ccl_dcl_can_frame.data[2] = ccl & 0xFF;
+                inverter_ccl_dcl_can_frame.data[3] = ccl >> 8;
                 ubyte2 afwspd = (ubyte2)(avg_front_wheel_speed);
-                inverter_ccl_dcl_can_frame.data[4] = afwspd & 0xFF;
-                inverter_ccl_dcl_can_frame.data[5] = afwspd >> 8;
-                inverter_ccl_dcl_can_frame.data[6] = launch_control_torque_limit & 0xFF;
-                inverter_ccl_dcl_can_frame.data[7] = launch_control_torque_limit >> 8;
+                inverter_ccl_dcl_can_frame.data[4] = 0;
+                inverter_ccl_dcl_can_frame.data[5] = 0;
+                inverter_ccl_dcl_can_frame.data[6] = 0; // UNUSED
+                inverter_ccl_dcl_can_frame.data[7] = 0; // UNUSED
                 write_can_msg(handle_controls_fifo_w, &inverter_ccl_dcl_can_frame);
                 write_can_msg(handle_telemetry_fifo_w, &inverter_ccl_dcl_can_frame);
             }
@@ -999,14 +1007,18 @@ void main (void)
 
 
             // diagnostics message
+
+            distance_meters += (avg_front_wheel_speed * 0.001) * 0.0022352;
+            ubyte2 distance_meters_int = (ubyte2)(distance_meters);
+
             vcu_diag_can_frame.data[0] = vcu_heartbeat;
             vcu_diag_can_frame.data[1] = pack_diag_flags(&vcu_diag_flags);
             vcu_diag_can_frame.data[2] = pack_live_flags(&vcu_live_flags);
             vcu_diag_can_frame.data[3] = controls_bus_failure_count;
             vcu_diag_can_frame.data[4] = telemetry_bus_failure_count;
-            vcu_diag_can_frame.data[5] = wheel_slip_scaled & 0xFF;
-            vcu_diag_can_frame.data[6] = wheel_slip_scaled >> 8;
-            vcu_diag_can_frame.data[7] = telemetry_tx_error_ctr;
+            vcu_diag_can_frame.data[5] = distance_meters_int & 0xFF;
+            vcu_diag_can_frame.data[6] = distance_meters_int >> 8;
+            vcu_diag_can_frame.data[7] = 0; //UNUSED
 
             write_can_msg(handle_controls_fifo_w, &vcu_diag_can_frame);
             write_can_msg(handle_telemetry_fifo_w, &vcu_diag_can_frame);
@@ -1039,6 +1051,20 @@ void main (void)
 
             write_can_msg(handle_controls_fifo_w, &debug_can_frame);
             write_can_msg(handle_telemetry_fifo_w, &debug_can_frame);
+
+            // send accel info message
+
+            ubyte2 afwspd_scaled = (ubyte2)(avg_front_wheel_speed * 1000.0);
+            ubyte2 wheel_slip_scaled = (ubyte2)(wheel_slip * 1000.0);
+
+            vcu_accel_can_frame.data[0] = afwspd_scaled & 0xFF;
+            vcu_accel_can_frame.data[1] = afwspd_scaled >> 8;
+            vcu_accel_can_frame.data[2] = wheel_slip_scaled & 0xFF;
+            vcu_accel_can_frame.data[3] = wheel_slip_scaled >> 8;
+            vcu_accel_can_frame.data[4] = accel_timer & 0xFF;
+            vcu_accel_can_frame.data[5] = accel_timer >> 8;
+            vcu_accel_can_frame.data[6] = launch_control_torque_limit & 0xFF;
+            vcu_accel_can_frame.data[7] = launch_control_torque_limit >> 8;
 
 
             // check if either channel has errored
