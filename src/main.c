@@ -1065,6 +1065,8 @@ void main (void)
             vcu_accel_can_frame.data[6] = launch_control_torque_limit & 0xFF;
             vcu_accel_can_frame.data[7] = launch_control_torque_limit >> 8;
 
+            write_can_msg(handle_telemetry_fifo_w, &vcu_accel_can_frame);
+
 
             // check if either channel has errored
             IO_ErrorType controls_error = IO_CAN_Status(CONTROLS_CAN_CHANNEL,
