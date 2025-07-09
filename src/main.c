@@ -60,7 +60,8 @@
 #define CONTINUOUS_TORQUE_MAX 220 // TODO 200
 #define MOTOR_DIRECTION MOTOR_FORWARDS // TODO backwards for dyno testing
 
-#define REGEN_TORQUE_MAX -100
+#define BRAKE_PRESSURE_FOR_MAX_REGEN 500 //psi
+#define REGEN_TORQUE_MAX 100
 
 /**************************************************************************
  * CAN Constants
@@ -186,11 +187,11 @@ sbyte2 pedal_travel_to_torque(ubyte1 pedal_travel) {
 }
 
 sbyte2 brake_pressure_to_torque(ubyte2 psi) {
-    if (psi >= 2000) {
+    if (psi >= BRAKE_PRESSURE_FOR_MAX_REGEN) {
         return REGEN_TORQUE_MAX;
     }
 
-    return (sbyte2)((sbyte2)psi * REGEN_TORQUE_MAX / 2000);
+    return (sbyte2) (-1) * (sbyte2)(((ubyte4)psi * REGEN_TORQUE_MAX) / BRAKE_PRESSURE_FOR_MAX_REGEN);
 }
 
 
