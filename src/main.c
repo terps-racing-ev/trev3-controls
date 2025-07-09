@@ -134,7 +134,7 @@
 #define CAN_IMD_BMS_DEBOUNCE_THRESHHOLD THRESHHOLD_500_MS
 
 #define MAX_POWER_LIMIT 135000
-#define CHARGE_CURRENT_LIMIT 7
+#define CHARGE_CURRENT_LIMIT 48
 #define MIN_DCL 150
 
 /**************************************************************************
