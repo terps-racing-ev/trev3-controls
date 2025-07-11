@@ -188,10 +188,12 @@ sbyte2 pedal_travel_to_torque(ubyte1 pedal_travel) {
 
 sbyte2 brake_pressure_to_torque(ubyte2 psi) {
     if (psi >= BRAKE_PRESSURE_FOR_MAX_REGEN) {
-        return REGEN_TORQUE_MAX;
+        return (-1) * (sbyte2) REGEN_TORQUE_MAX;
     }
 
-    return (sbyte2) (-1) * (sbyte2)(((ubyte4)psi * REGEN_TORQUE_MAX) / BRAKE_PRESSURE_FOR_MAX_REGEN);
+    sbyte2 psi_signed = (sbyte2) psi;
+
+    return (-1) * ((psi * REGEN_TORQUE_MAX) / BRAKE_PRESSURE_FOR_MAX_REGEN);
 }
 
 
