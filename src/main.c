@@ -60,8 +60,10 @@
 #define CONTINUOUS_TORQUE_MAX 220 // TODO 200
 #define MOTOR_DIRECTION MOTOR_FORWARDS // TODO backwards for dyno testing
 
-#define BRAKE_PRESSURE_FOR_MAX_REGEN 500 //psi
-#define REGEN_TORQUE_MAX 100
+#define BRAKE_PRESSURE_FOR_MAX_REGEN 500 //UNUSED
+#define REGEN_TORQUE_MAX 500 // UNUSED
+
+#define REGEN_PARABOLA_CONST 0.00015
 
 /**************************************************************************
  * CAN Constants
@@ -134,7 +136,7 @@
 #define CAN_IMD_BMS_DEBOUNCE_THRESHHOLD THRESHHOLD_500_MS
 
 #define MAX_POWER_LIMIT 135000
-#define CHARGE_CURRENT_LIMIT 48
+#define CHARGE_CURRENT_LIMIT 72
 #define MIN_DCL 150
 
 /**************************************************************************
@@ -191,9 +193,11 @@ sbyte2 brake_pressure_to_torque(ubyte2 psi) {
         return (-1) * (sbyte2) REGEN_TORQUE_MAX;
     }
 
-    sbyte2 psi_signed = (sbyte2) psi;
+    float psi_f = (float) psi;
 
-    return (-1) * ((psi * REGEN_TORQUE_MAX) / BRAKE_PRESSURE_FOR_MAX_REGEN);
+    float nm = (REGEN_PARABOLA_CONST) * (psi_f * psi_f);
+    return (-1) * ((sbyte2) nm);
+    //return (-1) * ((psi * REGEN_TORQUE_MAX) / BRAKE_PRESSURE_FOR_MAX_REGEN);
 }
 
 
