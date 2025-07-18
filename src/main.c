@@ -195,8 +195,8 @@ sbyte2 brake_pressure_to_torque(ubyte2 psi) {
 
     float psi_f = (float) psi;
 
-    float nm = (REGEN_PARABOLA_CONST) * (psi_f * psi_f);
-    return (-1) * ((sbyte2) nm);
+    float nm = (-1) * (REGEN_PARABOLA_CONST) * (psi_f * psi_f);
+    return (sbyte2) nm;
     //return (-1) * ((psi * REGEN_TORQUE_MAX) / BRAKE_PRESSURE_FOR_MAX_REGEN);
 }
 
