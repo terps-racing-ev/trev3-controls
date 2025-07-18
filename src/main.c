@@ -61,7 +61,7 @@
 #define MOTOR_DIRECTION MOTOR_FORWARDS // TODO backwards for dyno testing
 
 #define BRAKE_PRESSURE_FOR_MAX_REGEN 500 //UNUSED
-#define REGEN_TORQUE_MAX 500 // UNUSED
+#define REGEN_TORQUE_MAX 230 // UNUSED
 
 #define REGEN_PARABOLA_CONST 0.00015
 
@@ -189,13 +189,16 @@ sbyte2 pedal_travel_to_torque(ubyte1 pedal_travel) {
 }
 
 sbyte2 brake_pressure_to_torque(ubyte2 psi) {
-    if (psi >= BRAKE_PRESSURE_FOR_MAX_REGEN) {
-        return (-1) * (sbyte2) REGEN_TORQUE_MAX;
-    }
+    // if (psi >= BRAKE_PRESSURE_FOR_MAX_REGEN) {
+    //     return (-1) * (sbyte2) REGEN_TORQUE_MAX;
+    // }
 
     float psi_f = (float) psi;
 
     float nm = (-1) * (REGEN_PARABOLA_CONST) * (psi_f * psi_f);
+    if (nm < -REGEN_TORQUE_MAX) {
+        nm = -REGEN_TORQUE_MAX;
+    }
     return (sbyte2) nm;
     //return (-1) * ((psi * REGEN_TORQUE_MAX) / BRAKE_PRESSURE_FOR_MAX_REGEN);
 }
