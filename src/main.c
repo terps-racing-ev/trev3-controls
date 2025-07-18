@@ -831,7 +831,7 @@ void main (void)
 
             /************ POST FSM ***********/
 
-            if (sdc_val == SDC_OFF || rtd_val == RTD_OFF || dc_bus_voltage < 300){
+            if (sdc_val == SDC_OFF || rtd_val == RTD_OFF){
                 IO_DO_Set(DCDC_RELAY_PIN, FALSE);
             }
 
