@@ -63,7 +63,7 @@
 #define BRAKE_PRESSURE_FOR_MAX_REGEN 500 //UNUSED
 #define REGEN_TORQUE_MAX 230 // UNUSED
 
-#define REGEN_PARABOLA_CONST 0.00015
+#define REGEN_PARABOLA_CONST 0.00025
 
 /**************************************************************************
  * CAN Constants
