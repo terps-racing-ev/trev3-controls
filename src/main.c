@@ -14,6 +14,7 @@
 #include "IO_DIO.h"
 #include "IO_CAN.h"
 #include "APDB.h"
+#include "math.h"
 
 #include "apps.h"
 #include "bse.h"
@@ -88,9 +89,12 @@
 #define VCU_DIAG_CAN_ID 0xCD
 #define VCU_DEBUG_CAN_ID 0xDB
 
+#define COOLANT_INFO_CAN_ID 0xA2
 #define MOTOR_INFO_CAN_ID 0xA5
 #define VOLTAGE_INFO_CAN_ID 0xA7
 #define CURRENT_INFO_CAN_ID 0xA6
+#define FLUX_INFO_CAN_ID 0xA8
+#define INTERNAL_INFO_CAN_ID 0xAA
 #define TORQUE_INFO_CAN_ID 0xAC
 #define INVERTER_STATE_CAN_ID 0xAB
 
@@ -237,10 +241,13 @@ void main (void)
     ubyte1 handle_telemetry_fifo_w;
 
     // receiving
+    ubyte1 handle_inverter_coolant_info_r;
     ubyte1 handle_inverter_motor_info_r;
     ubyte1 handle_inverter_voltage_info_r;
     ubyte1 handle_inverter_current_info_r;
+    ubyte1 handle_inverter_flux_info_r;
     ubyte1 handle_inverter_torque_info_r;
+    ubyte1 handle_inverter_internal_info_r;
     ubyte1 handle_inverter_state_r;
     ubyte1 handle_orion_1_r;
     ubyte1 handle_orion_2_r;
@@ -250,10 +257,13 @@ void main (void)
     /* RX FRAMES */
 
     /* CAN frame for reading from inverter */
+    IO_CAN_DATA_FRAME inverter_coolant_info_can_frame;
     IO_CAN_DATA_FRAME inverter_motor_info_can_frame;
     IO_CAN_DATA_FRAME inverter_voltage_info_can_frame;
     IO_CAN_DATA_FRAME inverter_current_info_can_frame;
+    IO_CAN_DATA_FRAME inverter_flux_info_can_frame;
     IO_CAN_DATA_FRAME inverter_torque_info_can_frame;
+    IO_CAN_DATA_FRAME inverter_internal_info_can_frame;
     IO_CAN_DATA_FRAME inverter_state_can_frame;
 
     /* CAN frame for orion */
@@ -348,6 +358,14 @@ void main (void)
                     , 0);
 
     /* Initialize objects for rxing messages. Need one for each message expected */
+    
+    IO_CAN_ConfigMsg( &handle_inverter_coolant_info_r
+                 , CONTROLS_CAN_CHANNEL
+                 , IO_CAN_MSG_READ
+                 , IO_CAN_STD_FRAME
+                 , COOLANT_INFO_CAN_ID
+                 , 0x7FF);
+    
     IO_CAN_ConfigMsg( &handle_inverter_motor_info_r
                  , CONTROLS_CAN_CHANNEL
                  , IO_CAN_MSG_READ
@@ -369,6 +387,13 @@ void main (void)
                  , CURRENT_INFO_CAN_ID
                  , 0x7FF);
     
+    IO_CAN_ConfigMsg( &handle_inverter_flux_info_r
+                 , CONTROLS_CAN_CHANNEL
+                 , IO_CAN_MSG_READ
+                 , IO_CAN_STD_FRAME
+                 , FLUX_INFO_CAN_ID
+                 , 0x7FF);
+
     IO_CAN_ConfigMsg( &handle_inverter_torque_info_r
                  , CONTROLS_CAN_CHANNEL
                  , IO_CAN_MSG_READ
@@ -376,6 +401,13 @@ void main (void)
                  , TORQUE_INFO_CAN_ID
                  , 0x7FF);
     
+    IO_CAN_ConfigMsg( &handle_inverter_internal_info_r
+                 , CONTROLS_CAN_CHANNEL
+                 , IO_CAN_MSG_READ
+                 , IO_CAN_STD_FRAME
+                 , INTERNAL_INFO_CAN_ID
+                 , 0x7FF); 
+
     IO_CAN_ConfigMsg( &handle_inverter_state_r
                  , CONTROLS_CAN_CHANNEL
                  , IO_CAN_MSG_READ
@@ -508,6 +540,10 @@ void main (void)
     // whether any voltage info has been received
     bool dc_bus_voltage_updated_once = FALSE;
 
+    bool coolant_info_message_received = FALSE;
+    bool flux_info_message_received = FALSE;
+    bool internal_info_message_received = FALSE;
+
     //inverter current info received
     bool current_info_message_received = FALSE;
 
@@ -563,6 +599,8 @@ void main (void)
 
     ubyte2 accel_timer = 0;
     float4 distance_meters = 0;
+    ubyte2 start_dist = 0;
+    bool start_accel = FALSE;
 
     initialize_diag_flags(&vcu_diag_flags);
     initialize_live_flags(&vcu_live_flags);
@@ -618,6 +656,9 @@ void main (void)
             /*** CAN RX ***/
 
             // read info from inverter
+            read_can_msg(&handle_inverter_coolant_info_r, &inverter_coolant_info_can_frame, &coolant_info_message_received, COOLANT_INFO_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
+            read_can_msg(&handle_inverter_flux_info_r, &inverter_flux_info_can_frame, &flux_info_message_received, FLUX_INFO_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
+            read_can_msg(&handle_inverter_internal_info_r, &inverter_internal_info_can_frame, &internal_info_message_received, INTERNAL_INFO_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
             read_can_msg(&handle_inverter_current_info_r, &inverter_current_info_can_frame, &current_info_message_received, CURRENT_INFO_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
             read_can_msg(&handle_inverter_torque_info_r, &inverter_torque_info_can_frame, &torque_info_message_received, TORQUE_INFO_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
             read_can_msg(&handle_inverter_state_r, &inverter_state_can_frame, &inverter_state_message_received, INVERTER_STATE_CAN_ID, CONTROLS_CAN_CHANNEL, IO_CAN_STD_FRAME);
@@ -669,6 +710,7 @@ void main (void)
 
                 // Scaled by 1000!
                 avg_front_wheel_speed = (((float4) fr_wheel_speed) + ((float4) fl_wheel_speed)) / ((float4) 2.0);
+                // THIS IS ACTUALLY FRONT DISTANCE!
                 avg_rear_wheel_speed = (((float4) br_wheel_speed) + ((float4) bl_wheel_speed)) / ((float4) 2.0);
             }
 
@@ -723,7 +765,8 @@ void main (void)
                     initialize_diag_flags(&vcu_diag_flags);
                     // reset flags
                     accel_timer = 0;
-                    distance_meters = 0;
+                    start_accel = FALSE;
+                    start_dist = avg_rear_wheel_speed;
                 }
 
                 // keep sending 0 torque messages to the inverter in this state
@@ -773,7 +816,11 @@ void main (void)
                         torque = brake_pressure_to_torque(bse_result);
                     }
 
-                    if(apps_pedal_travel_result >= PEDAL_TRAVEL_FOR_MAX_TORQUE && distance_meters < 75.0) {
+                    if(apps_pedal_travel_result >= PEDAL_TRAVEL_FOR_MAX_TORQUE){
+                        start_accel = TRUE;
+                    }
+
+                    if(start_accel && avg_rear_wheel_speed < start_dist + 75.0) {
                         accel_timer += 5;
                     }
                 }
@@ -919,13 +966,16 @@ void main (void)
                 wheel_slip = 50.0;
             }
 
+            // god this code is so shit
+
             // only run PID if we get new data
             if (wheel_speed_message_received) {
+                // shouldve probably just changed the function to return sbyte but whatever
                 launch_control_torque_limit = get_launch_control_torque_limit((float4)torque, wheel_slip);
             }
 
-            if (LAUNCH_CONTROL_ENABLED && torque > launch_control_torque_limit) {
-                torque = launch_control_torque_limit;
+            if (LAUNCH_CONTROL_ENABLED && torque > (sbyte2)launch_control_torque_limit) {
+                torque = (sbyte2)launch_control_torque_limit;
             }
 
             /* CAN TX */
@@ -966,6 +1016,19 @@ void main (void)
             }
 
             // echo motor info message
+
+            if (coolant_info_message_received) {
+                write_can_msg(handle_telemetry_fifo_w, &inverter_coolant_info_can_frame);
+            }
+
+            if (flux_info_message_received) {
+                write_can_msg(handle_telemetry_fifo_w, &inverter_flux_info_can_frame);
+            }
+
+            if (internal_info_message_received) {
+                write_can_msg(handle_telemetry_fifo_w, &inverter_internal_info_can_frame);
+            }
+
             if (motor_info_message_received) {
                 write_can_msg(handle_telemetry_fifo_w, &inverter_motor_info_can_frame);
             }
@@ -1127,6 +1190,13 @@ void main (void)
                     , 0);
 
                 /* Initialize objects for rxing messages. Need one for each message expected */
+                IO_CAN_ConfigMsg( &handle_inverter_coolant_info_r
+                    , CONTROLS_CAN_CHANNEL
+                    , IO_CAN_MSG_READ
+                    , IO_CAN_STD_FRAME
+                    , COOLANT_INFO_CAN_ID
+                    , 0x7FF);
+                
                 IO_CAN_ConfigMsg( &handle_inverter_motor_info_r
                     , CONTROLS_CAN_CHANNEL
                     , IO_CAN_MSG_READ
@@ -1148,11 +1218,25 @@ void main (void)
                         , CURRENT_INFO_CAN_ID
                         , 0x7FF);
 
+                IO_CAN_ConfigMsg( &handle_inverter_flux_info_r
+                    , CONTROLS_CAN_CHANNEL
+                    , IO_CAN_MSG_READ
+                    , IO_CAN_STD_FRAME
+                    , FLUX_INFO_CAN_ID
+                    , 0x7FF);
+
                 IO_CAN_ConfigMsg( &handle_inverter_torque_info_r
                         , CONTROLS_CAN_CHANNEL
                         , IO_CAN_MSG_READ
                         , IO_CAN_STD_FRAME
                         , TORQUE_INFO_CAN_ID
+                        , 0x7FF);
+
+                IO_CAN_ConfigMsg( &handle_inverter_internal_info_r
+                        , CONTROLS_CAN_CHANNEL
+                        , IO_CAN_MSG_READ
+                        , IO_CAN_STD_FRAME
+                        , INTERNAL_INFO_CAN_ID
                         , 0x7FF);
 
                 IO_CAN_ConfigMsg( &handle_inverter_state_r

@@ -27,9 +27,10 @@
 #define CURRENT_LIMITING_ENABLED TRUE
 
 
-#define LAUNCH_CONTROL_ENABLED FALSE
-
-#define BRAKE_REGEN_ENABLED TRUE
+#define LAUNCH_CONTROL_ENABLED TRUE
+// These should always be oppossite, otherwise you are one bad line
+// away from making the car accelerate when you brake
+#define BRAKE_REGEN_ENABLED FALSE
 
 
 #endif
